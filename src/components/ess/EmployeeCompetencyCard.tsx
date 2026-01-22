@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { RequiredLevelBadge } from "@/components/ui/required-level-badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -159,10 +160,11 @@ export function EmployeeCompetencyCard({
                     {category && <Badge variant="outline" className="text-xs">{category}</Badge>}
                     <span>Weight: {weight}%</span>
                     {showRoleExpectation && requiredLevel && (
-                      <Badge variant="outline" className="text-xs bg-info/10 border-info/20 text-info-foreground">
-                        <Target className="h-3 w-3 mr-1 text-info" />
-                        Role: L{requiredLevel} ({PROFICIENCY_LABELS[requiredLevel]})
-                      </Badge>
+                      <RequiredLevelBadge 
+                        level={requiredLevel} 
+                        label={`Role: L${requiredLevel}`}
+                        size="sm"
+                      />
                     )}
                     {evidenceCount > 0 && (
                       <Badge variant="secondary" className="text-xs">
