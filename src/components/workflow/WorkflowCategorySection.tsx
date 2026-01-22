@@ -69,13 +69,26 @@ export function WorkflowCategorySection({
   const Icon = category.icon;
 
   // Calculate enabled count for this category
+  // For workflows with transaction types, check settings
+  // For workflows without transaction types (legacy), check if templates exist
   const enabledCount = category.workflows.filter(workflow => {
-    const transactionType = transactionTypes.find(
-      t => t.code === workflow.transactionTypeCode
+    // First try transaction type binding
+    if (workflow.transactionTypeCode) {
+      const transactionType = transactionTypes.find(
+        t => t.code === workflow.transactionTypeCode
+      );
+      if (transactionType) {
+        const setting = settings.find(s => s.transaction_type_id === transactionType.id);
+        return setting?.workflow_enabled;
+      }
+    }
+    
+    // Fallback: check if a template exists for this workflow category
+    const hasTemplate = workflowTemplates.some(t => 
+      t.category === workflow.code || 
+      t.code?.toLowerCase().includes(workflow.code.toLowerCase())
     );
-    if (!transactionType) return false;
-    const setting = settings.find(s => s.transaction_type_id === transactionType.id);
-    return setting?.workflow_enabled;
+    return hasTemplate;
   }).length;
 
   const getSettingForWorkflow = (workflow: WorkflowDefinition) => {
