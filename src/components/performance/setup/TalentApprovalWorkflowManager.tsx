@@ -156,7 +156,7 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
     if (!companyId) return;
     setLoading(true);
     try {
-      // Still using goal_approval_rules table but treating it as unified
+      // Fetch rules with process_type from database
       const { data: rulesData, error: rulesError } = await supabase
         .from("goal_approval_rules")
         .select("*")
@@ -165,10 +165,10 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
 
       if (rulesError) throw rulesError;
       
-      // Map the existing goal_level to scope_level for the unified view
+      // Map the existing goal_level to scope_level, use process_type from DB (defaults to 'goals')
       const mappedRules = (rulesData || []).map(r => ({
         ...r,
-        process_type: "goals", // Default to goals for existing rules
+        process_type: (r as any).process_type || "goals",
         scope_level: r.goal_level,
       })) as ApprovalRule[];
       
@@ -355,23 +355,53 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
   const handleApplyTemplate = async (template: IndustryTemplate) => {
     if (!companyId) return;
 
+    let createdRuleId: string | null = null;
+
     try {
-      // Create the rule
+      // Check for duplicate: same company + process_type + scope_level
+      const { data: existingRules } = await supabase
+        .from("goal_approval_rules")
+        .select("id, name")
+        .eq("company_id", companyId)
+        .eq("goal_level", template.scopeLevel) as { data: { id: string; name: string }[] | null };
+
+      if (existingRules && existingRules.length > 0) {
+        const confirmReplace = confirm(
+          `A workflow already exists for ${template.processType} - ${template.scopeLevel}. Replace it?`
+        );
+        if (!confirmReplace) return;
+        
+        // Delete the existing rule (cascade will remove steps)
+        await supabase
+          .from("goal_approval_rules")
+          .delete()
+          .eq("id", existingRules[0].id);
+      }
+
+      // Create the rule with process_type
+      const rulePayload = {
+        company_id: companyId,
+        name: template.name,
+        goal_level: template.scopeLevel,
+        process_type: template.processType,
+        approval_type: template.steps.length > 1 ? "multi_level" : "single_level",
+        requires_hr_approval: template.steps.some(s => s.approverType === "hr"),
+        max_approval_days: Math.ceil(template.steps.reduce((sum, s) => sum + s.slaHours, 0) / 24),
+        is_active: true,
+      };
+      
       const { data: ruleData, error: ruleError } = await supabase
         .from("goal_approval_rules")
-        .insert([{
-          company_id: companyId,
-          name: template.name,
-          goal_level: template.scopeLevel,
-          approval_type: template.steps.length > 1 ? "multi_level" : "single_level",
-          requires_hr_approval: template.steps.some(s => s.approverType === "hr"),
-          max_approval_days: Math.ceil(template.steps.reduce((sum, s) => sum + s.slaHours, 0) / 24),
-          is_active: true,
-        }])
+        .insert([rulePayload as any])
         .select()
         .single();
 
-      if (ruleError) throw ruleError;
+      if (ruleError) {
+        console.error("Rule insert error:", ruleError);
+        throw new Error(`Failed to create workflow rule: ${ruleError.message}`);
+      }
+
+      createdRuleId = ruleData.id;
 
       // Create the steps
       const stepsToInsert = template.steps.map((step, idx) => ({
@@ -387,13 +417,23 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
         .from("goal_approval_chain")
         .insert(stepsToInsert);
 
-      if (stepsError) throw stepsError;
+      if (stepsError) {
+        console.error("Steps insert error:", stepsError);
+        // Rollback: delete the rule we just created
+        if (createdRuleId) {
+          await supabase
+            .from("goal_approval_rules")
+            .delete()
+            .eq("id", createdRuleId);
+        }
+        throw new Error(`Failed to create workflow steps: ${stepsError.message}`);
+      }
 
       toast.success(`Applied "${template.name}" template successfully`);
       fetchRules();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error applying template:", error);
-      toast.error("Failed to apply template");
+      toast.error(error.message || "Failed to apply template");
     }
   };
 

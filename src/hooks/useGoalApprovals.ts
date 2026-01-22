@@ -71,10 +71,12 @@ export function useGoalApprovals(companyId?: string) {
     if (!companyId) return;
     
     try {
+      // Filter to only goal-related approval rules (not appraisals, 360 feedback, etc.)
       const { data, error } = await supabase
         .from("goal_approval_rules")
         .select("*")
         .eq("company_id", companyId)
+        .or("process_type.eq.goals,process_type.is.null")
         .order("goal_level");
 
       if (error) throw error;
