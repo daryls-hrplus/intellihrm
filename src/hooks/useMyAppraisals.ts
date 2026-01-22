@@ -26,6 +26,7 @@ export interface MyAppraisal {
   position_title: string | null;
   company_id: string | null;
   template_id: string | null;
+  component_scale_id: string | null;
   // Template configuration flags
   include_goals: boolean;
   include_competencies: boolean;
@@ -66,6 +67,7 @@ export function useMyAppraisals() {
             name,
             company_id,
             template_id,
+            component_scale_id,
             start_date,
             end_date,
             status,

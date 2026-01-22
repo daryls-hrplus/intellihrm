@@ -39,14 +39,28 @@ interface EmployeeCompetencyCardProps {
   onBehaviorsChange?: (behaviors: string[]) => void;
   onAttachEvidence?: () => void;
   readOnly?: boolean;
+  // New props for configurable rating scale
+  ratingLabels?: Record<number, string>;
+  usePerformanceScale?: boolean;
+  ratingLabel?: string; // e.g. "Performance Rating" vs "Proficiency Level"
 }
 
-const RATING_LABELS: Record<number, string> = {
+// Default proficiency labels (Dreyfus model - used for competency profiles)
+const PROFICIENCY_LABELS: Record<number, string> = {
   1: "Novice",
   2: "Developing",
   3: "Proficient",
   4: "Advanced",
   5: "Expert",
+};
+
+// Default performance labels (used when no custom scale provided in appraisals)
+const PERFORMANCE_LABELS: Record<number, string> = {
+  1: "Needs Improvement",
+  2: "Below Expectations",
+  3: "Meets Expectations",
+  4: "Exceeds Expectations",
+  5: "Outstanding",
 };
 
 export function EmployeeCompetencyCard({
@@ -67,8 +81,15 @@ export function EmployeeCompetencyCard({
   onBehaviorsChange,
   onAttachEvidence,
   readOnly = false,
+  ratingLabels,
+  usePerformanceScale = false,
+  ratingLabel,
 }: EmployeeCompetencyCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Determine which labels to use based on context
+  const displayLabels = ratingLabels || (usePerformanceScale ? PERFORMANCE_LABELS : PROFICIENCY_LABELS);
+  const fieldLabel = ratingLabel || (usePerformanceScale ? "Your Performance Rating" : "Your Proficiency Level");
 
   const getRatingColor = (rating: number | null) => {
     if (rating === null) return "text-muted-foreground";
@@ -80,6 +101,11 @@ export function EmployeeCompetencyCard({
 
   const isComplete = currentRating !== null;
   const currentLevelIndicators = proficiencyIndicators?.[String(Math.floor(currentRating || 1))] || [];
+  
+  // Get label for current rating
+  const currentRatingLabel = currentRating !== null 
+    ? displayLabels[Math.round(currentRating)] || ""
+    : "";
 
   const handleBehaviorToggle = (behavior: string) => {
     if (!onBehaviorsChange) return;
@@ -134,7 +160,7 @@ export function EmployeeCompetencyCard({
                       {currentRating.toFixed(1)}
                     </span>
                     <p className="text-xs text-muted-foreground">
-                      {RATING_LABELS[Math.round(currentRating)] || ""}
+                      {currentRatingLabel}
                     </p>
                   </div>
                 )}
@@ -155,7 +181,7 @@ export function EmployeeCompetencyCard({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium flex items-center gap-2">
-                    Your Proficiency Level
+                    {fieldLabel}
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -163,7 +189,9 @@ export function EmployeeCompetencyCard({
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="max-w-xs text-xs">
-                            Rate your current proficiency. Select behaviors below that you've demonstrated.
+                            {usePerformanceScale 
+                              ? "Rate how well you demonstrated this competency during the review period."
+                              : "Rate your current proficiency. Select behaviors below that you've demonstrated."}
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -185,8 +213,8 @@ export function EmployeeCompetencyCard({
                       className="py-2"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{RATING_LABELS[minRating]}</span>
-                      <span>{RATING_LABELS[maxRating]}</span>
+                      <span>{displayLabels[minRating] || minRating}</span>
+                      <span>{displayLabels[maxRating] || maxRating}</span>
                     </div>
                   </>
                 )}
@@ -206,7 +234,7 @@ export function EmployeeCompetencyCard({
                       {Object.entries(proficiencyIndicators).map(([level, behaviors]) => (
                         <div key={level} className="space-y-1">
                           <p className="text-xs font-medium text-muted-foreground">
-                            Level {level} - {RATING_LABELS[parseInt(level)] || ""}
+                            Level {level} - {PROFICIENCY_LABELS[parseInt(level)] || displayLabels[parseInt(level)] || ""}
                           </p>
                           {behaviors.map((behavior, idx) => (
                             <div key={`${level}-${idx}`} className="flex items-start gap-2">

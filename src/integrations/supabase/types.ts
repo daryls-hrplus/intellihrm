@@ -15891,6 +15891,7 @@ export type Database = {
           is_required: boolean | null
           notes: string | null
           proficiency_date: string | null
+          proficiency_history: Json | null
           required_proficiency_level: number | null
           start_date: string
           updated_at: string
@@ -15910,6 +15911,7 @@ export type Database = {
           is_required?: boolean | null
           notes?: string | null
           proficiency_date?: string | null
+          proficiency_history?: Json | null
           required_proficiency_level?: number | null
           start_date?: string
           updated_at?: string
@@ -15929,6 +15931,7 @@ export type Database = {
           is_required?: boolean | null
           notes?: string | null
           proficiency_date?: string | null
+          proficiency_history?: Json | null
           required_proficiency_level?: number | null
           start_date?: string
           updated_at?: string
@@ -59374,6 +59377,60 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rating_proficiency_conversion_rules: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          rating_scale_id: string | null
+          rules: Json
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          rating_scale_id?: string | null
+          rules?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          rating_scale_id?: string | null
+          rules?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rating_proficiency_conversion_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rating_proficiency_conversion_rules_rating_scale_id_fkey"
+            columns: ["rating_scale_id"]
+            isOneToOne: false
+            referencedRelation: "performance_rating_scales"
             referencedColumns: ["id"]
           },
         ]
