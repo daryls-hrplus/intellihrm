@@ -75093,6 +75093,7 @@ export type Database = {
               use_country_fiscal_year: boolean
             }[]
           }
+      get_current_user_company_id: { Args: never; Returns: string }
       get_employee_period_statutory: {
         Args: {
           p_employee_id: string
