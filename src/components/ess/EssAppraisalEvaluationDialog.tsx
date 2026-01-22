@@ -37,6 +37,7 @@ import {
   Loader2,
   FileText,
   Lock,
+  Info,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -49,6 +50,8 @@ import { EmployeeResponsibilityCard } from "./EmployeeResponsibilityCard";
 import { EvidenceQuickAttach } from "./EvidenceQuickAttach";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
+import { useRatingScale, getLabelsMap } from "@/hooks/useRatingScale";
+import { RatingScaleInfoBanner } from "./RatingScaleInfoBanner";
 
 interface ScoreItem {
   id?: string;
@@ -93,6 +96,15 @@ export function EssAppraisalEvaluationDialog({
 
   // Check if already submitted - form should be read-only
   const isSubmitted = !!appraisal.submitted_at;
+
+  // Fetch the configured rating scale for this appraisal cycle
+  const { data: ratingScale } = useRatingScale(appraisal.component_scale_id);
+  
+  // Get labels map for passing to child components
+  const ratingLabelsMap = useMemo(() => {
+    if (!ratingScale?.labels) return undefined;
+    return getLabelsMap(ratingScale);
+  }, [ratingScale]);
 
   // Enabled categories from cycle config
   const enabledCategories = useMemo(() => ({
@@ -481,6 +493,11 @@ export function EssAppraisalEvaluationDialog({
             </div>
           )}
 
+          {/* Rating Scale Info Banner */}
+          {!loading && (
+            <RatingScaleInfoBanner ratingScale={ratingScale} variant="compact" />
+          )}
+
           {loading ? (
             <div className="flex-1 flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -541,6 +558,8 @@ export function EssAppraisalEvaluationDialog({
                           onRatingChange={(r) => handleRatingChange(score.item_id, "goal", r)}
                           onCommentsChange={(c) => handleCommentsChange(score.item_id, "goal", c)}
                           onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "goal")}
+                          ratingLabels={ratingLabelsMap}
+                          ratingLabel="Performance Rating"
                         />
                       ))
                     )}
@@ -568,6 +587,9 @@ export function EssAppraisalEvaluationDialog({
                           onCommentsChange={(c) => handleCommentsChange(score.item_id, "competency", c)}
                           onBehaviorsChange={(b) => handleBehaviorsChange(score.item_id, b)}
                           onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "competency")}
+                          ratingLabels={ratingLabelsMap}
+                          usePerformanceScale={true}
+                          ratingLabel="Performance Rating"
                         />
                       ))
                     )}
@@ -592,6 +614,8 @@ export function EssAppraisalEvaluationDialog({
                           onRatingChange={(r) => handleRatingChange(score.item_id, "responsibility", r)}
                           onCommentsChange={(c) => handleCommentsChange(score.item_id, "responsibility", c)}
                           onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "responsibility")}
+                          ratingLabels={ratingLabelsMap}
+                          ratingLabel="Performance Rating"
                         />
                       ))
                     )}
