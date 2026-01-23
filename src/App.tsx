@@ -95,6 +95,7 @@ const App = () => (
             <Route path="/ess/compensation/equity" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssEquityPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/compensation/currency-preferences" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssCurrencyPreferencesPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/compensation/compa-ratio" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssCompaRatioPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/payslips" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.PayslipsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/banking" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyBankingPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/personal-info" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyPersonalInfoPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/dependents" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyDependentsPage /></LazyPage></ProtectedRoute>} />
