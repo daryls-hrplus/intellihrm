@@ -8,10 +8,10 @@ import {
 
 export function OverviewPersonas() {
   return (
-    <Card id="sec-1-4">
+    <Card id="sec-1-3">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 1.4</Badge>
+          <Badge variant="outline">Section 1.3</Badge>
           <span>•</span>
           <Clock className="h-3 w-3" />
           <span>15 min read</span>

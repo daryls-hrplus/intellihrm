@@ -16,11 +16,11 @@ export function ManualOverviewSection() {
       </section>
 
       <section id="sec-1-3" data-manual-anchor="sec-1-3" className="scroll-mt-32">
-        <OverviewArchitecture />
+        <OverviewPersonas />
       </section>
 
       <section id="sec-1-4" data-manual-anchor="sec-1-4" className="scroll-mt-32">
-        <OverviewPersonas />
+        <OverviewArchitecture />
       </section>
 
       <section id="sec-1-5" data-manual-anchor="sec-1-5" className="scroll-mt-32">

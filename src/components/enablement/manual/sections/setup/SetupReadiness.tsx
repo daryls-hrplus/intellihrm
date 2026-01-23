@@ -107,7 +107,7 @@ export function SetupReadiness() {
     <Card id="sec-2-readiness">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 2.1a</Badge>
+          <Badge variant="outline">Section 2.18</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~10 min read
@@ -116,7 +116,7 @@ export function SetupReadiness() {
         </div>
         <CardTitle className="text-2xl">Appraisal Readiness</CardTitle>
         <CardDescription>
-          Validate all prerequisites before launching appraisal cycles - the system's pre-flight checklist
+          Final validation dashboard before launching appraisal cycles - the system's pre-flight checklist
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
