@@ -93,10 +93,10 @@ const BUSINESS_RULES = [
 
 export function ComplianceDocumentSection() {
   return (
-    <Card id="sec-7-7">
+    <Card id="sec-7-9">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 7.7</Badge>
+          <Badge variant="outline">Section 7.9</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~12 min read
@@ -185,7 +185,7 @@ export function ComplianceDocumentSection() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 7.7.1: Compliance Document Generator with template selection"
+          caption="Figure 7.9.1: Compliance Document Generator with template selection"
           alt="Document generator interface"
         />
 
@@ -223,7 +223,7 @@ export function ComplianceDocumentSection() {
         <StepByStep steps={GENERATION_STEPS} title="Generating a Compliance Document" />
 
         <ScreenshotPlaceholder
-          caption="Figure 7.7.2: Generated document preview with signature routing options"
+          caption="Figure 7.9.2: Generated document preview with signature routing options"
           alt="Document preview and signature options"
         />
 

@@ -5,4 +5,6 @@ export { CompensationIntegrationSection } from './CompensationIntegrationSection
 export { LearningIntegrationSection } from './LearningIntegrationSection';
 export { NotificationOrchestrationSection } from './NotificationOrchestrationSection';
 export { IntegrationAnalyticsSection } from './IntegrationAnalyticsSection';
+export { IntegrationRuleConfiguration } from './IntegrationRuleConfiguration';
 export { ComplianceDocumentSection } from './ComplianceDocumentSection';
+export { WorkflowIntegration } from './WorkflowIntegration';

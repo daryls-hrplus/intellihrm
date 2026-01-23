@@ -45,10 +45,10 @@ const DASHBOARD_SECTIONS = [
 
 export function TalentUnifiedDashboardSection() {
   return (
-    <Card id="sec-6-6">
+    <Card id="sec-6-8">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 6.6</Badge>
+          <Badge variant="outline">Section 6.8</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~12 min read
@@ -118,7 +118,7 @@ export function TalentUnifiedDashboardSection() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 6.6.1: Talent Unified Dashboard with all sections visible"
+          caption="Figure 6.8.1: Talent Unified Dashboard with all sections visible"
           alt="Talent Unified Dashboard"
         />
 
@@ -177,7 +177,7 @@ export function TalentUnifiedDashboardSection() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 6.6.2: AI Insights section with cross-module recommendations"
+          caption="Figure 6.8.2: AI Insights section with cross-module recommendations"
           alt="AI Insights panel"
         />
 
@@ -193,7 +193,7 @@ export function TalentUnifiedDashboardSection() {
 
         <RelatedTopics
           topics={[
-            { sectionId: 'sec-6-5', title: 'Performance Intelligence Hub' },
+            { sectionId: 'sec-6-2', title: 'Performance Intelligence Hub' },
             { sectionId: 'sec-7-2', title: 'Nine-Box & Succession Integration' },
             { sectionId: 'sec-7-5', title: 'Learning & Development Links' }
           ]}

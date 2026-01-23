@@ -51,10 +51,10 @@ const HUB_TABS = [
 
 export function PerformanceIntelligenceHubSection() {
   return (
-    <Card id="sec-6-5">
+    <Card id="sec-6-2">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 6.5</Badge>
+          <Badge variant="outline">Section 6.2</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~18 min read
@@ -125,7 +125,7 @@ export function PerformanceIntelligenceHubSection() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 6.5.1: Performance Intelligence Hub main dashboard with tab navigation"
+          caption="Figure 6.2.1: Performance Intelligence Hub main dashboard with tab navigation"
           alt="Intelligence Hub dashboard"
         />
 
@@ -179,7 +179,7 @@ export function PerformanceIntelligenceHubSection() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 6.5.2: Predictive AI tab showing risk dashboard and high-potential identification"
+          caption="Figure 6.2.2: Predictive AI tab showing risk dashboard and high-potential identification"
           alt="Predictive AI analysis"
         />
 
@@ -232,7 +232,7 @@ export function PerformanceIntelligenceHubSection() {
           topics={[
             { sectionId: 'sec-6-1', title: 'Appraisal Analytics Dashboard' },
             { sectionId: 'sec-5-8', title: 'Performance Risk Detection' },
-            { sectionId: 'sec-6-6', title: 'Talent Unified Dashboard' }
+            { sectionId: 'sec-6-8', title: 'Talent Unified Dashboard' }
           ]}
         />
       </CardContent>

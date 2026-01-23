@@ -54,10 +54,10 @@ const TREND_WORKFLOW = `graph TB
 
 export function TrendAnalysisPredictions() {
   return (
-    <Card id="sec-6-4">
+    <Card id="sec-6-7">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 6.4</Badge>
+          <Badge variant="outline">Section 6.7</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~15 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />HR User / Admin / Executive</Badge>
         </div>

@@ -6,7 +6,9 @@ import {
   LearningIntegrationSection,
   NotificationOrchestrationSection,
   IntegrationAnalyticsSection,
-  ComplianceDocumentSection
+  IntegrationRuleConfiguration,
+  ComplianceDocumentSection,
+  WorkflowIntegration
 } from './sections/integration';
 
 export function ManualIntegrationSection() {
@@ -34,7 +36,13 @@ export function ManualIntegrationSection() {
         <IntegrationAnalyticsSection />
       </section>
       <section id="sec-7-8" data-manual-anchor="sec-7-8" className="scroll-mt-32">
+        <IntegrationRuleConfiguration />
+      </section>
+      <section id="sec-7-9" data-manual-anchor="sec-7-9" className="scroll-mt-32">
         <ComplianceDocumentSection />
+      </section>
+      <section id="sec-7-10" data-manual-anchor="sec-7-10" className="scroll-mt-32">
+        <WorkflowIntegration />
       </section>
     </div>
   );
