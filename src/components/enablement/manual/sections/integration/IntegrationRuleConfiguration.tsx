@@ -4,29 +4,29 @@ import { Clock, Users, CheckCircle, Settings, Zap, Filter, Play, Shield, ListOrd
 import { NavigationPath } from '../../NavigationPath';
 import { TipCallout, WarningCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
-import { FieldReferenceTable, type FieldReference } from '../../components/FieldReferenceTable';
+import { FieldReferenceTable, type FieldDefinition } from '../../components/FieldReferenceTable';
 import { RelatedTopics, StepByStep } from '../../components';
 
-const RULE_FIELDS: FieldReference[] = [
-  { fieldName: 'id', location: 'appraisal_integration_rules', required: true, description: 'Unique rule identifier' },
-  { fieldName: 'company_id', location: 'appraisal_integration_rules', required: true, description: 'Company owning the rule' },
-  { fieldName: 'name', location: 'appraisal_integration_rules', required: true, description: 'Rule display name' },
-  { fieldName: 'description', location: 'appraisal_integration_rules', required: false, description: 'Rule purpose and behavior notes' },
-  { fieldName: 'trigger_event', location: 'appraisal_integration_rules', required: true, description: 'appraisal_finalized, score_changed, calibration_complete' },
-  { fieldName: 'condition_type', location: 'appraisal_integration_rules', required: true, description: 'score, rating_level, section_score, category' },
-  { fieldName: 'condition_operator', location: 'appraisal_integration_rules', required: true, description: 'eq, gt, lt, gte, lte, between, in' },
-  { fieldName: 'condition_value', location: 'appraisal_integration_rules', required: false, description: 'Threshold value for comparison' },
-  { fieldName: 'condition_value_max', location: 'appraisal_integration_rules', required: false, description: 'Upper bound for between operator' },
-  { fieldName: 'condition_category_codes', location: 'appraisal_integration_rules', required: false, description: 'Rating level codes for in operator' },
-  { fieldName: 'condition_section', location: 'appraisal_integration_rules', required: false, description: 'Specific section to evaluate (goals, competencies, etc.)' },
-  { fieldName: 'target_module', location: 'appraisal_integration_rules', required: true, description: 'nine_box, succession, idp, pip, compensation, learning' },
-  { fieldName: 'action_type', location: 'appraisal_integration_rules', required: true, description: 'update_placement, create_plan, send_notification, etc.' },
-  { fieldName: 'action_config', location: 'appraisal_integration_rules', required: true, description: 'JSON configuration for action execution' },
-  { fieldName: 'auto_execute', location: 'appraisal_integration_rules', required: true, description: 'Execute automatically or require approval' },
-  { fieldName: 'requires_approval', location: 'appraisal_integration_rules', required: true, description: 'Whether HR approval is required' },
-  { fieldName: 'approval_role', location: 'appraisal_integration_rules', required: false, description: 'Role required for approval (hr_partner, hr_manager)' },
-  { fieldName: 'execution_order', location: 'appraisal_integration_rules', required: true, description: 'Order of rule execution (lower = earlier)' },
-  { fieldName: 'is_active', location: 'appraisal_integration_rules', required: true, description: 'Whether rule is enabled' }
+const RULE_FIELDS: FieldDefinition[] = [
+  { name: 'id', required: true, type: 'UUID', description: 'Unique rule identifier' },
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company owning the rule' },
+  { name: 'name', required: true, type: 'TEXT', description: 'Rule display name' },
+  { name: 'description', required: false, type: 'TEXT', description: 'Rule purpose and behavior notes' },
+  { name: 'trigger_event', required: true, type: 'TEXT', description: 'appraisal_finalized, score_changed, calibration_complete' },
+  { name: 'condition_type', required: true, type: 'TEXT', description: 'score, rating_level, section_score, category' },
+  { name: 'condition_operator', required: true, type: 'TEXT', description: 'eq, gt, lt, gte, lte, between, in' },
+  { name: 'condition_value', required: false, type: 'NUMERIC', description: 'Threshold value for comparison' },
+  { name: 'condition_value_max', required: false, type: 'NUMERIC', description: 'Upper bound for between operator' },
+  { name: 'condition_category_codes', required: false, type: 'TEXT[]', description: 'Rating level codes for in operator' },
+  { name: 'condition_section', required: false, type: 'TEXT', description: 'Specific section to evaluate (goals, competencies, etc.)' },
+  { name: 'target_module', required: true, type: 'TEXT', description: 'nine_box, succession, idp, pip, compensation, learning' },
+  { name: 'action_type', required: true, type: 'TEXT', description: 'update_placement, create_plan, send_notification, etc.' },
+  { name: 'action_config', required: true, type: 'JSONB', description: 'JSON configuration for action execution' },
+  { name: 'auto_execute', required: true, type: 'BOOLEAN', description: 'Execute automatically or require approval' },
+  { name: 'requires_approval', required: true, type: 'BOOLEAN', description: 'Whether HR approval is required' },
+  { name: 'approval_role', required: false, type: 'TEXT', description: 'Role required for approval (hr_partner, hr_manager)' },
+  { name: 'execution_order', required: true, type: 'INTEGER', description: 'Order of rule execution (lower = earlier)' },
+  { name: 'is_active', required: true, type: 'BOOLEAN', description: 'Whether rule is enabled' }
 ];
 
 const STEPS = [

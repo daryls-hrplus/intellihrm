@@ -4,27 +4,27 @@ import { Clock, Users, CheckCircle, TrendingUp, TrendingDown, Minus, BarChart3, 
 import { NavigationPath } from '../../NavigationPath';
 import { TipCallout, InfoCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
-import { FieldReferenceTable, type FieldReference } from '../../components/FieldReferenceTable';
+import { FieldReferenceTable, type FieldDefinition } from '../../components/FieldReferenceTable';
 import { RelatedTopics } from '../../components';
 
-const FIELD_REFERENCES: FieldReference[] = [
-  { fieldName: 'manager_id', location: 'manager_effectiveness_scores', required: true, description: 'Manager profile ID for effectiveness tracking' },
-  { fieldName: 'company_id', location: 'manager_effectiveness_scores', required: true, description: 'Company context for multi-tenant filtering' },
-  { fieldName: 'period_start', location: 'manager_effectiveness_scores', required: true, description: 'Start date of effectiveness calculation period' },
-  { fieldName: 'period_end', location: 'manager_effectiveness_scores', required: true, description: 'End date of effectiveness calculation period' },
-  { fieldName: 'overall_effectiveness_score', location: 'manager_effectiveness_scores', required: true, description: 'Composite effectiveness score (0-100)' },
-  { fieldName: 'avg_team_rating', location: 'manager_effectiveness_scores', required: false, description: 'Average performance rating of direct reports' },
-  { fieldName: 'avg_team_rating_change', location: 'manager_effectiveness_scores', required: false, description: 'Change in team rating vs previous period' },
-  { fieldName: 'feedback_frequency_score', location: 'manager_effectiveness_scores', required: false, description: 'Frequency of feedback interactions (0-100)' },
-  { fieldName: 'feedback_quality_score', location: 'manager_effectiveness_scores', required: false, description: 'Quality of feedback provided (0-100)' },
-  { fieldName: 'goal_completion_rate', location: 'manager_effectiveness_scores', required: false, description: 'Team goal achievement percentage' },
-  { fieldName: 'appraisal_completion_rate', location: 'manager_effectiveness_scores', required: false, description: 'Percentage of appraisals completed on time' },
-  { fieldName: 'team_retention_rate', location: 'manager_effectiveness_scores', required: false, description: 'Team member retention percentage' },
-  { fieldName: 'team_development_score', location: 'manager_effectiveness_scores', required: false, description: 'Team skill/competency growth score' },
-  { fieldName: 'calibration_alignment_score', location: 'manager_effectiveness_scores', required: false, description: 'Alignment with calibration decisions' },
-  { fieldName: 'trend_direction', location: 'manager_effectiveness_scores', required: false, description: 'improving, stable, or declining' },
-  { fieldName: 'recommendations', location: 'manager_effectiveness_scores', required: false, description: 'AI-generated improvement recommendations (JSON)' },
-  { fieldName: 'calculated_at', location: 'manager_effectiveness_scores', required: true, description: 'Timestamp of score calculation' }
+const FIELD_REFERENCES: FieldDefinition[] = [
+  { name: 'manager_id', required: true, type: 'UUID', description: 'Manager profile ID for effectiveness tracking' },
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company context for multi-tenant filtering' },
+  { name: 'period_start', required: true, type: 'DATE', description: 'Start date of effectiveness calculation period' },
+  { name: 'period_end', required: true, type: 'DATE', description: 'End date of effectiveness calculation period' },
+  { name: 'overall_effectiveness_score', required: true, type: 'NUMERIC', description: 'Composite effectiveness score (0-100)' },
+  { name: 'avg_team_rating', required: false, type: 'NUMERIC', description: 'Average performance rating of direct reports' },
+  { name: 'avg_team_rating_change', required: false, type: 'NUMERIC', description: 'Change in team rating vs previous period' },
+  { name: 'feedback_frequency_score', required: false, type: 'NUMERIC', description: 'Frequency of feedback interactions (0-100)' },
+  { name: 'feedback_quality_score', required: false, type: 'NUMERIC', description: 'Quality of feedback provided (0-100)' },
+  { name: 'goal_completion_rate', required: false, type: 'NUMERIC', description: 'Team goal achievement percentage' },
+  { name: 'appraisal_completion_rate', required: false, type: 'NUMERIC', description: 'Percentage of appraisals completed on time' },
+  { name: 'team_retention_rate', required: false, type: 'NUMERIC', description: 'Team member retention percentage' },
+  { name: 'team_development_score', required: false, type: 'NUMERIC', description: 'Team skill/competency growth score' },
+  { name: 'calibration_alignment_score', required: false, type: 'NUMERIC', description: 'Alignment with calibration decisions' },
+  { name: 'trend_direction', required: false, type: 'TEXT', description: 'improving, stable, or declining' },
+  { name: 'recommendations', required: false, type: 'JSONB', description: 'AI-generated improvement recommendations' },
+  { name: 'calculated_at', required: true, type: 'TIMESTAMPTZ', description: 'Timestamp of score calculation' }
 ];
 
 const BUSINESS_RULES = [
