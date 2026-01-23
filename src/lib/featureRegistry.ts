@@ -571,7 +571,7 @@ const essModule: ModuleDefinition = {
       groupName: "Personal Information",
       features: [
         { code: "profile", name: "My Profile", description: "View and update personal information", routePath: "/ess/profile", icon: "User", tabCode: "profile", roleRequirements: ["employee"], workflowSteps: ["View profile", "Edit information", "Upload documents"], uiElements: ["Profile tabs", "Edit forms", "Document uploader"] },
-        { code: "documents", name: "My Documents", description: "Access personal HR documents", routePath: "/workforce/employees/:id?tab=documents", icon: "FileText", tabCode: "documents", roleRequirements: ["employee"], workflowSteps: ["Browse documents", "Download files", "Upload new"], uiElements: ["Document list", "Download button", "Upload form"] },
+        { code: "documents", name: "My Documents", description: "Access personal HR documents", routePath: "/ess/documents", icon: "FileText", tabCode: "documents", roleRequirements: ["employee"], workflowSteps: ["Browse documents", "Download files", "Upload new"], uiElements: ["Document list", "Download button", "Upload form"] },
       ]
     },
     {
