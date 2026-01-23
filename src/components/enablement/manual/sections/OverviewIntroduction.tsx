@@ -137,12 +137,17 @@ export function OverviewIntroduction() {
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {[
-                'Appraisal cycle configuration and management',
-                'Rating scale and form template setup',
+                'Appraisal Readiness validation and pre-launch checks',
+                'Appraisal cycle configuration with 6-phase deadlines',
+                'Rating scales, rating levels, and form template setup',
+                'Job Assessment Configuration for responsibility weights',
                 'Participant enrollment and evaluation workflows',
-                'Calibration sessions and forced distribution',
-                'AI-assisted feedback and analytics',
-                'Integration with Nine-Box, Succession, Compensation',
+                'Multi-phase deadline management (self-assessment through acknowledgment)',
+                '360 Feedback integration and weight configuration',
+                'Calibration sessions and distribution management',
+                'AI-assisted feedback, narratives, and analytics',
+                'Integration with Nine-Box, Succession, Compensation, PIP',
+                'Outcome Rules for automated talent actions',
                 'Reporting and compliance requirements'
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
@@ -179,7 +184,7 @@ export function OverviewIntroduction() {
         {/* Key Differentiators */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Key Differentiators</h3>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="bg-primary/5 border-primary/20">
               <CardContent className="pt-4">
                 <div className="flex items-start gap-3">
@@ -223,6 +228,22 @@ export function OverviewIntroduction() {
                     <p className="text-sm text-muted-foreground mt-1">
                       Built-in support for Caribbean, African, and global labor law requirements. Country-specific 
                       configurations for probation reviews and termination processes.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-amber-500/5 border-amber-500/20">
+              <CardContent className="pt-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-amber-500/10">
+                    <CheckCircle className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Appraisal Readiness</h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Pre-launch validation dashboard that checks configuration prerequisites. Ensures rating 
+                      scales, templates, and workforce data are ready before cycle launch.
                     </p>
                   </div>
                 </div>

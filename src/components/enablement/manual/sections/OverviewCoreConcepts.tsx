@@ -19,19 +19,19 @@ export function OverviewCoreConcepts() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* CRGV Model Deep Dive */}
+        {/* CRGV+360 Model Deep Dive */}
         <div>
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Scale className="h-5 w-5 text-primary" />
-            The CRGV Model - Deep Dive
+            The CRGV+360 Model - Deep Dive
           </h3>
           <p className="text-muted-foreground mb-4">
-            Intelli HRM uses the Competencies-Responsibilities-Goals-Values (CRGV) model as the foundation for 
-            comprehensive performance evaluation. Each component captures a different dimension of employee 
-            contribution and can be weighted differently based on organizational priorities.
+            Intelli HRM uses an extended CRGV model that includes optional 360 Feedback as a fifth component: 
+            <strong>Competencies-Responsibilities-Goals-Values + 360 Feedback</strong>. Each component captures 
+            a different dimension of employee contribution and can be weighted differently based on organizational priorities.
           </p>
           
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             {[
               { 
                 letter: 'C', 
@@ -39,25 +39,25 @@ export function OverviewCoreConcepts() {
                 defaultWeight: '20%', 
                 range: '10-30%',
                 desc: 'Behavioral skills and capabilities aligned to job requirements',
-                details: 'Measures HOW work is done. Includes technical skills, soft skills, and leadership competencies. Typically derived from job profiles or competency frameworks.',
+                details: 'Measures HOW work is done. Includes technical skills, soft skills, and leadership competencies. Derived from job profiles with 100% weight validation.',
                 example: 'Communication, Problem Solving, Leadership, Technical Expertise'
               },
               { 
                 letter: 'R', 
                 title: 'Responsibilities', 
-                defaultWeight: '30%', 
+                defaultWeight: '25%', 
                 range: '20-40%',
                 desc: 'Key Result Areas (KRAs) and job-specific duties',
-                details: 'Measures WHAT the employee is accountable for in their role. Based on job descriptions and position requirements.',
+                details: 'Measures WHAT the employee is accountable for. Weights configured per job with auto, kra_based, or hybrid assessment modes.',
                 example: 'Budget Management, Team Supervision, Client Relations, Quality Assurance'
               },
               { 
                 letter: 'G', 
                 title: 'Goals', 
-                defaultWeight: '40%', 
+                defaultWeight: '35%', 
                 range: '30-60%',
                 desc: 'SMART objectives cascaded from organizational strategy',
-                details: 'Measures achievement of specific, time-bound objectives. Should be aligned with departmental and organizational goals.',
+                details: 'Measures achievement of specific, time-bound objectives. Aligned with departmental and organizational goals.',
                 example: 'Increase sales by 15%, Complete project by Q3, Reduce errors by 20%'
               },
               { 
@@ -68,6 +68,15 @@ export function OverviewCoreConcepts() {
                 desc: 'Alignment with organizational culture and principles',
                 details: 'Measures demonstration of core organizational values. Important for culture reinforcement and succession decisions.',
                 example: 'Integrity, Innovation, Customer Focus, Teamwork'
+              },
+              { 
+                letter: '360', 
+                title: '360 Feedback', 
+                defaultWeight: '10%', 
+                range: '0-25%',
+                desc: 'Multi-rater feedback from peers, reports, and stakeholders',
+                details: 'Optional component that aggregates feedback from multiple sources. Configured per cycle with anonymous or named responses.',
+                example: 'Peer ratings, Direct report feedback, Cross-functional stakeholder input'
               }
             ].map((item) => (
               <div key={item.letter} className="p-4 border rounded-lg">
@@ -76,7 +85,7 @@ export function OverviewCoreConcepts() {
                     {item.letter}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                       <h4 className="font-medium text-lg">{item.title}</h4>
                       <div className="flex gap-2">
                         <Badge variant="default">{item.defaultWeight}</Badge>
@@ -100,9 +109,10 @@ export function OverviewCoreConcepts() {
                 <h4 className="font-semibold text-foreground mb-2">Weight Configuration Best Practices</h4>
                 <ul className="text-sm text-foreground space-y-1">
                   <li>• <strong>Sales/Revenue roles:</strong> Higher Goals weight (50-60%) to emphasize measurable outcomes</li>
-                  <li>• <strong>Management roles:</strong> Higher Competencies weight (25-35%) for leadership behaviors</li>
+                  <li>• <strong>Management roles:</strong> Higher Competencies (25-35%) + 360 Feedback (15-20%) for leadership behaviors</li>
                   <li>• <strong>Technical roles:</strong> Balanced Responsibilities + Goals (35% + 40%)</li>
                   <li>• <strong>Customer-facing roles:</strong> Include Values weight (15-20%) for culture/service emphasis</li>
+                  <li>• <strong>Leadership roles:</strong> Include 360 Feedback (15-25%) for multi-rater perspective</li>
                   <li>• <strong>Probation reviews:</strong> Consider 100% Responsibilities weight for role fit assessment</li>
                 </ul>
               </div>
@@ -122,12 +132,12 @@ export function OverviewCoreConcepts() {
           <div className="space-y-6">
             {/* Formula */}
             <div className="p-4 bg-muted rounded-lg font-mono text-sm">
-              <p className="text-muted-foreground mb-2">Overall Score Formula:</p>
+              <p className="text-muted-foreground mb-2">Overall Score Formula (with optional 360 Feedback):</p>
               <code className="text-primary">
-                Overall Score = (C × W<sub>c</sub>) + (R × W<sub>r</sub>) + (G × W<sub>g</sub>) + (V × W<sub>v</sub>)
+                Overall Score = (C × W<sub>c</sub>) + (R × W<sub>r</sub>) + (G × W<sub>g</sub>) + (V × W<sub>v</sub>) + (360 × W<sub>360</sub>)
               </code>
               <p className="text-xs text-muted-foreground mt-2">
-                Where C, R, G, V are component scores (1-5) and W<sub>x</sub> are weights (must sum to 100%)
+                Where C, R, G, V, 360 are component scores (1-5) and W<sub>x</sub> are weights (must sum to 100%)
               </p>
             </div>
 
@@ -306,18 +316,24 @@ export function OverviewCoreConcepts() {
           <h3 className="text-lg font-semibold mb-4">Key Terminology</h3>
           <div className="space-y-3">
             {[
-              { term: 'Appraisal Cycle', def: 'A defined evaluation period (typically annual or semi-annual) during which performance assessments are conducted. Each cycle has a start date, end date, and evaluation deadline.' },
+              { term: 'Appraisal Cycle', def: 'A defined evaluation period (annual, mid_year, quarterly, or probation) during which performance assessments are conducted. Each cycle has start/end dates and 6 phase deadlines.' },
+              { term: 'Cycle Type', def: 'The category of appraisal cycle: annual (full year), mid_year (6-month check-in), quarterly (3-month pulse), or probation (new hire evaluation).' },
+              { term: 'Phase Deadlines', def: 'Six distinct deadlines within a cycle: self-assessment, 360 feedback, manager review, calibration, finalization, and acknowledgment.' },
+              { term: 'Appraisal Readiness', def: 'System validation of prerequisites before cycle launch. Checks rating scales, form templates, job weights, and workforce data.' },
               { term: 'Participant', def: 'An employee being evaluated within an appraisal cycle. Participants are enrolled either automatically based on eligibility rules or manually by HR.' },
               { term: 'Evaluator', def: 'The person conducting the evaluation, typically the direct manager. Some cycles may include additional evaluators (dotted-line managers, project leads).' },
               { term: 'Rating Scale', def: 'The scoring system used to rate individual components (e.g., 1-5 scale). Can be numeric or behaviorally anchored with descriptive labels.' },
-              { term: 'Overall Rating Scale', def: 'The final performance categories that map from the calculated overall score (e.g., Exceptional, Exceeds, Meets, Below, Needs Improvement).' },
+              { term: 'Rating Level', def: 'Maps overall scores to performance categories (e.g., Exceptional, Exceeds Expectations). Includes eligibility flags for promotion, succession, bonus, and PIP.' },
+              { term: 'Job Assessment Mode', def: 'How responsibilities are evaluated: auto (from competencies), kra_based (from specific KRAs), or hybrid (combination).' },
               { term: 'Calibration', def: 'A process where managers collectively review and adjust ratings to ensure consistency and fairness across teams and departments.' },
               { term: 'Pre-calibration Score', def: 'The initial calculated score before any calibration adjustments. This score is preserved for audit purposes.' },
               { term: 'Post-calibration Score', def: 'The final score after calibration has been applied. This is the score used for downstream actions like compensation.' },
               { term: 'Nine-Box Grid', def: 'A 3×3 matrix plotting Performance (X-axis) against Potential (Y-axis) to categorize employees for talent decisions. Generated from appraisal data.' },
               { term: 'Forced Distribution', def: 'A calibration method requiring ratings to match predefined percentages (e.g., 5% Exceptional, 15% Exceeds, 60% Meets, 15% Below, 5% Needs Improvement).' },
               { term: 'Self-Assessment', def: 'The employee\'s own evaluation of their performance, typically completed before the manager evaluation as input.' },
-              { term: 'Acknowledgment', def: 'The formal employee confirmation that they have reviewed their final evaluation. May include agreement/disagreement options.' }
+              { term: 'Acknowledgment', def: 'The formal employee confirmation that they have reviewed their final evaluation. May include agreement/disagreement options.' },
+              { term: 'Template Versioning', def: 'Form templates support draft vs published states with version history. Changes to published templates create new versions.' },
+              { term: 'Outcome Rules', def: 'Automated actions triggered by rating levels: PIP creation, succession nomination, bonus eligibility, or module integrations.' }
             ].map((item, i) => (
               <div key={i} className="flex gap-4 p-3 bg-muted/50 rounded-lg">
                 <span className="font-medium min-w-[200px]">{item.term}</span>

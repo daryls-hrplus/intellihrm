@@ -1,4 +1,6 @@
 export { SetupPrerequisites } from './SetupPrerequisites';
+export { SetupReadiness } from './SetupReadiness';
+export { SetupJobAssessmentConfig } from './SetupJobAssessmentConfig';
 export { SetupRatingScales } from './SetupRatingScales';
 export { SetupOverallScales } from './SetupOverallScales';
 export { SetupSkillsCompetencies } from './SetupSkillsCompetencies';
