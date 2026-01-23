@@ -1,12 +1,16 @@
 import {
   AIFeedbackOverview,
+  AIGeneratedNarratives,
   GeneratingStrengthStatements,
   DevelopmentSuggestionsIDP,
-  BiasDetectionRemediation,
+  StrengthsGapsAnalysis,
   CommentQualityAnalysis,
-  AIAnalyticsPredictions,
+  BiasDetectionRemediation,
+  BiasNudgeConfiguration,
+  ManagerBiasPatternTracking,
   AICoachingNudges,
-  AIPerformanceRiskDetection
+  AIPerformanceRiskDetection,
+  AIAnalyticsPredictions
 } from './sections/ai';
 
 export function ManualAISection() {
@@ -16,25 +20,37 @@ export function ManualAISection() {
         <AIFeedbackOverview />
       </section>
       <section id="sec-5-2" data-manual-anchor="sec-5-2" className="scroll-mt-32">
-        <GeneratingStrengthStatements />
+        <AIGeneratedNarratives />
       </section>
       <section id="sec-5-3" data-manual-anchor="sec-5-3" className="scroll-mt-32">
-        <DevelopmentSuggestionsIDP />
+        <GeneratingStrengthStatements />
       </section>
       <section id="sec-5-4" data-manual-anchor="sec-5-4" className="scroll-mt-32">
-        <BiasDetectionRemediation />
+        <DevelopmentSuggestionsIDP />
       </section>
       <section id="sec-5-5" data-manual-anchor="sec-5-5" className="scroll-mt-32">
-        <CommentQualityAnalysis />
+        <StrengthsGapsAnalysis />
       </section>
       <section id="sec-5-6" data-manual-anchor="sec-5-6" className="scroll-mt-32">
-        <AIAnalyticsPredictions />
+        <CommentQualityAnalysis />
       </section>
       <section id="sec-5-7" data-manual-anchor="sec-5-7" className="scroll-mt-32">
-        <AICoachingNudges />
+        <BiasDetectionRemediation />
       </section>
       <section id="sec-5-8" data-manual-anchor="sec-5-8" className="scroll-mt-32">
+        <BiasNudgeConfiguration />
+      </section>
+      <section id="sec-5-9" data-manual-anchor="sec-5-9" className="scroll-mt-32">
+        <ManagerBiasPatternTracking />
+      </section>
+      <section id="sec-5-10" data-manual-anchor="sec-5-10" className="scroll-mt-32">
+        <AICoachingNudges />
+      </section>
+      <section id="sec-5-11" data-manual-anchor="sec-5-11" className="scroll-mt-32">
         <AIPerformanceRiskDetection />
+      </section>
+      <section id="sec-5-12" data-manual-anchor="sec-5-12" className="scroll-mt-32">
+        <AIAnalyticsPredictions />
       </section>
     </div>
   );
