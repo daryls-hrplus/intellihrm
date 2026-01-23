@@ -30,7 +30,7 @@ const quickActions: QuickAction[] = [
   {
     label: "Submit Expense",
     icon: <Receipt className="h-4 w-4" />,
-    path: "/ess/expenses",
+    path: "/ess/expense-claims",
     variant: "outline",
   },
   {
