@@ -57,6 +57,11 @@ export default function AppraisalsManualPage() {
   const { printSettings, brandColors, savePrintSettings } = useManualPrintSettings('Appraisals Admin Manual');
 
   const activePartId = useMemo(() => {
+    // Handle appendix sections that aren't in APPRAISALS_MANUAL_STRUCTURE
+    if (['quick-ref', 'diagrams', 'glossary', 'version-history'].includes(selectedSectionId)) {
+      return selectedSectionId;
+    }
+    
     const parentPart = APPRAISALS_MANUAL_STRUCTURE.find(
       (s) => s.id === selectedSectionId || s.subsections?.some((sub) => sub.id === selectedSectionId)
     );

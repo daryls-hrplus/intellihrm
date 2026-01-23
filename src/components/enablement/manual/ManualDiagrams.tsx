@@ -4,7 +4,7 @@ import { Layers, GitBranch, Users, Link2, Calculator, Brain, Calendar, Zap, Scal
 
 export function ManualDiagrams() {
   return (
-    <div className="space-y-8">
+    <div id="diagrams" data-manual-anchor="diagrams" className="space-y-8 scroll-mt-32">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold">Architecture Diagrams</h2>
         <p className="text-muted-foreground">14 visual representations of system architecture and flows</p>
