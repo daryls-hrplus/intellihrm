@@ -1,10 +1,10 @@
 // Handbook version tracking and source manual references
 
 export const HANDBOOK_VERSION = {
-  version: '2.5.0',
-  date: '2026-01-14',
+  version: '2.6.0',
+  date: '2026-01-23',
   author: 'Intelli HRM Team',
-  nextReviewDate: '2026-04-14'
+  nextReviewDate: '2026-04-23'
 };
 
 export interface SourceManualReference {
@@ -93,6 +93,21 @@ export interface ChangeLogEntry {
 }
 
 export const HANDBOOK_CHANGE_LOG: ChangeLogEntry[] = [
+  {
+    version: '2.6.0',
+    date: '2026-01-23',
+    changes: [
+      'Added Section 2.1a: Appraisal Readiness - pre-launch validation dashboard documentation',
+      'Added Section 2.1b: Job Assessment Configuration - responsibility/KRA weight validation',
+      'Renamed "Index Settings" to "Performance Trend Settings" with user-friendly terminology',
+      'Updated CRGV model to CRGV+360 with optional 360 Feedback as fifth component',
+      'Added new terminology: Cycle Type, Phase Deadlines, Rating Level, Job Assessment Mode, Template Versioning, Outcome Rules',
+      'Updated System Architecture with 50+ performance tables organized into logical groups',
+      'Moved Performance Trend Settings from Appraisals tab to Core Framework (global setting)',
+      'Reorganized Chapter 2 section numbering to match actual UI tab structure',
+      'Updated Key Differentiators to include Appraisal Readiness feature'
+    ]
+  },
   {
     version: '2.5.0',
     date: '2026-01-14',

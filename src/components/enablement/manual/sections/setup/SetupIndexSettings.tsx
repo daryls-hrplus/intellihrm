@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Calculator, TrendingUp, User, Target, DollarSign, Users, ArrowUpRight, ArrowDownRight, Minus, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Clock, Calculator, TrendingUp, User, Target, DollarSign, Users, ArrowUpRight, ArrowDownRight, Minus, CheckCircle2, AlertTriangle, Lightbulb } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { 
   LearningObjectives, 
@@ -16,137 +16,123 @@ import { InfoCallout, TipCallout } from '../../components/Callout';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const FIELD_DEFINITIONS = [
-  { name: 'Index Name', required: true, type: 'Text', description: 'Display name for the performance index', defaultValue: '—', validation: 'Max 50 characters' },
-  { name: 'Index Code', required: true, type: 'Text', description: 'Unique identifier for reporting', defaultValue: 'Auto-generated', validation: 'Max 20 chars' },
-  { name: 'Calculation Method', required: true, type: 'Select', description: 'How index is calculated', defaultValue: 'Weighted Average', validation: '—' },
-  { name: 'Include Current Cycle', required: true, type: 'Boolean', description: 'Include most recent appraisal', defaultValue: 'true', validation: '—' },
-  { name: 'Historical Cycles', required: true, type: 'Number', description: 'Number of past cycles to include', defaultValue: '2', validation: 'Max 5 cycles' },
-  { name: 'Current Cycle Weight', required: true, type: 'Number', description: 'Weight for most recent cycle', defaultValue: '50%', validation: 'Sum to 100% with historical' },
-  { name: 'Historical Weight Distribution', required: true, type: 'Select', description: 'How historical weight is spread', defaultValue: 'Equal', validation: '—' },
-  { name: 'Minimum Cycles Required', required: true, type: 'Number', description: 'Minimum completed cycles (Annual, Mid-Year, Quarterly each count as one) before index is calculated', defaultValue: '1', validation: 'Min 1' },
-  { name: 'Handle Missing Data', required: true, type: 'Select', description: 'How to treat employees with fewer cycles', defaultValue: 'Use Available Data', validation: '—' },
+  { name: 'Lookback Period', required: true, type: 'Number', description: 'How many months of performance history to consider (e.g., 24 months = 2 years)', defaultValue: '24', validation: '6-60 months' },
+  { name: 'Recent Performance Weight', required: true, type: 'Percentage', description: 'How much emphasis to place on recent vs. older performance (higher = recent matters more)', defaultValue: '50%', validation: '0-100%' },
+  { name: 'Trend Impact Level', required: true, type: 'Select', description: 'How much score improvement/decline affects the index: Low, Medium, High', defaultValue: 'Medium', validation: 'Low/Medium/High' },
+  { name: 'Include Current Cycle', required: true, type: 'Boolean', description: 'Whether to include the most recent appraisal in calculations', defaultValue: 'true', validation: '—' },
+  { name: 'Minimum Cycles Required', required: true, type: 'Number', description: 'Minimum completed cycles before index is calculated', defaultValue: '1', validation: 'Min 1' },
+  { name: 'Handle Missing Data', required: true, type: 'Select', description: 'How to treat employees with fewer cycles than the lookback period', defaultValue: 'Use Available Data', validation: '—' },
   { name: 'Refresh Frequency', required: true, type: 'Select', description: 'When index is recalculated', defaultValue: 'On Cycle Close', validation: '—' },
-  { name: 'Is Active', required: true, type: 'Boolean', description: 'Whether index is calculated', defaultValue: 'true', validation: '—' },
+  { name: 'Is Active', required: true, type: 'Boolean', description: 'Whether trend tracking is enabled', defaultValue: 'true', validation: '—' },
 ];
 
 const STEPS = [
   {
-    title: 'Navigate to Index Settings',
-    description: 'Go to Performance → Setup → Appraisals → Index Settings',
-    expectedResult: 'Performance Index configuration page displays'
+    title: 'Navigate to Performance Trends',
+    description: 'Go to Performance → Setup → Core Framework → Performance Trends',
+    expectedResult: 'Performance Trend Settings page displays'
   },
   {
-    title: 'Review Default Index',
-    description: 'System provides a default Performance Index configuration',
-    expectedResult: 'Default index settings visible'
-  },
-  {
-    title: 'Click "Edit Index" or "Create Custom Index"',
-    description: 'Modify existing or create new performance index',
-    expectedResult: 'Index configuration form opens'
-  },
-  {
-    title: 'Configure Calculation Method',
-    description: 'Select how the index is computed',
+    title: 'Set the Lookback Period',
+    description: 'Configure how far back in time to consider performance history',
     substeps: [
-      'Weighted Average: Weight recent cycles more heavily',
-      'Simple Average: Equal weight across all cycles',
-      'Latest Only: Use only most recent score',
-      'Trend Adjusted: Factor in improvement/decline'
+      '12 months: Short-term focus, emphasizes recent performance',
+      '24 months: Standard - balances recent and historical',
+      '36+ months: Long-term view for succession planning'
     ],
-    expectedResult: 'Calculation method selected'
+    expectedResult: 'Lookback period configured based on organizational needs'
   },
   {
-    title: 'Set Cycle Inclusion',
-    description: 'Define which cycles contribute to the index',
+    title: 'Configure Recent Performance Weight',
+    description: 'Determine how much weight to give recent vs. older performance',
     substeps: [
-      'Toggle current cycle inclusion',
-      'Set number of historical cycles (typically 2-3)',
-      'Configure weight for current vs. historical'
+      '30%: Historical performance valued equally',
+      '50%: Balanced - recent performance slightly emphasized',
+      '70%: Strong emphasis on recent improvement'
     ],
-    expectedResult: 'Cycle scope defined'
+    expectedResult: 'Recent performance weight set'
   },
   {
-    title: 'Configure Weight Distribution',
-    description: 'Set how weights are distributed across cycles',
+    title: 'Set Trend Impact Level',
+    description: 'Choose how much score trajectory affects the index',
     substeps: [
-      'Equal: All historical cycles weighted equally',
-      'Declining: More recent historical cycles weighted higher',
-      'Custom: Manual weight assignment per cycle'
+      'Low: Minimal bonus/penalty for improvement/decline',
+      'Medium: Moderate recognition of trends',
+      'High: Strong emphasis on trajectory over absolute scores'
     ],
-    expectedResult: 'Weight distribution configured'
+    expectedResult: 'Trend sensitivity configured'
   },
   {
-    title: 'Handle Missing Data',
-    description: 'Configure behavior for employees with incomplete history',
+    title: 'Configure Missing Data Handling',
+    description: 'Set how to handle employees with incomplete history',
     substeps: [
       'Use Available Data: Calculate with what exists',
-      'Mark Incomplete: Flag index as provisional',
+      'Mark Provisional: Flag index as incomplete',
       'Require Minimum: Only calculate if minimum cycles met'
     ],
     expectedResult: 'Missing data handling configured'
   },
   {
     title: 'Save and Apply',
-    description: 'Save index configuration',
-    expectedResult: 'Index settings saved and calculation triggered'
+    description: 'Save trend settings configuration',
+    expectedResult: 'Settings saved and index recalculation triggered'
   }
 ];
 
 const CONFIGURATION_EXAMPLES = [
   {
-    title: 'Standard Weighted Index',
-    context: 'Emphasize recent performance while considering history.',
+    title: 'Balanced Performance Tracking',
+    context: 'Standard configuration balancing recent and historical performance.',
     values: [
-      { field: 'Method', value: 'Weighted Average' },
-      { field: 'Current Cycle', value: 'Included (50% weight)' },
-      { field: 'Historical', value: '2 cycles (25% each)' },
+      { field: 'Lookback Period', value: '24 months (2 years)' },
+      { field: 'Recent Performance Weight', value: '50%' },
+      { field: 'Trend Impact Level', value: 'Medium' },
       { field: 'Missing Data', value: 'Use Available Data' }
     ],
-    outcome: 'Balanced index reflecting both current and historical performance.'
+    outcome: 'Balanced index reflecting both current and historical performance with moderate trend recognition.'
   },
   {
     title: 'Recent Performance Focus',
-    context: 'Organizations prioritizing most recent evaluation.',
+    context: 'Organizations prioritizing recent improvement and turnaround.',
     values: [
-      { field: 'Method', value: 'Weighted Average' },
-      { field: 'Current Cycle', value: 'Included (70% weight)' },
-      { field: 'Historical', value: '1 cycle (30% weight)' },
+      { field: 'Lookback Period', value: '12 months' },
+      { field: 'Recent Performance Weight', value: '70%' },
+      { field: 'Trend Impact Level', value: 'High' },
       { field: 'Missing Data', value: 'Use Available Data' }
     ],
-    outcome: 'Index heavily weighted toward most recent performance.'
+    outcome: 'Index heavily weighted toward most recent performance with strong trend bonuses.'
   },
   {
-    title: 'Trend-Adjusted Index',
-    context: 'Recognize improvement trajectory alongside absolute scores.',
+    title: 'Long-Term Consistency',
+    context: 'For succession planning and leadership roles requiring sustained performance.',
     values: [
-      { field: 'Method', value: 'Trend Adjusted' },
-      { field: 'Current Cycle', value: 'Included' },
-      { field: 'Historical', value: '3 cycles' },
-      { field: 'Trend Bonus', value: '+0.2 for consistent improvement' }
+      { field: 'Lookback Period', value: '36 months (3 years)' },
+      { field: 'Recent Performance Weight', value: '40%' },
+      { field: 'Trend Impact Level', value: 'Low' },
+      { field: 'Missing Data', value: 'Require Minimum (3 cycles)' }
     ],
-    outcome: 'Index rewards sustained improvement over time.'
+    outcome: 'Index emphasizes sustained performance over time, suitable for high-stakes roles.'
   }
 ];
 
 const BUSINESS_RULES = [
   { rule: 'Index recalculates automatically on cycle close', enforcement: 'System' as const, description: 'Performance Index updates when appraisal cycles complete.' },
-  { rule: 'Weights must sum to 100%', enforcement: 'System' as const, description: 'Current and historical weights must total exactly 100%.' },
+  { rule: 'Lookback period determines data scope', enforcement: 'System' as const, description: 'Only cycles within the lookback window contribute to the index.' },
   { rule: 'Minimum one cycle required for calculation', enforcement: 'System' as const, description: 'Index cannot be calculated without at least one completed evaluation.' },
-  { rule: 'Index changes apply prospectively', enforcement: 'Policy' as const, description: 'Configuration changes affect future calculations, not historical values.' },
-  { rule: 'Consider probationary period in index', enforcement: 'Advisory' as const, description: 'Decide whether probationary reviews should count toward the index.' }
+  { rule: 'Settings changes apply prospectively', enforcement: 'Policy' as const, description: 'Configuration changes affect future calculations, not historical values.' },
+  { rule: 'Consider cycle types in lookback', enforcement: 'Advisory' as const, description: 'Annual, Mid-Year, and Quarterly cycles all contribute differently based on type weights.' }
 ];
 
 const TROUBLESHOOTING_ITEMS = [
   {
     issue: 'Index not calculating for some employees',
-    cause: 'Employees do not meet minimum cycle requirement.',
-    solution: 'Reduce minimum cycles required or configure missing data handling to use available data.'
+    cause: 'Employees do not meet minimum cycle requirement within the lookback period.',
+    solution: 'Reduce minimum cycles required or extend the lookback period to include more history.'
   },
   {
-    issue: 'Index value seems incorrect',
-    cause: 'Weight configuration or historical data issue.',
-    solution: 'Verify weight distribution sums to 100%. Check that correct historical cycles are included. Review individual score data.'
+    issue: 'Index seems to favor/penalize certain employees unfairly',
+    cause: 'Recent Performance Weight or Trend Impact Level may be misconfigured.',
+    solution: 'Review settings - high recent weight penalizes historically strong performers with recent dips. Adjust based on organizational philosophy.'
   },
   {
     issue: 'Index not updating after cycle close',
@@ -548,27 +534,27 @@ export function SetupIndexSettings() {
     <Card id="sec-2-13">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 2.13</Badge>
+          <Badge variant="outline">Section 2.4c</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
-            ~10 min read
+            ~12 min read
           </Badge>
           <Badge variant="secondary">Recommended</Badge>
         </div>
-        <CardTitle className="text-2xl">Performance Index Settings</CardTitle>
+        <CardTitle className="text-2xl">Performance Trend Settings</CardTitle>
         <CardDescription>
-          Configure how multi-cycle performance indices are calculated for talent decisions
+          Configure how performance trends are tracked across cycles to inform talent decisions
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <NavigationPath path={['Performance', 'Setup', 'Appraisals', 'Index Settings']} />
+        <NavigationPath path={['Performance', 'Setup', 'Core Framework', 'Performance Trends']} />
 
         <LearningObjectives
           objectives={[
-            'Understand performance index purpose and calculation methods',
-            'Configure cycle weighting for balanced indices',
-            'Handle employees with incomplete performance history',
-            'Align index settings with talent management strategy'
+            'Understand how lookback period affects performance trend calculations',
+            'Configure recent performance weight for balanced trend tracking',
+            'Set trend impact levels appropriate for your talent strategy',
+            'Handle employees with incomplete performance history'
           ]}
         />
 
@@ -576,18 +562,18 @@ export function SetupIndexSettings() {
           items={[
             'At least one appraisal cycle configured',
             'Understanding of organizational talent philosophy',
-            'Decision on historical data weighting approach'
+            'Decision on how much to value recent vs. historical performance'
           ]}
         />
 
         <div>
-          <h4 className="font-medium mb-2">What Is the Performance Index?</h4>
+          <h4 className="font-medium mb-2">What Are Performance Trends?</h4>
           <p className="text-muted-foreground">
-            The Performance Index is a calculated score that aggregates performance across multiple 
-            evaluation cycles to provide a more stable, trend-aware view of employee performance. 
-            Rather than relying solely on a single review, the index considers historical performance 
-            with configurable weighting. This supports better talent decisions by smoothing out 
-            single-cycle anomalies and recognizing consistent performers.
+            Performance Trends track how an employee's performance evolves over time, aggregating scores 
+            across multiple evaluation cycles to provide a more stable, trajectory-aware view. Rather than 
+            relying solely on a single review, trends consider historical performance with configurable 
+            weighting. This supports better talent decisions by smoothing out single-cycle anomalies, 
+            recognizing improvement trajectories, and identifying consistent performers.
           </p>
         </div>
 
@@ -595,22 +581,40 @@ export function SetupIndexSettings() {
           <div className="flex items-start gap-3">
             <TrendingUp className="h-5 w-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0" />
             <div>
-              <h4 className="font-semibold text-foreground">Index Use Cases</h4>
+              <h4 className="font-semibold text-foreground">Why Track Trends?</h4>
               <p className="text-sm text-foreground">
-                Performance Index is commonly used for: succession planning eligibility, merit increase 
-                guidelines, talent pool segmentation, and identifying consistent high/low performers 
-                across review cycles.
+                Performance trends answer questions that single scores cannot: Is this employee improving? 
+                Are they a consistent performer or volatile? Should we reward someone who has shown dramatic 
+                improvement even if their absolute score is lower than a declining performer?
               </p>
             </div>
           </div>
         </div>
 
+        {/* User-Friendly Terminology Callout */}
+        <div className="p-4 border-l-4 border-l-amber-500 bg-muted/50 rounded-r-lg">
+          <div className="flex items-start gap-3">
+            <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <div>
+              <h4 className="font-semibold text-foreground">Settings Terminology</h4>
+              <p className="text-sm text-foreground mt-1">
+                These settings use outcome-focused language to help non-technical users understand the impact:
+              </p>
+              <ul className="mt-2 text-sm space-y-1 text-foreground">
+                <li>• <strong>Lookback Period:</strong> How far back in time to consider (in months)</li>
+                <li>• <strong>Recent Performance Weight:</strong> How much to emphasize recent vs. older scores</li>
+                <li>• <strong>Trend Impact Level:</strong> How much improvement/decline affects the final index</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <ScreenshotPlaceholder
-          caption="Figure 2.13.1: Performance Index settings with calculation preview"
-          alt="Performance Index configuration page"
+          caption="Figure 2.4c.1: Performance Trend Settings with user-friendly configuration options"
+          alt="Performance Trend Settings configuration page"
         />
 
-        <StepByStep steps={STEPS} title="Configuring the Performance Index: Step-by-Step" />
+        <StepByStep steps={STEPS} title="Configuring Performance Trends: Step-by-Step" />
 
         <FieldReferenceTable fields={FIELD_DEFINITIONS} title="Field Reference" />
 
