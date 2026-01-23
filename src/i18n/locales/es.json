@@ -126,6 +126,22 @@
         "invalidFileType": "Solo se permiten imágenes y PDFs",
         "fileTooLarge": "El tamaño del archivo debe ser menor a 5MB"
       }
+    },
+    "myLetters": {
+      "title": "Mis Cartas",
+      "subtitle": "Solicitar y gestionar cartas y documentos oficiales",
+      "breadcrumb": "Mis Cartas",
+      "requestLetter": "Solicitar Carta",
+      "pending": "Pendiente",
+      "approved": "Aprobado",
+      "rejected": "Rechazado",
+      "allLetters": "Todas las Cartas",
+      "noLetters": "No se encontraron cartas",
+      "letterNumber": "Carta #",
+      "requestedOn": "Solicitado el",
+      "status": "Estado",
+      "viewLetter": "Ver Carta",
+      "downloadLetter": "Descargar Carta"
     }
   },
   "mss": {
