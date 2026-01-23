@@ -6,7 +6,10 @@ import {
   IntegrationTroubleshootingSection,
   PerformanceOptimizationSection,
   DataQualitySection,
-  EscalationProceduresSection
+  EscalationProceduresSection,
+  AIMLTroubleshootingSection,
+  CalibrationTroubleshootingSection,
+  PerformanceRiskTroubleshootingSection
 } from './sections/troubleshooting';
 
 interface ManualTroubleshootingSectionProps {
@@ -33,6 +36,12 @@ export function ManualTroubleshootingSection({ selectedSectionId }: ManualTroubl
         return <DataQualitySection />;
       case 'sec-8-8':
         return <EscalationProceduresSection />;
+      case 'sec-8-9':
+        return <AIMLTroubleshootingSection />;
+      case 'sec-8-10':
+        return <CalibrationTroubleshootingSection />;
+      case 'sec-8-11':
+        return <PerformanceRiskTroubleshootingSection />;
       default:
         break;
     }
@@ -64,6 +73,15 @@ export function ManualTroubleshootingSection({ selectedSectionId }: ManualTroubl
       </section>
       <section id="sec-8-8" data-manual-anchor="sec-8-8" className="scroll-mt-32">
         <EscalationProceduresSection />
+      </section>
+      <section id="sec-8-9" data-manual-anchor="sec-8-9" className="scroll-mt-32">
+        <AIMLTroubleshootingSection />
+      </section>
+      <section id="sec-8-10" data-manual-anchor="sec-8-10" className="scroll-mt-32">
+        <CalibrationTroubleshootingSection />
+      </section>
+      <section id="sec-8-11" data-manual-anchor="sec-8-11" className="scroll-mt-32">
+        <PerformanceRiskTroubleshootingSection />
       </section>
     </div>
   );
