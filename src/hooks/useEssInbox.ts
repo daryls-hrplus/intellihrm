@@ -210,7 +210,7 @@ export function useEssInbox() {
             description: `${doc.document_name || doc.document_type} • Expires in ${daysUntilExpiry} days`,
             urgency: daysUntilExpiry <= 7 ? 'response_required' : 'info',
             actionLabel: 'View',
-            actionPath: '/ess/documents',
+            actionPath: `/workforce/employees/${user.id}?tab=documents`,
             createdAt: doc.created_at || today,
             dueDate: doc.expiry_date || undefined,
           });
