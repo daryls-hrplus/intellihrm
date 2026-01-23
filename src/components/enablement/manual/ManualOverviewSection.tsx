@@ -7,20 +7,25 @@ import { OverviewCalendar } from './sections/OverviewCalendar';
 export function ManualOverviewSection() {
   return (
     <div className="space-y-8">
-      {/* Section 1.1: Introduction */}
-      <OverviewIntroduction />
+      <section id="sec-1-1" data-manual-anchor="sec-1-1" className="scroll-mt-32">
+        <OverviewIntroduction />
+      </section>
 
-      {/* Section 1.2: Core Concepts */}
-      <OverviewCoreConcepts />
+      <section id="sec-1-2" data-manual-anchor="sec-1-2" className="scroll-mt-32">
+        <OverviewCoreConcepts />
+      </section>
 
-      {/* Section 1.3: System Architecture */}
-      <OverviewArchitecture />
+      <section id="sec-1-3" data-manual-anchor="sec-1-3" className="scroll-mt-32">
+        <OverviewArchitecture />
+      </section>
 
-      {/* Section 1.4: User Personas & Journeys */}
-      <OverviewPersonas />
+      <section id="sec-1-4" data-manual-anchor="sec-1-4" className="scroll-mt-32">
+        <OverviewPersonas />
+      </section>
 
-      {/* Section 1.5: Performance Management Calendar */}
-      <OverviewCalendar />
+      <section id="sec-1-5" data-manual-anchor="sec-1-5" className="scroll-mt-32">
+        <OverviewCalendar />
+      </section>
     </div>
   );
 }
