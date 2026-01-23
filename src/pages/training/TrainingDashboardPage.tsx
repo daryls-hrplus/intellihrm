@@ -179,10 +179,11 @@ export default function TrainingDashboardPage() {
       titleKey: "Career & Growth",
       items: filterByAccess([allModules.careerPaths, allModules.developmentPlans, allModules.mentorship]),
     },
-    {
-      titleKey: "Course Development & Delivery",
-      items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions]),
-    },
+    // Deferred to future version - Content management available via Admin → LMS Management
+    // {
+    //   titleKey: "Course Development & Delivery",
+    //   items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions]),
+    // },
     {
       titleKey: "Planning & Assessment",
       items: filterByAccess([allModules.needs, allModules.gapAnalysis, allModules.evaluations, allModules.recertification]),
