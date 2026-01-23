@@ -358,6 +358,9 @@ async function executeRuleAction(
       case 'reminders':
         return await executeRemindersAction(supabase, rule, data, config);
       
+      case 'training':
+        return await executeTrainingAction(supabase, rule, data, config);
+      
       default:
         return { success: false, error: `Unknown target module: ${rule.target_module}` };
     }
@@ -366,6 +369,211 @@ async function executeRuleAction(
       success: false, 
       error: error instanceof Error ? error.message : 'Action execution failed' 
     };
+  }
+}
+
+// Training action handler for appraisal → training integration
+async function executeTrainingAction(
+  supabase: any,
+  rule: IntegrationRule,
+  data: TriggerData,
+  config: Record<string, unknown>
+): Promise<{ success: boolean; targetRecordId?: string; error?: string }> {
+  const actionType = rule.action_type;
+  
+  switch (actionType) {
+    case 'create_request': {
+      // Create a training request based on appraisal outcome
+      const courseId = config.course_id as string;
+      const learningPathId = config.learning_path_id as string;
+      let trainingName = config.training_name as string || 'Recommended Training';
+      
+      // If course_id specified, get course name
+      if (courseId) {
+        const { data: course } = await supabase
+          .from('lms_courses')
+          .select('title')
+          .eq('id', courseId)
+          .single();
+        trainingName = course?.title || trainingName;
+      }
+      
+      // If learning_path_id specified, get path name
+      if (learningPathId) {
+        const { data: path } = await supabase
+          .from('learning_paths')
+          .select('name')
+          .eq('id', learningPathId)
+          .single();
+        trainingName = path?.name || trainingName;
+      }
+      
+      const { data: request, error } = await supabase
+        .from('training_requests')
+        .insert({
+          company_id: data.company_id,
+          employee_id: data.employee_id,
+          training_name: trainingName,
+          request_type: 'internal',
+          source_type: 'appraisal',
+          source_reference_id: data.participant_id,
+          source_module: 'Performance Appraisal',
+          status: config.requires_manager_approval ? 'pending' : 'approved',
+          business_justification: `Auto-generated from ${data.cycle_name} appraisal. Performance category: ${data.performance_category_name || 'N/A'}. Score: ${data.overall_score || 'N/A'}`
+        })
+        .select('id')
+        .single();
+      
+      if (error) return { success: false, error: error.message };
+      return { success: true, targetRecordId: request?.id };
+    }
+    
+    case 'auto_enroll': {
+      // Directly enroll in a course or learning path
+      const courseId = config.course_id as string;
+      const learningPathId = config.learning_path_id as string;
+      
+      if (courseId) {
+        const { data: enrollment, error } = await supabase
+          .from('lms_enrollments')
+          .insert({
+            course_id: courseId,
+            user_id: data.employee_id,
+            status: 'enrolled',
+            enrolled_by: null // System enrollment
+          })
+          .select('id')
+          .single();
+        
+        if (error && !error.message.includes('duplicate')) {
+          return { success: false, error: error.message };
+        }
+        
+        // Also create training request for tracking
+        await supabase.from('training_requests').insert({
+          company_id: data.company_id,
+          employee_id: data.employee_id,
+          training_name: config.training_name || 'Auto-Enrolled Training',
+          request_type: 'internal',
+          source_type: 'appraisal',
+          source_reference_id: data.participant_id,
+          source_module: 'Performance Appraisal',
+          status: 'approved',
+          business_justification: `Auto-enrolled based on ${data.cycle_name} appraisal results`
+        });
+        
+        return { success: true, targetRecordId: enrollment?.id };
+      }
+      
+      if (learningPathId) {
+        // Add to learning path
+        const { data: pathEnrollment, error } = await supabase
+          .from('learning_path_enrollments')
+          .insert({
+            learning_path_id: learningPathId,
+            user_id: data.employee_id,
+            status: 'in_progress',
+            enrolled_at: new Date().toISOString()
+          })
+          .select('id')
+          .single();
+        
+        if (error && !error.message.includes('duplicate')) {
+          return { success: false, error: error.message };
+        }
+        return { success: true, targetRecordId: pathEnrollment?.id };
+      }
+      
+      return { success: false, error: 'No course_id or learning_path_id specified' };
+    }
+    
+    case 'recommend_courses': {
+      // Match competency gaps to courses
+      const matchGaps = config.match_competency_gaps as boolean;
+      
+      if (matchGaps) {
+        // Get competency gaps from appraisal
+        const { data: gaps } = await supabase
+          .from('appraisal_strengths_gaps')
+          .select('competency_id, gap_level')
+          .eq('participant_id', data.participant_id)
+          .eq('insight_type', 'gap')
+          .not('competency_id', 'is', null);
+        
+        if (gaps && gaps.length > 0) {
+          let recommendedCount = 0;
+          
+          for (const gap of gaps) {
+            // Find mapped courses for this competency
+            const { data: mappings } = await supabase
+              .from('competency_course_mappings')
+              .select('course_id, is_mandatory')
+              .eq('competency_id', gap.competency_id)
+              .eq('company_id', data.company_id)
+              .lte('min_gap_level', gap.gap_level || 1);
+            
+            if (mappings && mappings.length > 0) {
+              for (const mapping of mappings) {
+                // Get course details
+                const { data: course } = await supabase
+                  .from('lms_courses')
+                  .select('title')
+                  .eq('id', mapping.course_id)
+                  .single();
+                
+                // Create training request
+                await supabase.from('training_requests').insert({
+                  company_id: data.company_id,
+                  employee_id: data.employee_id,
+                  training_name: course?.title || 'Recommended Training',
+                  request_type: 'internal',
+                  source_type: 'competency_gap',
+                  source_reference_id: data.participant_id,
+                  source_module: 'Competency Gap Analysis',
+                  status: mapping.is_mandatory ? 'approved' : 'pending',
+                  business_justification: `Recommended to address competency gap identified in ${data.cycle_name} appraisal`
+                });
+                
+                recommendedCount++;
+              }
+            }
+          }
+          
+          return { success: true, targetRecordId: `${recommendedCount} courses recommended` };
+        }
+      }
+      
+      return { success: true };
+    }
+    
+    case 'add_to_path': {
+      // Add employee to a learning path
+      const learningPathId = config.learning_path_id as string;
+      
+      if (!learningPathId) {
+        return { success: false, error: 'No learning_path_id specified' };
+      }
+      
+      const { data: enrollment, error } = await supabase
+        .from('learning_path_enrollments')
+        .insert({
+          learning_path_id: learningPathId,
+          user_id: data.employee_id,
+          status: 'in_progress',
+          enrolled_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+      
+      if (error && !error.message.includes('duplicate')) {
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true, targetRecordId: enrollment?.id };
+    }
+    
+    default:
+      return { success: false, error: `Unknown training action type: ${actionType}` };
   }
 }
 

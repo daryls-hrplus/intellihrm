@@ -11827,6 +11827,78 @@ export type Database = {
           },
         ]
       }
+      competency_course_mappings: {
+        Row: {
+          company_id: string | null
+          competency_id: string | null
+          course_id: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_mandatory: boolean | null
+          min_gap_level: number | null
+          notes: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          competency_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_mandatory?: boolean | null
+          min_gap_level?: number | null
+          notes?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          competency_id?: string | null
+          course_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_mandatory?: boolean | null
+          min_gap_level?: number | null
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_course_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_course_mappings_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_course_mappings_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_course_mappings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "competency_course_mappings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competency_drift_analysis: {
         Row: {
           action_notes: string | null
@@ -19000,6 +19072,8 @@ export type Database = {
       }
       employee_recertifications: {
         Row: {
+          auto_request_created: boolean | null
+          auto_request_id: string | null
           certificate_number: string | null
           certificate_url: string | null
           certification_date: string
@@ -19014,6 +19088,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_request_created?: boolean | null
+          auto_request_id?: string | null
           certificate_number?: string | null
           certificate_url?: string | null
           certification_date: string
@@ -19028,6 +19104,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_request_created?: boolean | null
+          auto_request_id?: string | null
           certificate_number?: string | null
           certificate_url?: string | null
           certification_date?: string
@@ -19042,6 +19120,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_recertifications_auto_request_id_fkey"
+            columns: ["auto_request_id"]
+            isOneToOne: false
+            referencedRelation: "training_requests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_recertifications_employee_id_fkey"
             columns: ["employee_id"]
@@ -72345,24 +72430,85 @@ export type Database = {
           },
         ]
       }
+      training_request_approvals: {
+        Row: {
+          action: string
+          approval_level: number
+          approver_id: string | null
+          approver_role: string | null
+          comments: string | null
+          created_at: string | null
+          id: string
+          request_id: string
+        }
+        Insert: {
+          action: string
+          approval_level?: number
+          approver_id?: string | null
+          approver_role?: string | null
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          request_id: string
+        }
+        Update: {
+          action?: string
+          approval_level?: number
+          approver_id?: string | null
+          approver_role?: string | null
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_request_approvals_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "training_request_approvals_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_request_approvals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "training_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_requests: {
         Row: {
+          approval_chain: Json | null
           approved_at: string | null
           approved_by: string | null
           business_justification: string | null
           company_id: string
           created_at: string
           currency: string | null
+          current_approval_level: number | null
           description: string | null
           employee_id: string
           end_date: string | null
           estimated_cost: number | null
           id: string
           location: string | null
+          max_approval_levels: number | null
           provider_name: string | null
           rejection_reason: string | null
           request_number: string | null
           request_type: string
+          source_module: string | null
+          source_reference_id: string | null
+          source_type: string | null
           start_date: string | null
           status: string
           training_name: string
@@ -72370,22 +72516,28 @@ export type Database = {
           workflow_instance_id: string | null
         }
         Insert: {
+          approval_chain?: Json | null
           approved_at?: string | null
           approved_by?: string | null
           business_justification?: string | null
           company_id: string
           created_at?: string
           currency?: string | null
+          current_approval_level?: number | null
           description?: string | null
           employee_id: string
           end_date?: string | null
           estimated_cost?: number | null
           id?: string
           location?: string | null
+          max_approval_levels?: number | null
           provider_name?: string | null
           rejection_reason?: string | null
           request_number?: string | null
           request_type?: string
+          source_module?: string | null
+          source_reference_id?: string | null
+          source_type?: string | null
           start_date?: string | null
           status?: string
           training_name: string
@@ -72393,22 +72545,28 @@ export type Database = {
           workflow_instance_id?: string | null
         }
         Update: {
+          approval_chain?: Json | null
           approved_at?: string | null
           approved_by?: string | null
           business_justification?: string | null
           company_id?: string
           created_at?: string
           currency?: string | null
+          current_approval_level?: number | null
           description?: string | null
           employee_id?: string
           end_date?: string | null
           estimated_cost?: number | null
           id?: string
           location?: string | null
+          max_approval_levels?: number | null
           provider_name?: string | null
           rejection_reason?: string | null
           request_number?: string | null
           request_type?: string
+          source_module?: string | null
+          source_reference_id?: string | null
+          source_type?: string | null
           start_date?: string | null
           status?: string
           training_name?: string
