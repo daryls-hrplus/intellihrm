@@ -122,10 +122,6 @@ const App = () => (
             <Route path="/ess/benefits" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyBenefitsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/inbox" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyInboxPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/employee-directory" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EmployeeDirectoryPage /></LazyPage></ProtectedRoute>} />
-            <Route path="/ess/my-development-themes" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyDevelopmentThemesPage /></LazyPage></ProtectedRoute>} />
-            <Route path="/ess/payslips" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.PayslipsPage /></LazyPage></ProtectedRoute>} />
-            <Route path="/ess/documents" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyDocumentsPage /></LazyPage></ProtectedRoute>} />
-            <Route path="/ess/professional-info" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyProfessionalInfoPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/*" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EmployeeSelfServicePage /></LazyPage></ProtectedRoute>} />
 
             {/* Manager Self Service Routes */}

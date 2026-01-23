@@ -38,10 +38,7 @@ import {
   FileText,
   Lock,
   Info,
-  ChevronDown,
-  TrendingUp,
 } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,16 +48,10 @@ import { EmployeeGoalRatingCard } from "./EmployeeGoalRatingCard";
 import { EmployeeCompetencyCard } from "./EmployeeCompetencyCard";
 import { EmployeeResponsibilityCard } from "./EmployeeResponsibilityCard";
 import { EvidenceQuickAttach } from "./EvidenceQuickAttach";
-import { AppraisalContextHeader } from "./AppraisalContextHeader";
-import { AppraisalScoreSummaryCards } from "./AppraisalScoreSummaryCards";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
 import { useRatingScale, getLabelsMap } from "@/hooks/useRatingScale";
 import { RatingScaleInfoBanner } from "./RatingScaleInfoBanner";
-import { useEmployeeLevelExpectations } from "@/hooks/useEmployeeLevelExpectations";
-import { JobLevelExpectationsPanel } from "@/components/performance/JobLevelExpectationsPanel";
-import { PerformanceCategoryBadge } from "@/components/appraisals/PerformanceCategoryBadge";
-import { usePerformanceCategoryByScore } from "@/hooks/usePerformanceCategories";
 
 interface ScoreItem {
   id?: string;
@@ -105,7 +96,6 @@ export function EssAppraisalEvaluationDialog({
     type: "goal" | "competency" | "responsibility";
   } | null>(null);
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
-  const [scoreSummaryOpen, setScoreSummaryOpen] = useState(true);
 
   // Check if already submitted - form should be read-only
   const isSubmitted = !!appraisal.submitted_at;
@@ -126,57 +116,6 @@ export function EssAppraisalEvaluationDialog({
     responsibilities: appraisal.include_responsibilities && appraisal.responsibility_weight > 0,
     values: appraisal.include_values_assessment && appraisal.values_weight > 0,
   }), [appraisal]);
-
-  // Calculate current scores for display and level expectations
-  const currentScores = useMemo(() => {
-    const calcCategoryScore = (type: string) => {
-      const items = scores.filter(s => s.evaluation_type === type && s.self_rating !== null);
-      if (items.length === 0) return null;
-      const totalWeight = items.reduce((sum, s) => sum + s.weight, 0);
-      if (totalWeight === 0) return null;
-      const weighted = items.reduce((sum, s) => sum + (s.self_rating || 0) * (s.weight / totalWeight), 0);
-      return (weighted / 5) * 100; // Normalize to percentage
-    };
-    
-    const comp = calcCategoryScore("competency");
-    const resp = calcCategoryScore("responsibility");
-    const goal = calcCategoryScore("goal");
-    const values = calcCategoryScore("values");
-    
-    // Calculate overall using all category weights
-    let overall = null;
-    const weights = {
-      competency: appraisal.competency_weight,
-      responsibility: appraisal.responsibility_weight,
-      goal: appraisal.goal_weight,
-      values: appraisal.values_weight,
-    };
-    const totalWeight = weights.competency + weights.responsibility + weights.goal + weights.values;
-    if (totalWeight > 0) {
-      let weightedSum = 0;
-      let usedWeight = 0;
-      if (comp !== null) { weightedSum += comp * weights.competency; usedWeight += weights.competency; }
-      if (resp !== null) { weightedSum += resp * weights.responsibility; usedWeight += weights.responsibility; }
-      if (goal !== null) { weightedSum += goal * weights.goal; usedWeight += weights.goal; }
-      if (values !== null) { weightedSum += values * weights.values; usedWeight += weights.values; }
-      if (usedWeight > 0) overall = weightedSum / usedWeight;
-    }
-    
-    return { competency: comp, responsibility: resp, goal, values, overall };
-  }, [scores, appraisal]);
-
-  // Performance category based on overall score
-  const performanceCategory = usePerformanceCategoryByScore(
-    currentScores.overall,
-    appraisal.company_id || undefined
-  );
-
-  // Job level expectations
-  const { expectation: levelExpectation, employeeInfo: levelEmployeeInfo, loading: levelExpectationsLoading } = 
-    useEmployeeLevelExpectations(user?.id || null, appraisal.company_id || null, {
-      competencyScore: currentScores.competency ? (currentScores.competency / 100) * 5 : null,
-      goalScore: currentScores.goal,
-    });
 
   // Set initial tab based on enabled categories
   useEffect(() => {
@@ -545,7 +484,7 @@ export function EssAppraisalEvaluationDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col border-2 border-red-500">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
@@ -553,303 +492,193 @@ export function EssAppraisalEvaluationDialog({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex-1 flex flex-col min-h-0 space-y-4 overflow-hidden">
-              {/* Appraisal Context Header - Industry Standard */}
-              {!isSubmitted && (
-                <AppraisalContextHeader
-                  employeeName={appraisal.employee_name}
-                  positionTitle={appraisal.position_title}
-                  departmentName={appraisal.department_name}
-                  evaluatorName={appraisal.evaluator_name}
-                  performancePeriodStart={appraisal.performance_period_start || appraisal.cycle_start_date}
-                  performancePeriodEnd={appraisal.performance_period_end || appraisal.cycle_end_date}
-                  selfAssessmentDeadline={appraisal.self_assessment_deadline}
-                  cycleName={appraisal.cycle_name}
-                />
-              )}
+          {/* Submitted Banner */}
+          {isSubmitted && (
+            <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800 dark:text-green-200">
+                <span className="font-medium">Submitted</span> on {format(new Date(appraisal.submitted_at!), "MMMM d, yyyy 'at' h:mm a")}. 
+                Your self-assessment is now with your manager for review.
+              </AlertDescription>
+            </Alert>
+          )}
 
-              {/* Collapsible Score Summary Section */}
-              {currentScores.overall !== null && (
-                <Collapsible open={scoreSummaryOpen} onOpenChange={setScoreSummaryOpen}>
-                  <div className="border rounded-lg bg-card">
-                    <CollapsibleTrigger asChild>
-                      <button className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors rounded-t-lg text-left">
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="h-4 w-4 text-primary" />
-                          <span className="font-medium text-sm">Score Summary</span>
-                          {!scoreSummaryOpen && (
-                            <span className="text-sm text-muted-foreground ml-2">
-                              Overall: {currentScores.overall?.toFixed(0)}%
-                            </span>
-                          )}
-                        </div>
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
-                          scoreSummaryOpen ? "rotate-180" : ""
-                        }`} />
-                      </button>
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent>
-                      <div className="p-3 pt-0 space-y-3">
-                        <AppraisalScoreSummaryCards
-                          competencyScore={currentScores.competency}
-                          responsibilityScore={currentScores.responsibility}
-                          goalScore={currentScores.goal}
-                          valuesScore={currentScores.values}
-                          overallScore={currentScores.overall}
-                          weights={{
-                            competency: appraisal.competency_weight,
-                            responsibility: appraisal.responsibility_weight,
-                            goal: appraisal.goal_weight,
-                            values: appraisal.values_weight,
-                          }}
+          {/* Progress Bar */}
+          {!isSubmitted && (
+            <div className="space-y-2 px-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Completion</span>
+                <span className="font-medium">{completionStats.percentage}%</span>
+              </div>
+              <Progress value={completionStats.percentage} className="h-2" />
+            </div>
+          )}
+
+          {/* Rating Scale Info Banner */}
+          {!loading && (
+            <RatingScaleInfoBanner ratingScale={ratingScale} variant="compact" />
+          )}
+
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+              <TabsList className="grid w-full grid-cols-4">
+                {enabledCategories.goals && (
+                  <TabsTrigger value="goals" className="gap-1">
+                    <Target className="h-4 w-4" />
+                    Goals
+                    <Badge variant="secondary" className="ml-1 text-xs">
+                      {completionStats.byType.goal.done}/{completionStats.byType.goal.total}
+                    </Badge>
+                  </TabsTrigger>
+                )}
+                {enabledCategories.competencies && (
+                  <TabsTrigger value="competencies" className="gap-1">
+                    <Award className="h-4 w-4" />
+                    Competencies
+                    <Badge variant="secondary" className="ml-1 text-xs">
+                      {completionStats.byType.competency.done}/{completionStats.byType.competency.total}
+                    </Badge>
+                  </TabsTrigger>
+                )}
+                {enabledCategories.responsibilities && (
+                  <TabsTrigger value="responsibilities" className="gap-1">
+                    <Briefcase className="h-4 w-4" />
+                    KRAs
+                    <Badge variant="secondary" className="ml-1 text-xs">
+                      {completionStats.byType.responsibility.done}/{completionStats.byType.responsibility.total}
+                    </Badge>
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="reflection" className="gap-1">
+                  <Heart className="h-4 w-4" />
+                  Reflection
+                  {selfReflection.trim() && <CheckCircle2 className="h-3 w-3 text-green-600" />}
+                </TabsTrigger>
+              </TabsList>
+
+              <div className="flex-1 mt-4 overflow-y-auto pb-8">
+                {/* Goals Tab */}
+                {enabledCategories.goals && (
+                  <TabsContent value="goals" className="space-y-3 m-0">
+                    {goalScores.length === 0 ? (
+                      <Card><CardContent className="py-8 text-center text-muted-foreground">No goals assigned</CardContent></Card>
+                    ) : (
+                      goalScores.map(score => (
+                        <EmployeeGoalRatingCard
+                          key={score.item_id}
+                          goalId={score.item_id}
+                          goalName={score.item_name}
+                          weight={score.weight}
+                          currentRating={score.self_rating}
+                          comments={score.self_comments}
+                          evidenceCount={score.evidence_count}
+                          onRatingChange={(r) => handleRatingChange(score.item_id, "goal", r)}
+                          onCommentsChange={(c) => handleCommentsChange(score.item_id, "goal", c)}
+                          onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "goal")}
+                          ratingLabels={ratingLabelsMap}
+                          ratingLabel="Performance Rating"
                         />
-                        
-                        {/* How score is calculated - transparency for employees */}
-                        {!isSubmitted && (
-                          <Card className="bg-muted/30 border-muted">
-                            <CardContent className="p-3 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Info className="h-4 w-4" />
-                                <span className="font-medium text-foreground">How your score is calculated</span>
-                              </div>
-                              <div className="text-xs space-y-1">
-                                {enabledCategories.competencies && appraisal.competency_weight > 0 && (
-                                  <p>Competencies ({appraisal.competency_weight}%): {currentScores.competency?.toFixed(0) ?? '—'}%</p>
-                                )}
-                                {enabledCategories.responsibilities && appraisal.responsibility_weight > 0 && (
-                                  <p>Responsibilities ({appraisal.responsibility_weight}%): {currentScores.responsibility?.toFixed(0) ?? '—'}%</p>
-                                )}
-                                {enabledCategories.goals && appraisal.goal_weight > 0 && (
-                                  <p>Goals ({appraisal.goal_weight}%): {currentScores.goal?.toFixed(0) ?? '—'}%</p>
-                                )}
-                                {enabledCategories.values && appraisal.values_weight > 0 && (
-                                  <p>Values ({appraisal.values_weight}%): {currentScores.values?.toFixed(0) ?? '—'}%</p>
-                                )}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )}
-                        
-                        {/* Performance Category Badge - only after manager completes review */}
-                        {isSubmitted && appraisal.status === "completed" && performanceCategory && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Final Rating:</span>
-                            <PerformanceCategoryBadge 
-                              category={performanceCategory} 
-                              score={currentScores.overall}
-                              showEligibility={false}
-                            />
-                          </div>
-                        )}
+                      ))
+                    )}
+                  </TabsContent>
+                )}
+
+                {/* Competencies Tab */}
+                {enabledCategories.competencies && (
+                  <TabsContent value="competencies" className="space-y-3 m-0">
+                    {competencyScores.length === 0 ? (
+                      <Card><CardContent className="py-8 text-center text-muted-foreground">No competencies assigned</CardContent></Card>
+                    ) : (
+                      competencyScores.map(score => (
+                        <EmployeeCompetencyCard
+                          key={score.item_id}
+                          competencyId={score.item_id}
+                          competencyName={score.item_name}
+                          weight={score.weight}
+                          currentRating={score.self_rating}
+                          comments={score.self_comments}
+                          selectedBehaviors={score.self_metadata?.demonstrated_behaviors || []}
+                          proficiencyIndicators={score.proficiency_indicators}
+                          evidenceCount={score.evidence_count}
+                          requiredLevel={score.required_level}
+                          currentAssessedLevel={score.assessed_level}
+                          onRatingChange={(r) => handleRatingChange(score.item_id, "competency", r)}
+                          onCommentsChange={(c) => handleCommentsChange(score.item_id, "competency", c)}
+                          onBehaviorsChange={(b) => handleBehaviorsChange(score.item_id, b)}
+                          onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "competency")}
+                          ratingLabels={ratingLabelsMap}
+                          usePerformanceScale={true}
+                          ratingLabel="Performance Rating"
+                          showRoleExpectation={true}
+                        />
+                      ))
+                    )}
+                  </TabsContent>
+                )}
+
+                {/* Responsibilities Tab */}
+                {enabledCategories.responsibilities && (
+                  <TabsContent value="responsibilities" className="space-y-3 m-0">
+                    {responsibilityScores.length === 0 ? (
+                      <Card><CardContent className="py-8 text-center text-muted-foreground">No responsibilities assigned</CardContent></Card>
+                    ) : (
+                      responsibilityScores.map(score => (
+                        <EmployeeResponsibilityCard
+                          key={score.item_id}
+                          responsibilityId={score.item_id}
+                          responsibilityName={score.item_name}
+                          weight={score.weight}
+                          currentRating={score.self_rating}
+                          comments={score.self_comments}
+                          evidenceCount={score.evidence_count}
+                          onRatingChange={(r) => handleRatingChange(score.item_id, "responsibility", r)}
+                          onCommentsChange={(c) => handleCommentsChange(score.item_id, "responsibility", c)}
+                          onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "responsibility")}
+                          ratingLabels={ratingLabelsMap}
+                          ratingLabel="Performance Rating"
+                        />
+                      ))
+                    )}
+                  </TabsContent>
+                )}
+
+                {/* Reflection Tab */}
+                <TabsContent value="reflection" className="space-y-4 m-0">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Overall Self-Reflection</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Reflect on your overall performance {!isSubmitted && "*"}</Label>
+                        <Textarea
+                          value={selfReflection}
+                          onChange={(e) => setSelfReflection(e.target.value)}
+                          placeholder="Summarize your performance, key accomplishments, challenges overcome, and areas for growth..."
+                          rows={6}
+                          className="resize-none"
+                          disabled={isSubmitted}
+                        />
                       </div>
-                    </CollapsibleContent>
-                  </div>
-                </Collapsible>
-              )}
+                    </CardContent>
+                  </Card>
 
-              {/* Job Level Expectations Panel - Read-only for employees */}
-              {!levelExpectationsLoading && levelExpectation && (
-                <JobLevelExpectationsPanel
-                  expectation={levelExpectation}
-                  employeeInfo={levelEmployeeInfo}
-                  gapAnalysis={null}
-                  currentScores={{
-                    competencyScore: currentScores.competency ? (currentScores.competency / 100) * 5 : 0,
-                    goalScore: currentScores.goal ?? 0,
-                  }}
-                  maxRating={5}
-                />
-              )}
-
-              {/* Submitted Banner */}
-              {isSubmitted && (
-                <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <AlertDescription className="text-green-800 dark:text-green-200">
-                    <span className="font-medium">Submitted</span> on {format(new Date(appraisal.submitted_at!), "MMMM d, yyyy 'at' h:mm a")}. 
-                    Your self-assessment is now with your manager for review.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {/* Progress Bar */}
-              {!isSubmitted && (
-                <div className="space-y-2 px-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Completion</span>
-                    <span className="font-medium">{completionStats.percentage}%</span>
-                  </div>
-                  <Progress value={completionStats.percentage} className="h-2" />
-                </div>
-              )}
-
-              {/* Rating Scale Info Banner */}
-              {!loading && (
-                <RatingScaleInfoBanner ratingScale={ratingScale} variant="compact" />
-              )}
-
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-                  <TabsList className="grid w-full grid-cols-4">
-                    {enabledCategories.goals && (
-                      <TabsTrigger value="goals" className="gap-1">
-                        <Target className="h-4 w-4" />
-                        Goals
-                        <Badge variant="secondary" className="ml-1 text-xs">
-                          {completionStats.byType.goal.done}/{completionStats.byType.goal.total}
-                        </Badge>
-                      </TabsTrigger>
-                    )}
-                    {enabledCategories.competencies && (
-                      <TabsTrigger value="competencies" className="gap-1">
-                        <Award className="h-4 w-4" />
-                        Competencies
-                        <Badge variant="secondary" className="ml-1 text-xs">
-                          {completionStats.byType.competency.done}/{completionStats.byType.competency.total}
-                        </Badge>
-                      </TabsTrigger>
-                    )}
-                    {enabledCategories.responsibilities && (
-                      <TabsTrigger value="responsibilities" className="gap-1">
-                        <Briefcase className="h-4 w-4" />
-                        KRAs
-                        <Badge variant="secondary" className="ml-1 text-xs">
-                          {completionStats.byType.responsibility.done}/{completionStats.byType.responsibility.total}
-                        </Badge>
-                      </TabsTrigger>
-                    )}
-                    <TabsTrigger value="reflection" className="gap-1">
-                      <Heart className="h-4 w-4" />
-                      Reflection
-                      {selfReflection.trim() && <CheckCircle2 className="h-3 w-3 text-green-600" />}
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <div className="flex-1 overflow-y-auto mt-4 pb-8">
-                    {/* Goals Tab */}
-                    {enabledCategories.goals && (
-                      <TabsContent value="goals" className="space-y-3 m-0">
-                        {goalScores.length === 0 ? (
-                          <Card><CardContent className="py-8 text-center text-muted-foreground">No goals assigned</CardContent></Card>
-                        ) : (
-                          goalScores.map(score => (
-                            <EmployeeGoalRatingCard
-                              key={score.item_id}
-                              goalId={score.item_id}
-                              goalName={score.item_name}
-                              weight={score.weight}
-                              currentRating={score.self_rating}
-                              comments={score.self_comments}
-                              evidenceCount={score.evidence_count}
-                              onRatingChange={(r) => handleRatingChange(score.item_id, "goal", r)}
-                              onCommentsChange={(c) => handleCommentsChange(score.item_id, "goal", c)}
-                              onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "goal")}
-                              ratingLabels={ratingLabelsMap}
-                              ratingLabel="Performance Rating"
-                            />
-                          ))
-                        )}
-                      </TabsContent>
-                    )}
-
-                    {/* Competencies Tab */}
-                    {enabledCategories.competencies && (
-                      <TabsContent value="competencies" className="space-y-3 m-0">
-                        {competencyScores.length === 0 ? (
-                          <Card><CardContent className="py-8 text-center text-muted-foreground">No competencies assigned</CardContent></Card>
-                        ) : (
-                          competencyScores.map(score => (
-                            <EmployeeCompetencyCard
-                              key={score.item_id}
-                              competencyId={score.item_id}
-                              competencyName={score.item_name}
-                              weight={score.weight}
-                              currentRating={score.self_rating}
-                              comments={score.self_comments}
-                              selectedBehaviors={score.self_metadata?.demonstrated_behaviors || []}
-                              proficiencyIndicators={score.proficiency_indicators}
-                              evidenceCount={score.evidence_count}
-                              requiredLevel={score.required_level}
-                              currentAssessedLevel={score.assessed_level}
-                              onRatingChange={(r) => handleRatingChange(score.item_id, "competency", r)}
-                              onCommentsChange={(c) => handleCommentsChange(score.item_id, "competency", c)}
-                              onBehaviorsChange={(b) => handleBehaviorsChange(score.item_id, b)}
-                              onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "competency")}
-                              ratingLabels={ratingLabelsMap}
-                              usePerformanceScale={true}
-                              ratingLabel="Performance Rating"
-                              showRoleExpectation={true}
-                            />
-                          ))
-                        )}
-                      </TabsContent>
-                    )}
-
-                    {/* Responsibilities Tab */}
-                    {enabledCategories.responsibilities && (
-                      <TabsContent value="responsibilities" className="space-y-3 m-0">
-                        {responsibilityScores.length === 0 ? (
-                          <Card><CardContent className="py-8 text-center text-muted-foreground">No responsibilities assigned</CardContent></Card>
-                        ) : (
-                          responsibilityScores.map(score => (
-                            <EmployeeResponsibilityCard
-                              key={score.item_id}
-                              responsibilityId={score.item_id}
-                              responsibilityName={score.item_name}
-                              weight={score.weight}
-                              currentRating={score.self_rating}
-                              comments={score.self_comments}
-                              evidenceCount={score.evidence_count}
-                              onRatingChange={(r) => handleRatingChange(score.item_id, "responsibility", r)}
-                              onCommentsChange={(c) => handleCommentsChange(score.item_id, "responsibility", c)}
-                              onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "responsibility")}
-                              ratingLabels={ratingLabelsMap}
-                              ratingLabel="Performance Rating"
-                            />
-                          ))
-                        )}
-                      </TabsContent>
-                    )}
-
-                    {/* Reflection Tab */}
-                    <TabsContent value="reflection" className="space-y-4 m-0">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Overall Self-Reflection</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <Label>Reflect on your overall performance {!isSubmitted && "*"}</Label>
-                            <Textarea
-                              value={selfReflection}
-                              onChange={(e) => setSelfReflection(e.target.value)}
-                              placeholder="Summarize your performance, key accomplishments, challenges overcome, and areas for growth..."
-                              rows={6}
-                              className="resize-none"
-                              disabled={isSubmitted}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {!isSubmitted && (
-                        <Alert>
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertDescription>
-                            Once submitted, your self-assessment will be visible to your manager and cannot be edited.
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              )}
-          </div>
+                  {!isSubmitted && (
+                    <Alert>
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        Once submitted, your self-assessment will be visible to your manager and cannot be edited.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </TabsContent>
+              </div>
+            </Tabs>
+          )}
 
           {/* Footer Actions */}
           {!isSubmitted ? (

@@ -32,7 +32,6 @@ import { PositionScoreSummary } from "./PositionScoreSummary";
 import { MultiPositionWeightsManager } from "./MultiPositionWeightsManager";
 import { useEmployeeLevelExpectations } from "@/hooks/useEmployeeLevelExpectations";
 import { JobLevelExpectationsPanel } from "./JobLevelExpectationsPanel";
-import { ManagerAppraisalContextHeader } from "./ManagerAppraisalContextHeader";
 import { ManagerRoleChangeGuidance } from "./ManagerRoleChangeGuidance";
 import { AppraisalEvidenceSummary } from "./AppraisalEvidenceSummary";
 import { useCommentAnalyzer } from "@/hooks/performance/useCommentAnalyzer";
@@ -113,9 +112,6 @@ interface CycleInfo {
   include_values_assessment?: boolean;
   values_weight?: number;
   component_scale_id?: string | null;
-  performance_period_start?: string | null;
-  performance_period_end?: string | null;
-  evaluation_deadline?: string | null;
 }
 
 interface ParticipantInfo {
@@ -123,9 +119,6 @@ interface ParticipantInfo {
   final_comments: string | null;
   has_role_change: boolean;
   primary_position_id: string | null;
-  submitted_at: string | null;
-  position_title: string | null;
-  department_name: string | null;
 }
 
 interface AppraisalEvaluationDialogProps {
@@ -166,7 +159,6 @@ export function AppraisalEvaluationDialog({
   const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
   const [weightsDialogOpen, setWeightsDialogOpen] = useState(false);
   const [employeeId, setEmployeeId] = useState<string | null>(null);
-  const [participantInfo, setParticipantInfo] = useState<ParticipantInfo | null>(null);
   
   // Values assessment state
   const [valueScores, setValueScores] = useState<ValueScoreInput[]>([]);
@@ -256,7 +248,7 @@ export function AppraisalEvaluationDialog({
       // Fetch cycle info including multi_position_mode, company_id, and values settings
       const { data: cycleData } = await supabase
         .from("appraisal_cycles")
-        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode, company_id, include_values_assessment, values_weight, component_scale_id, performance_period_start, performance_period_end, evaluation_deadline")
+        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode, company_id, include_values_assessment, values_weight, component_scale_id")
         .eq("id", cycleId)
         .single();
 
@@ -267,43 +259,20 @@ export function AppraisalEvaluationDialog({
           include_values_assessment: cycleData.include_values_assessment || false,
           values_weight: cycleData.values_weight || 0,
           component_scale_id: cycleData.component_scale_id,
-          performance_period_start: cycleData.performance_period_start,
-          performance_period_end: cycleData.performance_period_end,
-          evaluation_deadline: cycleData.evaluation_deadline,
         });
       }
 
-      // Fetch participant info with position and department
+      // Fetch participant info
       const { data: participantData } = await supabase
         .from("appraisal_participants")
-        .select(`
-          employee_id, 
-          final_comments, 
-          has_role_change, 
-          primary_position_id,
-          submitted_at,
-          positions:primary_position_id(
-            title,
-            department:departments(name)
-          )
-        `)
+        .select("employee_id, final_comments, has_role_change, primary_position_id")
         .eq("id", participantId)
         .single();
 
       if (participantData) {
-        const positionData = participantData.positions as any;
         setEmployeeId(participantData.employee_id);
         setFinalComments(participantData.final_comments || "");
         setHasRoleChange(participantData.has_role_change || false);
-        setParticipantInfo({
-          employee_id: participantData.employee_id,
-          final_comments: participantData.final_comments,
-          has_role_change: participantData.has_role_change || false,
-          primary_position_id: participantData.primary_position_id,
-          submitted_at: participantData.submitted_at,
-          position_title: positionData?.title || null,
-          department_name: positionData?.department?.name || null,
-        });
         
         // Fetch role segments if there's a role change
         if (participantData.has_role_change) {
@@ -1432,19 +1401,6 @@ export function AppraisalEvaluationDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Manager Context Header - Industry Standard */}
-          {!isEmployee && participantInfo && cycleInfo && (
-            <ManagerAppraisalContextHeader
-              employeeName={employeeName}
-              positionTitle={participantInfo.position_title}
-              departmentName={participantInfo.department_name}
-              performancePeriodStart={cycleInfo.performance_period_start || null}
-              performancePeriodEnd={cycleInfo.performance_period_end || null}
-              evaluationDeadline={cycleInfo.evaluation_deadline || null}
-              selfAssessmentSubmittedAt={participantInfo.submitted_at}
-            />
-          )}
-
           {/* Rating Scale Info Banner - shows configured scale for transparency */}
           {ratingScale && (
             <RatingScaleInfoBanner 
