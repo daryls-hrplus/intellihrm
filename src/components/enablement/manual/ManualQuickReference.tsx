@@ -16,7 +16,9 @@ import {
   UserCheck,
   Briefcase,
   TrendingUp,
-  Table
+  Table,
+  CheckCircle2,
+  Info
 } from 'lucide-react';
 
 export function ManualQuickReference() {
@@ -472,24 +474,93 @@ export function ManualQuickReference() {
       {/* HR Partner / HR Ops Cycle Management Journey Card */}
       <Card className="border-2 border-violet-500/30">
         <CardHeader className="bg-violet-500/10">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
             <Briefcase className="h-5 w-5 text-violet-600" />
             <CardTitle>HR Partner / HR Ops Cycle Management Journey</CardTitle>
             <Badge className="ml-auto bg-violet-600 text-white">HR</Badge>
           </div>
-          <CardDescription>8-step journey for managing the full appraisal cycle • 10-20 hours per cycle</CardDescription>
+          <CardDescription>12-step journey for managing the full appraisal cycle • 15-25 hours per cycle</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
+          {/* Readiness Check Note */}
+          <div className="mb-4 p-3 border-l-4 border-l-violet-600 bg-violet-500/10 rounded-r-lg">
+            <h4 className="font-semibold text-sm mb-1 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-violet-600" />
+              Prerequisite: Appraisal Readiness Check
+            </h4>
+            <p className="text-xs text-muted-foreground">Run Readiness Panel to validate all prerequisites before launch. All critical checks must pass.</p>
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
-              { step: 1, title: 'CONFIGURE CYCLE', time: 'Pre-cycle • 2-4 hrs', items: ['Set cycle dates', 'Configure rating scales', 'Update form templates', 'Define eligibility', 'Set component weights', 'Configure governance'] },
-              { step: 2, title: 'ENROLL PARTICIPANTS', time: 'Cycle start • 1-2 hrs', items: ['Run eligibility check', 'Bulk enroll participants', 'Assign evaluators', 'Handle exceptions', 'Activate cycle'] },
-              { step: 3, title: 'MONITOR PROGRESS', time: 'Ongoing • 30 min/day', items: ['Check completion rates', 'Review deadline compliance', 'Identify at-risk', 'Run progress reports'] },
-              { step: 4, title: 'SEND REMINDERS', time: 'As needed', items: ['Configure templates', 'Send bulk notifications', 'Escalate overdue items'] },
-              { step: 5, title: 'FACILITATE CALIBRATION', time: 'Mid-cycle • 2-4 hrs', items: ['Schedule sessions', 'Prepare distribution analysis', 'Run calibration meeting', 'Document adjustments', 'Apply governance rules'] },
-              { step: 6, title: 'REVIEW AI ALERTS', time: 'During calibration', items: ['Check bias flags', 'Review manager patterns', 'Investigate alerts', 'Document interventions'] },
-              { step: 7, title: 'PROCESS OUTCOMES', time: 'Post-calibration', items: ['Finalize scores', 'Execute action rules', 'Trigger IDP/PIP workflows', 'Update integrations'] },
-              { step: 8, title: 'GENERATE REPORTS', time: 'Cycle end • 2-3 hrs', items: ['Run distribution reports', 'Generate nine-box', 'Create exec dashboards', 'Export compliance docs', 'Archive cycle data'] }
+              { step: 1, title: 'CONFIGURE CYCLE', time: 'Pre-cycle • 2-4 hrs', variant: 'default', items: [
+                'Run Appraisal Readiness check',
+                'Set cycle dates + 6 phase deadlines',
+                'Configure rating scales',
+                'Select/update form template',
+                'Define eligibility criteria',
+                'Set CRGV component weights (100%)',
+                'Configure Job Assessment settings',
+                'Set governance rules',
+                'Preview participant count'
+              ] },
+              { step: 2, title: 'ENROLL PARTICIPANTS', time: 'Cycle start • 1-2 hrs', variant: 'default', items: [
+                'Run eligibility check with preview',
+                'Review role change employees',
+                'Configure multi-position weights',
+                'Bulk enroll participants',
+                'Assign primary evaluators',
+                'Override for matrix reporting',
+                'Document exclusions',
+                'Activate cycle (triggers notifications)'
+              ] },
+              { step: 3, title: 'MONITOR PROGRESS', time: 'Ongoing • 30 min/day', variant: 'default', items: [
+                'Review Journey Stage dashboard',
+                'Check completion by phase',
+                'Monitor deadline warnings (amber/red)',
+                'Track approval workflow status',
+                'Identify at-risk participants',
+                'Run progress reports by dept'
+              ] },
+              { step: 4, title: 'SEND REMINDERS', time: 'As needed + escalations', variant: 'default', items: [
+                'Configure reminder templates',
+                'Send bulk notifications',
+                'Trigger HR Escalation rules',
+                'Monitor escalation status'
+              ] },
+              { step: 5, title: 'FACILITATE CALIBRATION', time: 'Mid-cycle • 2-4 hrs', variant: 'default', items: [
+                'Schedule calibration sessions',
+                'Prepare distribution analysis',
+                'Review pre-calibration nine-box',
+                'Conduct calibration meeting',
+                'Apply Potential Assessment (if enabled)',
+                'Document adjustments with rationale',
+                'Execute governance rules'
+              ] },
+              { step: 6, title: 'REVIEW AI ALERTS', time: 'During calibration', variant: 'default', items: [
+                'Check bias flags (recency, halo, comparison)',
+                'Review manager patterns across team',
+                'Investigate high-confidence alerts',
+                'Review rating gap alerts (self vs mgr)',
+                'Document interventions for audit'
+              ] },
+              { step: 7, title: 'RELEASE RATINGS', time: 'Post-calibration • 1-2 hrs', variant: 'default', items: [
+                'Finalize scores (lock ratings)',
+                'Access Release Ratings Dialog',
+                'Select release scope (bulk/phased/individual)',
+                'Configure notification preferences',
+                'Set acknowledgment deadline',
+                'Preview and confirm release',
+                'Execute release (employees notified)'
+              ] },
+              { step: 8, title: 'PROCESS ACKNOWLEDGMENTS', time: 'After release • ongoing', variant: 'default', items: [
+                'Monitor acknowledgment rate',
+                'Review Agree responses (no action)',
+                'Review Partially Disagree (follow-up)',
+                'Review Disagree (HR queue)',
+                'Send deadline reminders',
+                'Escalate overdue acknowledgments'
+              ] }
             ].map((phase) => (
               <div key={phase.step} className="p-3 border rounded-lg bg-muted/50">
                 <div className="flex items-center gap-2 mb-2">
@@ -507,10 +578,144 @@ export function ManualQuickReference() {
               </div>
             ))}
           </div>
+
+          {/* Second row of steps */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+            {/* Step 9: Resolve Disputes - Amber styling */}
+            <div className="p-3 border rounded-lg bg-amber-500/10 border-amber-500/30">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-amber-600 text-white text-xs flex items-center justify-center font-bold">9</span>
+                <h4 className="font-semibold text-xs">RESOLVE DISPUTES</h4>
+                <Badge variant="outline" className="text-[10px] h-4 ml-auto border-amber-500 text-amber-700">If Filed</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Dispute window • 30-60 min each</p>
+              <div className="space-y-1">
+                {[
+                  'Access HR Dispute Queue',
+                  'Review by category (6 types)',
+                  '• Score Inaccuracy',
+                  '• Missing Evidence / Bias Concern',
+                  '• Process Violation / Missing Context',
+                  'Review employee justification',
+                  'Review manager rebuttal',
+                  'Decide: Uphold / Modify / Overturn',
+                  'Document resolution for audit',
+                  'Notify all parties'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    {item.startsWith('•') ? (
+                      <span className="text-xs text-muted-foreground ml-4">{item}</span>
+                    ) : (
+                      <><Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span></>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Step 10: Execute Outcome Rules */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-bold">10</span>
+                <h4 className="font-semibold text-xs">EXECUTE OUTCOME RULES</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Post-disputes • 1-2 hrs</p>
+              <div className="space-y-1">
+                {[
+                  'Preview action rules before execution',
+                  'Check downstream actions:',
+                  '• PIP creation (rating ≤ 2.0)',
+                  '• IDP generation (gaps)',
+                  '• Succession nomination (≥ 4.5)',
+                  '• Compensation flags',
+                  'Execute proficiency updates',
+                  'Run action rule engine',
+                  'Update integrations (LMS, payroll)',
+                  'Monitor execution status'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    {item.startsWith('•') ? (
+                      <span className="text-xs text-muted-foreground ml-4">{item}</span>
+                    ) : (
+                      <><Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span></>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Step 11: Generate Reports */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-bold">11</span>
+                <h4 className="font-semibold text-xs">GENERATE REPORTS</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Cycle end • 2-3 hrs</p>
+              <div className="space-y-1">
+                {[
+                  'Run distribution reports (pre/post)',
+                  'Generate nine-box summary',
+                  'Create movement analysis',
+                  'Build exec dashboards',
+                  'Export compliance docs',
+                  'Generate cycle summary report',
+                  'Archive with retention policy'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Step 12: Close Cycle */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-violet-600 text-white text-xs flex items-center justify-center font-bold">12</span>
+                <h4 className="font-semibold text-xs">CLOSE CYCLE</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Final step • 30-60 min</p>
+              <div className="space-y-1">
+                {[
+                  'Verify close-out checklist:',
+                  '• All evaluations submitted',
+                  '• All acknowledgments collected',
+                  '• All disputes resolved',
+                  '• Calibration documented',
+                  '• Action rules executed',
+                  'Click "Close Cycle"',
+                  'Confirm closure (irreversible)',
+                  'Send cycle complete notification',
+                  'Schedule post-cycle review'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    {item.startsWith('•') ? (
+                      <span className="text-xs text-muted-foreground ml-4">{item}</span>
+                    ) : (
+                      <><Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span></>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Info callout */}
+          <div className="mt-4 p-3 border rounded-lg bg-blue-500/10 border-blue-500/30">
+            <h4 className="font-semibold text-sm mb-1 flex items-center gap-2">
+              <Info className="h-4 w-4 text-blue-600" />
+              Finalization vs Release
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              <strong>Finalization</strong> locks ratings post-calibration. <strong>Release</strong> makes them visible to employees. These are separate actions—finalize first, then release when ready.
+            </p>
+          </div>
           
           <div className="mt-4 p-3 border-l-4 border-l-violet-600 bg-violet-500/10 rounded-r-lg">
             <h4 className="font-semibold text-sm mb-1">Success Indicators</h4>
-            <p className="text-xs text-muted-foreground">95%+ completion rate • All calibrations documented • Action rules executed • Reports delivered on time</p>
+            <p className="text-xs text-muted-foreground">
+              Readiness check 100% pass • 95%+ completion rate • All calibrations documented • 100% disputes resolved • 95%+ acknowledgment rate • All action rules executed • Reports within SLA • Cycle closed on target
+            </p>
           </div>
         </CardContent>
       </Card>
