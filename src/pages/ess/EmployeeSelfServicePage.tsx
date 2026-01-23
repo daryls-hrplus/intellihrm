@@ -11,6 +11,7 @@ import { QuickActionsBar } from "@/components/ess/QuickActionsBar";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
 import { useEssItemBadges } from "@/hooks/useEssItemBadges";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   User,
   Calendar,
@@ -57,6 +58,7 @@ import {
 export default function EmployeeSelfServicePage() {
   usePageAudit('ess_dashboard', 'ESS');
   const { t } = useTranslation();
+  const { profile } = useAuth();
   const { hasTabAccess } = useGranularPermissions();
   const { data: sectionBadges = {} } = useEssPendingActions();
   const { data: itemBadges = {} } = useEssItemBadges();
@@ -67,6 +69,9 @@ export default function EmployeeSelfServicePage() {
     return badge ? { ...module, actionBadge: badge } : module;
   };
 
+  // Dynamic route for documents - points to employee profile documents tab
+  const documentsHref = profile?.id ? `/workforce/employees/${profile.id}?tab=documents` : "/ess";
+
   const allModules = {
     profile: { title: t("ess.modules.profile.title"), description: t("ess.modules.profile.description"), href: "/profile", icon: User, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-profile" },
     personalInfo: { title: t("ess.modules.personalInfo.title", "Personal Information"), description: t("ess.modules.personalInfo.description", "Update addresses and emergency contacts"), href: "/ess/personal-info", icon: MapPin, color: "bg-teal-500/10 text-teal-600", tabCode: "ess-personal-info" },
@@ -75,7 +80,7 @@ export default function EmployeeSelfServicePage() {
     delegates: { title: t("ess.modules.delegates.title"), description: t("ess.modules.delegates.description"), href: "/workflow/delegates", icon: UserCheck, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "ess-delegates" },
     leave: { title: t("ess.modules.leave.title"), description: t("ess.modules.leave.description"), href: "/ess/leave", icon: Calendar, color: "bg-green-500/10 text-green-600", tabCode: "ess-leave" },
     myCalendar: { title: t("ess.modules.myCalendar.title", "My Calendar"), description: t("ess.modules.myCalendar.description", "View your leave and key dates"), href: "/ess/my-calendar", icon: Calendar, color: "bg-sky-500/10 text-sky-600", tabCode: "ess-my-calendar" },
-    documents: { title: t("ess.modules.documents.title"), description: t("ess.modules.documents.description"), href: "/ess/documents", icon: FileText, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-documents" },
+    documents: { title: t("ess.modules.documents.title"), description: t("ess.modules.documents.description"), href: documentsHref, icon: FileText, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-documents" },
     timeAttendance: { title: t("ess.modules.timeAttendance.title"), description: t("ess.modules.timeAttendance.description"), href: "/ess/time-attendance", icon: Clock, color: "bg-orange-500/10 text-orange-600", tabCode: "ess-time-attendance" },
     payslips: { title: t("ess.modules.payslips.title"), description: t("ess.modules.payslips.description"), href: "/ess/payslips", icon: CreditCard, color: "bg-emerald-500/10 text-emerald-600", tabCode: "ess-payslips" },
     expenses: { title: t("ess.modules.expenses.title", "Expense Claims"), description: t("ess.modules.expenses.description", "Submit and track expense reimbursements"), href: "/ess/expense-claims", icon: Receipt, color: "bg-orange-500/10 text-orange-600", tabCode: "ess-expenses" },

@@ -270,7 +270,7 @@ export const pageInstrumentationRegistry: PageInstrumentationStatus[] = [
   { pagePath: '/ess/training', pageName: 'My Training', module: 'ESS', entityType: 'my_training', isInstrumented: false },
   { pagePath: '/ess/goals', pageName: 'My Goals', module: 'ESS', entityType: 'my_goals', isInstrumented: false },
   { pagePath: '/ess/compensation', pageName: 'My Compensation', module: 'ESS', entityType: 'my_compensation', isInstrumented: false },
-  { pagePath: '/ess/documents', pageName: 'My Documents', module: 'ESS', entityType: 'my_documents', isInstrumented: false },
+  { pagePath: '/workforce/employees/:id?tab=documents', pageName: 'My Documents', module: 'ESS', entityType: 'my_documents', isInstrumented: false },
   { pagePath: '/ess/banking', pageName: 'My Banking', module: 'ESS', entityType: 'my_banking', isInstrumented: false },
   { pagePath: '/ess/dependents', pageName: 'My Dependents', module: 'ESS', entityType: 'my_dependents', isInstrumented: false },
 
