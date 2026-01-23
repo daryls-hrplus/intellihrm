@@ -24,7 +24,9 @@ import {
   Target,
   DollarSign,
   TrendingDown,
-  LineChart
+  LineChart,
+  Wrench,
+  Shield
 } from 'lucide-react';
 
 export function ManualQuickReference() {
@@ -852,14 +854,14 @@ export function ManualQuickReference() {
         </CardContent>
       </Card>
 
-      {/* Performance Cycle Phase Reference - Cross-Persona Matrix */}
+      {/* Performance Cycle Phase Reference - Cross-Persona Matrix (11 Phases) */}
       <Card className="border-2 border-primary/30">
         <CardHeader className="bg-primary/10">
           <div className="flex items-center gap-2">
             <Table className="h-5 w-5 text-primary" />
             <CardTitle>Performance Cycle Phase Reference</CardTitle>
           </div>
-          <CardDescription>Who does what, when — cross-persona view by cycle phase</CardDescription>
+          <CardDescription>Who does what, when — cross-persona view by cycle phase (11 phases)</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="overflow-x-auto">
@@ -875,13 +877,17 @@ export function ManualQuickReference() {
               </thead>
               <tbody className="text-xs">
                 {[
-                  { phase: 'Pre-cycle', employee: '—', manager: '—', hr: 'Configure settings', exec: '—' },
-                  { phase: 'Cycle Start', employee: 'Receive notification', manager: 'Review enrollment', hr: 'Enroll participants', exec: '—' },
+                  { phase: 'Pre-cycle', employee: '—', manager: '—', hr: 'Configure settings, Run readiness check', exec: '—' },
+                  { phase: 'Cycle Start', employee: 'Receive notification', manager: 'Review enrollment', hr: 'Enroll participants, Activate cycle', exec: '—' },
                   { phase: 'Week 1-2', employee: 'Self-assessment', manager: 'Wait', hr: 'Monitor progress', exec: '—' },
-                  { phase: 'Week 2-4', employee: 'Wait', manager: 'Evaluate team', hr: 'Send reminders', exec: '—' },
-                  { phase: 'Mid-cycle', employee: '—', manager: 'Calibration prep', hr: 'Facilitate calibration', exec: 'Review distributions' },
-                  { phase: 'Post-calibration', employee: 'Review meeting', manager: 'Conduct meetings', hr: 'Process outcomes', exec: 'Approve results' },
-                  { phase: 'Final Week', employee: 'Acknowledge', manager: 'Address responses', hr: 'Generate reports', exec: 'Review dashboards' }
+                  { phase: 'Week 2-4', employee: 'Wait', manager: 'Evaluate team, Use AI assistant', hr: 'Send reminders, Track approvals', exec: '—' },
+                  { phase: 'Approval Phase', employee: '—', manager: 'Await approval', hr: 'Process approval queue', exec: '—' },
+                  { phase: 'Calibration', employee: '—', manager: 'Participate in calibration', hr: 'Facilitate calibration', exec: 'Review distributions' },
+                  { phase: 'Rating Release', employee: '—', manager: '—', hr: 'Release ratings', exec: '—' },
+                  { phase: 'Post-calibration', employee: 'Attend review meeting', manager: 'Conduct meetings, Share evaluations', hr: 'Monitor interviews', exec: 'Approve results' },
+                  { phase: 'Acknowledgment', employee: 'Submit acknowledgment', manager: 'Process responses', hr: 'Track acknowledgment rate', exec: '—' },
+                  { phase: 'Dispute Window', employee: 'File dispute (if applicable)', manager: 'Submit rebuttal (if applicable)', hr: 'Resolve disputes', exec: 'Escalation review' },
+                  { phase: 'Cycle Close', employee: 'View final rating', manager: '—', hr: 'Generate reports, Close cycle', exec: 'Review dashboards' }
                 ].map((row, i) => (
                   <tr key={i} className="border-b last:border-0">
                     <td className="py-2 px-3 font-medium">{row.phase}</td>
@@ -916,21 +922,23 @@ export function ManualQuickReference() {
         <p className="text-sm text-muted-foreground">Condensed guides for specific configuration and operational tasks</p>
       </div>
 
-      {/* Cycle Setup Checklist */}
+      {/* Implementation Consultant Pre-Launch Checklist */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <CheckSquare className="h-5 w-5 text-primary" />
-            <CardTitle>Cycle Setup Checklist</CardTitle>
+            <Wrench className="h-5 w-5 text-primary" />
+            <CardTitle>Implementation Consultant Pre-Launch Checklist</CardTitle>
           </div>
-          <CardDescription>Essential steps for launching an appraisal cycle</CardDescription>
+          <CardDescription>First-time setup validation before going live</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <div>
-              <h4 className="font-medium mb-3">4-6 Weeks Before</h4>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Badge className="bg-gray-600 text-white">Environment</Badge>
+              </h4>
               <div className="space-y-2">
-                {['Verify rating scales', 'Update form templates', 'Define eligibility criteria', 'Set cycle dates'].map((item, i) => (
+                {['Verify database connections', 'Test SSO integration', 'Validate API permissions', 'Check storage buckets'].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Checkbox /><span className="text-sm">{item}</span>
                   </div>
@@ -938,9 +946,23 @@ export function ManualQuickReference() {
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-3">1-2 Weeks Before</h4>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Badge>Master Data</Badge>
+              </h4>
               <div className="space-y-2">
-                {['Enroll participants', 'Assign evaluators', 'Send communications', 'Activate cycle'].map((item, i) => (
+                {['Org structure loaded', 'Job families configured', 'Competency library imported', 'Rating scales defined'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Checkbox /><span className="text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Badge className="bg-green-600 text-white">Integration</Badge>
+              </h4>
+              <div className="space-y-2">
+                {['LMS connection tested', 'Payroll sync verified', 'Email templates configured', 'UAT sign-off complete'].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Checkbox /><span className="text-sm">{item}</span>
                   </div>
@@ -951,38 +973,63 @@ export function ManualQuickReference() {
         </CardContent>
       </Card>
 
-      {/* Manager Quick Guide */}
+      {/* Manager Quick Start Card */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <ListOrdered className="h-5 w-5 text-primary" />
-            <CardTitle>Manager Evaluation Quick Guide</CardTitle>
+            <Zap className="h-5 w-5 text-primary" />
+            <CardTitle>Manager Evaluation Quick Start</CardTitle>
           </div>
-          <CardDescription>10-step summary for completing evaluations</CardDescription>
+          <CardDescription>One-page cheat sheet for first-time managers</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[
-              '1. Access Team Appraisals',
-              '2. Select Employee',
-              '3. Review Self-Assessment',
-              '4. Rate Goals',
-              '5. Rate Competencies',
-              '6. Rate Responsibilities',
-              '7. Use AI Assistant',
-              '8. Add Comments',
-              '9. Submit Evaluation',
-              '10. Schedule Interview'
-            ].map((step, i) => (
-              <div key={i} className="p-3 bg-muted rounded-lg text-center text-sm">
-                {step}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium mb-3">Key Actions (CRGV Order)</h4>
+              <div className="space-y-2 text-sm">
+                <div className="p-2 bg-muted rounded-lg flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">1</span>
+                  <span>Access Team Appraisals → Rate <strong>Goals</strong></span>
+                </div>
+                <div className="p-2 bg-muted rounded-lg flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">2</span>
+                  <span>Rate <strong>Responsibilities/KRAs</strong></span>
+                </div>
+                <div className="p-2 bg-muted rounded-lg flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">3</span>
+                  <span>Rate <strong>Competencies</strong></span>
+                </div>
+                <div className="p-2 bg-muted rounded-lg flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">4</span>
+                  <span>Rate <strong>Values</strong> → Submit</span>
+                </div>
               </div>
-            ))}
+            </div>
+            <div>
+              <h4 className="font-medium mb-3">Common Mistakes to Avoid</h4>
+              <div className="space-y-2 text-sm">
+                <div className="p-2 border-l-4 border-l-destructive bg-destructive/10 rounded-r-lg">
+                  <span className="text-destructive font-medium">✗</span> Submitting without comments on low scores
+                </div>
+                <div className="p-2 border-l-4 border-l-destructive bg-destructive/10 rounded-r-lg">
+                  <span className="text-destructive font-medium">✗</span> Ignoring AI-generated suggestions
+                </div>
+                <div className="p-2 border-l-4 border-l-destructive bg-destructive/10 rounded-r-lg">
+                  <span className="text-destructive font-medium">✗</span> Not scheduling the review interview
+                </div>
+              </div>
+              <div className="mt-3 p-3 border-2 border-primary bg-primary/10 rounded-lg text-sm">
+                <strong>💡 Tip:</strong> Use the AI Assistant to generate narrative summaries after rating all components.
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 text-sm text-muted-foreground">
+            → For detailed workflow, see <strong>Manager (MSS) Journey</strong> card above
           </div>
         </CardContent>
       </Card>
 
-      {/* Employee Response Quick Guide */}
+      {/* Employee Response Quick Guide (Updated to 6 steps) */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -992,13 +1039,14 @@ export function ManualQuickReference() {
           <CardDescription>Steps for reviewing and responding to your evaluation</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
             {[
               '1. Receive Notification',
               '2. Review Manager Rating',
               '3. Compare to Self-Score',
               '4. Select Response Type',
-              '5. Add Comments'
+              '5. Add Comments',
+              '6. File Dispute (if needed)'
             ].map((step, i) => (
               <div key={i} className="p-3 bg-muted rounded-lg text-center text-sm">
                 {step}
@@ -1008,10 +1056,122 @@ export function ManualQuickReference() {
           <div className="mt-4 p-4 border-l-4 border-l-primary bg-primary/20 rounded-r-lg">
             <h4 className="font-semibold text-sm mb-2">Response Status Options</h4>
             <div className="flex flex-wrap gap-2">
-              <Badge className="bg-green-600 text-white hover:bg-green-700">agree</Badge>
-              <Badge className="bg-red-600 text-white hover:bg-red-700">disagree</Badge>
-              <Badge className="bg-amber-600 text-white hover:bg-amber-700">partial_agree</Badge>
-              <Badge variant="outline" className="border-2 border-primary">pending</Badge>
+              <Badge className="bg-green-600 text-white hover:bg-green-700">Agree</Badge>
+              <Badge className="bg-amber-600 text-white hover:bg-amber-700">Partially Disagree</Badge>
+              <Badge className="bg-red-600 text-white hover:bg-red-700">Disagree</Badge>
+              <Badge className="bg-destructive text-destructive-foreground">Dispute Filed</Badge>
+              <Badge variant="outline" className="border-2 border-primary">Pending</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Approval Workflow Quick Reference (NEW) */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <CardTitle>Approval Workflow Quick Reference</CardTitle>
+          </div>
+          <CardDescription>Understanding the multi-level approval chain</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium mb-3">Approval Chain Levels</h4>
+              <div className="space-y-3">
+                <div className="p-3 border-2 border-blue-500 bg-blue-500/10 rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <Badge className="bg-blue-600 text-white">Level 1</Badge>
+                    <span className="text-xs text-muted-foreground">72h SLA</span>
+                  </div>
+                  <p className="text-sm font-medium">Skip-Level Manager</p>
+                  <p className="text-xs text-muted-foreground">Reviews direct manager's ratings for objectivity</p>
+                </div>
+                <div className="p-3 border-2 border-violet-500 bg-violet-500/10 rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <Badge className="bg-violet-600 text-white">Level 2</Badge>
+                    <span className="text-xs text-muted-foreground">48h SLA</span>
+                  </div>
+                  <p className="text-sm font-medium">HR Representative</p>
+                  <p className="text-xs text-muted-foreground">Ensures policy compliance and consistency</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3">Approval Statuses</h4>
+              <div className="flex flex-wrap gap-2 mb-4">
+                <Badge variant="outline" className="border-amber-500 text-amber-700">Pending</Badge>
+                <Badge className="bg-green-600 text-white">Approved</Badge>
+                <Badge className="bg-red-600 text-white">Rejected</Badge>
+                <Badge className="bg-blue-600 text-white">Returned</Badge>
+              </div>
+              <h4 className="font-medium mb-2">Common Rejection Reasons</h4>
+              <ul className="text-sm space-y-1 text-muted-foreground">
+                <li>• Insufficient justification for rating</li>
+                <li>• Missing mandatory comments</li>
+                <li>• Inconsistent with documented evidence</li>
+                <li>• Policy violation detected</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-4 p-3 border-2 border-amber-500 bg-amber-500/10 rounded-lg">
+            <h4 className="font-semibold text-sm mb-1">⚠️ SLA Breach Escalation</h4>
+            <p className="text-sm text-muted-foreground">
+              If approval is not completed within SLA, auto-escalation notifies HR Director and pauses cycle progression.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Form Template Configuration Guide (NEW) */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <CardTitle>Form Template Configuration Guide</CardTitle>
+          </div>
+          <CardDescription>Setting up evaluation templates with CRGV components</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium mb-3">Template Components (CRGV)</h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-muted rounded-lg">
+                  <span className="text-sm font-medium">Goals</span>
+                  <Badge variant="outline">Weight: configurable</Badge>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted rounded-lg">
+                  <span className="text-sm font-medium">Responsibilities (KRAs)</span>
+                  <Badge variant="outline">Weight: configurable</Badge>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted rounded-lg">
+                  <span className="text-sm font-medium">Competencies</span>
+                  <Badge variant="outline">Weight: configurable</Badge>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted rounded-lg">
+                  <span className="text-sm font-medium">Values</span>
+                  <Badge variant="outline">Weight: configurable</Badge>
+                </div>
+              </div>
+              <div className="mt-3 p-3 border-2 border-primary bg-primary/10 rounded-lg">
+                <p className="text-sm"><strong>Rule:</strong> Component weights must total 100%</p>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3">Assignment Rules</h4>
+              <div className="space-y-2">
+                {['By Department', 'By Job Family', 'By Job Level', 'By Location', 'By Employment Type'].map((rule, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Checkbox /><span className="text-sm">{rule}</span>
+                  </div>
+                ))}
+              </div>
+              <h4 className="font-medium mt-4 mb-2">Versioning</h4>
+              <p className="text-sm text-muted-foreground">
+                Templates are versioned. Active cycles use the version assigned at enrollment. Updates create new versions without affecting in-progress cycles.
+              </p>
             </div>
           </div>
         </CardContent>
@@ -1178,7 +1338,7 @@ export function ManualQuickReference() {
         </CardContent>
       </Card>
 
-      {/* Outcome Action Rules Reference */}
+      {/* Outcome Action Rules Reference (Enhanced) */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -1192,7 +1352,7 @@ export function ManualQuickReference() {
             <div>
               <h4 className="font-medium mb-3 text-primary">Condition Types</h4>
               <div className="flex flex-wrap gap-2">
-                {['score_below', 'score_above', 'repeated_low', 'gap_detected', 'improvement_trend', 'competency_gap', 'goal_not_met'].map((type) => (
+                {['score_below', 'score_above', 'repeated_low', 'gap_detected', 'improvement_trend', 'competency_gap', 'goal_not_met', 'proficiency_threshold', 'consecutive_improvement'].map((type) => (
                   <Badge key={type} className="bg-amber-600 text-white hover:bg-amber-700">{type}</Badge>
                 ))}
               </div>
@@ -1200,28 +1360,39 @@ export function ManualQuickReference() {
             <div>
               <h4 className="font-medium mb-3 text-primary">Action Types</h4>
               <div className="flex flex-wrap gap-2">
-                {['create_idp', 'create_pip', 'suggest_succession', 'block_finalization', 'require_comment', 'notify_hr', 'schedule_coaching', 'require_development_plan'].map((type) => (
+                {['create_idp', 'create_pip', 'suggest_succession', 'block_finalization', 'require_comment', 'notify_hr', 'schedule_coaching', 'require_development_plan', 'update_proficiency', 'trigger_lms_enrollment', 'flag_for_merit_review', 'create_succession_entry'].map((type) => (
                   <Badge key={type} className="bg-primary text-primary-foreground">{type}</Badge>
                 ))}
               </div>
             </div>
           </div>
-          <div className="mt-4 p-4 border-2 border-primary bg-primary/20 rounded-lg">
-            <h4 className="font-semibold text-sm mb-2">Execution Status Flow</h4>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-amber-600 text-white">pending</Badge>
-              <span className="font-bold text-lg">→</span>
-              <Badge className="bg-green-600 text-white">executed</Badge>
-              <span className="font-medium">or</span>
-              <Badge className="bg-gray-600 text-white">overridden</Badge>
-              <span className="font-bold text-lg">→</span>
-              <Badge className="bg-primary text-primary-foreground">acknowledged</Badge>
+          <div className="mt-4 grid md:grid-cols-2 gap-4">
+            <div className="p-4 border-2 border-primary bg-primary/20 rounded-lg">
+              <h4 className="font-semibold text-sm mb-2">Execution Status Flow</h4>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="bg-amber-600 text-white">pending</Badge>
+                <span className="font-bold text-lg">→</span>
+                <Badge className="bg-green-600 text-white">executed</Badge>
+                <span className="font-medium">or</span>
+                <Badge className="bg-gray-600 text-white">overridden</Badge>
+                <span className="font-bold text-lg">→</span>
+                <Badge className="bg-primary text-primary-foreground">acknowledged</Badge>
+              </div>
+            </div>
+            <div className="p-4 border-2 border-blue-500 bg-blue-500/10 rounded-lg">
+              <h4 className="font-semibold text-sm mb-2">Integration Targets</h4>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="border-blue-500">LMS</Badge>
+                <Badge variant="outline" className="border-blue-500">Payroll/HRIS</Badge>
+                <Badge variant="outline" className="border-blue-500">Succession</Badge>
+                <Badge variant="outline" className="border-blue-500">Compensation</Badge>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Calibration Session Checklist */}
+      {/* Calibration Session Checklist (Enhanced) */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -1237,7 +1408,7 @@ export function ManualQuickReference() {
                 <Badge className="bg-gray-600 text-white">Pre-Session</Badge>
               </h4>
               <div className="space-y-2">
-                {['Gather all submitted evaluations', 'Run distribution analysis', 'Identify rating outliers', 'Prepare nine-box view'].map((item, i) => (
+                {['Run Appraisal Readiness check', 'Gather all submitted evaluations', 'Run distribution analysis', 'Identify rating outliers', 'Prepare nine-box view', 'Prepare potential assessment inputs', 'Review governance rules'].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Checkbox /><span className="text-sm">{item}</span>
                   </div>
@@ -1249,7 +1420,7 @@ export function ManualQuickReference() {
                 <Badge>During Session</Badge>
               </h4>
               <div className="space-y-2">
-                {['Review distribution vs targets', 'Discuss outlier cases', 'Apply forced distribution (if enabled)', 'Document adjustment reasons'].map((item, i) => (
+                {['Review distribution vs targets', 'Discuss outlier cases', 'Update nine-box placements', 'Apply Potential Assessment scores', 'Apply forced distribution (if enabled)', 'Document adjustment reasons', 'Check for bias alerts'].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Checkbox /><span className="text-sm">{item}</span>
                   </div>
@@ -1261,7 +1432,7 @@ export function ManualQuickReference() {
                 <Badge className="bg-green-600 text-white">Post-Session</Badge>
               </h4>
               <div className="space-y-2">
-                {['Finalize calibrated scores', 'Update post_calibration_score', 'Generate audit trail', 'Communicate to managers'].map((item, i) => (
+                {['Finalize calibrated scores', 'Update post_calibration_score', 'Execute governance rules', 'Trigger downstream actions', 'Generate audit trail', 'Communicate to managers', 'Prepare for Rating Release'].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Checkbox /><span className="text-sm">{item}</span>
                   </div>
@@ -1272,28 +1443,36 @@ export function ManualQuickReference() {
         </CardContent>
       </Card>
 
-      {/* Performance Calendar */}
+      {/* Performance Calendar (Enhanced) */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
             <CardTitle>Annual Performance Calendar</CardTitle>
           </div>
-          <CardDescription>Timeline for the performance management year</CardDescription>
+          <CardDescription>Timeline for the performance management year with phase deadlines</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {[
-              { quarter: 'Q1', activities: 'Goal setting, prior year closeout, compensation processing' },
-              { quarter: 'Q2', activities: 'Mid-year check-ins, goal progress reviews' },
-              { quarter: 'Q3', activities: 'Development planning, calibration prep' },
-              { quarter: 'Q4', activities: 'Annual evaluations, calibration sessions, employee responses' }
+              { quarter: 'Q1', deadlines: 'Goal Setting: Week 4', activities: 'Goal setting, prior year closeout, compensation processing, merit reviews' },
+              { quarter: 'Q2', deadlines: 'Mid-Year Check-in: Week 26', activities: 'Mid-year progress reviews, goal updates, development discussions' },
+              { quarter: 'Q3', deadlines: 'Calibration Prep: Week 38', activities: 'Development planning, nine-box preparation, succession updates' },
+              { quarter: 'Q4', deadlines: 'Eval: W44, Calibrate: W48, Release: W50, Ack: W52', activities: 'Annual evaluations, calibration sessions, rating release, employee responses, disputes' }
             ].map((q) => (
               <div key={q.quarter} className="flex gap-4 p-3 bg-muted/50 rounded-lg">
-                <Badge variant="outline" className="h-fit">{q.quarter}</Badge>
-                <span className="text-sm">{q.activities}</span>
+                <Badge variant="outline" className="h-fit shrink-0">{q.quarter}</Badge>
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground mb-1">{q.deadlines}</p>
+                  <span className="text-sm">{q.activities}</span>
+                </div>
               </div>
             ))}
+          </div>
+          <div className="mt-4 p-3 border rounded-lg bg-muted/30">
+            <p className="text-xs text-muted-foreground">
+              <strong>Note:</strong> Dates are configurable per organization. Continuous cycles may have different cadences.
+            </p>
           </div>
         </CardContent>
       </Card>
