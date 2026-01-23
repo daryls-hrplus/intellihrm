@@ -47,25 +47,6 @@
       "analytics": "Analytics"
     }
   },
-  "ess": {
-    "groups": {
-      "personal": "Personal",
-      "timeLeave": "Time & Leave",
-      "payBenefits": "Pay & Benefits",
-      "careerDevelopment": "Career & Development",
-      "workplaceResources": "Workplace Resources",
-      "support": "Support"
-    },
-    "myLetters": {
-      "breadcrumb": "My Letters",
-      "title": "My Letters",
-      "subtitle": "Request and track employment letters from HR.",
-      "requestLetter": "Request Letter",
-      "pending": "Pending",
-      "approved": "Approved",
-      "rejected": "Rejected"
-    }
-  },
   "mss": {
     "groups": {
       "teamManagement": "Team Management",
@@ -972,6 +953,14 @@
   "ess": {
     "title": "Employee Self Service",
     "subtitle": "Access your personal information, requests, and employment details",
+    "groups": {
+      "personal": "Personal",
+      "timeLeave": "Time & Leave",
+      "payBenefits": "Pay & Benefits",
+      "careerDevelopment": "Career & Development",
+      "workplaceResources": "Workplace Resources",
+      "support": "Support"
+    },
     "modules": {
       "profile": {
         "title": "My Profile",
