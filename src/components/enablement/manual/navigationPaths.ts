@@ -1,30 +1,38 @@
 // Centralized navigation paths mapping for all Appraisals manual sections
 export const NAVIGATION_PATHS: Record<string, string[]> = {
-  // Part 2: Setup & Configuration - Foundation (2.1-2.4)
+  // Part 1: Overview (reordered)
+  'sec-1-3': ['Performance', 'Appraisals', 'Personas & Journeys'],
+  'sec-1-4': ['Performance', 'Appraisals', 'Architecture'],
+
+  // Part 2: Setup & Configuration - Core Framework (2.1-2.7)
   'sec-2-1': ['Performance', 'Setup', '(Multiple areas)'],
-  'sec-2-2': ['Performance', 'Setup', 'Foundation', 'Rating Scales'],
-  'sec-2-3': ['Performance', 'Setup', 'Foundation', 'Overall Rating Scales'],
-  'sec-2-4a': ['Performance', 'Setup', 'Foundation', 'Skills & Competencies'],
-  'sec-2-4': ['Performance', 'Setup', 'Foundation', 'Competencies'],
+  'sec-2-2': ['Performance', 'Setup', 'Core Framework', 'Rating Scales'],
+  'sec-2-3': ['Performance', 'Setup', 'Core Framework', 'Overall Rating Scales'],
+  'sec-2-4-levels': ['Performance', 'Setup', 'Core Framework', 'Rating Levels'],
+  'sec-2-4a': ['Performance', 'Setup', 'Core Framework', 'Skills & Competencies'],
+  'sec-2-4': ['Performance', 'Setup', 'Core Framework', 'Competencies'],
   'sec-2-4b': ['Performance', 'Setup', 'Job Profiles', 'Responsibilities'],
-  'sec-2-4c': ['Performance', 'Setup', 'Foundation', 'Performance Trends'],
+  'sec-2-7': ['Performance', 'Setup', 'Core Framework', 'Values Assessment'],
+  
+  // Part 2: Form & Template Configuration (2.8-2.12)
+  'sec-2-5': ['Performance', 'Setup', 'Appraisals', 'Form Templates'],
+  'sec-2-8': ['Performance', 'Setup', 'Appraisals', 'Outcome Rules'],
+  'sec-2-9': ['Performance', 'Setup', 'Integration', 'Integration Rules'],
+  'sec-2-1-workflows': ['Performance', 'Setup', 'Appraisals', 'Approval Workflows'],
   'sec-2-4d': ['Performance', 'Setup', 'Notifications'],
   
-  // Part 2: Setup & Configuration - Appraisals (2.5-2.16)
-  'sec-2-readiness': ['Performance', 'Setup', 'Appraisals', 'Readiness'],
-  'sec-2-job-config': ['Performance', 'Setup', 'Job Profiles', 'Assessment Config'],
-  'sec-2-5': ['Performance', 'Setup', 'Appraisals', 'Form Templates'],
+  // Part 2: Cycle & Operational Configuration (2.13-2.17)
   'sec-2-6': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles'],
-  'sec-2-7': ['Performance', 'Setup', 'Appraisals', 'Performance Categories'],
-  'sec-2-8': ['Performance', 'Setup', 'Appraisals', 'Action Rules'],
-  'sec-2-9': ['Performance', 'Setup', 'Integration', 'Integration Rules'],
+  'sec-2-12': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles', 'Multi-Position'],
   'sec-2-10': ['Performance', 'Setup', 'Appraisals', 'Employee Response'],
   'sec-2-11': ['Performance', 'Setup', 'Appraisals', 'HR Escalations'],
-  'sec-2-12': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles', 'Multi-Position'],
-  'sec-2-13': ['Performance', 'Setup', 'Appraisals', 'Index Settings'],
   'sec-2-14': ['Performance', 'Setup', 'Appraisals', 'Benchmarks'],
-  'sec-2-15': ['Performance', 'Setup', 'Appraisals', 'Values Assessment'],
+  
+  // Part 2: Advanced Configuration (2.18-2.21)
+  'sec-2-4c': ['Performance', 'Setup', 'Core Framework', 'Performance Trends'],
   'sec-2-16': ['Performance', 'Setup', 'Appraisals', 'Goals Integration'],
+  'sec-2-job-config': ['Performance', 'Setup', 'Job Profiles', 'Assessment Config'],
+  'sec-2-readiness': ['Performance', 'Setup', 'Appraisals', 'Readiness'],
 
   // Part 3: Workflows (3.1-3.13) - Industry-standard order
   'sec-3-1': ['Performance', 'Appraisals', 'Cycles'],

@@ -8,10 +8,10 @@ import {
 
 export function OverviewArchitecture() {
   return (
-    <Card id="sec-1-3">
+    <Card id="sec-1-4">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 1.3</Badge>
+          <Badge variant="outline">Section 1.4</Badge>
           <span>•</span>
           <Clock className="h-3 w-3" />
           <span>25 min read</span>

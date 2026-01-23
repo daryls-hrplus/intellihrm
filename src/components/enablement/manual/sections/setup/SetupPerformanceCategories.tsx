@@ -156,15 +156,15 @@ const TROUBLESHOOTING_ITEMS = [
 
 export function SetupPerformanceCategories() {
   return (
-    <Card id="sec-2-7">
+    <Card id="sec-2-4-levels">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 2.7</Badge>
+          <Badge variant="outline">Section 2.4</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~15 min read
           </Badge>
-          <Badge variant="secondary">Recommended</Badge>
+          <Badge variant="destructive">Required</Badge>
         </div>
         <CardTitle className="text-2xl">Rating Levels Configuration</CardTitle>
         <CardDescription>

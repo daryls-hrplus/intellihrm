@@ -148,20 +148,6 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-1-3',
         sectionNumber: '1.3',
-        title: 'System Architecture',
-        description: 'Data model, integration points, and technical overview',
-        contentLevel: 'reference',
-        estimatedReadTime: 20,
-        targetRoles: ['Admin', 'Consultant'],
-        industryContext: {
-          frequency: 'Reference material',
-          timing: 'Implementation phase',
-          benchmark: 'Enterprise HRMS data architecture standards'
-        }
-      },
-      {
-        id: 'sec-1-4',
-        sectionNumber: '1.4',
         title: 'User Personas & Journeys',
         description: 'Role-based workflows and user experience paths',
         contentLevel: 'overview',
@@ -171,6 +157,20 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           frequency: 'Reference material',
           timing: 'Training sessions',
           benchmark: 'Industry-standard persona definitions'
+        }
+      },
+      {
+        id: 'sec-1-4',
+        sectionNumber: '1.4',
+        title: 'System Architecture',
+        description: 'Data model, integration points, and technical overview',
+        contentLevel: 'reference',
+        estimatedReadTime: 20,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Reference material',
+          timing: 'Implementation phase',
+          benchmark: 'Enterprise HRMS data architecture standards'
         }
       },
       {

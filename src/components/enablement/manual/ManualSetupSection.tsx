@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Settings, FileText } from 'lucide-react';
+import { Settings, FileText, Calendar, Sparkles } from 'lucide-react';
 import {
   SetupPrerequisites,
   SetupReadiness,
@@ -31,32 +31,32 @@ type ManualSetupSectionProps = {
   selectedSectionId?: string;
 };
 
-const APPRAISALS_SECTION_IDS = new Set([
-  'sec-2-readiness',
-  'sec-2-job-config',
-  'sec-2-5',
-  'sec-2-6',
-  'sec-2-7',
-  'sec-2-8',
-  'sec-2-9',
-  'sec-2-10',
-  'sec-2-11',
-  'sec-2-12',
-  'sec-2-13',
-  'sec-2-14',
-  'sec-2-15',
-  'sec-2-16',
+// Section ID groupings for accordion auto-open
+const CORE_FRAMEWORK_IDS = new Set([
+  'sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4-levels', 'sec-2-4a', 'sec-2-4', 'sec-2-4b', 'sec-2-7'
 ]);
 
-const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4a', 'sec-2-4', 'sec-2-4b', 'sec-2-4c', 'sec-2-1-workflows', 'sec-2-4d']);
+const FORMS_TEMPLATES_IDS = new Set([
+  'sec-2-5', 'sec-2-8', 'sec-2-9', 'sec-2-1-workflows', 'sec-2-4d'
+]);
+
+const CYCLE_OPS_IDS = new Set([
+  'sec-2-6', 'sec-2-12', 'sec-2-10', 'sec-2-11', 'sec-2-14'
+]);
+
+const ADVANCED_IDS = new Set([
+  'sec-2-4c', 'sec-2-16', 'sec-2-job-config', 'sec-2-readiness'
+]);
 
 export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProps) {
-  const [openGroups, setOpenGroups] = useState<string[]>(['foundation']);
+  const [openGroups, setOpenGroups] = useState<string[]>(['core-framework']);
 
   const targetGroup = useMemo(() => {
     if (!selectedSectionId) return null;
-    if (FOUNDATION_SECTION_IDS.has(selectedSectionId)) return 'foundation';
-    if (APPRAISALS_SECTION_IDS.has(selectedSectionId)) return 'appraisals';
+    if (CORE_FRAMEWORK_IDS.has(selectedSectionId)) return 'core-framework';
+    if (FORMS_TEMPLATES_IDS.has(selectedSectionId)) return 'forms-templates';
+    if (CYCLE_OPS_IDS.has(selectedSectionId)) return 'cycle-ops';
+    if (ADVANCED_IDS.has(selectedSectionId)) return 'advanced';
     return null;
   }, [selectedSectionId]);
 
@@ -90,8 +90,8 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
         onValueChange={setOpenGroups}
         className="space-y-4"
       >
-        {/* Foundation Settings */}
-        <AccordionItem value="foundation" className="border rounded-lg px-4">
+        {/* Group 1: Core Framework */}
+        <AccordionItem value="core-framework" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
@@ -100,10 +100,10 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
               <div className="text-left">
                 <h3 className="font-semibold">Core Framework</h3>
                 <p className="text-sm text-muted-foreground font-normal">
-                  Rating scales, competencies, responsibilities/KRAs, workflows, notifications, and performance trends
+                  Prerequisites, rating scales, competencies, responsibilities, and values
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto">9 sections</Badge>
+              <Badge variant="outline" className="ml-auto">8 sections</Badge>
             </div>
           </AccordionTrigger>
           <AccordionContent forceMount className="pt-4 space-y-6 data-[state=closed]:hidden">
@@ -116,6 +116,9 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             <section id="sec-2-3" data-manual-anchor="sec-2-3" className="scroll-mt-32">
               <SetupOverallScales />
             </section>
+            <section id="sec-2-4-levels" data-manual-anchor="sec-2-4-levels" className="scroll-mt-32">
+              <SetupPerformanceCategories />
+            </section>
             <section id="sec-2-4a" data-manual-anchor="sec-2-4a" className="scroll-mt-32">
               <SetupSkillsCompetencies />
             </section>
@@ -125,8 +128,37 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             <section id="sec-2-4b" data-manual-anchor="sec-2-4b" className="scroll-mt-32">
               <SetupResponsibilityKRA />
             </section>
-            <section id="sec-2-4c" data-manual-anchor="sec-2-4c" className="scroll-mt-32">
-              <SetupIndexSettings />
+            <section id="sec-2-7" data-manual-anchor="sec-2-7" className="scroll-mt-32">
+              <SetupValuesAssessment />
+            </section>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Group 2: Form & Template Configuration */}
+        <AccordionItem value="forms-templates" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold">Form & Template Configuration</h3>
+                <p className="text-sm text-muted-foreground font-normal">
+                  Form templates, outcome rules, workflows, and notifications
+                </p>
+              </div>
+              <Badge variant="outline" className="ml-auto">5 sections</Badge>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent forceMount className="pt-4 space-y-6 data-[state=closed]:hidden">
+            <section id="sec-2-5" data-manual-anchor="sec-2-5" className="scroll-mt-32">
+              <SetupFormTemplates />
+            </section>
+            <section id="sec-2-8" data-manual-anchor="sec-2-8" className="scroll-mt-32">
+              <SetupActionRules />
+            </section>
+            <section id="sec-2-9" data-manual-anchor="sec-2-9" className="scroll-mt-32">
+              <SetupIntegrationRules />
             </section>
             <section id="sec-2-1-workflows" data-manual-anchor="sec-2-1-workflows" className="scroll-mt-32">
               <SetupApprovalWorkflows />
@@ -137,43 +169,28 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
           </AccordionContent>
         </AccordionItem>
 
-        {/* Appraisal Configuration */}
-        <AccordionItem value="appraisals" className="border rounded-lg px-4">
+        {/* Group 3: Cycle & Operational Configuration */}
+        <AccordionItem value="cycle-ops" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                <Calendar className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold">Appraisal Configuration</h3>
+                <h3 className="font-semibold">Cycle & Operational Configuration</h3>
                 <p className="text-sm text-muted-foreground font-normal">
-                  Forms, cycles, categories, actions, and integrations
+                  Appraisal cycles, multi-position, employee response, escalations, benchmarks
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto">14 sections</Badge>
+              <Badge variant="outline" className="ml-auto">5 sections</Badge>
             </div>
           </AccordionTrigger>
           <AccordionContent forceMount className="pt-4 space-y-6 data-[state=closed]:hidden">
-            <section id="sec-2-readiness" data-manual-anchor="sec-2-readiness" className="scroll-mt-32">
-              <SetupReadiness />
-            </section>
-            <section id="sec-2-job-config" data-manual-anchor="sec-2-job-config" className="scroll-mt-32">
-              <SetupJobAssessmentConfig />
-            </section>
-            <section id="sec-2-5" data-manual-anchor="sec-2-5" className="scroll-mt-32">
-              <SetupFormTemplates />
-            </section>
-            <section id="sec-2-7" data-manual-anchor="sec-2-7" className="scroll-mt-32">
-              <SetupPerformanceCategories />
-            </section>
-            <section id="sec-2-8" data-manual-anchor="sec-2-8" className="scroll-mt-32">
-              <SetupActionRules />
-            </section>
-            <section id="sec-2-9" data-manual-anchor="sec-2-9" className="scroll-mt-32">
-              <SetupIntegrationRules />
-            </section>
             <section id="sec-2-6" data-manual-anchor="sec-2-6" className="scroll-mt-32">
               <SetupAppraisalCycles />
+            </section>
+            <section id="sec-2-12" data-manual-anchor="sec-2-12" className="scroll-mt-32">
+              <SetupMultiPositionAppraisals />
             </section>
             <section id="sec-2-10" data-manual-anchor="sec-2-10" className="scroll-mt-32">
               <SetupEmployeeResponse />
@@ -181,17 +198,40 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             <section id="sec-2-11" data-manual-anchor="sec-2-11" className="scroll-mt-32">
               <SetupHREscalations />
             </section>
-            <section id="sec-2-12" data-manual-anchor="sec-2-12" className="scroll-mt-32">
-              <SetupMultiPositionAppraisals />
-            </section>
             <section id="sec-2-14" data-manual-anchor="sec-2-14" className="scroll-mt-32">
               <SetupBenchmarks />
             </section>
-            <section id="sec-2-15" data-manual-anchor="sec-2-15" className="scroll-mt-32">
-              <SetupValuesAssessment />
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Group 4: Advanced Configuration */}
+        <AccordionItem value="advanced" className="border rounded-lg px-4">
+          <AccordionTrigger className="hover:no-underline">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold">Advanced Configuration</h3>
+                <p className="text-sm text-muted-foreground font-normal">
+                  Performance trends, goals integration, job assessment, and readiness validation
+                </p>
+              </div>
+              <Badge variant="outline" className="ml-auto">4 sections</Badge>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent forceMount className="pt-4 space-y-6 data-[state=closed]:hidden">
+            <section id="sec-2-4c" data-manual-anchor="sec-2-4c" className="scroll-mt-32">
+              <SetupIndexSettings />
             </section>
             <section id="sec-2-16" data-manual-anchor="sec-2-16" className="scroll-mt-32">
               <SetupGoalsIntegration />
+            </section>
+            <section id="sec-2-job-config" data-manual-anchor="sec-2-job-config" className="scroll-mt-32">
+              <SetupJobAssessmentConfig />
+            </section>
+            <section id="sec-2-readiness" data-manual-anchor="sec-2-readiness" className="scroll-mt-32">
+              <SetupReadiness />
             </section>
           </AccordionContent>
         </AccordionItem>
