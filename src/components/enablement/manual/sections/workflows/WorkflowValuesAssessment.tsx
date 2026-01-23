@@ -107,10 +107,10 @@ const BUSINESS_RULES = [
 
 export function WorkflowValuesAssessment() {
   return (
-    <Card id="sec-3-12">
+    <Card id="sec-3-6">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 3.12</Badge>
+          <Badge variant="outline">Section 3.6</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~10 min read
@@ -125,7 +125,7 @@ export function WorkflowValuesAssessment() {
           Values Assessment Process
         </CardTitle>
         <CardDescription>
-          Employee self-assessment and manager evaluation of company values alignment
+          Employee self-assessment and manager evaluation of company values alignment (the "V" in CRGV)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
