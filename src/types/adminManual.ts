@@ -270,6 +270,20 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
+        id: 'sec-2-4b',
+        sectionNumber: '2.4b',
+        title: 'Responsibility & KRA Configuration',
+        description: 'Setting up job responsibilities and Key Result Areas for performance scoring',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Initial setup, per new job',
+          timing: 'Before cycle launch',
+          benchmark: 'KRA weights must total 100% per responsibility'
+        }
+      },
+      {
         id: 'sec-2-4c',
         sectionNumber: '2.4c',
         title: 'Performance Trend Settings',
@@ -432,7 +446,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
     title: 'Operational Workflows',
     description: 'Day-to-day procedures for running appraisal cycles',
     contentLevel: 'procedure',
-    estimatedReadTime: 75,
+    estimatedReadTime: 90,
     targetRoles: ['HR User', 'Manager', 'Employee'],
     subsections: [
       {
@@ -466,24 +480,10 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-3-3',
         sectionNumber: '3.3',
-        title: 'Manager Evaluation Workflow',
-        description: 'Complete guide for managers conducting evaluations',
-        contentLevel: 'procedure',
-        estimatedReadTime: 20,
-        targetRoles: ['Manager'],
-        industryContext: {
-          frequency: 'Per cycle (annual/semi-annual)',
-          timing: 'During evaluation window (2-4 weeks)',
-          benchmark: 'Industry standard 30-45 minutes per evaluation'
-        }
-      },
-      {
-        id: 'sec-3-4',
-        sectionNumber: '3.4',
         title: 'Self-Assessment Process',
-        description: 'Employee guide for completing self-evaluations',
+        description: 'Employee guide for completing self-evaluations across all CRGV components',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['Employee'],
         industryContext: {
           frequency: 'Per cycle',
@@ -492,13 +492,13 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-3-5',
-        sectionNumber: '3.5',
+        id: 'sec-3-4',
+        sectionNumber: '3.4',
         title: 'Goal Rating Process',
         description: 'Evaluating goal achievement with evidence',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Manager'],
+        targetRoles: ['Manager', 'Employee'],
         industryContext: {
           frequency: 'Per evaluation',
           timing: 'Part of evaluation window',
@@ -506,13 +506,27 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-3-6',
-        sectionNumber: '3.6',
+        id: 'sec-3-5',
+        sectionNumber: '3.5',
+        title: 'Responsibility/KRA Assessment',
+        description: 'Rating job responsibilities and Key Result Areas',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Manager', 'Employee'],
+        industryContext: {
+          frequency: 'Per evaluation',
+          timing: 'Part of evaluation window',
+          benchmark: 'Weight-adjusted KRA scoring'
+        }
+      },
+      {
+        id: 'sec-3-5a',
+        sectionNumber: '3.5a',
         title: 'Competency Assessment',
         description: 'Rating behavioral competencies with indicators',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Manager'],
+        targetRoles: ['Manager', 'Employee'],
         industryContext: {
           frequency: 'Per evaluation',
           timing: 'Part of evaluation window',
@@ -520,18 +534,31 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
+        id: 'sec-3-6',
+        sectionNumber: '3.6',
+        title: 'Values Assessment',
+        description: 'Evaluating employees against organizational values',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Manager', 'Employee'],
+        industryContext: {
+          frequency: 'Per evaluation',
+          timing: 'Part of evaluation window',
+          benchmark: 'Values alignment with culture initiatives'
+        }
+      },
+      {
         id: 'sec-3-7',
         sectionNumber: '3.7',
-        title: 'Employee Response Phase',
-        description: 'Managing employee acknowledgment and disagreements',
+        title: 'Manager Evaluation Workflow',
+        description: 'Complete guide for managers conducting evaluations across all CRGV components',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['Employee', 'HR User'],
+        estimatedReadTime: 18,
+        targetRoles: ['Manager'],
         industryContext: {
-          frequency: 'Post-evaluation',
-          timing: '5-10 business days after manager submission',
-          benchmark: 'Response rate target: 95%+',
-          compliance: ['Documentation for legal compliance']
+          frequency: 'Per cycle (annual/semi-annual)',
+          timing: 'During evaluation window (2-4 weeks)',
+          benchmark: 'Industry standard 60-90 minutes per evaluation'
         }
       },
       {
@@ -551,6 +578,21 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-3-9',
         sectionNumber: '3.9',
+        title: 'Employee Response Phase',
+        description: 'Managing employee acknowledgment and disagreements',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Employee', 'HR User'],
+        industryContext: {
+          frequency: 'Post-evaluation',
+          timing: '5-10 business days after manager submission',
+          benchmark: 'Response rate target: 95%+',
+          compliance: ['Documentation for legal compliance']
+        }
+      },
+      {
+        id: 'sec-3-10',
+        sectionNumber: '3.10',
         title: 'Role Change Handling',
         description: 'Managing appraisals for employees who changed roles',
         contentLevel: 'procedure',
@@ -563,8 +605,8 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-3-10',
-        sectionNumber: '3.10',
+        id: 'sec-3-11',
+        sectionNumber: '3.11',
         title: 'Finalization & Close-out',
         description: 'Completing and archiving the appraisal cycle',
         contentLevel: 'procedure',
@@ -577,8 +619,8 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-3-11',
-        sectionNumber: '3.11',
+        id: 'sec-3-12',
+        sectionNumber: '3.12',
         title: 'Rating Release Workflow',
         description: 'Releasing finalized ratings to employees and managing the visibility transition',
         contentLevel: 'procedure',
@@ -591,8 +633,8 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-3-12',
-        sectionNumber: '3.12',
+        id: 'sec-3-13',
+        sectionNumber: '3.13',
         title: 'Rating Dispute & Acknowledgment',
         description: 'Employee acknowledgment process and formal dispute resolution',
         contentLevel: 'procedure',
@@ -603,20 +645,6 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           timing: '10 business days for acknowledgment',
           benchmark: 'Acknowledgment rate target: 95%+',
           compliance: ['Documentation for legal compliance']
-        }
-      },
-      {
-        id: 'sec-3-13',
-        sectionNumber: '3.13',
-        title: 'Values Assessment',
-        description: 'Evaluating employees against organizational values',
-        contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Manager', 'HR User'],
-        industryContext: {
-          frequency: 'Per evaluation',
-          timing: 'Part of evaluation window',
-          benchmark: 'Values alignment with culture initiatives'
         }
       }
     ]

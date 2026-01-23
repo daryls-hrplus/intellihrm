@@ -10,6 +10,7 @@ import {
   SetupOverallScales,
   SetupSkillsCompetencies,
   SetupCompetencies,
+  SetupResponsibilityKRA,
   SetupApprovalWorkflows,
   SetupNotifications,
   SetupFormTemplates,
@@ -47,7 +48,7 @@ const APPRAISALS_SECTION_IDS = new Set([
   'sec-2-16',
 ]);
 
-const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4a', 'sec-2-4', 'sec-2-4c', 'sec-2-1-workflows', 'sec-2-4b']);
+const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4a', 'sec-2-4', 'sec-2-4b', 'sec-2-4c', 'sec-2-1-workflows', 'sec-2-4d']);
 
 export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProps) {
   const [openGroups, setOpenGroups] = useState<string[]>(['foundation']);
@@ -99,10 +100,10 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
               <div className="text-left">
                 <h3 className="font-semibold">Core Framework</h3>
                 <p className="text-sm text-muted-foreground font-normal">
-                  Rating scales, competencies, workflows, notifications, and performance trends
+                  Rating scales, competencies, responsibilities/KRAs, workflows, notifications, and performance trends
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto">8 sections</Badge>
+              <Badge variant="outline" className="ml-auto">9 sections</Badge>
             </div>
           </AccordionTrigger>
           <AccordionContent forceMount className="pt-4 space-y-6 data-[state=closed]:hidden">
@@ -121,13 +122,16 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             <section id="sec-2-4" data-manual-anchor="sec-2-4" className="scroll-mt-32">
               <SetupCompetencies />
             </section>
+            <section id="sec-2-4b" data-manual-anchor="sec-2-4b" className="scroll-mt-32">
+              <SetupResponsibilityKRA />
+            </section>
             <section id="sec-2-4c" data-manual-anchor="sec-2-4c" className="scroll-mt-32">
               <SetupIndexSettings />
             </section>
             <section id="sec-2-1-workflows" data-manual-anchor="sec-2-1-workflows" className="scroll-mt-32">
               <SetupApprovalWorkflows />
             </section>
-            <section id="sec-2-4b" data-manual-anchor="sec-2-4b" className="scroll-mt-32">
+            <section id="sec-2-4d" data-manual-anchor="sec-2-4d" className="scroll-mt-32">
               <SetupNotifications />
             </section>
           </AccordionContent>
