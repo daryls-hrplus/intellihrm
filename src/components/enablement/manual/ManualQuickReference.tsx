@@ -18,7 +18,13 @@ import {
   TrendingUp,
   Table,
   CheckCircle2,
-  Info
+  Info,
+  Sparkles,
+  Brain,
+  Target,
+  DollarSign,
+  TrendingDown,
+  LineChart
 } from 'lucide-react';
 
 export function ManualQuickReference() {
@@ -728,40 +734,107 @@ export function ManualQuickReference() {
             <CardTitle>Executive Strategic Insights Guide</CardTitle>
             <Badge className="ml-auto bg-amber-600 text-white">EXEC</Badge>
           </div>
-          <CardDescription>6 key dashboards and metrics for leadership • 1-2 hours per quarter</CardDescription>
+          <CardDescription>10 strategic insight areas with AI-powered predictions for leadership • 2-3 hours per quarter</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { num: 1, title: 'PERFORMANCE DISTRIBUTION', metrics: ['Overall rating bell curve', 'Department comparisons', 'Year-over-year trends'], location: 'Analytics > Distribution Dashboard' },
-              { num: 2, title: 'NINE-BOX SUMMARY', metrics: ['High performer/potential count', 'At-risk talent identification', 'Movement between boxes'], location: 'Talent > Nine-Box Grid' },
-              { num: 3, title: 'HIGH PERFORMER RETENTION', metrics: ['Top performer by dept', 'Retention risk indicators', 'Flight risk alerts'], location: 'Analytics > Retention Dashboard' },
-              { num: 4, title: 'SUCCESSION PIPELINE', metrics: ['Ready-now candidates', 'Coverage ratio', 'Development progress'], location: 'Succession > Pipeline Summary' },
-              { num: 5, title: 'CALIBRATION ADJUSTMENTS', metrics: ['Pre vs post distribution', 'Adjustment magnitude', 'Governance rule triggers'], location: 'Calibration > Adjustment Report' },
-              { num: 6, title: 'CYCLE COMPLETION RATE', metrics: ['Overall completion %', 'Department breakdown', 'Overdue/at-risk count'], location: 'Analytics > Completion Dashboard' }
-            ].map((dash) => (
-              <div key={dash.num} className="p-4 border rounded-lg bg-muted/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-6 h-6 rounded-full bg-amber-600 text-white text-xs flex items-center justify-center font-bold">{dash.num}</span>
-                  <h4 className="font-semibold text-sm">{dash.title}</h4>
+          {/* Performance & Talent Dashboards */}
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <Target className="h-4 w-4 text-amber-600" />
+              Performance & Talent Insights
+            </h4>
+            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-3">
+              {[
+                { num: 1, title: 'PERFORMANCE DISTRIBUTION', metrics: ['Overall rating bell curve', 'Department comparisons', 'Pre/post calibration overlay'], location: 'Analytics > Distribution' },
+                { num: 2, title: 'NINE-BOX SUMMARY', metrics: ['High performer/potential count', 'At-risk talent identification', 'Movement between boxes (YoY)'], location: 'Talent > Nine-Box Grid' },
+                { num: 3, title: 'TALENT RISK RADAR', metrics: ['Attrition risk predictions (AI)', 'Burnout indicators', 'Flight risk alerts'], location: 'Analytics > Talent Risk', hasAI: true },
+                { num: 4, title: 'SUCCESSION PIPELINE', metrics: ['Critical role coverage gaps', 'Time-to-ready projections', 'Ready-now candidates'], location: 'Succession > Pipeline' },
+                { num: 5, title: 'CALIBRATION ADJUSTMENTS', metrics: ['Pre vs post distribution', 'Adjustment magnitude', 'Governance rule triggers'], location: 'Calibration > Adjustments' }
+              ].map((dash) => (
+                <div key={dash.num} className="p-3 border rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-5 h-5 rounded-full bg-amber-600 text-white text-xs flex items-center justify-center font-bold">{dash.num}</span>
+                    <h4 className="font-semibold text-xs leading-tight">{dash.title}</h4>
+                    {dash.hasAI && <Sparkles className="h-3 w-3 text-purple-500" />}
+                  </div>
+                  <div className="space-y-0.5 mb-2">
+                    {dash.metrics.map((metric, i) => (
+                      <p key={i} className="text-xs text-muted-foreground">• {metric}</p>
+                    ))}
+                  </div>
+                  <p className="text-xs font-mono bg-background border px-1.5 py-0.5 rounded truncate" title={dash.location}>{dash.location}</p>
                 </div>
-                <div className="space-y-1 mb-3">
-                  {dash.metrics.map((metric, i) => (
-                    <p key={i} className="text-xs text-muted-foreground">• {metric}</p>
-                  ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Strategic Planning Dashboards */}
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <LineChart className="h-4 w-4 text-amber-600" />
+              Strategic Planning & Forecasting
+            </h4>
+            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-3">
+              {[
+                { num: 6, title: 'CYCLE COMPLETION RATE', metrics: ['Overall completion %', 'Department breakdown', 'Overdue/at-risk count'], location: 'Analytics > Completion' },
+                { num: 7, title: 'WORKFORCE PLANNING', metrics: ['Headcount forecast (Monte Carlo)', 'Attrition projection scenarios', 'Skills gap analysis'], location: 'Workforce > Planning', hasAI: true },
+                { num: 8, title: 'PERFORMANCE-TO-PAY LINKAGE', metrics: ['Merit eligibility distribution', 'Compensation impact projections', 'Pay equity flags by rating'], location: 'Compensation > Merit' },
+                { num: 9, title: 'PREDICTIVE TALENT INSIGHTS', metrics: ['Promotion success predictions', 'Role readiness forecasts', 'High-potential identification'], location: 'Intelligence > Predictive AI', hasAI: true },
+                { num: 10, title: 'CROSS-CYCLE TRENDS', metrics: ['3-year performance trajectory', 'Calibration pattern analysis', 'Manager consistency metrics'], location: 'Analytics > Trends' }
+              ].map((dash) => (
+                <div key={dash.num} className="p-3 border rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-5 h-5 rounded-full bg-amber-600 text-white text-xs flex items-center justify-center font-bold">{dash.num}</span>
+                    <h4 className="font-semibold text-xs leading-tight">{dash.title}</h4>
+                    {dash.hasAI && <Sparkles className="h-3 w-3 text-purple-500" />}
+                  </div>
+                  <div className="space-y-0.5 mb-2">
+                    {dash.metrics.map((metric, i) => (
+                      <p key={i} className="text-xs text-muted-foreground">• {metric}</p>
+                    ))}
+                  </div>
+                  <p className="text-xs font-mono bg-background border px-1.5 py-0.5 rounded truncate" title={dash.location}>{dash.location}</p>
                 </div>
-                <p className="text-xs font-mono bg-background border px-2 py-1 rounded">{dash.location}</p>
+              ))}
+            </div>
+          </div>
+
+          {/* AI-Powered Decision Support Callout */}
+          <div className="mb-4 p-3 border rounded-lg bg-purple-500/10 border-purple-500/30">
+            <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+              <Brain className="h-4 w-4 text-purple-600" />
+              AI-Powered Decision Support
+            </h4>
+            <div className="grid md:grid-cols-4 gap-3 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2">
+                <Sparkles className="h-3 w-3 mt-0.5 text-purple-500 shrink-0" />
+                <span>Attrition predictions with 75-85% accuracy (6+ months data)</span>
               </div>
-            ))}
+              <div className="flex items-start gap-2">
+                <Sparkles className="h-3 w-3 mt-0.5 text-purple-500 shrink-0" />
+                <span>Promotion success likelihood for succession candidates</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Sparkles className="h-3 w-3 mt-0.5 text-purple-500 shrink-0" />
+                <span>Anomaly detection in rating patterns across managers</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Sparkles className="h-3 w-3 mt-0.5 text-purple-500 shrink-0" />
+                <span>Workforce scenario modeling with cost projections</span>
+              </div>
+            </div>
           </div>
           
-          <div className="mt-4 grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="p-3 border-l-4 border-l-amber-600 bg-amber-500/10 rounded-r-lg">
               <h4 className="font-semibold text-sm mb-2">Approval Responsibilities</h4>
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>• Calibration session sign-off (when required)</p>
                 <p>• High-stakes rating exceptions</p>
                 <p>• Forced distribution overrides</p>
+                <p>• <strong>Succession plan approval for critical roles</strong></p>
+                <p>• <strong>Senior employee dispute escalation</strong></p>
+                <p>• <strong>Development budget allocation</strong></p>
               </div>
             </div>
             <div className="p-3 border-l-4 border-l-amber-600 bg-amber-500/10 rounded-r-lg">
@@ -770,6 +843,9 @@ export function ManualQuickReference() {
                 <p>• What drove the rating distribution shift?</p>
                 <p>• Who are our emerging high-potentials?</p>
                 <p>• What's the plan for bottom-box performers?</p>
+                <p>• <strong>What are the workforce cost implications of talent decisions?</strong></p>
+                <p>• <strong>Which skills gaps pose the greatest strategic risk?</strong></p>
+                <p>• <strong>How does our performance-to-pay linkage compare to market?</strong></p>
               </div>
             </div>
           </div>
