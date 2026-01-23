@@ -221,40 +221,250 @@ export function ManualQuickReference() {
             <CardTitle>Manager Evaluation Journey</CardTitle>
             <Badge className="ml-auto bg-blue-600 text-white">MSS</Badge>
           </div>
-          <CardDescription>8-step journey for evaluating direct reports • 2-4 hours per cycle</CardDescription>
+          <CardDescription>10-step journey for evaluating direct reports • 3-5 hours per cycle</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
+          {/* Template awareness note */}
+          <div className="mb-4 p-3 border-l-4 border-l-blue-500 bg-blue-500/10 rounded-r-lg">
+            <p className="text-xs text-muted-foreground">
+              <strong>Template-Aware:</strong> Rating components (Goals, Responsibilities, Competencies, Values) vary by cycle template. 
+              For role changes, use Role Segment Timeline. For multi-position employees, review Position Weights.
+            </p>
+          </div>
+          
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              { step: 1, title: 'ENROLLMENT REVIEW', time: 'Cycle Start', items: ['Verify direct reports enrolled', 'Check dotted-line assignments', 'Review multi-position employees'] },
-              { step: 2, title: 'REVIEW SELF-ASSESSMENTS', time: 'After submissions', items: ['Access team dashboard', 'Read each self-assessment', 'Note agreement areas'] },
-              { step: 3, title: 'RATE COMPONENTS', time: 'Week 2-3 • 20-30 min/emp', items: ['Rate Goals with evidence', 'Rate Responsibilities/KRAs', 'Rate Competencies', 'Rate Values (if enabled)'] },
-              { step: 4, title: 'USE AI ASSISTANT', time: '5-10 min/employee', items: ['Generate narrative draft', 'Review confidence score', 'Edit and personalize', 'Check bias alerts'] },
-              { step: 5, title: 'SUBMIT EVALUATIONS', time: 'Before deadline', items: ['Review team distribution', 'Ensure all complete', 'Submit for calibration'] },
-              { step: 6, title: 'CALIBRATION SESSION', time: 'Scheduled', items: ['Prepare outlier justification', 'Bring evidence', 'Accept/contest adjustments'] },
-              { step: 7, title: 'CONDUCT MEETINGS', time: 'Post-calibration', items: ['Schedule via interview module', 'Share calibrated results', 'Discuss development'] },
-              { step: 8, title: 'PROCESS ACKNOWLEDGMENTS', time: 'Final week', items: ['Monitor submissions', 'Address disagreements', 'Finalize and close'] }
-            ].map((phase) => (
-              <div key={phase.step} className="p-3 border rounded-lg bg-muted/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">{phase.step}</span>
-                  <h4 className="font-semibold text-xs">{phase.title}</h4>
+            {/* Step 1: Enrollment Review */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">1</span>
+                <h4 className="font-semibold text-xs">ENROLLMENT REVIEW</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Cycle Start</p>
+              <div className="space-y-1">
+                {['Verify direct reports enrolled', 'Check dotted-line assignments', 'Review multi-position employees', 'Note any role changes mid-cycle'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Step 2: Review Self-Assessments */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">2</span>
+                <h4 className="font-semibold text-xs">REVIEW SELF-ASSESSMENTS</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">After submissions</p>
+              <div className="space-y-1">
+                {['Access team dashboard', 'Read each self-assessment', 'Note agreement areas', 'Identify gaps for discussion'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Step 3: Rate Components - Template Aware */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">3</span>
+                <h4 className="font-semibold text-xs">RATE COMPONENTS</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Week 2-3 • 20-30 min/emp</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Rate <strong>Goals</strong> (if enabled)</span>
                 </div>
-                <p className="text-xs text-muted-foreground mb-2">{phase.time}</p>
-                <div className="space-y-1">
-                  {phase.items.map((item, i) => (
-                    <div key={i} className="flex items-center gap-1">
-                      <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
-                    </div>
-                  ))}
+                <div className="flex items-center gap-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Rate <strong>Responsibilities/KRAs</strong> (if enabled)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Rate <strong>Competencies</strong> (if enabled)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Rate <strong>Values</strong> (if enabled)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Handle <strong>Role Segments</strong> if role changed</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Adjust <strong>Position Weights</strong> if multi-position</span>
                 </div>
               </div>
-            ))}
+            </div>
+            
+            {/* Step 4: AI Assistant - Enhanced */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">4</span>
+                <h4 className="font-semibold text-xs">USE AI ASSISTANT</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">5-10 min/employee</p>
+              <div className="space-y-1">
+                {[
+                  'Generate narrative draft',
+                  'Review AI confidence score',
+                  'Edit and personalize',
+                  'Address bias alert flags',
+                  'Check comment quality (≥80%)',
+                  'Review proficiency impact',
+                  'Preview downstream actions'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Step 5: Submit Evaluations - Approval Workflow */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">5</span>
+                <h4 className="font-semibold text-xs">SUBMIT EVALUATIONS</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Before deadline</p>
+              <div className="space-y-1">
+                {[
+                  'Review team score distribution',
+                  'Verify all enabled components rated',
+                  'Check comment quality ≥80%',
+                  'Click "Submit for Approval"'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2 italic">Triggers approval workflow</p>
+            </div>
+            
+            {/* Step 5a: Await Approval - NEW */}
+            <div className="p-3 border rounded-lg bg-blue-500/10 border-blue-500/30">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-700 text-white text-xs flex items-center justify-center font-bold">5a</span>
+                <h4 className="font-semibold text-xs">AWAIT APPROVAL</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">2-5 business days</p>
+              <div className="space-y-1">
+                {[
+                  'Monitor status in workflow dashboard',
+                  'Respond to approval queries',
+                  'Justify outlier ratings if asked'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 text-xs">
+                <p className="font-medium">Approval Chain:</p>
+                <p className="text-muted-foreground">• Skip-Level Manager (72h SLA)</p>
+                <p className="text-muted-foreground">• HR Representative (48h SLA)</p>
+              </div>
+            </div>
+            
+            {/* Step 6: Calibration Session */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">6</span>
+                <h4 className="font-semibold text-xs">CALIBRATION SESSION</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Scheduled</p>
+              <div className="space-y-1">
+                {[
+                  'Review pre-calibration analysis',
+                  'Prepare justification for extremes (1s/5s)',
+                  'Bring evidence for borderline cases',
+                  'Participate in calibration',
+                  'Accept/contest adjustments',
+                  'Document calibration rationale'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Step 7: Conduct Meetings - Enhanced */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">7</span>
+                <h4 className="font-semibold text-xs">CONDUCT MEETINGS</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Post-calibration • 45-60 min</p>
+              <div className="space-y-1">
+                {[
+                  'Share evaluation 24h before',
+                  'Schedule via interview module',
+                  'Configure meeting format',
+                  'Conduct performance discussion',
+                  'Mark interview complete (required)',
+                  'Log interview notes'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Step 8: Process Acknowledgments - Response Types */}
+            <div className="p-3 border rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">8</span>
+                <h4 className="font-semibold text-xs">PROCESS ACKNOWLEDGMENTS</h4>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Final week</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Monitor team acknowledgment status</span>
+                </div>
+                <div className="text-xs mt-1 mb-1 font-medium">Review responses by type:</div>
+                <div className="pl-2 space-y-0.5 text-xs text-muted-foreground">
+                  <p>• <strong>Agree</strong> - No action required</p>
+                  <p>• <strong>Partially Disagree</strong> - Review concerns</p>
+                  <p>• <strong>Disagree</strong> - Await HR escalation</p>
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Address factual corrections</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Step 8a: Dispute Rebuttal - NEW */}
+            <div className="p-3 border rounded-lg bg-amber-500/10 border-amber-500/30">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-5 h-5 rounded-full bg-amber-600 text-white text-xs flex items-center justify-center font-bold">8a</span>
+                <h4 className="font-semibold text-xs text-amber-700 dark:text-amber-400">DISPUTE REBUTTAL</h4>
+                <Badge variant="outline" className="text-xs border-amber-500 text-amber-600">If Filed</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Within dispute window • 15-30 min</p>
+              <div className="space-y-1">
+                {[
+                  'Receive dispute notification',
+                  'Review employee justification',
+                  'Consider dispute category'
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="text-xs mt-2 font-medium">Resolution paths:</div>
+              <div className="pl-2 space-y-0.5 text-xs text-muted-foreground">
+                <p>• <strong>Accept</strong> - Revise rating with justification</p>
+                <p>• <strong>Rebuttal</strong> - Submit counter-rationale</p>
+              </div>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-2 italic">If unresolved, HR makes final determination.</p>
+            </div>
           </div>
           
           <div className="mt-4 p-3 border-l-4 border-l-blue-600 bg-blue-500/10 rounded-r-lg">
             <h4 className="font-semibold text-sm mb-1">Success Indicators</h4>
-            <p className="text-xs text-muted-foreground">All evaluations submitted before deadline • Team distribution aligns with guidelines • All review meetings completed • 100% acknowledgment rate</p>
+            <p className="text-xs text-muted-foreground">All evaluations submitted before deadline • All enabled components rated with evidence • Comment quality ≥80% • Approval workflow completed within SLA • Team distribution aligns with calibration guidelines • All review meetings conducted and logged • 100% acknowledgment rate • Disputes resolved with documented rationale (if applicable)</p>
           </div>
         </CardContent>
       </Card>
