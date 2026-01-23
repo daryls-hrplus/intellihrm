@@ -138,10 +138,10 @@ const DISPUTE_CATEGORIES = [
 
 export function WorkflowRatingDispute() {
   return (
-    <Card id="sec-3-11">
+    <Card id="sec-3-12">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 3.11</Badge>
+          <Badge variant="outline">Section 3.12</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~18 min read

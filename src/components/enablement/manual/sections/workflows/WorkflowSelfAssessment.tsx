@@ -13,11 +13,12 @@ import { TroubleshootingSection } from '../../components/TroubleshootingSection'
 const SELF_ASSESSMENT_STEPS = [
   {
     title: 'Access Your Appraisal',
-    description: 'Navigate to your active performance review.',
+    description: 'Navigate to your active performance review via ESS.',
     substeps: [
-      'Go to ESS → My Performance',
+      'Go to ESS → My Appraisals (or /ess/my-appraisals)',
       'Click on the active appraisal cycle',
-      'Review the cycle timeline and deadlines'
+      'Review the AppraisalJourneyTracker showing your current stage',
+      'Check phase deadlines in the timeline'
     ],
     expectedResult: 'Self-assessment form opens with your assigned goals and competencies'
   },

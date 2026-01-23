@@ -9,6 +9,7 @@ import {
   WorkflowInterviewScheduling,
   WorkflowRoleChangeHandling,
   WorkflowFinalization,
+  WorkflowRatingRelease,
   WorkflowRatingDispute,
   WorkflowValuesAssessment
 } from './sections/workflows';
@@ -47,9 +48,12 @@ export function ManualWorkflowsSection() {
         <WorkflowFinalization />
       </section>
       <section id="sec-3-11" data-manual-anchor="sec-3-11" className="scroll-mt-32">
-        <WorkflowRatingDispute />
+        <WorkflowRatingRelease />
       </section>
       <section id="sec-3-12" data-manual-anchor="sec-3-12" className="scroll-mt-32">
+        <WorkflowRatingDispute />
+      </section>
+      <section id="sec-3-13" data-manual-anchor="sec-3-13" className="scroll-mt-32">
         <WorkflowValuesAssessment />
       </section>
     </div>

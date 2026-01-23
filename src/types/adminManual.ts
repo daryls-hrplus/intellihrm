@@ -575,6 +575,49 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           timing: 'Within 2 weeks of deadline',
           benchmark: 'Completion rate target: 95%+'
         }
+      },
+      {
+        id: 'sec-3-11',
+        sectionNumber: '3.11',
+        title: 'Rating Release Workflow',
+        description: 'Releasing finalized ratings to employees and managing the visibility transition',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'Post-calibration',
+          timing: 'Before employee acknowledgment',
+          benchmark: 'Release within 1 week of calibration'
+        }
+      },
+      {
+        id: 'sec-3-12',
+        sectionNumber: '3.12',
+        title: 'Rating Dispute & Acknowledgment',
+        description: 'Employee acknowledgment process and formal dispute resolution',
+        contentLevel: 'procedure',
+        estimatedReadTime: 18,
+        targetRoles: ['Employee', 'Manager', 'HR User'],
+        industryContext: {
+          frequency: 'Post-release',
+          timing: '10 business days for acknowledgment',
+          benchmark: 'Acknowledgment rate target: 95%+',
+          compliance: ['Documentation for legal compliance']
+        }
+      },
+      {
+        id: 'sec-3-13',
+        sectionNumber: '3.13',
+        title: 'Values Assessment',
+        description: 'Evaluating employees against organizational values',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Manager', 'HR User'],
+        industryContext: {
+          frequency: 'Per evaluation',
+          timing: 'Part of evaluation window',
+          benchmark: 'Values alignment with culture initiatives'
+        }
       }
     ]
   },

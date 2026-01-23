@@ -48,9 +48,20 @@ const LAUNCH_STEPS = [
 
 const FIELDS = [
   { name: 'status', required: true, type: 'Enum', description: 'Current lifecycle stage of the cycle', defaultValue: 'Draft', validation: 'Must follow valid state transitions' },
+  { name: 'cycle_type', required: true, type: 'Enum', description: 'Type of appraisal cycle', defaultValue: 'annual', validation: 'annual, mid_year, quarterly, probation, manager_360' },
   { name: 'start_date', required: true, type: 'Date', description: 'When the cycle becomes active for participants', validation: 'Cannot be in the past when launching' },
   { name: 'end_date', required: true, type: 'Date', description: 'When the cycle closes for new submissions', validation: 'Must be after start_date' },
-  { name: 'evaluation_deadline', required: false, type: 'Date', description: 'Deadline for manager evaluations', validation: 'Must be between start_date and end_date' },
+  { name: 'performance_period_start', required: false, type: 'Date', description: 'Start of the actual performance period being evaluated' },
+  { name: 'performance_period_end', required: false, type: 'Date', description: 'End of the actual performance period being evaluated' },
+  { name: 'self_assessment_deadline', required: false, type: 'Date', description: 'Deadline for employee self-assessments' },
+  { name: 'feedback_360_deadline', required: false, type: 'Date', description: 'Deadline for 360 feedback collection' },
+  { name: 'manager_review_deadline', required: false, type: 'Date', description: 'Deadline for manager evaluations' },
+  { name: 'calibration_deadline', required: false, type: 'Date', description: 'Deadline for calibration sessions' },
+  { name: 'finalization_deadline', required: false, type: 'Date', description: 'Deadline for rating finalization' },
+  { name: 'acknowledgment_deadline', required: false, type: 'Date', description: 'Deadline for employee acknowledgment' },
+  { name: 'auto_activate_enabled', required: false, type: 'Boolean', description: 'Enable automatic cycle activation at start date', defaultValue: 'false' },
+  { name: 'activated_at', required: false, type: 'Timestamp', description: 'When the cycle was activated' },
+  { name: 'activated_by', required: false, type: 'UUID', description: 'User who activated the cycle' },
   { name: 'is_locked', required: true, type: 'Boolean', description: 'Prevents all modifications when true', defaultValue: 'false' },
   { name: 'locked_by', required: false, type: 'UUID', description: 'User who locked the cycle' },
   { name: 'locked_at', required: false, type: 'Timestamp', description: 'When the cycle was locked' }
