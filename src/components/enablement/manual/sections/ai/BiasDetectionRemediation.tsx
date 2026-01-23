@@ -7,6 +7,7 @@ import { TipCallout, WarningCallout } from '../../components/Callout';
 import { StepByStep, Step } from '../../components/StepByStep';
 import { BusinessRules } from '../../components/BusinessRules';
 
+// Section 5.7 - Bias Detection & Remediation (renumbered from 5.4)
 const FIELD_REFERENCES = [
   { fieldName: 'Check Bias Button', location: 'AI Feedback Assistant Panel → Comment Improvement', required: false, description: 'Analyzes entered text for potential bias indicators' },
   { fieldName: 'Bias Alert Banner', location: 'Evaluation Form (when detected)', required: false, description: 'System-generated warning when bias patterns are identified' },
@@ -101,10 +102,10 @@ Reason: Conditional praise implies surprise based on role stereotypes`;
 
 export function BiasDetectionRemediation() {
   return (
-    <Card id="sec-5-4">
+    <Card id="sec-5-7">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 5.4</Badge>
+          <Badge variant="outline">Section 5.7</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~15 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />Manager / HR / Compliance</Badge>
         </div>

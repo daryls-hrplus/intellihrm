@@ -14,14 +14,15 @@ const BUSINESS_RULES = [
   { rule: 'Key Insights auto-refresh on data change', enforcement: 'System' as const, description: 'AI insights panel regenerates when underlying analytics data is updated.' }
 ];
 
+// Section 5.12 - AI Analytics & Predictions (renumbered from 5.6, moved to end)
 export function AIAnalyticsPredictions() {
-  const relatedTopics = RELATED_TOPICS['sec-5-6'] || [];
+  const relatedTopics = RELATED_TOPICS['sec-5-12'] || [];
 
   return (
-    <Card id="sec-5-6">
+    <Card id="sec-5-12">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 5.6</Badge>
+          <Badge variant="outline">Section 5.12</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~8 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />HR / Executive / Manager</Badge>
         </div>

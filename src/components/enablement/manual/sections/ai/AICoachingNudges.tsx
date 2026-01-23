@@ -11,6 +11,7 @@ import {
   RelatedTopics
 } from '../../components';
 
+// Section 5.10 - AI Coaching Nudges (renumbered from 5.7)
 const NUDGE_TYPES = [
   { 
     type: 'Goal Progress Alert', 
@@ -58,10 +59,10 @@ const BUSINESS_RULES = [
 
 export function AICoachingNudges() {
   return (
-    <Card id="sec-5-7">
+    <Card id="sec-5-10">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 5.7</Badge>
+          <Badge variant="outline">Section 5.10</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~12 min read

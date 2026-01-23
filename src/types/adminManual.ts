@@ -653,30 +653,30 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
     id: 'part-4',
     sectionNumber: '4',
     title: 'Calibration Sessions',
-    description: 'Running effective calibration to ensure fair and consistent ratings',
+    description: 'Ensuring rating consistency through collaborative review',
     contentLevel: 'procedure',
-    estimatedReadTime: 45,
+    estimatedReadTime: 75,
     targetRoles: ['HR User', 'Admin'],
     subsections: [
       {
         id: 'sec-4-1',
         sectionNumber: '4.1',
         title: 'Calibration Concepts & Purpose',
-        description: 'Understanding why calibration matters and how it works',
+        description: 'Understanding the rationale and benefits of calibration',
         contentLevel: 'concept',
-        estimatedReadTime: 10,
-        targetRoles: ['All'],
+        estimatedReadTime: 6,
+        targetRoles: ['HR User', 'Admin'],
         industryContext: {
-          frequency: 'Pre-calibration training',
-          timing: 'Before first calibration session',
-          benchmark: 'Reduce rating bias by 20-30%'
+          frequency: 'Annual training refresh',
+          timing: 'Pre-calibration season',
+          benchmark: 'Alignment with enterprise performance culture'
         }
       },
       {
         id: 'sec-4-2',
         sectionNumber: '4.2',
         title: 'Calibration Session Setup',
-        description: 'Creating and configuring calibration sessions',
+        description: 'Creating and scheduling calibration sessions',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['HR User', 'Admin'],
@@ -689,29 +689,29 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-4-3',
         sectionNumber: '4.3',
-        title: 'Calibration Workspace Guide',
-        description: 'Using the calibration interface effectively',
+        title: 'Potential Assessment Configuration',
+        description: 'Configure templates and questions for potential assessment',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['HR User'],
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
         industryContext: {
-          frequency: 'During calibration sessions',
-          timing: '2-4 hours per session',
-          benchmark: 'Facilitator ratio: 1 HR per 50-100 employees'
+          frequency: 'One-time setup, annual review',
+          timing: 'Pre-calibration season',
+          benchmark: 'Learning agility, leadership capacity, strategic thinking'
         }
       },
       {
         id: 'sec-4-4',
         sectionNumber: '4.4',
-        title: 'AI-Powered Calibration Features',
-        description: 'Leveraging AI for anomaly detection and suggestions',
+        title: 'Nine-Box Rating Sources Setup',
+        description: 'Configure data sources for Nine-Box grid axes',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['HR User', 'Admin'],
+        estimatedReadTime: 8,
+        targetRoles: ['Admin'],
         industryContext: {
-          frequency: 'During calibration',
-          timing: 'Real-time during session',
-          benchmark: 'AI accuracy rate: 85%+ for anomaly detection'
+          frequency: 'One-time setup, review as needed',
+          timing: 'Pre-calibration',
+          benchmark: 'Composite scoring for performance and potential'
         }
       },
       {
@@ -731,6 +731,48 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-4-6',
         sectionNumber: '4.6',
+        title: 'Calibration Workspace Guide',
+        description: 'Using the calibration interface effectively',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR User'],
+        industryContext: {
+          frequency: 'During calibration sessions',
+          timing: '2-4 hours per session',
+          benchmark: 'Facilitator ratio: 1 HR per 50-100 employees'
+        }
+      },
+      {
+        id: 'sec-4-7',
+        sectionNumber: '4.7',
+        title: 'AI-Powered Calibration Features',
+        description: 'Leveraging AI for anomaly detection and suggestions',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'During calibration',
+          timing: 'Real-time during session',
+          benchmark: 'AI accuracy rate: 85%+ for anomaly detection'
+        }
+      },
+      {
+        id: 'sec-4-8',
+        sectionNumber: '4.8',
+        title: 'Calibration Governance Rules',
+        description: 'Configure rules that govern calibration behavior and approvals',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup, policy review annually',
+          timing: 'Pre-implementation',
+          benchmark: 'Max score change limits, justification requirements'
+        }
+      },
+      {
+        id: 'sec-4-9',
+        sectionNumber: '4.9',
         title: 'Calibration Governance & Audit',
         description: 'Ensuring compliance and documenting decisions',
         contentLevel: 'procedure',
@@ -742,6 +784,20 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           benchmark: '100% justification documentation',
           compliance: ['Audit trail requirements', 'EEOC compliance']
         }
+      },
+      {
+        id: 'sec-4-10',
+        sectionNumber: '4.10',
+        title: 'Manager Calibration Alignment',
+        description: 'Track and improve manager rating alignment over time',
+        contentLevel: 'procedure',
+        estimatedReadTime: 7,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'Post-calibration analysis',
+          timing: 'After each calibration cycle',
+          benchmark: 'Alignment score thresholds, training interventions'
+        }
       }
     ]
   },
@@ -751,7 +807,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
     title: 'AI Features & Intelligence',
     description: 'Leveraging AI capabilities throughout the appraisal process',
     contentLevel: 'procedure',
-    estimatedReadTime: 45,
+    estimatedReadTime: 90,
     targetRoles: ['Manager', 'HR User', 'Admin'],
     subsections: [
       {
@@ -760,7 +816,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         title: 'AI Feedback Assistant Overview',
         description: 'Introduction to AI-powered evaluation assistance',
         contentLevel: 'overview',
-        estimatedReadTime: 10,
+        estimatedReadTime: 8,
         targetRoles: ['Manager', 'HR User'],
         industryContext: {
           frequency: 'During evaluations',
@@ -771,6 +827,20 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-5-2',
         sectionNumber: '5.2',
+        title: 'AI-Generated Narratives',
+        description: 'Create cohesive performance summaries from component ratings',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Manager', 'HR User'],
+        industryContext: {
+          frequency: 'Per evaluation',
+          timing: 'During summary writing',
+          benchmark: 'ISO 42001 human review compliance'
+        }
+      },
+      {
+        id: 'sec-5-3',
+        sectionNumber: '5.3',
         title: 'Generating Strength Statements',
         description: 'Using AI to create impactful feedback',
         contentLevel: 'procedure',
@@ -783,8 +853,8 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-5-3',
-        sectionNumber: '5.3',
+        id: 'sec-5-4',
+        sectionNumber: '5.4',
         title: 'Development Suggestions & IDP Links',
         description: 'AI-generated development recommendations',
         contentLevel: 'procedure',
@@ -797,8 +867,36 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-5-4',
-        sectionNumber: '5.4',
+        id: 'sec-5-5',
+        sectionNumber: '5.5',
+        title: 'Strengths & Gaps Analysis',
+        description: 'AI-powered identification of employee strengths and development opportunities',
+        contentLevel: 'procedure',
+        estimatedReadTime: 7,
+        targetRoles: ['Manager', 'HR User'],
+        industryContext: {
+          frequency: 'Per evaluation',
+          timing: 'Post-rating',
+          benchmark: 'Evidence-based gap prioritization'
+        }
+      },
+      {
+        id: 'sec-5-6',
+        sectionNumber: '5.6',
+        title: 'Comment Quality Analysis',
+        description: 'Ensuring meaningful and constructive feedback',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Manager', 'HR User'],
+        industryContext: {
+          frequency: 'Per evaluation',
+          timing: 'During comment review',
+          benchmark: 'Quality threshold: 80%+'
+        }
+      },
+      {
+        id: 'sec-5-7',
+        sectionNumber: '5.7',
         title: 'Bias Detection & Remediation',
         description: 'Identifying and addressing potential bias in evaluations',
         contentLevel: 'procedure',
@@ -812,22 +910,65 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-5-5',
-        sectionNumber: '5.5',
-        title: 'Comment Quality Analysis',
-        description: 'Ensuring meaningful and constructive feedback',
+        id: 'sec-5-8',
+        sectionNumber: '5.8',
+        title: 'Bias Nudge Configuration',
+        description: 'Configure messages and educational content for bias detection',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup, review as needed',
+          timing: 'Pre-implementation',
+          benchmark: 'Constructive coaching approach'
+        }
+      },
+      {
+        id: 'sec-5-9',
+        sectionNumber: '5.9',
+        title: 'Manager Bias Pattern Tracking',
+        description: 'Track aggregate bias patterns to identify systemic issues',
+        contentLevel: 'procedure',
+        estimatedReadTime: 9,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'Post-cycle analysis',
+          timing: 'After calibration',
+          benchmark: 'Graduated intervention workflow',
+          compliance: ['ISO 42001 compliance', 'Data privacy requirements']
+        }
+      },
+      {
+        id: 'sec-5-10',
+        sectionNumber: '5.10',
+        title: 'AI Coaching Nudges',
+        description: 'AI-powered manager coaching prompts',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Manager', 'HR User'],
+        industryContext: {
+          frequency: 'Continuous during cycle',
+          timing: 'Real-time as events occur',
+          benchmark: 'Proactive performance intervention'
+        }
+      },
+      {
+        id: 'sec-5-11',
+        sectionNumber: '5.11',
+        title: 'AI Performance Risk Detection',
+        description: 'Early identification of performance risks',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Manager', 'HR User'],
         industryContext: {
-          frequency: 'Per evaluation',
-          timing: 'During comment review',
-          benchmark: 'Quality threshold: 80%+'
+          frequency: 'Continuous monitoring',
+          timing: 'Real-time alerts',
+          benchmark: 'Predictive accuracy: 80%+ for risk indicators'
         }
       },
       {
-        id: 'sec-5-6',
-        sectionNumber: '5.6',
+        id: 'sec-5-12',
+        sectionNumber: '5.12',
         title: 'AI Analytics & Predictions',
         description: 'Advanced insights and predictive capabilities',
         contentLevel: 'procedure',

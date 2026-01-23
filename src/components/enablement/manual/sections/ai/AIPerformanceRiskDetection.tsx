@@ -14,6 +14,7 @@ import {
   RelatedTopics
 } from '../../components';
 
+// Section 5.11 - AI Performance Risk Detection (renumbered from 5.8)
 const RISK_TYPES = [
   { 
     type: 'Chronic Underperformance', 
@@ -152,10 +153,10 @@ const TROUBLESHOOTING_ITEMS = [
 
 export function AIPerformanceRiskDetection() {
   return (
-    <Card id="sec-5-8">
+    <Card id="sec-5-11">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 5.8</Badge>
+          <Badge variant="outline">Section 5.11</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~20 min read

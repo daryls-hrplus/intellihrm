@@ -6,6 +6,7 @@ import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout } from '../../components/Callout';
 import { StepByStep, Step } from '../../components/StepByStep';
 
+// Section 5.3 - Generating Strength Statements (renumbered from 5.2)
 const FIELD_REFERENCES = [
   { fieldName: 'Generate Strengths Button', location: 'AI Feedback Assistant Panel → Quick Actions', required: false, description: 'Triggers AI analysis of high-rated areas to generate positive feedback statements' },
   { fieldName: 'Confidence Score', location: 'Each AI Suggestion', required: false, description: 'Percentage indicating AI certainty (80%+ = high confidence)' },
@@ -89,10 +90,10 @@ Confidence: 78%`;
 
 export function GeneratingStrengthStatements() {
   return (
-    <Card id="sec-5-2">
+    <Card id="sec-5-3">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 5.2</Badge>
+          <Badge variant="outline">Section 5.3</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~10 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />Manager</Badge>
         </div>

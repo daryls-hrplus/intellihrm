@@ -9,6 +9,7 @@ import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
 import { TroubleshootingSection } from '../../components/TroubleshootingSection';
 
+// Section 4.9 - Calibration Governance & Audit (renumbered)
 const AUDIT_STEPS = [
   {
     title: 'Access Calibration Audit Trail',
@@ -85,10 +86,10 @@ const TROUBLESHOOTING = [
 
 export function CalibrationGovernanceAudit() {
   return (
-    <Card id="sec-4-6">
+    <Card id="sec-4-9">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 4.6</Badge>
+          <Badge variant="outline">Section 4.9</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~8 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Shield className="h-3 w-3" />HR Admin / Compliance</Badge>
         </div>
