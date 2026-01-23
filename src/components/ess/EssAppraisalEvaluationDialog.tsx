@@ -137,25 +137,28 @@ export function EssAppraisalEvaluationDialog({
     const comp = calcCategoryScore("competency");
     const resp = calcCategoryScore("responsibility");
     const goal = calcCategoryScore("goal");
+    const values = calcCategoryScore("values");
     
-    // Calculate overall
+    // Calculate overall using all category weights
     let overall = null;
     const weights = {
       competency: appraisal.competency_weight,
       responsibility: appraisal.responsibility_weight,
       goal: appraisal.goal_weight,
+      values: appraisal.values_weight,
     };
-    const totalWeight = weights.competency + weights.responsibility + weights.goal;
+    const totalWeight = weights.competency + weights.responsibility + weights.goal + weights.values;
     if (totalWeight > 0) {
       let weightedSum = 0;
       let usedWeight = 0;
       if (comp !== null) { weightedSum += comp * weights.competency; usedWeight += weights.competency; }
       if (resp !== null) { weightedSum += resp * weights.responsibility; usedWeight += weights.responsibility; }
       if (goal !== null) { weightedSum += goal * weights.goal; usedWeight += weights.goal; }
+      if (values !== null) { weightedSum += values * weights.values; usedWeight += weights.values; }
       if (usedWeight > 0) overall = weightedSum / usedWeight;
     }
     
-    return { competency: comp, responsibility: resp, goal, overall };
+    return { competency: comp, responsibility: resp, goal, values, overall };
   }, [scores, appraisal]);
 
   // Performance category based on overall score
@@ -568,11 +571,13 @@ export function EssAppraisalEvaluationDialog({
                     competencyScore={currentScores.competency}
                     responsibilityScore={currentScores.responsibility}
                     goalScore={currentScores.goal}
+                    valuesScore={currentScores.values}
                     overallScore={currentScores.overall}
                     weights={{
                       competency: appraisal.competency_weight,
                       responsibility: appraisal.responsibility_weight,
                       goal: appraisal.goal_weight,
+                      values: appraisal.values_weight,
                     }}
                   />
                   
@@ -593,6 +598,9 @@ export function EssAppraisalEvaluationDialog({
                           )}
                           {enabledCategories.goals && appraisal.goal_weight > 0 && (
                             <p>Goals ({appraisal.goal_weight}%): {currentScores.goal?.toFixed(0) ?? '—'}%</p>
+                          )}
+                          {enabledCategories.values && appraisal.values_weight > 0 && (
+                            <p>Values ({appraisal.values_weight}%): {currentScores.values?.toFixed(0) ?? '—'}%</p>
                           )}
                         </div>
                       </CardContent>
