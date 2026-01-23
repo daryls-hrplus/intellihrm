@@ -283,7 +283,7 @@ export function ManualGlossary() {
   }).sort((a, b) => a.term.localeCompare(b.term));
 
   return (
-    <div className="space-y-6">
+    <div id="glossary" data-manual-anchor="glossary" className="space-y-6 scroll-mt-32">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">

@@ -16,7 +16,7 @@ import {
 
 export function ManualQuickReference() {
   return (
-    <div className="space-y-8">
+    <div id="quick-ref" data-manual-anchor="quick-ref" className="space-y-8 scroll-mt-32">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold">Quick Reference Cards</h2>
         <p className="text-muted-foreground">Condensed guides for common tasks</p>
