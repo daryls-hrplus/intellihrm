@@ -208,6 +208,64 @@ const GLOSSARY_TERMS = [
     definition: 'Jurisdiction-specific performance documentation generated from appraisal data using configured templates. Ensures legal compliance for performance actions.',
     category: 'Integration',
   },
+  // v2.7.0 Additions - Calibration & Nine-Box
+  {
+    term: 'Potential Assessment',
+    definition: 'A questionnaire-based evaluation of employee potential used to determine the Y-axis position in Nine-Box placement. Includes learning agility, leadership capacity, and strategic thinking dimensions.',
+    category: 'Calibration',
+  },
+  {
+    term: 'Manager Alignment',
+    definition: 'A score (0-100%) measuring how closely a manager\'s initial ratings align with final calibration outcomes over time. Low scores may trigger coaching interventions.',
+    category: 'Calibration',
+  },
+  {
+    term: 'Calibration Drift',
+    definition: 'Pattern of a manager\'s ratings diverging from organizational standards over multiple cycles. Tracked in manager_calibration_alignment for trend analysis.',
+    category: 'Calibration',
+  },
+  {
+    term: 'Governance Rule',
+    definition: 'Configurable rule controlling calibration adjustments including max_score_change limits, justification requirements, and approval thresholds.',
+    category: 'Calibration',
+  },
+  // v2.7.0 Additions - AI Features
+  {
+    term: 'AI Narrative',
+    definition: 'AI-generated performance summary synthesizing component scores into cohesive text. Requires human review per ISO 42001 compliance. Stored in ai_generated_narratives.',
+    category: 'AI',
+  },
+  {
+    term: 'Bias Nudge',
+    definition: 'Real-time prompt alerting managers to potential bias in their feedback during appraisal completion. Types include recency, halo/horns, central tendency, and attribution bias.',
+    category: 'AI',
+  },
+  {
+    term: 'Manager Bias Pattern',
+    definition: 'Aggregate tracking of bias detection across a manager\'s evaluations over time. Used to identify systemic bias and trigger graduated interventions.',
+    category: 'AI',
+  },
+  {
+    term: 'AI Explainability',
+    definition: 'Transparency logging for AI decision factors, confidence scores, and uncertainty areas. Required for ISO 42001 compliance and stored in ai_explainability_logs.',
+    category: 'AI',
+  },
+  // v2.7.0 Additions - Analytics
+  {
+    term: 'Performance Trajectory',
+    definition: 'AI-predicted performance scores for 3/6/12 months based on historical appraisal data. Requires minimum 2-4 completed cycles for accurate predictions.',
+    category: 'Analytics',
+  },
+  {
+    term: 'Employee Performance Index',
+    definition: 'Composite score aggregating weighted historical performance with trend adjustments. Configurable lookback period (12/24/36 months) via performance_index_settings.',
+    category: 'Analytics',
+  },
+  {
+    term: 'Nine-Box Rating Sources',
+    definition: 'Configurable data sources for Nine-Box grid axes. Performance axis typically uses post-calibration scores; potential axis uses potential assessments or manager ratings.',
+    category: 'Talent',
+  },
 ];
 
 const CATEGORIES = ['All', ...Array.from(new Set(GLOSSARY_TERMS.map(t => t.category)))];

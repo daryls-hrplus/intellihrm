@@ -6,3 +6,6 @@ export { IntegrationTroubleshootingSection } from './IntegrationTroubleshootingS
 export { PerformanceOptimizationSection } from './PerformanceOptimizationSection';
 export { DataQualitySection } from './DataQualitySection';
 export { EscalationProceduresSection } from './EscalationProceduresSection';
+export { AIMLTroubleshootingSection } from './AIMLTroubleshootingSection';
+export { CalibrationTroubleshootingSection } from './CalibrationTroubleshootingSection';
+export { PerformanceRiskTroubleshootingSection } from './PerformanceRiskTroubleshootingSection';

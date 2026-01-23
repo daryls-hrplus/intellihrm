@@ -17,7 +17,7 @@ export function ManualDiagrams() {
             <Layers className="h-5 w-5 text-primary" />
             <CardTitle>Complete Data Architecture</CardTitle>
           </div>
-          <CardDescription>All 14 appraisal tables and their relationships</CardDescription>
+          <CardDescription>40+ appraisal tables organized by domain</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">

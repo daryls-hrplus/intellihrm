@@ -4,6 +4,26 @@ import { History, User, Calendar } from 'lucide-react';
 
 const VERSION_HISTORY = [
   {
+    version: '2.7.0',
+    date: '2026-01-23',
+    author: 'Intelli HRM Team',
+    changes: [
+      'Reorganized Chapter 1: User Personas (1.3) now before System Architecture (1.4)',
+      'Reorganized Chapter 2 into 4 groups: Core Framework, Form & Template, Cycle & Operations, Advanced Configuration',
+      'Expanded Chapter 4 Calibration to 10 sections (4.1-4.10) with Potential Assessment, Nine-Box Sources, Governance Rules, Manager Alignment',
+      'Expanded Chapter 5 AI Features to 12 sections (5.1-5.12) with AI Narratives, Strengths/Gaps, Bias Nudge Config, Manager Bias Patterns',
+      'Expanded Chapter 6 Analytics to 11 sections (6.1-6.11) with Manager Effectiveness, Employee Index, Report Builder, BI Dashboard',
+      'Expanded Chapter 7 Integration to 10 sections (7.1-7.10) with Integration Analytics, Rule Configuration, Workflow Integration',
+      'Added Chapter 8.9 AI/ML Troubleshooting section',
+      'Added Chapter 8.10 Calibration Troubleshooting section',
+      'Added Chapter 8.11 Performance Risk Troubleshooting section',
+      'Added 6 new architecture diagrams (Calibration, Nine-Box, AI Bias, Performance Risk, Report Builder, Workflow Integration)',
+      'Updated Complete Data Architecture diagram to show 40+ tables across 8 groups',
+      'Added Appendix type definitions with 5 sections (A.1-A.5)',
+      'Expanded Glossary with 12 new terms from Chapters 4-5 updates (now 45+ terms)',
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2026-01-13',
     author: 'Intelli HRM Team',
