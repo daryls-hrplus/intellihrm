@@ -24,10 +24,10 @@ const TROUBLESHOOTING = [
 
 export function AIPoweredCalibration() {
   return (
-    <Card id="sec-4-4">
+    <Card id="sec-4-7">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 4.4</Badge>
+          <Badge variant="outline">Section 4.7</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~10 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />HR Admin / Facilitators</Badge>
         </div>

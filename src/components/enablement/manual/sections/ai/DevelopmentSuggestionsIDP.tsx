@@ -7,6 +7,7 @@ import { TipCallout, WarningCallout } from '../../components/Callout';
 import { StepByStep, Step } from '../../components/StepByStep';
 import { BusinessRules } from '../../components/BusinessRules';
 
+// Section 5.4 - Development Suggestions & IDP Links (renumbered from 5.3)
 const FIELD_REFERENCES = [
   { fieldName: 'Development Areas Button', location: 'AI Feedback Assistant Panel → Quick Actions', required: false, description: 'Generates improvement suggestions based on lower-rated competencies and gaps' },
   { fieldName: 'Link to IDP', location: 'Strength/Gap Card', required: false, description: 'Creates a development goal in the Individual Development Plan from an identified gap' },
@@ -103,10 +104,10 @@ Skill Gap: Executive communication, presentation skills`;
 
 export function DevelopmentSuggestionsIDP() {
   return (
-    <Card id="sec-5-3">
+    <Card id="sec-5-4">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 5.3</Badge>
+          <Badge variant="outline">Section 5.4</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~12 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />Manager / HR Partner</Badge>
         </div>

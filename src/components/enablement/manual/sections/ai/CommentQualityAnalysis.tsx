@@ -6,6 +6,7 @@ import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
 
+// Section 5.6 - Comment Quality Analysis (renumbered from 5.5)
 const FIELD_REFERENCES = [
   { fieldName: 'Comment Quality Panel', location: 'Below Comment Text Area', required: false, description: 'Real-time analysis panel showing quality metrics for entered comments' },
   { fieldName: 'Length Indicator', location: 'Quality Panel', required: false, description: 'Word/character count progress toward recommended minimum' },
@@ -60,10 +61,10 @@ const overallScore = (lengthScore + specificityScore +
 
 export function CommentQualityAnalysis() {
   return (
-    <Card id="sec-5-5">
+    <Card id="sec-5-6">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 5.5</Badge>
+          <Badge variant="outline">Section 5.6</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~10 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />Manager</Badge>
         </div>

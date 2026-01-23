@@ -76,10 +76,10 @@ const TROUBLESHOOTING = [
 
 export function CalibrationWorkspaceGuide() {
   return (
-    <Card id="sec-4-3">
+    <Card id="sec-4-6">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 4.3</Badge>
+          <Badge variant="outline">Section 4.6</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~12 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />All Attendees</Badge>
         </div>

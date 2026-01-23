@@ -8,6 +8,7 @@ import { StepByStep } from '../../components/StepByStep';
 import { BusinessRules } from '../../components/BusinessRules';
 import { TroubleshootingSection } from '../../components/TroubleshootingSection';
 
+// Section 4.5 - Nine-Box Grid Integration (moved up in new ordering)
 const NINE_BOX_STEPS = [
   {
     title: 'Access Nine-Box View',

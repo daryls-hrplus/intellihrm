@@ -50,23 +50,31 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-3-12': ['Performance', 'Appraisals', 'Rating Release'],
   'sec-3-13': ['Performance', 'Appraisals', 'Rating Dispute'],
 
-  // Part 4: Calibration Sessions
+  // Part 4: Calibration Sessions (reordered 4.1-4.10)
   'sec-4-1': ['Performance', 'Calibration', 'Overview'],
   'sec-4-2': ['Performance', 'Calibration', 'Sessions', 'Create'],
-  'sec-4-3': ['Performance', 'Calibration', 'Sessions', 'Workspace'],
-  'sec-4-4': ['Performance', 'Calibration', 'AI Insights'],
+  'sec-4-3': ['Performance', 'Setup', 'Calibration', 'Potential Assessment'],
+  'sec-4-4': ['Performance', 'Setup', 'Calibration', 'Nine-Box Rating Sources'],
   'sec-4-5': ['Performance', 'Talent', 'Nine-Box Grid'],
-  'sec-4-6': ['Performance', 'Calibration', 'Audit Trail'],
+  'sec-4-6': ['Performance', 'Calibration', 'Sessions', 'Workspace'],
+  'sec-4-7': ['Performance', 'Calibration', 'AI Insights'],
+  'sec-4-8': ['Performance', 'Setup', 'Calibration', 'Governance Rules'],
+  'sec-4-9': ['Performance', 'Calibration', 'Audit Trail'],
+  'sec-4-10': ['Performance', 'Intelligence Hub', 'Manager Alignment'],
 
-  // Part 5: AI Features & Intelligence (5.1-5.8)
+  // Part 5: AI Features & Intelligence (reordered 5.1-5.12)
   'sec-5-1': ['Performance', 'Appraisals', 'AI Assistant', 'Overview'],
-  'sec-5-2': ['Performance', 'Appraisals', 'AI Assistant', 'Strengths Generator'],
-  'sec-5-3': ['Performance', 'Appraisals', 'AI Assistant', 'Development Suggestions'],
-  'sec-5-4': ['Performance', 'Appraisals', 'AI Assistant', 'Bias Detection'],
-  'sec-5-5': ['Performance', 'Appraisals', 'AI Assistant', 'Comment Quality'],
-  'sec-5-6': ['Performance', 'Intelligence Hub'],
-  'sec-5-7': ['Performance', 'AI Insights', 'Coaching Nudges'],
-  'sec-5-8': ['Performance', 'AI Insights', 'Risk Detection'],
+  'sec-5-2': ['Performance', 'Appraisals', 'AI Assistant', 'Narratives'],
+  'sec-5-3': ['Performance', 'Appraisals', 'AI Assistant', 'Strengths Generator'],
+  'sec-5-4': ['Performance', 'Appraisals', 'AI Assistant', 'Development Suggestions'],
+  'sec-5-5': ['Performance', 'Appraisals', 'AI Assistant', 'Strengths & Gaps'],
+  'sec-5-6': ['Performance', 'Appraisals', 'AI Assistant', 'Comment Quality'],
+  'sec-5-7': ['Performance', 'Appraisals', 'AI Assistant', 'Bias Detection'],
+  'sec-5-8': ['Performance', 'Setup', 'AI', 'Bias Nudges'],
+  'sec-5-9': ['Performance', 'Intelligence Hub', 'Bias Pattern Tracking'],
+  'sec-5-10': ['Performance', 'AI Insights', 'Coaching Nudges'],
+  'sec-5-11': ['Performance', 'AI Insights', 'Risk Detection'],
+  'sec-5-12': ['Performance', 'Intelligence Hub'],
 
   // Part 6: Analytics & Reporting (6.1-6.6)
   'sec-6-1': ['Performance', 'Intelligence Hub'],
