@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layers, GitBranch, Users, Link2, Calculator, Brain, Calendar, Zap } from 'lucide-react';
+import { Layers, GitBranch, Users, Link2, Calculator, Brain, Calendar, Zap, Scale, Target, TrendingUp, FileText, Workflow, Shield } from 'lucide-react';
 
 export function ManualDiagrams() {
   return (
     <div className="space-y-8">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold">Architecture Diagrams</h2>
-        <p className="text-muted-foreground">Visual representations of system architecture and flows</p>
+        <p className="text-muted-foreground">14 visual representations of system architecture and flows</p>
       </div>
 
       {/* Complete Data Architecture */}
@@ -21,60 +21,353 @@ export function ManualDiagrams() {
         </CardHeader>
         <CardContent>
           <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
-            <pre>{`┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                    CORE TABLES                                               │
-├─────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                              │
-│  ┌──────────────────────┐     ┌──────────────────────┐     ┌──────────────────────┐         │
-│  │ appraisal_form_      │────▶│   appraisal_cycles   │◀────│ appraisal_rating_    │         │
-│  │ templates            │     │                      │     │ scales               │         │
-│  └──────────────────────┘     └──────────┬───────────┘     └──────────────────────┘         │
-│                                          │                                                   │
-│                                          ▼                                                   │
-│                               ┌──────────────────────┐                                       │
-│                               │appraisal_participants│◀─────────────────────────────┐       │
-│                               └──────────┬───────────┘                              │       │
-│                                          │                                          │       │
-│         ┌────────────────────────────────┼────────────────────────────────┐         │       │
-│         ▼                                ▼                                ▼         │       │
-│  ┌──────────────────┐         ┌──────────────────────┐         ┌──────────────────┐ │       │
-│  │ appraisal_scores │         │appraisal_score_      │         │ appraisal_value_ │ │       │
-│  │                  │         │breakdown             │         │ scores           │ │       │
-│  └──────────────────┘         └──────────────────────┘         └──────────────────┘ │       │
-│                                                                                      │       │
-├─────────────────────────────────────────────────────────────────────────────────────┼───────┤
-│                              MULTI-POSITION & ROLE CHANGE                            │       │
-├─────────────────────────────────────────────────────────────────────────────────────┼───────┤
-│                                                                                      │       │
-│  ┌──────────────────────┐                              ┌──────────────────────┐     │       │
-│  │ appraisal_position_  │──────────────────────────────│ appraisal_role_      │─────┘       │
-│  │ weights              │                              │ segments             │             │
-│  └──────────────────────┘                              └──────────────────────┘             │
-│                                                                                              │
-├─────────────────────────────────────────────────────────────────────────────────────────────┤
-│                              AI & DEVELOPMENT TABLES                                         │
-├─────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                              │
-│  ┌──────────────────────┐     ┌──────────────────────┐     ┌──────────────────────┐         │
-│  │ appraisal_strengths_ │     │ ai_generated_        │     │ appraisal_interviews │         │
-│  │ gaps                 │     │ narratives           │     │                      │         │
-│  └──────────────────────┘     └──────────────────────┘     └──────────────────────┘         │
-│                                                                                              │
-├─────────────────────────────────────────────────────────────────────────────────────────────┤
-│                              AUTOMATION & INTEGRATION                                        │
-├─────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                              │
-│  ┌──────────────────────┐     ┌──────────────────────┐                                      │
-│  │ appraisal_outcome_   │────▶│ appraisal_action_    │──────▶ IDP, PIP, Succession          │
-│  │ action_rules         │     │ executions           │                                      │
-│  └──────────────────────┘     └──────────────────────┘                                      │
-│                                                                                              │
-│  ┌──────────────────────┐     ┌──────────────────────┐                                      │
-│  │ appraisal_integration│────▶│ appraisal_integration│──────▶ Nine-Box, Succession,         │
-│  │ _rules               │     │ _log                 │       Compensation, Workforce        │
-│  └──────────────────────┘     └──────────────────────┘                                      │
-│                                                                                              │
-└─────────────────────────────────────────────────────────────────────────────────────────────┘`}</pre>
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              CORE APPRAISAL TABLES (14)                                          │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  appraisal_cycles, appraisal_participants, appraisal_scores, appraisal_score_breakdown,         │
+│  appraisal_value_scores, appraisal_form_templates, appraisal_rating_scales,                     │
+│  appraisal_position_weights, appraisal_role_segments, appraisal_interviews,                     │
+│  appraisal_strengths_gaps, ai_generated_narratives, appraisal_outcome_action_rules,             │
+│  appraisal_action_executions                                                                     │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                              CALIBRATION TABLES (8)                                              │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  calibration_sessions, calibration_participants, calibration_adjustments,                        │
+│  calibration_ai_analyses, calibration_governance_rules, calibration_override_audit,             │
+│  manager_calibration_alignment, calibration_notes                                                │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                              NINE-BOX & POTENTIAL (8)                                            │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  nine_box_assessments, nine_box_rating_sources, nine_box_signal_mappings,                       │
+│  nine_box_evidence_sources, potential_assessment_templates, potential_assessment_questions,     │
+│  potential_assessments, potential_assessment_responses                                           │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                              AI & BIAS DETECTION (8)                                             │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  ai_explainability_logs, ai_human_overrides, manager_bias_patterns, bias_nudge_templates,       │
+│  ai_bias_incidents, feedback_ai_action_logs, ai_governance_metrics, ai_guardrails_config        │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                              PERFORMANCE ANALYTICS (5)                                           │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  employee_performance_risks, performance_trajectory, performance_trajectory_scores,             │
+│  employee_performance_index, performance_index_settings                                          │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                              REPORTING & BI (7)                                                  │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  report_templates, report_template_bands, report_data_sources, saved_report_configs,            │
+│  scheduled_org_reports, bi_dashboards, bi_dashboard_shares                                       │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                              INTEGRATION & WORKFLOW (5)                                          │
+├─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  appraisal_integration_rules, appraisal_integration_log, workflow_instances,                    │
+│  workflow_step_actions, workflow_audit_events                                                    │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calibration Session Architecture - NEW */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Scale className="h-5 w-5 text-primary" />
+            <CardTitle>Calibration Session Architecture</CardTitle>
+            <Badge variant="secondary">NEW</Badge>
+          </div>
+          <CardDescription>Calibration data flow with governance and audit tracking</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────┐
+│                     CALIBRATION SESSION ARCHITECTURE                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────┐     ┌──────────────────┐                              │
+│  │ calibration_     │────▶│ calibration_     │                              │
+│  │ sessions         │     │ participants     │                              │
+│  └──────────────────┘     └────────┬─────────┘                              │
+│                                    │                                         │
+│         ┌──────────────────────────┼──────────────────────────┐             │
+│         ▼                          ▼                          ▼             │
+│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     │
+│  │ calibration_     │     │ calibration_     │     │ calibration_     │     │
+│  │ adjustments      │     │ ai_analyses      │     │ governance_rules │     │
+│  └────────┬─────────┘     └──────────────────┘     └────────┬─────────┘     │
+│           │                                                  │              │
+│           ▼                                                  ▼              │
+│  ┌──────────────────┐                             ┌──────────────────┐      │
+│  │ calibration_     │                             │ manager_         │      │
+│  │ override_audit   │                             │ calibration_     │      │
+│  │ (EEOC Compliance)│                             │ alignment        │      │
+│  └──────────────────┘                             └──────────────────┘      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Nine-Box & Potential Assessment Architecture - NEW */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            <CardTitle>Nine-Box & Potential Assessment</CardTitle>
+            <Badge variant="secondary">NEW</Badge>
+          </div>
+          <CardDescription>Potential assessments feeding into Nine-Box placement</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────┐
+│                   NINE-BOX & POTENTIAL ASSESSMENT                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  POTENTIAL AXIS                           PERFORMANCE AXIS                   │
+│  ┌────────────────────┐                  ┌────────────────────┐             │
+│  │ potential_         │                  │ appraisal_scores   │             │
+│  │ assessment_        │                  │ (post_calibration) │             │
+│  │ templates          │                  └──────────┬─────────┘             │
+│  └────────┬───────────┘                             │                       │
+│           │                                         │                       │
+│           ▼                                         │                       │
+│  ┌────────────────────┐                             │                       │
+│  │ potential_         │         ┌───────────────────┘                       │
+│  │ assessment_        │         │                                           │
+│  │ questions          │         │    ┌──────────────────────────┐          │
+│  └────────┬───────────┘         │    │ nine_box_rating_sources  │          │
+│           │                     │    │ (weights per source)     │          │
+│           ▼                     │    └────────────┬─────────────┘          │
+│  ┌────────────────────┐         │                 │                         │
+│  │ potential_         │─────────┼─────────────────┘                         │
+│  │ assessments        │         │                                           │
+│  └────────────────────┘         │                                           │
+│                                 ▼                                           │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    nine_box_assessments                              │   │
+│  │  (performance_score, potential_score, quadrant, box_number)          │   │
+│  └────────────────────────────────────────────────────────────────────────┤ │
+│                                    │                                       │ │
+│         ┌──────────────────────────┼──────────────────────────┐           │ │
+│         ▼                          ▼                          ▼           │ │
+│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐   │ │
+│  │ signal_mappings  │     │ evidence_sources │     │ Succession       │   │ │
+│  └──────────────────┘     └──────────────────┘     └──────────────────┘   │ │
+└─────────────────────────────────────────────────────────────────────────────┘`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Bias Detection & Governance - NEW */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            <CardTitle>AI Bias Detection & Governance</CardTitle>
+            <Badge variant="secondary">NEW</Badge>
+          </div>
+          <CardDescription>Bias detection with ISO 42001 compliance and human oversight</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────┐
+│                   AI BIAS DETECTION & GOVERNANCE                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────┐                                                       │
+│  │ Manager Feedback │                                                       │
+│  │ (text input)     │                                                       │
+│  └────────┬─────────┘                                                       │
+│           │                                                                  │
+│           ▼                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐               │
+│  │                    AI BIAS ANALYSIS                       │               │
+│  │  • Recency bias     • Halo/horns effect                  │               │
+│  │  • Gender bias      • Attribution error                   │               │
+│  │  • Central tendency • Leniency/severity                   │               │
+│  └────────┬───────────────────────────────┬─────────────────┘               │
+│           │                               │                                  │
+│           ▼                               ▼                                  │
+│  ┌──────────────────┐           ┌──────────────────┐                        │
+│  │ bias_nudge_      │           │ ai_explainability│                        │
+│  │ templates        │           │ _logs            │                        │
+│  └────────┬─────────┘           └──────────────────┘                        │
+│           │                                                                  │
+│           ▼                                                                  │
+│  ┌──────────────────┐     ┌──────────────────┐                              │
+│  │ Real-time Nudge  │────▶│ manager_bias_    │                              │
+│  │ to Manager       │     │ patterns         │                              │
+│  └────────┬─────────┘     └────────┬─────────┘                              │
+│           │                        │                                         │
+│           ▼                        ▼                                         │
+│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     │
+│  │ ai_human_        │     │ ai_bias_         │     │ HR Intervention  │     │
+│  │ overrides        │     │ incidents        │     │ Workflow         │     │
+│  └──────────────────┘     └──────────────────┘     └──────────────────┘     │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │ ISO 42001 COMPLIANCE: All AI decisions logged with explainability   │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Performance Risk & Trajectory - NEW */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <CardTitle>Performance Risk & Trajectory Pipeline</CardTitle>
+            <Badge variant="secondary">NEW</Badge>
+          </div>
+          <CardDescription>Predictive analytics and risk detection architecture</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────┐
+│                 PERFORMANCE RISK & TRAJECTORY PIPELINE                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  HISTORICAL DATA                         RISK DETECTION                      │
+│  ┌────────────────────┐                 ┌────────────────────┐              │
+│  │ appraisal_scores   │                 │ AI Risk Analysis   │              │
+│  │ (multi-cycle)      │────────────────▶│ • Declining trend  │              │
+│  └────────────────────┘                 │ • Toxic performer  │              │
+│                                         │ • Skills decay     │              │
+│  ┌────────────────────┐                 │ • Disengagement    │              │
+│  │ performance_index  │                 └──────────┬─────────┘              │
+│  │ _settings          │                            │                        │
+│  └────────┬───────────┘                            │                        │
+│           │                                        ▼                        │
+│           ▼                             ┌────────────────────┐              │
+│  ┌────────────────────┐                 │ employee_          │              │
+│  │ employee_          │                 │ performance_risks  │              │
+│  │ performance_index  │                 │ (risk_type,        │              │
+│  │ (12/24/36 month)   │                 │ confidence,        │              │
+│  └────────────────────┘                 │ intervention)      │              │
+│                                         └──────────┬─────────┘              │
+│  TRAJECTORY PREDICTION                             │                        │
+│  ┌────────────────────┐                            ▼                        │
+│  │ performance_       │                 ┌────────────────────┐              │
+│  │ trajectory         │────────────────▶│ Manager Dashboard  │              │
+│  │ (3/6/12 mo pred.)  │                 │ • Risk alerts      │              │
+│  └────────┬───────────┘                 │ • Intervention     │              │
+│           │                             │ • Coaching nudges  │              │
+│           ▼                             └────────────────────┘              │
+│  ┌────────────────────┐                                                     │
+│  │ performance_       │                                                     │
+│  │ trajectory_scores  │                                                     │
+│  └────────────────────┘                                                     │
+└─────────────────────────────────────────────────────────────────────────────┘`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Report Builder & BI Architecture - NEW */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <CardTitle>Report Builder & BI Architecture</CardTitle>
+            <Badge variant="secondary">NEW</Badge>
+          </div>
+          <CardDescription>Report templates, scheduling, and BI dashboard structure</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────┐
+│                     REPORT BUILDER & BI ARCHITECTURE                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  REPORT TEMPLATES                           BI DASHBOARDS                    │
+│  ┌────────────────────┐                    ┌────────────────────┐           │
+│  │ report_templates   │                    │ bi_dashboards      │           │
+│  │ (name, category,   │                    │ (name, widgets[],  │           │
+│  │ parameters[])      │                    │ is_shared)         │           │
+│  └────────┬───────────┘                    └────────┬───────────┘           │
+│           │                                         │                       │
+│           ▼                                         ▼                       │
+│  ┌────────────────────┐                    ┌────────────────────┐           │
+│  │ report_template_   │                    │ bi_dashboard_      │           │
+│  │ bands              │                    │ shares             │           │
+│  │ (header, detail,   │                    │ (role sharing)     │           │
+│  │ group, footer)     │                    └────────────────────┘           │
+│  └────────┬───────────┘                                                     │
+│           │                                                                  │
+│           ▼                                                                  │
+│  ┌────────────────────┐                                                     │
+│  │ report_data_       │                                                     │
+│  │ sources            │                                                     │
+│  │ (table, joins,     │                                                     │
+│  │ aggregations)      │                                                     │
+│  └────────┬───────────┘                                                     │
+│           │                                                                  │
+│           ▼                                                                  │
+│  ┌────────────────────┐         ┌────────────────────┐                      │
+│  │ saved_report_      │────────▶│ scheduled_org_     │                      │
+│  │ configs            │         │ reports            │                      │
+│  │ (user preferences) │         │ (cron, recipients) │                      │
+│  └────────────────────┘         └────────┬───────────┘                      │
+│                                          │                                   │
+│                                          ▼                                   │
+│                                 ┌────────────────────┐                      │
+│                                 │ Generated Reports  │                      │
+│                                 │ (PDF, Excel, CSV)  │                      │
+│                                 └────────────────────┘                      │
+└─────────────────────────────────────────────────────────────────────────────┘`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Workflow Integration Architecture - NEW */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Workflow className="h-5 w-5 text-primary" />
+            <CardTitle>Workflow Integration Architecture</CardTitle>
+            <Badge variant="secondary">NEW</Badge>
+          </div>
+          <CardDescription>Appraisal-triggered workflow execution and monitoring</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────┐
+│                    WORKFLOW INTEGRATION ARCHITECTURE                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  TRIGGER                                                                     │
+│  ┌────────────────────┐                                                     │
+│  │ Appraisal Event    │                                                     │
+│  │ (finalization,     │                                                     │
+│  │ low score, etc.)   │                                                     │
+│  └────────┬───────────┘                                                     │
+│           │                                                                  │
+│           ▼                                                                  │
+│  ┌────────────────────┐         ┌────────────────────┐                      │
+│  │ appraisal_         │────────▶│ appraisal_         │                      │
+│  │ integration_rules  │         │ integration_log    │                      │
+│  │ (conditions,       │         │ (execution status, │                      │
+│  │ target module)     │         │ error details)     │                      │
+│  └────────┬───────────┘         └────────────────────┘                      │
+│           │                                                                  │
+│           ▼                                                                  │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                      workflow_instances                              │   │
+│  │  (workflow_type, current_step, status, sla_deadline)                 │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                         │
+│         ┌──────────────────────────┼──────────────────────────┐             │
+│         ▼                          ▼                          ▼             │
+│  ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     │
+│  │ workflow_step_   │     │ workflow_audit_  │     │ workflow_        │     │
+│  │ actions          │     │ events           │     │ delegates        │     │
+│  └──────────────────┘     └──────────────────┘     └──────────────────┘     │
+│                                                                              │
+│  TARGET MODULES                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │  IDP  │  PIP  │  Succession  │  Compensation  │  Learning  │ Nine-Box │ │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘`}</pre>
           </div>
         </CardContent>
       </Card>
