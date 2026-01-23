@@ -1,8 +1,12 @@
 export { AIFeedbackOverview } from './AIFeedbackOverview';
+export { AIGeneratedNarratives } from './AIGeneratedNarratives';
 export { GeneratingStrengthStatements } from './GeneratingStrengthStatements';
 export { DevelopmentSuggestionsIDP } from './DevelopmentSuggestionsIDP';
-export { BiasDetectionRemediation } from './BiasDetectionRemediation';
+export { StrengthsGapsAnalysis } from './StrengthsGapsAnalysis';
 export { CommentQualityAnalysis } from './CommentQualityAnalysis';
-export { AIAnalyticsPredictions } from './AIAnalyticsPredictions';
+export { BiasDetectionRemediation } from './BiasDetectionRemediation';
+export { BiasNudgeConfiguration } from './BiasNudgeConfiguration';
+export { ManagerBiasPatternTracking } from './ManagerBiasPatternTracking';
 export { AICoachingNudges } from './AICoachingNudges';
 export { AIPerformanceRiskDetection } from './AIPerformanceRiskDetection';
+export { AIAnalyticsPredictions } from './AIAnalyticsPredictions';
