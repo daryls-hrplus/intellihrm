@@ -9,6 +9,7 @@ import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { ManagerTeamTrainingCard } from "@/components/training/ManagerTeamTrainingCard";
 import {
   GraduationCap,
   BookOpen,
@@ -34,6 +35,7 @@ import {
   Monitor,
   PenTool,
   UserPlus,
+  History,
 } from "lucide-react";
 
 interface Stats {
@@ -44,7 +46,7 @@ interface Stats {
 }
 
 export default function TrainingDashboardPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { t } = useLanguage();
   const { hasTabAccess } = useGranularPermissions();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
@@ -56,9 +58,11 @@ export default function TrainingDashboardPage() {
     certifications: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isManager, setIsManager] = useState(false);
 
   useEffect(() => {
     fetchStats();
+    checkIfManager();
   }, [user, selectedCompanyId]);
 
   const fetchStats = async () => {
@@ -98,6 +102,33 @@ export default function TrainingDashboardPage() {
     }
   };
 
+  const checkIfManager = async () => {
+    if (!user) {
+      setIsManager(false);
+      return;
+    }
+    
+    try {
+      // Check if user has direct reports - cast to any to avoid deep type instantiation
+      const client = supabase as any;
+      const { data, error } = await client
+        .from('profiles')
+        .select('id')
+        .eq('manager_id', user.id)
+        .eq('is_active', true)
+        .limit(1);
+      
+      if (!error && data && data.length > 0) {
+        setIsManager(true);
+      } else {
+        setIsManager(false);
+      }
+    } catch (error) {
+      console.error("Error checking manager status:", error);
+      setIsManager(false);
+    }
+  };
+
   const statCards = [
     { label: t("training.stats.coursesAvailable"), value: stats.coursesAvailable, icon: BookOpen, color: "bg-primary/10 text-primary" },
     { label: t("training.stats.inProgress"), value: stats.inProgress, icon: Clock, color: "bg-warning/10 text-warning" },
@@ -132,6 +163,8 @@ export default function TrainingDashboardPage() {
     careerPaths: { title: t("training.modules.careerPaths.title", "Career Paths"), description: t("training.modules.careerPaths.description", "Define career progression routes"), href: "/training/career-paths", icon: Route, color: "bg-teal-500/10 text-teal-600", tabCode: "career-paths" },
     developmentPlans: { title: t("training.modules.developmentPlans.title", "Development Plans"), description: t("training.modules.developmentPlans.description", "Manage Individual Development Plans (IDPs)"), href: "/succession/career-development", icon: Target, color: "bg-emerald-500/10 text-emerald-600", tabCode: "development-plans" },
     mentorship: { title: t("training.modules.mentorship.title", "Mentorship"), description: t("training.modules.mentorship.description", "Mentoring relationships and programs"), href: "/training/mentorship", icon: UserPlus, color: "bg-pink-500/10 text-pink-600", tabCode: "mentorship" },
+    // Training History
+    history: { title: t("training.modules.history.title", "Training History"), description: t("training.modules.history.description", "View complete training records and certifications"), href: "/ess/training", icon: History, color: "bg-cyan-500/10 text-cyan-600", tabCode: "history" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -140,7 +173,7 @@ export default function TrainingDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Learning & Development",
-      items: filterByAccess([allModules.catalog, allModules.employeeLearning, allModules.employeeCertifications, allModules.learningPaths, allModules.interactive]),
+      items: filterByAccess([allModules.catalog, allModules.employeeLearning, allModules.employeeCertifications, allModules.learningPaths, allModules.interactive, allModules.history]),
     },
     {
       titleKey: "Career & Growth",
@@ -227,6 +260,14 @@ export default function TrainingDashboardPage() {
             );
           })}
         </div>
+
+        {/* Manager Team Training Card - shown only for managers */}
+        {isManager && user && profile?.company_id && (
+          <ManagerTeamTrainingCard 
+            managerId={user.id} 
+            companyId={profile.company_id} 
+          />
+        )}
 
         <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
       </div>

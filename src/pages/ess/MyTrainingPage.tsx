@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Award,
   FileText,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NavLink } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TrainingHistoryTab } from "@/components/training/TrainingHistoryTab";
 
 interface Enrollment {
   id: string;
@@ -50,7 +52,7 @@ interface Certificate {
   id: string;
   certificate_number: string;
   issued_at: string;
-  expiry_date: string | null;
+  expires_at: string | null;
   course: {
     title: string;
     code: string;
@@ -59,7 +61,7 @@ interface Certificate {
 
 export default function MyTrainingPage() {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -90,7 +92,7 @@ export default function MyTrainingPage() {
         supabase
           .from("lms_certificates")
           .select(`
-            id, certificate_number, issued_at, expiry_date,
+            id, certificate_number, issued_at, expires_at,
             course:lms_courses(title, code)
           `)
           .eq("user_id", user!.id)
@@ -319,6 +321,10 @@ export default function MyTrainingPage() {
               <TabsTrigger value="certificates">
                 Certificates ({certificates.length})
               </TabsTrigger>
+              <TabsTrigger value="history" className="flex items-center gap-1">
+                <History className="h-4 w-4" />
+                {t("pages.myTraining.history", "History")}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="in_progress" className="mt-6">
@@ -393,10 +399,10 @@ export default function MyTrainingPage() {
                             <span className="text-muted-foreground">Issued</span>
                             <span>{new Date(cert.issued_at).toLocaleDateString()}</span>
                           </div>
-                          {cert.expiry_date && (
+                          {cert.expires_at && (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Expires</span>
-                              <span>{new Date(cert.expiry_date).toLocaleDateString()}</span>
+                              <span>{new Date(cert.expires_at).toLocaleDateString()}</span>
                             </div>
                           )}
                         </div>
@@ -408,6 +414,15 @@ export default function MyTrainingPage() {
                     </Card>
                   ))}
                 </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-6">
+              {user && profile?.company_id && (
+                <TrainingHistoryTab 
+                  employeeId={user.id} 
+                  companyId={profile.company_id} 
+                />
               )}
             </TabsContent>
           </Tabs>
