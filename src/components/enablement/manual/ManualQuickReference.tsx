@@ -44,9 +44,16 @@ export function ManualQuickReference() {
             <CardTitle>Employee Self-Service Journey</CardTitle>
             <Badge className="ml-auto bg-green-600 text-white">ESS</Badge>
           </div>
-          <CardDescription>6-step journey from notification to final rating • 30-60 min total</CardDescription>
+          <CardDescription>7-step journey from notification to final rating • 35-75 min total</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
+          {/* Template awareness note */}
+          <div className="mb-4 p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              <strong>Note:</strong> Components vary by cycle template. Your cycle may include 1-4 rating areas (Goals, Responsibilities, Competencies, Values).
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="p-4 border rounded-lg bg-muted/50">
               <div className="flex items-center gap-2 mb-2">
@@ -55,7 +62,7 @@ export function ManualQuickReference() {
               </div>
               <p className="text-xs text-muted-foreground mb-2">Day 1</p>
               <div className="space-y-1">
-                {['Receive cycle email', 'Review timeline', 'Access ESS portal'].map((item, i) => (
+                {['Receive cycle email', 'Review timeline & deadlines', 'Access ESS portal'].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
                   </div>
@@ -70,11 +77,27 @@ export function ManualQuickReference() {
               </div>
               <p className="text-xs text-muted-foreground mb-2">Week 1-2 • 15-30 min</p>
               <div className="space-y-1">
-                {['Review goals from Goals module', 'Rate each goal with evidence', 'Assess competencies', 'Submit self-assessment'].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
-                  </div>
-                ))}
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Review enabled components</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Rate <strong>Goals</strong> with evidence <span className="text-muted-foreground">(if enabled)</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Rate <strong>Responsibilities/KRAs</strong> <span className="text-muted-foreground">(if enabled)</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Rate <strong>Competencies</strong> <span className="text-muted-foreground">(if enabled)</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Rate <strong>Values</strong> <span className="text-muted-foreground">(if enabled)</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Complete self-reflection narrative</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Submit self-assessment</span>
+                </div>
               </div>
             </div>
             
@@ -97,7 +120,7 @@ export function ManualQuickReference() {
               </div>
               <p className="text-xs text-muted-foreground mb-2">Scheduled</p>
               <div className="space-y-1">
-                {['Receive invitation', 'Prepare discussion points', 'Attend meeting'].map((item, i) => (
+                {['Receive interview invitation', 'Prepare discussion points', 'Attend review meeting'].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
                   </div>
@@ -112,12 +135,59 @@ export function ManualQuickReference() {
               </div>
               <p className="text-xs text-muted-foreground mb-2">Within 5 days • 5-10 min</p>
               <div className="space-y-1">
-                {['Review evaluation', 'Select response type', 'Add comments', 'Submit acknowledgment'].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
-                  </div>
-                ))}
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Review manager's evaluation & final score</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Compare to your self-assessment</span>
+                </div>
+                <div className="text-xs mt-1 mb-1 font-medium">Select response:</div>
+                <div className="pl-2 space-y-0.5 text-xs">
+                  <p>• <strong>Agree</strong> – Accept as written</p>
+                  <p>• <strong>Partially Disagree</strong> – Accept with concerns</p>
+                  <p>• <strong>Disagree</strong> – Triggers HR notification</p>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Add comments explaining perspective</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Submit acknowledgment</span>
+                </div>
               </div>
+            </div>
+            
+            {/* NEW: Escalation/Dispute Step */}
+            <div className="p-4 border rounded-lg bg-amber-500/10 border-amber-500/30">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-6 rounded-full bg-amber-600 text-white text-xs flex items-center justify-center font-bold">5a</span>
+                <h4 className="font-semibold text-sm text-amber-700 dark:text-amber-400">ESCALATION</h4>
+                <Badge variant="outline" className="text-xs border-amber-500 text-amber-600">Optional</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">Within dispute window • 10-15 min</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Click "File Dispute" if disagreeing</span>
+                </div>
+                <div className="text-xs mt-1 mb-1 font-medium">Select dispute category:</div>
+                <div className="pl-2 space-y-0.5 text-xs text-muted-foreground">
+                  <p>• Score Inaccuracy</p>
+                  <p>• Missing Evidence</p>
+                  <p>• Bias Concern</p>
+                  <p>• Process Violation</p>
+                  <p>• Missing Context</p>
+                  <p>• Other</p>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Provide detailed justification</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Attach supporting evidence</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox className="h-3 w-3" /><span className="text-xs">Submit dispute (HR & Manager notified)</span>
+                </div>
+              </div>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-2 italic">Note: Disputes are part of permanent record.</p>
             </div>
             
             <div className="p-4 border rounded-lg bg-muted/50">
@@ -127,7 +197,7 @@ export function ManualQuickReference() {
               </div>
               <p className="text-xs text-muted-foreground mb-2">After cycle close</p>
               <div className="space-y-1">
-                {['View finalized rating', 'Review performance category', 'Access development recs'].map((item, i) => (
+                {['View finalized rating', 'Review performance category', 'Access development recommendations'].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Checkbox className="h-3 w-3" /><span className="text-xs">{item}</span>
                   </div>
@@ -138,7 +208,7 @@ export function ManualQuickReference() {
           
           <div className="mt-4 p-3 border-l-4 border-l-green-600 bg-green-500/10 rounded-r-lg">
             <h4 className="font-semibold text-sm mb-1">Success Indicators</h4>
-            <p className="text-xs text-muted-foreground">Self-assessment submitted before deadline • All components rated with evidence • Acknowledgment within SLA</p>
+            <p className="text-xs text-muted-foreground">Self-assessment submitted before deadline • All enabled components rated with evidence • Response submitted within acknowledgment window • Disputes filed with evidence and valid category (if applicable)</p>
           </div>
         </CardContent>
       </Card>
