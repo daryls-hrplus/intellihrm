@@ -5559,7 +5559,8 @@
       "certificateNumber": "Certificate #",
       "issued": "Issued",
       "expires": "Expires",
-      "viewCertificate": "View Certificate"
+      "viewCertificate": "View Certificate",
+      "history": "History"
     },
     "myBenefits": {
       "title": "My Benefits",
@@ -7306,6 +7307,10 @@
       "mentorship": {
         "title": "Mentorship",
         "description": "Mentoring relationships and programs"
+      },
+      "history": {
+        "title": "Training History",
+        "description": "View complete training records and certifications"
       }
     },
     "virtualClassroom": {
