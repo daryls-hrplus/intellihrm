@@ -13,11 +13,12 @@ import { TroubleshootingSection } from '../../components/TroubleshootingSection'
 const EVALUATION_STEPS = [
   {
     title: 'Access Pending Evaluations',
-    description: 'Navigate to your team appraisal dashboard.',
+    description: 'Navigate to your team appraisal dashboard via MSS.',
     substeps: [
-      'Go to MSS → Team Appraisals',
-      'Filter by "Pending My Review"',
-      'Select the employee to evaluate'
+      'Go to MSS → Team Appraisals (or /mss/appraisals)',
+      'View the Overview tab with TeamAppraisalSummaryCard',
+      'Filter by "Pending My Review" using DirectReportsAppraisalStatus',
+      'Select the employee to evaluate from Quick Actions'
     ],
     expectedResult: 'Employee evaluation form opens with their self-assessment visible'
   },

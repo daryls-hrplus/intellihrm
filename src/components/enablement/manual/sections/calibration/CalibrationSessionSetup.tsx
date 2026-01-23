@@ -67,16 +67,17 @@ const SESSION_SETUP_STEPS = [
 ];
 
 const FIELDS = [
-  { name: 'session_name', required: true, type: 'String', description: 'Descriptive name for the calibration session', validation: 'Max 100 characters' },
-  { name: 'cycle_id', required: true, type: 'UUID', description: 'Link to the appraisal cycle being calibrated', validation: 'Cycle must be in Completed status' },
-  { name: 'session_date', required: true, type: 'DateTime', description: 'Scheduled date and time for the session', validation: 'Must be future date' },
-  { name: 'duration_minutes', required: true, type: 'Integer', description: 'Expected session length in minutes', defaultValue: '120', validation: '30-480 minutes' },
-  { name: 'session_type', required: true, type: 'Enum', description: 'Department, Cross-functional, or Executive', defaultValue: 'Department' },
-  { name: 'status', required: true, type: 'Enum', description: 'Scheduled, In Progress, Completed, Cancelled', defaultValue: 'Scheduled' },
-  { name: 'facilitator_id', required: true, type: 'UUID', description: 'HR user responsible for running the session' },
-  { name: 'chair_id', required: true, type: 'UUID', description: 'Senior leader who chairs the session' },
-  { name: 'ai_enabled', required: false, type: 'Boolean', description: 'Enable AI-powered calibration assistance', defaultValue: 'true' },
-  { name: 'voting_method', required: true, type: 'Enum', description: 'How rating changes are approved', defaultValue: 'consensus' }
+  { name: 'name', required: true, type: 'String', description: 'Descriptive name for the calibration session', validation: 'Max 100 characters' },
+  { name: 'appraisal_cycle_id', required: false, type: 'UUID', description: 'Link to the appraisal cycle being calibrated', validation: 'Cycle should be in appropriate status' },
+  { name: 'overall_scale_id', required: false, type: 'UUID', description: 'Rating scale used for calibration scoring' },
+  { name: 'scheduled_date', required: true, type: 'DateTime', description: 'Scheduled date and time for the session', validation: 'Must be future date' },
+  { name: 'status', required: true, type: 'Enum', description: 'Session lifecycle status', defaultValue: 'pending', validation: 'pending, scheduled, in_progress, completed, cancelled' },
+  { name: 'facilitator_id', required: false, type: 'UUID', description: 'HR user responsible for running the session' },
+  { name: 'participants', required: false, type: 'UUID[]', description: 'Array of user IDs participating in the session' },
+  { name: 'calibration_rules', required: false, type: 'JSONB', description: 'Calibration rules configuration (force distribution, max percentages)', validation: 'JSON object with rule definitions' },
+  { name: 'outcome_summary', required: false, type: 'Text', description: 'Summary of calibration decisions and outcomes' },
+  { name: 'completed_at', required: false, type: 'Timestamp', description: 'When the session was completed' },
+  { name: 'description', required: false, type: 'Text', description: 'Detailed description of the session scope and objectives' }
 ];
 
 const TROUBLESHOOTING = [
