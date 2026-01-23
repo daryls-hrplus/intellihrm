@@ -41,14 +41,30 @@ export function ManualTroubleshootingSection({ selectedSectionId }: ManualTroubl
   // Default: render all sections
   return (
     <div className="space-y-8">
-      <CommonIssuesSection />
-      <BestPracticesSection />
-      <SecurityAccessControlSection />
-      <ComplianceAuditSection />
-      <IntegrationTroubleshootingSection />
-      <PerformanceOptimizationSection />
-      <DataQualitySection />
-      <EscalationProceduresSection />
+      <section id="sec-8-1" data-manual-anchor="sec-8-1" className="scroll-mt-32">
+        <CommonIssuesSection />
+      </section>
+      <section id="sec-8-2" data-manual-anchor="sec-8-2" className="scroll-mt-32">
+        <BestPracticesSection />
+      </section>
+      <section id="sec-8-3" data-manual-anchor="sec-8-3" className="scroll-mt-32">
+        <SecurityAccessControlSection />
+      </section>
+      <section id="sec-8-4" data-manual-anchor="sec-8-4" className="scroll-mt-32">
+        <ComplianceAuditSection />
+      </section>
+      <section id="sec-8-5" data-manual-anchor="sec-8-5" className="scroll-mt-32">
+        <IntegrationTroubleshootingSection />
+      </section>
+      <section id="sec-8-6" data-manual-anchor="sec-8-6" className="scroll-mt-32">
+        <PerformanceOptimizationSection />
+      </section>
+      <section id="sec-8-7" data-manual-anchor="sec-8-7" className="scroll-mt-32">
+        <DataQualitySection />
+      </section>
+      <section id="sec-8-8" data-manual-anchor="sec-8-8" className="scroll-mt-32">
+        <EscalationProceduresSection />
+      </section>
     </div>
   );
 }
