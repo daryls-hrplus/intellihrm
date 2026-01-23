@@ -1135,6 +1135,22 @@
         "invalidFileType": "Only images and PDFs are allowed",
         "fileTooLarge": "File size must be less than 5MB"
       }
+    },
+    "myLetters": {
+      "title": "My Letters",
+      "subtitle": "Request and manage official letters and documents",
+      "breadcrumb": "My Letters",
+      "requestLetter": "Request Letter",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "allLetters": "All Letters",
+      "noLetters": "No letters found",
+      "letterNumber": "Letter #",
+      "requestedOn": "Requested On",
+      "status": "Status",
+      "viewLetter": "View Letter",
+      "downloadLetter": "Download Letter"
     }
   },
   "leave": {
