@@ -50,7 +50,7 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   if (user) {
-    const from = location.state?.from?.pathname || "/";
+    const from = location.state?.from?.pathname || "/dashboard";
     navigate(from, { replace: true });
     return null;
   }

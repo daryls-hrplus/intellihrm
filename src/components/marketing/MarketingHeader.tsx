@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/landing", label: "Home" },
+  { href: "/", label: "Home" },
   { href: "/product-tour", label: "Product Tour" },
   { href: "/features", label: "Features" },
   { href: "/about", label: "About" },
@@ -19,7 +19,7 @@ export function MarketingHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link to="/landing" className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <span className="text-lg font-bold text-primary-foreground">i</span>
           </div>

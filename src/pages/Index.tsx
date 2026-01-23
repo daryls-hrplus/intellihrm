@@ -28,7 +28,7 @@ const Index = () => {
 
   // Redirect unauthenticated users to landing page
   if (!authLoading && !user) {
-    return <Navigate to="/landing" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (

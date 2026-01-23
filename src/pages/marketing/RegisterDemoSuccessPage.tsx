@@ -60,7 +60,7 @@ export default function RegisterDemoSuccessPage() {
 
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button asChild>
-                  <Link to="/landing">
+                  <Link to="/">
                     Return to Home
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

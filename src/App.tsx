@@ -51,6 +51,11 @@ const App = () => (
           <BrowserRouter>
             <AuthProvider>
             <Routes>
+            {/* Public Landing Page at Root */}
+            <Route element={<MarketingLayout />}>
+              <Route path="/" element={<LazyPage><Pages.LandingPage /></LazyPage>} />
+            </Route>
+            
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/mfa" element={<LazyPage><Pages.MFAChallengePage /></LazyPage>} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
@@ -67,7 +72,7 @@ const App = () => (
             {/* Protected Routes with Layout */}
             <Route element={<ProtectedLayout />}>
               {/* Main Dashboard */}
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
 
             {/* Employee Self Service Routes */}
             <Route path="/ess" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EmployeeSelfServicePage /></LazyPage></ProtectedRoute>} />
@@ -666,7 +671,7 @@ const App = () => (
 
             {/* Marketing Routes (Public) */}
             <Route element={<MarketingLayout />}>
-              <Route path="/landing" element={<LazyPage><Pages.LandingPage /></LazyPage>} />
+              <Route path="/landing" element={<Navigate to="/" replace />} />
               <Route path="/register-demo" element={<LazyPage><Pages.RegisterDemoPage /></LazyPage>} />
               <Route path="/register-demo/success" element={<LazyPage><Pages.RegisterDemoSuccessPage /></LazyPage>} />
               <Route path="/features" element={<LazyPage><Pages.FeaturesPage /></LazyPage>} />
