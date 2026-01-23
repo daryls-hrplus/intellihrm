@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Grid3X3, Users, Clock, CheckCircle, Settings, BarChart3, Target, Gauge, Layers, ArrowUpDown } from 'lucide-react';
+import { Grid3X3, Users, Clock, CheckCircle, Settings, BarChart3, Target, Gauge, Layers, ArrowUpDown, GitBranch } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
-import { TipCallout, WarningCallout } from '../../components/Callout';
+import { TipCallout, WarningCallout, NoteCallout, IntegrationCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
 import { FieldReferenceTable, FieldDefinition } from '../../components/FieldReferenceTable';
 import { StepByStep, Step } from '../../components/StepByStep';
+import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
 const BUSINESS_RULES = [
   { rule: 'Performance axis requires at least one source', enforcement: 'System' as const, description: 'Nine-Box cannot calculate without a performance data source.' },
@@ -72,7 +73,7 @@ const SETUP_STEPS: Step[] = [
   },
   {
     title: 'Define Signal Mappings (Optional)',
-    description: 'Map additional talent signals to potential scoring.',
+    description: 'Map basic talent signals to potential scoring. For advanced succession-focused signals, see the Succession Planning module.',
     substeps: [
       'Click "Signal Mappings" sub-tab',
       'Add signals like "Learning Velocity" or "Leadership Readiness"',
@@ -210,6 +211,48 @@ export function NineBoxRatingSourcesSetup() {
           </div>
         </div>
 
+        {/* Calibration vs. Succession Context */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <GitBranch className="h-5 w-5 text-primary" />
+            Calibration vs. Succession Context
+          </h3>
+          <p className="text-muted-foreground">
+            The Nine-Box grid is used in two distinct organizational contexts, each with different 
+            data priorities and ownership:
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
+              <CardContent className="pt-4">
+                <h4 className="font-semibold mb-2">Performance Calibration</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  <strong>Focus:</strong> Current appraisal cycle accuracy
+                </p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                  <li>Owned by HR Ops / Compensation</li>
+                  <li>Uses appraisal scores, goal ratings</li>
+                  <li>Drives compensation decisions</li>
+                  <li>Configured in this section</li>
+                </ul>
+              </CardContent>
+            </Card>
+            <Card className="border-violet-200 bg-violet-50/50 dark:bg-violet-950/20">
+              <CardContent className="pt-4">
+                <h4 className="font-semibold mb-2">Succession Planning</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  <strong>Focus:</strong> 2-5 year strategic talent pipeline
+                </p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                  <li>Owned by Talent Management / L&D</li>
+                  <li>Uses talent signals, leadership readiness</li>
+                  <li>Drives succession pool placement</li>
+                  <li>Configured in Succession module</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
         {/* Database Tables */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Related Database Tables</h3>
@@ -227,6 +270,22 @@ export function NineBoxRatingSourcesSetup() {
               <span className="text-sm text-muted-foreground">Calculated positions per employee</span>
             </div>
           </div>
+          
+          <IntegrationCallout title="Talent Signal Mappings">
+            The <code className="font-mono text-xs bg-muted px-1 py-0.5 rounded">nine_box_signal_mappings</code> table 
+            supports both calibration and succession planning contexts. While basic signal configuration 
+            is covered here, detailed talent signal definitions and strategic succession mappings 
+            are managed in the Succession Planning module.
+          </IntegrationCallout>
+
+          <SeeAlsoReference
+            moduleCode="SUCC"
+            moduleName="Succession Planning"
+            sectionId="sec-talent-signals"
+            sectionTitle="Talent Signal Definitions & Nine-Box Mappings"
+            description="Configure detailed talent signals including learning agility, leadership readiness, and strategic potential indicators for succession pipeline placement."
+            manualPath="/enablement/manuals/succession"
+          />
         </div>
 
         <StepByStep steps={SETUP_STEPS} title="Step-by-Step: Configure Rating Sources" />
@@ -258,6 +317,17 @@ export function NineBoxRatingSourcesSetup() {
 
         <FieldReferenceTable fields={RATING_SOURCE_FIELDS} title="Rating Source Fields Reference" />
         <FieldReferenceTable fields={SIGNAL_MAPPING_FIELDS} title="Signal Mapping Fields Reference" />
+
+        <NoteCallout title="Succession Planning Integration">
+          When using Nine-Box for succession planning (rather than calibration), 
+          additional signal categories become relevant:
+          <ul className="list-disc list-inside mt-2 space-y-1">
+            <li><strong>Leadership Pipeline Signals</strong> – Readiness for next-level roles</li>
+            <li><strong>Critical Role Fit</strong> – Match to succession target positions</li>
+            <li><strong>Flight Risk Indicators</strong> – Retention probability factors</li>
+          </ul>
+          These are configured in the Succession Planning module's Talent Intelligence section.
+        </NoteCallout>
 
         <TipCallout title="Best Practice">
           Start with simple single-source configuration (appraisal score for performance, 
