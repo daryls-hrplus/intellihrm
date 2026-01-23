@@ -3770,8 +3770,8 @@
     }
   },
   "trainingModule": {
-    "title": "Training",
-    "subtitle": "Manage learning and development",
+    "title": "Learning & Development",
+    "subtitle": "Manage training, certifications, and career growth",
     "modules": {
       "catalog": {
         "title": "Course Catalog",
