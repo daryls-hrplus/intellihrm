@@ -38,7 +38,10 @@ import {
   FileText,
   Lock,
   Info,
+  ChevronDown,
+  TrendingUp,
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,6 +105,7 @@ export function EssAppraisalEvaluationDialog({
     type: "goal" | "competency" | "responsibility";
   } | null>(null);
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
+  const [scoreSummaryOpen, setScoreSummaryOpen] = useState(true);
 
   // Check if already submitted - form should be read-only
   const isSubmitted = !!appraisal.submitted_at;
@@ -564,61 +568,84 @@ export function EssAppraisalEvaluationDialog({
                 />
               )}
 
-              {/* Score Summary Cards - Real-time visibility during self-assessment (industry standard) */}
+              {/* Collapsible Score Summary Section */}
               {currentScores.overall !== null && (
-                <div className="space-y-3">
-                  <AppraisalScoreSummaryCards
-                    competencyScore={currentScores.competency}
-                    responsibilityScore={currentScores.responsibility}
-                    goalScore={currentScores.goal}
-                    valuesScore={currentScores.values}
-                    overallScore={currentScores.overall}
-                    weights={{
-                      competency: appraisal.competency_weight,
-                      responsibility: appraisal.responsibility_weight,
-                      goal: appraisal.goal_weight,
-                      values: appraisal.values_weight,
-                    }}
-                  />
-                  
-                  {/* How score is calculated - transparency for employees */}
-                  {!isSubmitted && (
-                    <Card className="bg-muted/30 border-muted">
-                      <CardContent className="p-3 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Info className="h-4 w-4" />
-                          <span className="font-medium text-foreground">How your score is calculated</span>
-                        </div>
-                        <div className="text-xs space-y-1">
-                          {enabledCategories.competencies && appraisal.competency_weight > 0 && (
-                            <p>Competencies ({appraisal.competency_weight}%): {currentScores.competency?.toFixed(0) ?? '—'}%</p>
-                          )}
-                          {enabledCategories.responsibilities && appraisal.responsibility_weight > 0 && (
-                            <p>Responsibilities ({appraisal.responsibility_weight}%): {currentScores.responsibility?.toFixed(0) ?? '—'}%</p>
-                          )}
-                          {enabledCategories.goals && appraisal.goal_weight > 0 && (
-                            <p>Goals ({appraisal.goal_weight}%): {currentScores.goal?.toFixed(0) ?? '—'}%</p>
-                          )}
-                          {enabledCategories.values && appraisal.values_weight > 0 && (
-                            <p>Values ({appraisal.values_weight}%): {currentScores.values?.toFixed(0) ?? '—'}%</p>
+                <Collapsible open={scoreSummaryOpen} onOpenChange={setScoreSummaryOpen}>
+                  <div className="border rounded-lg bg-card">
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors rounded-t-lg text-left">
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-primary" />
+                          <span className="font-medium text-sm">Score Summary</span>
+                          {!scoreSummaryOpen && (
+                            <span className="text-sm text-muted-foreground ml-2">
+                              Overall: {currentScores.overall?.toFixed(0)}%
+                            </span>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                  
-                  {/* Performance Category Badge - only after manager completes review */}
-                  {isSubmitted && appraisal.status === "completed" && performanceCategory && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Final Rating:</span>
-                      <PerformanceCategoryBadge 
-                        category={performanceCategory} 
-                        score={currentScores.overall}
-                        showEligibility={false}
-                      />
-                    </div>
-                  )}
-                </div>
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                          scoreSummaryOpen ? "rotate-180" : ""
+                        }`} />
+                      </button>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent>
+                      <div className="p-3 pt-0 space-y-3">
+                        <AppraisalScoreSummaryCards
+                          competencyScore={currentScores.competency}
+                          responsibilityScore={currentScores.responsibility}
+                          goalScore={currentScores.goal}
+                          valuesScore={currentScores.values}
+                          overallScore={currentScores.overall}
+                          weights={{
+                            competency: appraisal.competency_weight,
+                            responsibility: appraisal.responsibility_weight,
+                            goal: appraisal.goal_weight,
+                            values: appraisal.values_weight,
+                          }}
+                        />
+                        
+                        {/* How score is calculated - transparency for employees */}
+                        {!isSubmitted && (
+                          <Card className="bg-muted/30 border-muted">
+                            <CardContent className="p-3 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Info className="h-4 w-4" />
+                                <span className="font-medium text-foreground">How your score is calculated</span>
+                              </div>
+                              <div className="text-xs space-y-1">
+                                {enabledCategories.competencies && appraisal.competency_weight > 0 && (
+                                  <p>Competencies ({appraisal.competency_weight}%): {currentScores.competency?.toFixed(0) ?? '—'}%</p>
+                                )}
+                                {enabledCategories.responsibilities && appraisal.responsibility_weight > 0 && (
+                                  <p>Responsibilities ({appraisal.responsibility_weight}%): {currentScores.responsibility?.toFixed(0) ?? '—'}%</p>
+                                )}
+                                {enabledCategories.goals && appraisal.goal_weight > 0 && (
+                                  <p>Goals ({appraisal.goal_weight}%): {currentScores.goal?.toFixed(0) ?? '—'}%</p>
+                                )}
+                                {enabledCategories.values && appraisal.values_weight > 0 && (
+                                  <p>Values ({appraisal.values_weight}%): {currentScores.values?.toFixed(0) ?? '—'}%</p>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                        
+                        {/* Performance Category Badge - only after manager completes review */}
+                        {isSubmitted && appraisal.status === "completed" && performanceCategory && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">Final Rating:</span>
+                            <PerformanceCategoryBadge 
+                              category={performanceCategory} 
+                              score={currentScores.overall}
+                              showEligibility={false}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </CollapsibleContent>
+                  </div>
+                </Collapsible>
               )}
 
               {/* Job Level Expectations Panel - Read-only for employees */}
