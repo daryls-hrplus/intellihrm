@@ -988,7 +988,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
     title: 'Analytics & Reporting',
     description: 'Monitoring, measuring, and reporting on appraisal outcomes',
     contentLevel: 'procedure',
-    estimatedReadTime: 30,
+    estimatedReadTime: 90,
     targetRoles: ['HR User', 'Admin'],
     subsections: [
       {
@@ -1008,6 +1008,20 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-6-2',
         sectionNumber: '6.2',
+        title: 'Performance Intelligence Hub',
+        description: 'Central hub for AI-powered performance insights and recommendations',
+        contentLevel: 'overview',
+        estimatedReadTime: 12,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'Continuous access',
+          timing: 'Throughout cycle',
+          benchmark: 'Unified intelligence dashboard for cross-module insights'
+        }
+      },
+      {
+        id: 'sec-6-3',
+        sectionNumber: '6.3',
         title: 'Performance Distribution Analysis',
         description: 'Analyzing rating distributions and trends',
         contentLevel: 'procedure',
@@ -1020,8 +1034,8 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-6-3',
-        sectionNumber: '6.3',
+        id: 'sec-6-4',
+        sectionNumber: '6.4',
         title: 'Manager Scoring Patterns',
         description: 'Identifying and addressing rating tendencies',
         contentLevel: 'procedure',
@@ -1034,8 +1048,36 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-6-4',
-        sectionNumber: '6.4',
+        id: 'sec-6-5',
+        sectionNumber: '6.5',
+        title: 'Manager Effectiveness Analytics',
+        description: 'Track manager effectiveness as team leaders and evaluators',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'Monthly/Quarterly',
+          timing: 'Ongoing monitoring',
+          benchmark: 'Manager effectiveness scoring with 25+ metrics'
+        }
+      },
+      {
+        id: 'sec-6-6',
+        sectionNumber: '6.6',
+        title: 'Employee Performance Index',
+        description: 'Rolling composite performance scores with trend analysis',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'Per cycle update',
+          timing: 'Post-appraisal finalization',
+          benchmark: '12/24/36 month rolling scores for talent decisions'
+        }
+      },
+      {
+        id: 'sec-6-7',
+        sectionNumber: '6.7',
         title: 'Trend Analysis & Predictions',
         description: 'Year-over-year comparisons and forecasting',
         contentLevel: 'procedure',
@@ -1046,6 +1088,62 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           timing: 'Strategic planning cycles',
           benchmark: '3-year trend minimum for insights'
         }
+      },
+      {
+        id: 'sec-6-8',
+        sectionNumber: '6.8',
+        title: 'Talent Unified Dashboard',
+        description: 'Cross-module talent analytics combining appraisals, succession, and development',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'Weekly/Monthly',
+          timing: 'Strategic talent reviews',
+          benchmark: 'Unified view across talent modules'
+        }
+      },
+      {
+        id: 'sec-6-9',
+        sectionNumber: '6.9',
+        title: 'Report Builder Configuration',
+        description: 'Create custom banded reports with templates, parameters, and data sources',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'As needed',
+          timing: 'Report development',
+          benchmark: 'Custom report templates with band types and grouping'
+        }
+      },
+      {
+        id: 'sec-6-10',
+        sectionNumber: '6.10',
+        title: 'Scheduled Reports & Exports',
+        description: 'Configure automated report generation and delivery',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR User'],
+        industryContext: {
+          frequency: 'Setup + monitoring',
+          timing: 'Ongoing automation',
+          benchmark: 'Daily/weekly/monthly scheduled delivery'
+        }
+      },
+      {
+        id: 'sec-6-11',
+        sectionNumber: '6.11',
+        title: 'BI Dashboard Customization',
+        description: 'Create custom analytics dashboards with widgets and sharing',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'As needed',
+          timing: 'Dashboard development',
+          benchmark: 'Self-service BI with role-based sharing'
+        }
       }
     ]
   },
@@ -1055,7 +1153,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
     title: 'Integration & Downstream Impacts',
     description: 'How appraisal data flows to other Intelli HRM modules',
     contentLevel: 'reference',
-    estimatedReadTime: 40,
+    estimatedReadTime: 60,
     targetRoles: ['Admin', 'Consultant'],
     subsections: [
       {
@@ -1140,6 +1238,62 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           frequency: 'Per event',
           timing: 'Event-triggered',
           benchmark: 'Multi-channel notification delivery'
+        }
+      },
+      {
+        id: 'sec-7-7',
+        sectionNumber: '7.7',
+        title: 'Integration Analytics Dashboard',
+        description: 'Monitor integration execution, success rates, and troubleshoot failures',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Weekly monitoring',
+          timing: 'Post-integration execution',
+          benchmark: 'Integration success rate: 99%+ target'
+        }
+      },
+      {
+        id: 'sec-7-8',
+        sectionNumber: '7.8',
+        title: 'Integration Rule Configuration',
+        description: 'Configure integration rules with conditions, priorities, and approval workflows',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Initial setup + annual review',
+          timing: 'Pre-implementation',
+          benchmark: '28-field rule configuration with HR override support'
+        }
+      },
+      {
+        id: 'sec-7-9',
+        sectionNumber: '7.9',
+        title: 'Compliance Document Generation',
+        description: 'Generate HR compliance documents from appraisal outcomes',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['HR User', 'Admin'],
+        industryContext: {
+          frequency: 'Post-finalization',
+          timing: 'Within 30 days of cycle close',
+          benchmark: 'Automated document generation for audit compliance'
+        }
+      },
+      {
+        id: 'sec-7-10',
+        sectionNumber: '7.10',
+        title: 'Workflow Integration',
+        description: 'Appraisal-triggered workflows with step tracking and SLA monitoring',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Per triggered workflow',
+          timing: 'Continuous',
+          benchmark: 'Workflow SLA compliance and bottleneck detection'
         }
       }
     ]
