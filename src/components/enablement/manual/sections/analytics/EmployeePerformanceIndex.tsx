@@ -4,36 +4,36 @@ import { Clock, Users, CheckCircle, TrendingUp, TrendingDown, Minus, BarChart3, 
 import { NavigationPath } from '../../NavigationPath';
 import { TipCallout, InfoCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
-import { FieldReferenceTable, type FieldReference } from '../../components/FieldReferenceTable';
+import { FieldReferenceTable, type FieldDefinition } from '../../components/FieldReferenceTable';
 import { RelatedTopics } from '../../components';
 
-const INDEX_FIELDS: FieldReference[] = [
-  { fieldName: 'employee_id', location: 'employee_performance_index', required: true, description: 'Employee profile ID' },
-  { fieldName: 'company_id', location: 'employee_performance_index', required: true, description: 'Company context for multi-tenant filtering' },
-  { fieldName: 'rolling_score_12m', location: 'employee_performance_index', required: false, description: '12-month rolling performance score' },
-  { fieldName: 'rolling_score_24m', location: 'employee_performance_index', required: false, description: '24-month rolling performance score' },
-  { fieldName: 'rolling_score_36m', location: 'employee_performance_index', required: false, description: '36-month rolling performance score' },
-  { fieldName: 'goal_component_score', location: 'employee_performance_index', required: false, description: 'Weighted goal achievement contribution' },
-  { fieldName: 'competency_component_score', location: 'employee_performance_index', required: false, description: 'Weighted competency rating contribution' },
-  { fieldName: 'responsibility_component_score', location: 'employee_performance_index', required: false, description: 'Weighted responsibility/KRA contribution' },
-  { fieldName: 'values_component_score', location: 'employee_performance_index', required: false, description: 'Weighted values assessment contribution' },
-  { fieldName: 'trend_direction', location: 'employee_performance_index', required: false, description: 'improving, stable, or declining' },
-  { fieldName: 'trend_velocity', location: 'employee_performance_index', required: false, description: 'Rate of score change (percentage per cycle)' },
-  { fieldName: 'consistency_rating', location: 'employee_performance_index', required: false, description: 'Score stability: high, medium, low' },
-  { fieldName: 'promotion_readiness_score', location: 'employee_performance_index', required: false, description: 'Composite readiness for advancement (0-100)' },
-  { fieldName: 'succession_readiness_score', location: 'employee_performance_index', required: false, description: 'Readiness for critical role succession' },
-  { fieldName: 'skill_gap_closure_rate', location: 'employee_performance_index', required: false, description: 'Percentage of identified gaps closed' },
-  { fieldName: 'last_calculated_at', location: 'employee_performance_index', required: true, description: 'Timestamp of last index calculation' }
+const INDEX_FIELDS: FieldDefinition[] = [
+  { name: 'employee_id', required: true, type: 'UUID', description: 'Employee profile ID' },
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company context for multi-tenant filtering' },
+  { name: 'rolling_score_12m', required: false, type: 'NUMERIC', description: '12-month rolling performance score' },
+  { name: 'rolling_score_24m', required: false, type: 'NUMERIC', description: '24-month rolling performance score' },
+  { name: 'rolling_score_36m', required: false, type: 'NUMERIC', description: '36-month rolling performance score' },
+  { name: 'goal_component_score', required: false, type: 'NUMERIC', description: 'Weighted goal achievement contribution' },
+  { name: 'competency_component_score', required: false, type: 'NUMERIC', description: 'Weighted competency rating contribution' },
+  { name: 'responsibility_component_score', required: false, type: 'NUMERIC', description: 'Weighted responsibility/KRA contribution' },
+  { name: 'values_component_score', required: false, type: 'NUMERIC', description: 'Weighted values assessment contribution' },
+  { name: 'trend_direction', required: false, type: 'TEXT', description: 'improving, stable, or declining' },
+  { name: 'trend_velocity', required: false, type: 'NUMERIC', description: 'Rate of score change (percentage per cycle)' },
+  { name: 'consistency_rating', required: false, type: 'TEXT', description: 'Score stability: high, medium, low' },
+  { name: 'promotion_readiness_score', required: false, type: 'NUMERIC', description: 'Composite readiness for advancement (0-100)' },
+  { name: 'succession_readiness_score', required: false, type: 'NUMERIC', description: 'Readiness for critical role succession' },
+  { name: 'skill_gap_closure_rate', required: false, type: 'NUMERIC', description: 'Percentage of identified gaps closed' },
+  { name: 'last_calculated_at', required: true, type: 'TIMESTAMPTZ', description: 'Timestamp of last index calculation' }
 ];
 
-const SETTINGS_FIELDS: FieldReference[] = [
-  { fieldName: 'company_id', location: 'performance_index_settings', required: true, description: 'Company-specific configuration' },
-  { fieldName: 'goal_weight', location: 'performance_index_settings', required: true, description: 'Weight for goal component (default 35%)' },
-  { fieldName: 'competency_weight', location: 'performance_index_settings', required: true, description: 'Weight for competency component (default 30%)' },
-  { fieldName: 'responsibility_weight', location: 'performance_index_settings', required: true, description: 'Weight for responsibility component (default 25%)' },
-  { fieldName: 'values_weight', location: 'performance_index_settings', required: true, description: 'Weight for values component (default 10%)' },
-  { fieldName: 'recency_decay_factor', location: 'performance_index_settings', required: false, description: 'Weight decay for older cycles (0-1)' },
-  { fieldName: 'minimum_cycles_for_trend', location: 'performance_index_settings', required: false, description: 'Min cycles required for trend calculation' }
+const SETTINGS_FIELDS: FieldDefinition[] = [
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company-specific configuration' },
+  { name: 'goal_weight', required: true, type: 'NUMERIC', description: 'Weight for goal component (default 35%)' },
+  { name: 'competency_weight', required: true, type: 'NUMERIC', description: 'Weight for competency component (default 30%)' },
+  { name: 'responsibility_weight', required: true, type: 'NUMERIC', description: 'Weight for responsibility component (default 25%)' },
+  { name: 'values_weight', required: true, type: 'NUMERIC', description: 'Weight for values component (default 10%)' },
+  { name: 'recency_decay_factor', required: false, type: 'NUMERIC', description: 'Weight decay for older cycles (0-1)' },
+  { name: 'minimum_cycles_for_trend', required: false, type: 'INTEGER', description: 'Min cycles required for trend calculation' }
 ];
 
 const BUSINESS_RULES = [

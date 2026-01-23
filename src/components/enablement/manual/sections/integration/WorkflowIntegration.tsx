@@ -4,38 +4,38 @@ import { Clock, Users, CheckCircle, GitBranch, Play, CheckSquare, AlertTriangle,
 import { NavigationPath } from '../../NavigationPath';
 import { TipCallout, InfoCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
-import { FieldReferenceTable, type FieldReference } from '../../components/FieldReferenceTable';
+import { FieldReferenceTable, type FieldDefinition } from '../../components/FieldReferenceTable';
 import { RelatedTopics } from '../../components';
 import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
-const INSTANCE_FIELDS: FieldReference[] = [
-  { fieldName: 'id', location: 'workflow_instances', required: true, description: 'Unique workflow instance identifier' },
-  { fieldName: 'template_id', location: 'workflow_instances', required: true, description: 'Workflow template reference' },
-  { fieldName: 'company_id', location: 'workflow_instances', required: true, description: 'Company context' },
-  { fieldName: 'source_module', location: 'workflow_instances', required: true, description: 'Module that triggered workflow (appraisals)' },
-  { fieldName: 'source_record_id', location: 'workflow_instances', required: true, description: 'ID of triggering record (participant_id)' },
-  { fieldName: 'status', location: 'workflow_instances', required: true, description: 'pending, in_progress, completed, cancelled' },
-  { fieldName: 'current_step_id', location: 'workflow_instances', required: false, description: 'Currently active step' },
-  { fieldName: 'started_at', location: 'workflow_instances', required: true, description: 'Workflow start timestamp' },
-  { fieldName: 'completed_at', location: 'workflow_instances', required: false, description: 'Workflow completion timestamp' },
-  { fieldName: 'due_date', location: 'workflow_instances', required: false, description: 'Overall workflow deadline' },
-  { fieldName: 'sla_status', location: 'workflow_instances', required: false, description: 'on_track, at_risk, breached' },
-  { fieldName: 'initiated_by', location: 'workflow_instances', required: true, description: 'User or system that started workflow' }
+const INSTANCE_FIELDS: FieldDefinition[] = [
+  { name: 'id', required: true, type: 'UUID', description: 'Unique workflow instance identifier' },
+  { name: 'template_id', required: true, type: 'UUID', description: 'Workflow template reference' },
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company context' },
+  { name: 'source_module', required: true, type: 'TEXT', description: 'Module that triggered workflow (appraisals)' },
+  { name: 'source_record_id', required: true, type: 'UUID', description: 'ID of triggering record (participant_id)' },
+  { name: 'status', required: true, type: 'TEXT', description: 'pending, in_progress, completed, cancelled' },
+  { name: 'current_step_id', required: false, type: 'UUID', description: 'Currently active step' },
+  { name: 'started_at', required: true, type: 'TIMESTAMPTZ', description: 'Workflow start timestamp' },
+  { name: 'completed_at', required: false, type: 'TIMESTAMPTZ', description: 'Workflow completion timestamp' },
+  { name: 'due_date', required: false, type: 'DATE', description: 'Overall workflow deadline' },
+  { name: 'sla_status', required: false, type: 'TEXT', description: 'on_track, at_risk, breached' },
+  { name: 'initiated_by', required: true, type: 'UUID', description: 'User or system that started workflow' }
 ];
 
-const STEP_FIELDS: FieldReference[] = [
-  { fieldName: 'workflow_instance_id', location: 'workflow_steps', required: true, description: 'Parent workflow instance' },
-  { fieldName: 'step_order', location: 'workflow_steps', required: true, description: 'Sequence position in workflow' },
-  { fieldName: 'step_type', location: 'workflow_steps', required: true, description: 'approval, notification, action, condition' },
-  { fieldName: 'step_name', location: 'workflow_steps', required: true, description: 'Step display name' },
-  { fieldName: 'assignee_id', location: 'workflow_steps', required: false, description: 'User assigned to step (for approvals)' },
-  { fieldName: 'assignee_role', location: 'workflow_steps', required: false, description: 'Role for dynamic assignment' },
-  { fieldName: 'status', location: 'workflow_steps', required: true, description: 'pending, in_progress, completed, skipped' },
-  { fieldName: 'started_at', location: 'workflow_steps', required: false, description: 'Step start timestamp' },
-  { fieldName: 'completed_at', location: 'workflow_steps', required: false, description: 'Step completion timestamp' },
-  { fieldName: 'due_date', location: 'workflow_steps', required: false, description: 'Step deadline' },
-  { fieldName: 'action_taken', location: 'workflow_steps', required: false, description: 'approve, reject, delegate, escalate' },
-  { fieldName: 'comments', location: 'workflow_steps', required: false, description: 'Step completion notes' }
+const STEP_FIELDS: FieldDefinition[] = [
+  { name: 'workflow_instance_id', required: true, type: 'UUID', description: 'Parent workflow instance' },
+  { name: 'step_order', required: true, type: 'INTEGER', description: 'Sequence position in workflow' },
+  { name: 'step_type', required: true, type: 'TEXT', description: 'approval, notification, action, condition' },
+  { name: 'step_name', required: true, type: 'TEXT', description: 'Step display name' },
+  { name: 'assignee_id', required: false, type: 'UUID', description: 'User assigned to step (for approvals)' },
+  { name: 'assignee_role', required: false, type: 'TEXT', description: 'Role for dynamic assignment' },
+  { name: 'status', required: true, type: 'TEXT', description: 'pending, in_progress, completed, skipped' },
+  { name: 'started_at', required: false, type: 'TIMESTAMPTZ', description: 'Step start timestamp' },
+  { name: 'completed_at', required: false, type: 'TIMESTAMPTZ', description: 'Step completion timestamp' },
+  { name: 'due_date', required: false, type: 'DATE', description: 'Step deadline' },
+  { name: 'action_taken', required: false, type: 'TEXT', description: 'approve, reject, delegate, escalate' },
+  { name: 'comments', required: false, type: 'TEXT', description: 'Step completion notes' }
 ];
 
 const APPRAISAL_WORKFLOWS = [

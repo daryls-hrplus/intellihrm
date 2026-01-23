@@ -4,35 +4,35 @@ import { Clock, Users, CheckCircle, FileText, Layers, Settings, Database, Filter
 import { NavigationPath } from '../../NavigationPath';
 import { TipCallout, WarningCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
-import { FieldReferenceTable, type FieldReference } from '../../components/FieldReferenceTable';
+import { FieldReferenceTable, type FieldDefinition } from '../../components/FieldReferenceTable';
 import { RelatedTopics, StepByStep } from '../../components';
 
-const TEMPLATE_FIELDS: FieldReference[] = [
-  { fieldName: 'id', location: 'report_templates', required: true, description: 'Unique template identifier' },
-  { fieldName: 'company_id', location: 'report_templates', required: true, description: 'Company owning the template' },
-  { fieldName: 'template_name', location: 'report_templates', required: true, description: 'Display name for the template' },
-  { fieldName: 'template_code', location: 'report_templates', required: true, description: 'Unique code for programmatic reference' },
-  { fieldName: 'module_scope', location: 'report_templates', required: true, description: 'Module this template applies to (appraisals, goals, etc.)' },
-  { fieldName: 'description', location: 'report_templates', required: false, description: 'Template purpose and usage notes' },
-  { fieldName: 'output_format', location: 'report_templates', required: true, description: 'PDF, Excel, Word, or PowerPoint' },
-  { fieldName: 'page_orientation', location: 'report_templates', required: false, description: 'Portrait or Landscape' },
-  { fieldName: 'page_size', location: 'report_templates', required: false, description: 'A4, Letter, Legal' },
-  { fieldName: 'header_content', location: 'report_templates', required: false, description: 'Template header HTML/Markdown' },
-  { fieldName: 'footer_content', location: 'report_templates', required: false, description: 'Template footer HTML/Markdown' },
-  { fieldName: 'is_active', location: 'report_templates', required: true, description: 'Whether template is available for use' },
-  { fieldName: 'created_by', location: 'report_templates', required: true, description: 'User who created the template' }
+const TEMPLATE_FIELDS: FieldDefinition[] = [
+  { name: 'id', required: true, type: 'UUID', description: 'Unique template identifier' },
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company owning the template' },
+  { name: 'template_name', required: true, type: 'TEXT', description: 'Display name for the template' },
+  { name: 'template_code', required: true, type: 'TEXT', description: 'Unique code for programmatic reference' },
+  { name: 'module_scope', required: true, type: 'TEXT', description: 'Module this template applies to (appraisals, goals, etc.)' },
+  { name: 'description', required: false, type: 'TEXT', description: 'Template purpose and usage notes' },
+  { name: 'output_format', required: true, type: 'TEXT', description: 'PDF, Excel, Word, or PowerPoint' },
+  { name: 'page_orientation', required: false, type: 'TEXT', description: 'Portrait or Landscape' },
+  { name: 'page_size', required: false, type: 'TEXT', description: 'A4, Letter, Legal' },
+  { name: 'header_content', required: false, type: 'TEXT', description: 'Template header HTML/Markdown' },
+  { name: 'footer_content', required: false, type: 'TEXT', description: 'Template footer HTML/Markdown' },
+  { name: 'is_active', required: true, type: 'BOOLEAN', description: 'Whether template is available for use' },
+  { name: 'created_by', required: true, type: 'UUID', description: 'User who created the template' }
 ];
 
-const BAND_FIELDS: FieldReference[] = [
-  { fieldName: 'template_id', location: 'report_template_bands', required: true, description: 'Parent template reference' },
-  { fieldName: 'band_type', location: 'report_template_bands', required: true, description: 'header, detail, group_header, group_footer, footer' },
-  { fieldName: 'band_order', location: 'report_template_bands', required: true, description: 'Rendering order within template' },
-  { fieldName: 'content_template', location: 'report_template_bands', required: true, description: 'Band content with variable placeholders' },
-  { fieldName: 'data_source_id', location: 'report_template_bands', required: false, description: 'Data source for detail bands' },
-  { fieldName: 'group_by_field', location: 'report_template_bands', required: false, description: 'Field for grouping (group bands only)' },
-  { fieldName: 'sort_by_field', location: 'report_template_bands', required: false, description: 'Field for sorting within band' },
-  { fieldName: 'sort_direction', location: 'report_template_bands', required: false, description: 'ASC or DESC' },
-  { fieldName: 'conditional_display', location: 'report_template_bands', required: false, description: 'Expression to conditionally show band' }
+const BAND_FIELDS: FieldDefinition[] = [
+  { name: 'template_id', required: true, type: 'UUID', description: 'Parent template reference' },
+  { name: 'band_type', required: true, type: 'TEXT', description: 'header, detail, group_header, group_footer, footer' },
+  { name: 'band_order', required: true, type: 'INTEGER', description: 'Rendering order within template' },
+  { name: 'content_template', required: true, type: 'TEXT', description: 'Band content with variable placeholders' },
+  { name: 'data_source_id', required: false, type: 'UUID', description: 'Data source for detail bands' },
+  { name: 'group_by_field', required: false, type: 'TEXT', description: 'Field for grouping (group bands only)' },
+  { name: 'sort_by_field', required: false, type: 'TEXT', description: 'Field for sorting within band' },
+  { name: 'sort_direction', required: false, type: 'TEXT', description: 'ASC or DESC' },
+  { name: 'conditional_display', required: false, type: 'TEXT', description: 'Expression to conditionally show band' }
 ];
 
 const STEPS = [

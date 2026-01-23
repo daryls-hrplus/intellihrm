@@ -4,35 +4,35 @@ import { Clock, Users, CheckCircle, LayoutDashboard, BarChart3, PieChart, LineCh
 import { NavigationPath } from '../../NavigationPath';
 import { TipCallout, InfoCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
-import { FieldReferenceTable, type FieldReference } from '../../components/FieldReferenceTable';
+import { FieldReferenceTable, type FieldDefinition } from '../../components/FieldReferenceTable';
 import { RelatedTopics, StepByStep } from '../../components';
 
-const DASHBOARD_FIELDS: FieldReference[] = [
-  { fieldName: 'id', location: 'bi_dashboards', required: true, description: 'Unique dashboard identifier' },
-  { fieldName: 'company_id', location: 'bi_dashboards', required: true, description: 'Company owning the dashboard' },
-  { fieldName: 'dashboard_name', location: 'bi_dashboards', required: true, description: 'Display name for the dashboard' },
-  { fieldName: 'dashboard_code', location: 'bi_dashboards', required: true, description: 'Unique code for programmatic reference' },
-  { fieldName: 'description', location: 'bi_dashboards', required: false, description: 'Dashboard purpose and usage notes' },
-  { fieldName: 'layout_config', location: 'bi_dashboards', required: true, description: 'JSON grid layout configuration' },
-  { fieldName: 'theme', location: 'bi_dashboards', required: false, description: 'Visual theme (light, dark, custom)' },
-  { fieldName: 'refresh_interval_seconds', location: 'bi_dashboards', required: false, description: 'Auto-refresh interval (0 = manual)' },
-  { fieldName: 'is_public', location: 'bi_dashboards', required: true, description: 'Whether dashboard is visible to all users' },
-  { fieldName: 'created_by', location: 'bi_dashboards', required: true, description: 'User who created the dashboard' },
-  { fieldName: 'is_active', location: 'bi_dashboards', required: true, description: 'Whether dashboard is available' }
+const DASHBOARD_FIELDS: FieldDefinition[] = [
+  { name: 'id', required: true, type: 'UUID', description: 'Unique dashboard identifier' },
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company owning the dashboard' },
+  { name: 'dashboard_name', required: true, type: 'TEXT', description: 'Display name for the dashboard' },
+  { name: 'dashboard_code', required: true, type: 'TEXT', description: 'Unique code for programmatic reference' },
+  { name: 'description', required: false, type: 'TEXT', description: 'Dashboard purpose and usage notes' },
+  { name: 'layout_config', required: true, type: 'JSONB', description: 'JSON grid layout configuration' },
+  { name: 'theme', required: false, type: 'TEXT', description: 'Visual theme (light, dark, custom)' },
+  { name: 'refresh_interval_seconds', required: false, type: 'INTEGER', description: 'Auto-refresh interval (0 = manual)' },
+  { name: 'is_public', required: true, type: 'BOOLEAN', description: 'Whether dashboard is visible to all users' },
+  { name: 'created_by', required: true, type: 'UUID', description: 'User who created the dashboard' },
+  { name: 'is_active', required: true, type: 'BOOLEAN', description: 'Whether dashboard is available' }
 ];
 
-const WIDGET_FIELDS: FieldReference[] = [
-  { fieldName: 'dashboard_id', location: 'bi_widgets', required: true, description: 'Parent dashboard reference' },
-  { fieldName: 'widget_type', location: 'bi_widgets', required: true, description: 'bar, line, pie, table, kpi, gauge' },
-  { fieldName: 'title', location: 'bi_widgets', required: true, description: 'Widget display title' },
-  { fieldName: 'data_source_id', location: 'bi_widgets', required: true, description: 'Data source for widget' },
-  { fieldName: 'query_config', location: 'bi_widgets', required: true, description: 'JSON query/aggregation configuration' },
-  { fieldName: 'visualization_config', location: 'bi_widgets', required: false, description: 'Colors, labels, axes configuration' },
-  { fieldName: 'position_x', location: 'bi_widgets', required: true, description: 'Grid column position' },
-  { fieldName: 'position_y', location: 'bi_widgets', required: true, description: 'Grid row position' },
-  { fieldName: 'width', location: 'bi_widgets', required: true, description: 'Widget width in grid units' },
-  { fieldName: 'height', location: 'bi_widgets', required: true, description: 'Widget height in grid units' },
-  { fieldName: 'filter_config', location: 'bi_widgets', required: false, description: 'Widget-level filters' }
+const WIDGET_FIELDS: FieldDefinition[] = [
+  { name: 'dashboard_id', required: true, type: 'UUID', description: 'Parent dashboard reference' },
+  { name: 'widget_type', required: true, type: 'TEXT', description: 'bar, line, pie, table, kpi, gauge' },
+  { name: 'title', required: true, type: 'TEXT', description: 'Widget display title' },
+  { name: 'data_source_id', required: true, type: 'UUID', description: 'Data source for widget' },
+  { name: 'query_config', required: true, type: 'JSONB', description: 'JSON query/aggregation configuration' },
+  { name: 'visualization_config', required: false, type: 'JSONB', description: 'Colors, labels, axes configuration' },
+  { name: 'position_x', required: true, type: 'INTEGER', description: 'Grid column position' },
+  { name: 'position_y', required: true, type: 'INTEGER', description: 'Grid row position' },
+  { name: 'width', required: true, type: 'INTEGER', description: 'Widget width in grid units' },
+  { name: 'height', required: true, type: 'INTEGER', description: 'Widget height in grid units' },
+  { name: 'filter_config', required: false, type: 'JSONB', description: 'Widget-level filters' }
 ];
 
 const STEPS = [

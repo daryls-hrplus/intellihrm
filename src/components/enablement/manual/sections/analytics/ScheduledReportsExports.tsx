@@ -4,37 +4,37 @@ import { Clock, Users, CheckCircle, Calendar, Mail, Download, FileText, Play, Hi
 import { NavigationPath } from '../../NavigationPath';
 import { TipCallout, InfoCallout } from '../../components/Callout';
 import { BusinessRules } from '../../components/BusinessRules';
-import { FieldReferenceTable, type FieldReference } from '../../components/FieldReferenceTable';
+import { FieldReferenceTable, type FieldDefinition } from '../../components/FieldReferenceTable';
 import { RelatedTopics, StepByStep } from '../../components';
 
-const SCHEDULED_FIELDS: FieldReference[] = [
-  { fieldName: 'id', location: 'scheduled_org_reports', required: true, description: 'Unique schedule identifier' },
-  { fieldName: 'company_id', location: 'scheduled_org_reports', required: true, description: 'Company owning the schedule' },
-  { fieldName: 'report_template_id', location: 'scheduled_org_reports', required: true, description: 'Template to execute' },
-  { fieldName: 'schedule_name', location: 'scheduled_org_reports', required: true, description: 'Display name for the schedule' },
-  { fieldName: 'schedule_type', location: 'scheduled_org_reports', required: true, description: 'daily, weekly, monthly, quarterly' },
-  { fieldName: 'schedule_day', location: 'scheduled_org_reports', required: false, description: 'Day of week (1-7) or month (1-31)' },
-  { fieldName: 'schedule_time', location: 'scheduled_org_reports', required: true, description: 'Time of day to execute (HH:MM)' },
-  { fieldName: 'timezone', location: 'scheduled_org_reports', required: true, description: 'Timezone for schedule execution' },
-  { fieldName: 'filter_config', location: 'scheduled_org_reports', required: false, description: 'JSON filter parameters for report' },
-  { fieldName: 'recipients', location: 'scheduled_org_reports', required: true, description: 'Email addresses or distribution lists' },
-  { fieldName: 'output_format', location: 'scheduled_org_reports', required: true, description: 'PDF, Excel, or PowerPoint' },
-  { fieldName: 'is_active', location: 'scheduled_org_reports', required: true, description: 'Whether schedule is enabled' },
-  { fieldName: 'last_run_at', location: 'scheduled_org_reports', required: false, description: 'Last successful execution timestamp' },
-  { fieldName: 'next_run_at', location: 'scheduled_org_reports', required: false, description: 'Next scheduled execution timestamp' }
+const SCHEDULED_FIELDS: FieldDefinition[] = [
+  { name: 'id', required: true, type: 'UUID', description: 'Unique schedule identifier' },
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company owning the schedule' },
+  { name: 'report_template_id', required: true, type: 'UUID', description: 'Template to execute' },
+  { name: 'schedule_name', required: true, type: 'TEXT', description: 'Display name for the schedule' },
+  { name: 'schedule_type', required: true, type: 'TEXT', description: 'daily, weekly, monthly, quarterly' },
+  { name: 'schedule_day', required: false, type: 'INTEGER', description: 'Day of week (1-7) or month (1-31)' },
+  { name: 'schedule_time', required: true, type: 'TIME', description: 'Time of day to execute (HH:MM)' },
+  { name: 'timezone', required: true, type: 'TEXT', description: 'Timezone for schedule execution' },
+  { name: 'filter_config', required: false, type: 'JSONB', description: 'JSON filter parameters for report' },
+  { name: 'recipients', required: true, type: 'TEXT[]', description: 'Email addresses or distribution lists' },
+  { name: 'output_format', required: true, type: 'TEXT', description: 'PDF, Excel, or PowerPoint' },
+  { name: 'is_active', required: true, type: 'BOOLEAN', description: 'Whether schedule is enabled' },
+  { name: 'last_run_at', required: false, type: 'TIMESTAMPTZ', description: 'Last successful execution timestamp' },
+  { name: 'next_run_at', required: false, type: 'TIMESTAMPTZ', description: 'Next scheduled execution timestamp' }
 ];
 
-const GENERATED_FIELDS: FieldReference[] = [
-  { fieldName: 'id', location: 'generated_reports', required: true, description: 'Unique report instance identifier' },
-  { fieldName: 'schedule_id', location: 'generated_reports', required: false, description: 'Scheduled job that created this (null for ad-hoc)' },
-  { fieldName: 'template_id', location: 'generated_reports', required: true, description: 'Template used for generation' },
-  { fieldName: 'generated_by', location: 'generated_reports', required: true, description: 'User or system that triggered generation' },
-  { fieldName: 'generated_at', location: 'generated_reports', required: true, description: 'Generation timestamp' },
-  { fieldName: 'file_path', location: 'generated_reports', required: true, description: 'Storage path for generated file' },
-  { fieldName: 'file_size_bytes', location: 'generated_reports', required: false, description: 'Size of generated file' },
-  { fieldName: 'status', location: 'generated_reports', required: true, description: 'success, failed, pending' },
-  { fieldName: 'error_message', location: 'generated_reports', required: false, description: 'Error details if failed' },
-  { fieldName: 'delivery_status', location: 'generated_reports', required: false, description: 'Email delivery status' }
+const GENERATED_FIELDS: FieldDefinition[] = [
+  { name: 'id', required: true, type: 'UUID', description: 'Unique report instance identifier' },
+  { name: 'schedule_id', required: false, type: 'UUID', description: 'Scheduled job that created this (null for ad-hoc)' },
+  { name: 'template_id', required: true, type: 'UUID', description: 'Template used for generation' },
+  { name: 'generated_by', required: true, type: 'UUID', description: 'User or system that triggered generation' },
+  { name: 'generated_at', required: true, type: 'TIMESTAMPTZ', description: 'Generation timestamp' },
+  { name: 'file_path', required: true, type: 'TEXT', description: 'Storage path for generated file' },
+  { name: 'file_size_bytes', required: false, type: 'BIGINT', description: 'Size of generated file' },
+  { name: 'status', required: true, type: 'TEXT', description: 'success, failed, pending' },
+  { name: 'error_message', required: false, type: 'TEXT', description: 'Error details if failed' },
+  { name: 'delivery_status', required: false, type: 'TEXT', description: 'Email delivery status' }
 ];
 
 const STEPS = [
