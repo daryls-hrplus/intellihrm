@@ -124,6 +124,41 @@ export default function EnablementHubPage() {
       ],
     },
     {
+      titleKey: "Documentation Library",
+      items: [
+        {
+          title: "Administrator Manuals",
+          description: "7 comprehensive admin guides (349 sections)",
+          href: "/enablement/manuals",
+          icon: BookOpen,
+          color: "bg-blue-500/10 text-blue-500",
+          badge: "7 Guides",
+        },
+        {
+          title: "Quick Start Guides",
+          description: "Get modules running in 10-30 minutes",
+          href: "/enablement/quickstarts",
+          icon: Rocket,
+          color: "bg-emerald-500/10 text-emerald-500",
+          badge: "New",
+        },
+        {
+          title: "Implementation Checklists",
+          description: "Prerequisites and go-live readiness",
+          href: "/enablement/checklists",
+          icon: ClipboardCheck,
+          color: "bg-amber-500/10 text-amber-500",
+        },
+        {
+          title: "Module Documentation",
+          description: "Browse all content by module",
+          href: "/enablement/modules",
+          icon: FolderTree,
+          color: "bg-violet-500/10 text-violet-500",
+        },
+      ],
+    },
+    {
       titleKey: "Content Workflow",
       items: [
         {
@@ -145,14 +180,6 @@ export default function EnablementHubPage() {
     {
       titleKey: "Publish",
       items: [
-        {
-          title: "Administrator Manuals",
-          description: "6 comprehensive admin guides (284 sections)",
-          href: "/enablement/manuals",
-          icon: BookOpen,
-          color: "bg-blue-500/10 text-blue-500",
-          badge: "6 Guides",
-        },
         {
           title: "Publish to Help Center",
           description: "AI-enhanced publishing with version control",
