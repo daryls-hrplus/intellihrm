@@ -5,6 +5,7 @@ export { SetupRatingScales } from './SetupRatingScales';
 export { SetupOverallScales } from './SetupOverallScales';
 export { SetupSkillsCompetencies } from './SetupSkillsCompetencies';
 export { SetupCompetencies } from './SetupCompetencies';
+export { SetupResponsibilityKRA } from './SetupResponsibilityKRA';
 export { SetupApprovalWorkflows } from './SetupApprovalWorkflows';
 export { SetupNotifications } from './SetupNotifications';
 export { SetupFormTemplates } from './SetupFormTemplates';

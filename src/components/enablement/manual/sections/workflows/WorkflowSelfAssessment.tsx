@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { User, Clock, CheckCircle, Target, FileText, Upload, Bell } from 'lucide-react';
+import { User, Clock, CheckCircle, Target, FileText, Upload, Bell, Briefcase, Heart } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout, InfoCallout } from '../../components/Callout';
@@ -20,7 +20,7 @@ const SELF_ASSESSMENT_STEPS = [
       'Review the AppraisalJourneyTracker showing your current stage',
       'Check phase deadlines in the timeline'
     ],
-    expectedResult: 'Self-assessment form opens with your assigned goals and competencies'
+    expectedResult: 'Self-assessment form opens with all assigned components'
   },
   {
     title: 'Review Your Goals',
@@ -45,6 +45,17 @@ const SELF_ASSESSMENT_STEPS = [
     expectedResult: 'All goals rated with evidence-based comments'
   },
   {
+    title: 'Rate Your Responsibilities (KRAs)',
+    description: 'Evaluate your job responsibility and KRA achievement.',
+    substeps: [
+      'Expand each responsibility to view its KRAs',
+      'Rate each KRA based on target achievement',
+      'Add achievement notes with specific metrics',
+      'Upload evidence documents where applicable'
+    ],
+    expectedResult: 'All responsibilities and KRAs self-assessed'
+  },
+  {
     title: 'Assess Your Competencies',
     description: 'Evaluate your behavioral competencies honestly.',
     substeps: [
@@ -56,10 +67,21 @@ const SELF_ASSESSMENT_STEPS = [
     expectedResult: 'All competencies self-assessed with examples'
   },
   {
+    title: 'Assess Your Values',
+    description: 'Rate your alignment with company values.',
+    substeps: [
+      'Review each company value and its behavioral indicators',
+      'Reflect on how you embody each value in your work',
+      'Select the rating that reflects your typical behavior',
+      'Add comments with specific examples if applicable'
+    ],
+    expectedResult: 'All values self-assessed'
+  },
+  {
     title: 'Upload Supporting Evidence',
     description: 'Attach documents that support your self-assessment.',
     substeps: [
-      'Click "Add Evidence" for relevant goals',
+      'Click "Add Evidence" for relevant goals or KRAs',
       'Upload documents, screenshots, or reports',
       'Add descriptions for each attachment',
       'Verify files uploaded successfully'
@@ -81,7 +103,7 @@ const SELF_ASSESSMENT_STEPS = [
     title: 'Review and Submit',
     description: 'Final review before submitting to your manager.',
     substeps: [
-      'Review all ratings and comments',
+      'Review all ratings and comments across all components',
       'Check for any incomplete sections',
       'Click "Submit Self-Assessment"',
       'Confirm submission in dialog'
@@ -92,7 +114,9 @@ const SELF_ASSESSMENT_STEPS = [
 
 const FIELDS = [
   { name: 'self_goal_ratings', required: true, type: 'JSON', description: 'Your ratings for each assigned goal', validation: 'All goals must be rated' },
+  { name: 'self_responsibility_ratings', required: true, type: 'JSON', description: 'Your ratings for each KRA', validation: 'All required KRAs must be rated' },
   { name: 'self_competency_ratings', required: true, type: 'JSON', description: 'Your competency self-assessments', validation: 'All competencies must be rated' },
+  { name: 'self_value_ratings', required: false, type: 'JSON', description: 'Your values self-assessments', validation: 'Required if values enabled for cycle' },
   { name: 'self_comments', required: true, type: 'Text', description: 'Overall self-reflection', validation: 'Minimum 50 characters' },
   { name: 'evidence_attachments', required: false, type: 'JSON', description: 'Uploaded supporting documents', validation: 'Max 10 files, 5MB each' },
   { name: 'self_assessment_status', required: true, type: 'Enum', description: 'Completion state', defaultValue: 'Not Started', validation: 'Not Started, In Progress, Submitted' },
@@ -102,7 +126,7 @@ const FIELDS = [
 
 const BUSINESS_RULES = [
   { rule: 'Self-assessment required before manager evaluation', enforcement: 'System' as const, description: 'Manager evaluation form is locked until employee submits self-assessment.' },
-  { rule: 'All assigned components must be rated', enforcement: 'System' as const, description: 'Cannot submit with missing ratings for goals or competencies.' },
+  { rule: 'All assigned components must be rated', enforcement: 'System' as const, description: 'Cannot submit with missing ratings for goals, KRAs, competencies, or values (if enabled).' },
   { rule: 'Submission deadline enforced', enforcement: 'System' as const, description: 'Self-assessment cannot be submitted after deadline. Contact HR for extensions.' },
   { rule: 'Self-ratings visible to manager', enforcement: 'Advisory' as const, description: 'Be honest—managers see your self-ratings alongside their own assessment.' },
   { rule: 'Evidence encouraged but not required', enforcement: 'Advisory' as const, description: 'Supporting documents strengthen your case but are optional unless specified.' }
@@ -111,6 +135,8 @@ const BUSINESS_RULES = [
 const TROUBLESHOOTING = [
   { issue: 'Cannot find my appraisal', cause: 'You may not be enrolled in the current cycle or enrollment is pending.', solution: 'Contact HR to verify your enrollment status. Check if you meet eligibility criteria.' },
   { issue: 'Goal appears locked or read-only', cause: 'Goal may be from a locked period or requires manager action first.', solution: 'Check goal status indicators. Some goals may need manager to confirm assignment first.' },
+  { issue: 'KRAs not appearing', cause: 'Job profile may not have KRA-based assessment configured.', solution: 'Check with HR if your role uses KRA-based or auto assessment mode for responsibilities.' },
+  { issue: 'Values section missing', cause: 'Values assessment may not be enabled for this cycle.', solution: 'This is expected if the cycle does not include values. Check cycle configuration with HR.' },
   { issue: 'File upload failing', cause: 'File too large, unsupported format, or network issues.', solution: 'Ensure file is under 5MB and in supported format (PDF, DOC, DOCX, PNG, JPG). Try again with stable connection.' },
   { issue: 'Missed submission deadline', cause: 'Self-assessment window has closed.', solution: 'Contact HR immediately. They can grant deadline extension if justified.' }
 ];
@@ -121,11 +147,11 @@ export function WorkflowSelfAssessment() {
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <Badge variant="outline">Section 3.4</Badge>
-          <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~10 min read</Badge>
+          <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~12 min read</Badge>
           <Badge className="gap-1 bg-teal-600 text-white"><User className="h-3 w-3" />Employee</Badge>
         </div>
         <CardTitle className="text-2xl">Self-Assessment Process</CardTitle>
-        <CardDescription>Employee guide to completing self-evaluation and submitting evidence</CardDescription>
+        <CardDescription>Employee guide to completing self-evaluation across all CRGV components</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         <NavigationPath path={NAVIGATION_PATHS['sec-3-4']} />
@@ -137,8 +163,8 @@ export function WorkflowSelfAssessment() {
             Learning Objectives
           </h3>
           <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-2">
-            <li>Complete a thorough and honest self-assessment</li>
-            <li>Rate goals and competencies with supporting evidence</li>
+            <li>Complete a thorough self-assessment across all four CRGV components</li>
+            <li>Rate goals, responsibilities/KRAs, competencies, and values with evidence</li>
             <li>Upload relevant documentation to strengthen your case</li>
             <li>Submit self-assessment before the deadline</li>
           </ul>
@@ -147,33 +173,34 @@ export function WorkflowSelfAssessment() {
         {/* Interactive Workflow Diagram */}
         <WorkflowDiagram 
           title="Self-Assessment Workflow"
-          description="Flow between system, employee, and manager during self-assessment"
+          description="Complete CRGV self-assessment flow covering all appraisal components"
           diagram={`flowchart TD
     subgraph System["⚙️ System"]
         A[Cycle Launches] --> B[Send Notification]
-        J[Validate Submission]
-        K[Unlock Manager Form]
+        M[Validate Submission]
+        N[Unlock Manager Form]
     end
     
-    subgraph Employee["👤 Employee Actions"]
-        C[Access Appraisal] --> D[Review Goals]
-        D --> E[Rate Goals with Evidence]
+    subgraph Employee["👤 Employee Self-Assessment"]
+        C[Access Appraisal] --> D[Review & Rate Goals]
+        D --> E[Rate Responsibilities/KRAs]
         E --> F[Assess Competencies]
-        F --> G[Upload Evidence]
-        G --> H[Write Self-Reflection]
-        H --> I{Ready to Submit?}
-        I -->|No| D
-        I -->|Yes| L[Submit Self-Assessment]
+        F --> G[Assess Values]
+        G --> H[Upload Evidence]
+        H --> I[Write Self-Reflection]
+        I --> J{Ready to Submit?}
+        J -->|No| D
+        J -->|Yes| K[Submit Self-Assessment]
     end
     
     subgraph Manager["👔 Manager"]
-        M[Begin Evaluation]
+        O[Begin Evaluation]
     end
     
     B --> C
-    L --> J
-    J --> K
-    K --> M`}
+    K --> M
+    M --> N
+    N --> O`}
         />
 
         {/* Timeline Overview */}
@@ -197,30 +224,35 @@ export function WorkflowSelfAssessment() {
         </div>
 
         <InfoCallout title="Why Self-Assessment Matters">
-          Self-assessment gives you a voice in your performance review. Your manager will see your self-ratings alongside their evaluation, creating a foundation for productive discussion.
+          Self-assessment gives you a voice in your performance review. Your manager will see your self-ratings alongside their evaluation across all components, creating a foundation for productive discussion.
         </InfoCallout>
 
-        {/* Self-Assessment Components */}
+        {/* Self-Assessment Components - CRGV */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">What You Will Assess</h3>
-          <div className="grid md:grid-cols-3 gap-4">
+          <h3 className="text-lg font-semibold">What You Will Assess (CRGV Model)</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { component: 'Goals', icon: Target, desc: 'Rate achievement of your assigned objectives', weight: 'Typically 40%' },
-              { component: 'Competencies', icon: CheckCircle, desc: 'Assess your behavioral capabilities', weight: 'Typically 30%' },
-              { component: 'Responsibilities', icon: FileText, desc: 'Evaluate your KRA performance', weight: 'Typically 30%' }
+              { component: 'Goals', code: 'G', icon: Target, desc: 'Rate achievement of your assigned objectives', weight: 'Typically 35%', color: 'text-blue-600' },
+              { component: 'Responsibilities', code: 'R', icon: Briefcase, desc: 'Evaluate your KRA performance', weight: 'Typically 25%', color: 'text-orange-600' },
+              { component: 'Competencies', code: 'C', icon: CheckCircle, desc: 'Assess your behavioral capabilities', weight: 'Typically 25%', color: 'text-green-600' },
+              { component: 'Values', code: 'V', icon: Heart, desc: 'Rate alignment with company values', weight: 'Typically 15%', color: 'text-pink-600' }
             ].map((item) => (
               <Card key={item.component} className="bg-muted/50">
                 <CardContent className="pt-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <item.icon className="h-5 w-5 text-primary" />
+                    <item.icon className={`h-5 w-5 ${item.color}`} />
                     <h4 className="font-semibold text-foreground">{item.component}</h4>
+                    <Badge variant="outline" className="text-xs ml-auto">{item.code}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  <Badge variant="outline" className="mt-2 text-xs">{item.weight}</Badge>
+                  <Badge variant="secondary" className="mt-2 text-xs">{item.weight}</Badge>
                 </CardContent>
               </Card>
             ))}
           </div>
+          <p className="text-sm text-muted-foreground">
+            Note: Values assessment is optional and depends on cycle configuration. If not visible, it's not enabled for this cycle.
+          </p>
         </div>
 
         <StepByStep steps={SELF_ASSESSMENT_STEPS} title="Self-Assessment Steps" />

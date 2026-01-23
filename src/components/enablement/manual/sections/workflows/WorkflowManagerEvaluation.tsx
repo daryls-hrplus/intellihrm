@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Clock, CheckCircle, MessageSquare, Star, Brain, Save, Send } from 'lucide-react';
+import { Users, Clock, CheckCircle, MessageSquare, Star, Brain, Save, Send, Target, Briefcase, Heart } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout } from '../../components/Callout';
@@ -26,10 +26,11 @@ const EVALUATION_STEPS = [
     title: 'Review Self-Assessment',
     description: 'Read and understand the employee self-ratings and comments.',
     substeps: [
-      'Review each goal self-rating',
-      'Read the evidence and comments provided',
-      'Note areas of agreement or disagreement',
-      'Check competency self-assessments'
+      'Review each goal self-rating and evidence',
+      'Check responsibility/KRA self-ratings',
+      'Read competency self-assessments',
+      'Review values self-ratings (if enabled)',
+      'Note areas of agreement or disagreement'
     ],
     expectedResult: 'Clear understanding of employee perspective before rating'
   },
@@ -45,6 +46,17 @@ const EVALUATION_STEPS = [
     expectedResult: 'All goals rated with supporting comments'
   },
   {
+    title: 'Rate Responsibilities (KRAs)',
+    description: 'Evaluate key responsibility area achievement.',
+    substeps: [
+      'Review each responsibility from job profile',
+      'Rate each KRA based on target achievement',
+      'Compare actual results against metrics',
+      'Document specific accomplishments or gaps'
+    ],
+    expectedResult: 'All KRAs rated with documentation'
+  },
+  {
     title: 'Rate Competencies',
     description: 'Assess behavioral indicators at appropriate proficiency levels.',
     substeps: [
@@ -56,14 +68,15 @@ const EVALUATION_STEPS = [
     expectedResult: 'All competencies rated with behavioral evidence'
   },
   {
-    title: 'Rate Responsibilities (KRAs)',
-    description: 'Evaluate key responsibility area achievement.',
+    title: 'Rate Values',
+    description: 'Assess alignment with organizational values.',
     substeps: [
-      'Review each responsibility from job profile',
-      'Rate achievement level',
-      'Document specific accomplishments or gaps'
+      'Review each company value',
+      'Rate based on observed behaviors over the period',
+      'Provide examples of value demonstration',
+      'Note any concerns about cultural alignment'
     ],
-    expectedResult: 'All KRAs rated with documentation'
+    expectedResult: 'All values rated (if enabled for cycle)'
   },
   {
     title: 'Use AI Feedback Assistant',
@@ -126,7 +139,9 @@ const EVALUATION_STEPS = [
 const FIELDS = [
   { name: 'manager_overall_rating', required: true, type: 'Decimal', description: 'Calculated weighted average of all component ratings', validation: 'System-calculated, read-only' },
   { name: 'manager_goal_ratings', required: true, type: 'JSON', description: 'Individual ratings for each goal', validation: 'All assigned goals must be rated' },
+  { name: 'manager_responsibility_ratings', required: true, type: 'JSON', description: 'Ratings for each KRA', validation: 'All required KRAs must be rated' },
   { name: 'manager_competency_ratings', required: true, type: 'JSON', description: 'Ratings for each competency', validation: 'All competencies must be rated' },
+  { name: 'manager_value_ratings', required: false, type: 'JSON', description: 'Ratings for each value', validation: 'Required if values enabled' },
   { name: 'manager_comments', required: true, type: 'Text', description: 'Overall manager assessment', validation: 'Minimum 100 characters' },
   { name: 'comment_quality_score', required: false, type: 'Integer', description: 'AI-assessed quality of feedback', defaultValue: 'Auto-calculated' },
   { name: 'ai_suggestions_used', required: false, type: 'Boolean', description: 'Whether AI assistant was utilized', defaultValue: 'false' },
@@ -135,7 +150,7 @@ const FIELDS = [
 ];
 
 const BUSINESS_RULES = [
-  { rule: 'All components must be rated before submission', enforcement: 'System' as const, description: 'Cannot submit evaluation with missing ratings for any assigned component.' },
+  { rule: 'All components must be rated before submission', enforcement: 'System' as const, description: 'Cannot submit evaluation with missing ratings for any assigned component (G, R, C, V).' },
   { rule: 'Manager comments required for all ratings', enforcement: 'Policy' as const, description: 'Each rating must include supporting comments explaining the assessment.' },
   { rule: 'Extreme ratings require additional justification', enforcement: 'Policy' as const, description: 'Ratings at scale extremes (1 or 5) trigger mandatory extended comments.' },
   { rule: 'Self-assessment must be completed first', enforcement: 'System' as const, description: 'Manager evaluation form only unlocks after employee submits self-assessment.' },
@@ -146,20 +161,20 @@ const TROUBLESHOOTING = [
   { issue: 'Cannot access employee evaluation form', cause: 'Employee has not completed self-assessment or you are not assigned as evaluator.', solution: 'Check participant enrollment to verify evaluator assignment. Send reminder to employee if self-assessment pending.' },
   { issue: 'AI Feedback Assistant not generating suggestions', cause: 'Insufficient rating data or comments entered.', solution: 'Complete at least 3 goal ratings with comments before using AI Assistant.' },
   { issue: 'Comment quality score too low', cause: 'Comments contain vague language, bias indicators, or lack specificity.', solution: 'Review the flagged issues in the quality panel. Replace generic phrases with specific examples.' },
-  { issue: 'Cannot submit - validation errors', cause: 'Missing required fields or business rule violations.', solution: 'Review all highlighted errors. Ensure all components are rated and comments meet minimum requirements.' }
+  { issue: 'Cannot submit - validation errors', cause: 'Missing required fields or business rule violations.', solution: 'Review all highlighted errors. Ensure all components (Goals, Responsibilities, Competencies, Values) are rated and comments meet minimum requirements.' }
 ];
 
 export function WorkflowManagerEvaluation() {
   return (
-    <Card id="sec-3-3">
+    <Card id="sec-3-7">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 3.3</Badge>
-          <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~15 min read</Badge>
+          <Badge variant="outline">Section 3.7</Badge>
+          <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~18 min read</Badge>
           <Badge className="gap-1 bg-green-600 text-white"><Users className="h-3 w-3" />Manager</Badge>
         </div>
         <CardTitle className="text-2xl">Manager Evaluation Workflow</CardTitle>
-        <CardDescription>Complete guide for managers conducting performance evaluations (2-4 week window)</CardDescription>
+        <CardDescription>Complete guide for managers conducting performance evaluations across all CRGV components (2-4 week window)</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         <NavigationPath path={NAVIGATION_PATHS['sec-3-3']} />
@@ -171,7 +186,7 @@ export function WorkflowManagerEvaluation() {
             Learning Objectives
           </h3>
           <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-2">
-            <li>Complete a thorough performance evaluation in 10 structured steps</li>
+            <li>Complete a thorough performance evaluation covering all CRGV components</li>
             <li>Utilize AI-powered feedback assistance effectively</li>
             <li>Write high-quality, actionable performance comments</li>
             <li>Schedule and prepare for performance discussions</li>
@@ -181,7 +196,7 @@ export function WorkflowManagerEvaluation() {
         {/* Interactive Workflow Diagram */}
         <WorkflowDiagram 
           title="Manager Evaluation Workflow"
-          description="Flow between employee, manager, and system during the evaluation process"
+          description="Complete CRGV evaluation flow covering all appraisal components"
           diagram={`flowchart LR
     subgraph Employee["👤 Employee"]
         A[Submit Self-Assessment]
@@ -189,55 +204,58 @@ export function WorkflowManagerEvaluation() {
     
     subgraph Manager["👔 Manager Actions"]
         B[Review Self-Assessment] --> C[Rate Goals]
-        C --> D[Rate Competencies]
-        D --> E[Use AI Assistant]
-        E --> F[Write Comments]
-        F --> G{Save or Submit?}
-        G -->|Save| H[Draft Saved]
-        G -->|Submit| I[Submit Evaluation]
-        H --> G
-        I --> J[Schedule Interview]
+        C --> D[Rate Responsibilities/KRAs]
+        D --> E[Rate Competencies]
+        E --> F[Rate Values]
+        F --> G[Use AI Assistant]
+        G --> H[Write Comments]
+        H --> I{Save or Submit?}
+        I -->|Save| J[Draft Saved]
+        I -->|Submit| K[Submit Evaluation]
+        J --> I
+        K --> L[Schedule Interview]
     end
     
     subgraph System["⚙️ System"]
-        K[Calculate Scores]
-        L[Quality Check]
-        M[Notify Employee]
+        M[Calculate CRGV Scores]
+        N[Quality Check]
+        O[Notify Employee]
     end
     
     A -->|Unlocks Form| B
-    E --> L
-    I --> K
-    J --> M`}
+    G --> N
+    K --> M
+    L --> O`}
         />
 
-        {/* Evaluation Checklist Overview */}
+        {/* Evaluation Components Checklist */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Evaluation Checklist</h3>
+          <h3 className="text-lg font-semibold">CRGV Evaluation Components</h3>
           <div className="grid md:grid-cols-2 gap-3">
             {[
-              { icon: MessageSquare, label: 'Review self-assessment', time: '10-15 min' },
-              { icon: Star, label: 'Rate goals with evidence', time: '20-30 min' },
-              { icon: CheckCircle, label: 'Assess competencies', time: '15-20 min' },
-              { icon: Brain, label: 'Use AI feedback tools', time: '5-10 min' },
-              { icon: Save, label: 'Write overall comments', time: '10-15 min' },
-              { icon: Send, label: 'Submit and schedule', time: '5 min' }
+              { icon: Target, label: 'Rate Goals', time: '20-30 min', code: 'G', color: 'text-blue-600' },
+              { icon: Briefcase, label: 'Rate Responsibilities/KRAs', time: '15-20 min', code: 'R', color: 'text-orange-600' },
+              { icon: CheckCircle, label: 'Assess Competencies', time: '15-20 min', code: 'C', color: 'text-green-600' },
+              { icon: Heart, label: 'Assess Values', time: '10-15 min', code: 'V', color: 'text-pink-600' },
+              { icon: Brain, label: 'Use AI Feedback Tools', time: '5-10 min', code: 'AI', color: 'text-purple-600' },
+              { icon: Send, label: 'Submit & Schedule Interview', time: '5-10 min', code: '✓', color: 'text-teal-600' }
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                <item.icon className="h-5 w-5 text-primary" />
+                <item.icon className={`h-5 w-5 ${item.color}`} />
                 <span className="flex-1">{item.label}</span>
-                <Badge variant="outline" className="text-xs">{item.time}</Badge>
+                <Badge variant="outline" className="text-xs">{item.code}</Badge>
+                <Badge variant="secondary" className="text-xs">{item.time}</Badge>
               </div>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Total estimated time: 65-95 minutes per evaluation</p>
+          <p className="text-sm text-muted-foreground">Total estimated time: 70-105 minutes per evaluation</p>
         </div>
 
         <NoteCallout title="Prerequisite">
           Complete Section 3.4 (Self-Assessment Process) to understand what employees see. This context improves your evaluation quality.
         </NoteCallout>
 
-        <StepByStep steps={EVALUATION_STEPS} title="10-Step Evaluation Process" />
+        <StepByStep steps={EVALUATION_STEPS} title="11-Step Evaluation Process" />
 
         {/* AI Assistant Features */}
         <div className="space-y-4">
