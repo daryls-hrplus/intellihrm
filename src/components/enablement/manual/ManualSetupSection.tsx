@@ -97,12 +97,12 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
                 <Settings className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold">Foundation Settings</h3>
+                <h3 className="font-semibold">Core Framework</h3>
                 <p className="text-sm text-muted-foreground font-normal">
-                  Rating scales, competencies, workflows, and notifications
+                  Rating scales, competencies, workflows, notifications, and performance trends
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto">7 sections</Badge>
+              <Badge variant="outline" className="ml-auto">8 sections</Badge>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4 space-y-6">
@@ -120,6 +120,9 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             </section>
             <section id="sec-2-4" data-manual-anchor="sec-2-4" className="scroll-mt-32">
               <SetupCompetencies />
+            </section>
+            <section id="sec-2-13" data-manual-anchor="sec-2-13" className="scroll-mt-32">
+              <SetupIndexSettings />
             </section>
             <section id="sec-2-1-workflows" data-manual-anchor="sec-2-1-workflows" className="scroll-mt-32">
               <SetupApprovalWorkflows />
@@ -179,9 +182,6 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             </section>
             <section id="sec-2-12" data-manual-anchor="sec-2-12" className="scroll-mt-32">
               <SetupMultiPositionAppraisals />
-            </section>
-            <section id="sec-2-13" data-manual-anchor="sec-2-13" className="scroll-mt-32">
-              <SetupIndexSettings />
             </section>
             <section id="sec-2-14" data-manual-anchor="sec-2-14" className="scroll-mt-32">
               <SetupBenchmarks />

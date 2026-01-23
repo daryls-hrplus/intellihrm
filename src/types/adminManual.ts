@@ -135,14 +135,14 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         id: 'sec-1-2',
         sectionNumber: '1.2',
         title: 'Core Concepts & Terminology',
-        description: 'CRGV Model, scoring methodology, and key definitions',
+        description: 'CRGV+360 Model, scoring methodology, phase deadlines, and key definitions',
         contentLevel: 'concept',
-        estimatedReadTime: 15,
+        estimatedReadTime: 20,
         targetRoles: ['HR User', 'Admin', 'Consultant'],
         industryContext: {
           frequency: 'Reference material',
           timing: 'Initial onboarding',
-          benchmark: '70-20-10 goal-competency-responsibility weight distribution'
+          benchmark: '35-25-30-10 goal-responsibility-competency-values weight distribution with optional 360'
         }
       },
       {
@@ -270,36 +270,64 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'sec-2-5',
+        id: 'sec-2-4c',
+        sectionNumber: '2.4c',
+        title: 'Performance Trend Settings',
+        description: 'Configure lookback period, recent performance weight, and trend impact levels',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Annual review',
+          timing: 'After initial cycles',
+          benchmark: 'Weighted historical performance aggregation with trend recognition'
+        }
+      },
+      {
+        id: 'sec-2-readiness',
         sectionNumber: '2.5',
+        title: 'Appraisal Readiness',
+        description: 'Pre-launch validation dashboard to verify configuration prerequisites',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR User'],
+        industryContext: {
+          frequency: 'Before each cycle launch',
+          timing: '2-4 weeks before cycle start',
+          benchmark: 'Pre-flight checklist for cycle readiness'
+        }
+      },
+      {
+        id: 'sec-2-job-config',
+        sectionNumber: '2.6',
+        title: 'Job Assessment Configuration',
+        description: 'Validate job responsibility weights and KRA structures for accurate scoring',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Annual review, per new job',
+          timing: 'Before cycle launch',
+          benchmark: 'Responsibility weights must total 100%'
+        }
+      },
+      {
+        id: 'sec-2-5',
+        sectionNumber: '2.7',
         title: 'Appraisal Form Templates',
-        description: 'Creating and configuring evaluation templates',
+        description: 'Creating and configuring evaluation templates with versioning and weight enforcement',
         contentLevel: 'procedure',
         estimatedReadTime: 20,
         targetRoles: ['Admin'],
         industryContext: {
           frequency: 'Annual template refresh cycle',
           timing: '2-4 weeks before cycle launch',
-          benchmark: 'Role-based template assignment'
-        }
-      },
-      {
-        id: 'sec-2-6',
-        sectionNumber: '2.6',
-        title: 'Appraisal Cycles Configuration',
-        description: 'Setting up annual, semi-annual, or probationary cycles',
-        contentLevel: 'procedure',
-        estimatedReadTime: 20,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Per cycle (annual/semi-annual)',
-          timing: '4-6 weeks before cycle start',
-          benchmark: 'Annual review cycle aligned with fiscal year'
+          benchmark: 'Role-based template assignment with version control'
         }
       },
       {
         id: 'sec-2-7',
-        sectionNumber: '2.7',
+        sectionNumber: '2.8',
         title: 'Rating Levels Configuration',
         description: 'Map overall scores to rating labels, colors, and eligibility flags for automated talent actions',
         contentLevel: 'procedure',
@@ -313,35 +341,35 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       },
       {
         id: 'sec-2-8',
-        sectionNumber: '2.8',
-        title: 'Action Rules Configuration',
-        description: 'Setting up automated actions based on appraisal outcomes',
+        sectionNumber: '2.9',
+        title: 'Outcome Rules Configuration',
+        description: 'Setting up automated actions and module integrations based on appraisal outcomes',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 20,
         targetRoles: ['Admin'],
         industryContext: {
           frequency: 'Per template, annual review',
           timing: 'Post template creation',
-          benchmark: 'Score-based action triggers'
+          benchmark: 'Score-based action triggers and cross-module integration'
         }
       },
       {
-        id: 'sec-2-9',
-        sectionNumber: '2.9',
-        title: 'Integration Rules (Downstream)',
-        description: 'Configuring automatic updates to Nine-Box, Succession, Compensation',
+        id: 'sec-2-6',
+        sectionNumber: '2.10',
+        title: 'Appraisal Cycles Configuration',
+        description: 'Setting up annual, mid-year, quarterly, or probationary cycles with 6-phase deadlines',
         contentLevel: 'procedure',
         estimatedReadTime: 20,
-        targetRoles: ['Admin', 'Consultant'],
+        targetRoles: ['Admin'],
         industryContext: {
-          frequency: 'Per implementation, annual review',
-          timing: 'Post initial setup',
-          benchmark: 'Cross-module data flow automation'
+          frequency: 'Per cycle (annual/semi-annual)',
+          timing: '4-6 weeks before cycle start',
+          benchmark: 'Annual review cycle aligned with fiscal year'
         }
       },
       {
         id: 'sec-2-10',
-        sectionNumber: '2.10',
+        sectionNumber: '2.11',
         title: 'Employee Response Configuration',
         description: 'Setting up the employee acknowledgment and response phase',
         contentLevel: 'procedure',
@@ -356,7 +384,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       },
       {
         id: 'sec-2-11',
-        sectionNumber: '2.11',
+        sectionNumber: '2.12',
         title: 'HR Escalation Settings',
         description: 'Configuring escalation paths for disagreements',
         contentLevel: 'procedure',
@@ -370,7 +398,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       },
       {
         id: 'sec-2-12',
-        sectionNumber: '2.12',
+        sectionNumber: '2.13',
         title: 'Multi-Position Appraisals Setup',
         description: 'Configuring evaluations for employees with multiple positions',
         contentLevel: 'procedure',
@@ -380,20 +408,6 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           frequency: 'As needed for complex org structures',
           timing: 'Post basic setup',
           benchmark: 'Aggregate vs Separate evaluation modes'
-        }
-      },
-      {
-        id: 'sec-2-13',
-        sectionNumber: '2.13',
-        title: 'Index Settings',
-        description: 'Multi-cycle performance index calculation',
-        contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'Consultant'],
-        industryContext: {
-          frequency: 'Annual review',
-          timing: 'After initial cycles',
-          benchmark: 'Weighted historical performance aggregation'
         }
       },
       {

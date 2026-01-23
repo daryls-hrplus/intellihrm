@@ -29,7 +29,7 @@ export function OverviewArchitecture() {
             Entity Relationship Diagram
           </h3>
           <p className="text-muted-foreground mb-4">
-            The Appraisals module consists of 14 core database tables with extensive relationships. 
+            The Appraisals module consists of 50+ database tables organized into logical groups. 
             Understanding this structure is essential for advanced configuration and troubleshooting.
           </p>
           
@@ -38,41 +38,41 @@ export function OverviewArchitecture() {
             <pre className="text-xs">{`┌─────────────────────────┐
 │    appraisal_cycles     │◄──────────────────────────────────────────┐
 │  (id, company_id,       │                                          │
-│   status, dates, weights)│                                          │
+│   status, 6 phase       │                                          │
+│   deadlines, weights)   │                                          │
 └───────────┬─────────────┘                                          │
             │ 1:N                                                     │
             ▼                                                         │
 ┌─────────────────────────┐     ┌─────────────────────────┐          │
 │ appraisal_participants  │     │ appraisal_form_templates │          │
-│  (employee_id, status,  │     │  (sections, questions,  │──────────┤
-│   scores, workflow_step)│     │   component_configs)     │          │
+│  (employee_id, status,  │     │  (sections, versioning, │──────────┤
+│   scores, journey_step) │     │   weight_enforcement)   │          │
 └───────────┬─────────────┘     └─────────────────────────┘          │
             │ 1:N                                                     │
             ▼                                                         │
 ┌─────────────────────────┐     ┌─────────────────────────┐          │
-│    appraisal_scores     │     │appraisal_integration_rules│─────────┤
-│  (component, score,     │     │  (target_module, trigger,│          │
-│   self_score, comments) │     │   field_mappings)        │          │
-└─────────────────────────┘     └─────────────────────────┘          │
-                                                                      │
+│    appraisal_scores     │     │ appraisal_outcome_       │          │
+│  (component, score,     │     │   action_rules          │──────────┤
+│   self_score, 360_score)│     │  (eligibility flags,    │          │
+└─────────────────────────┘     │   downstream actions)   │          │
+                                └─────────────────────────┘          │
 ┌─────────────────────────┐     ┌─────────────────────────┐          │
-│appraisal_outcome_actions│     │  calibration_sessions   │──────────┘
-│  (rule conditions,      │     │  (status, participants, │
-│   downstream actions)   │     │   distribution_targets) │
+│     rating_levels       │     │  calibration_sessions   │──────────┘
+│  (score ranges,         │     │  (status, participants, │
+│   eligibility flags)    │     │   distribution_targets) │
 └─────────────────────────┘     └─────────────────────────┘`}</pre>
           </div>
 
           {/* Core Tables Grid */}
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-3">
-              <h4 className="font-medium">Core Tables</h4>
+              <h4 className="font-medium">Core Cycle Tables</h4>
               {[
-                { name: 'appraisal_cycles', desc: 'Defines evaluation periods, weights, and status', rows: '~10-50/company' },
-                { name: 'appraisal_participants', desc: 'Employees enrolled in a cycle with status tracking', rows: '~100-10K/cycle' },
-                { name: 'appraisal_scores', desc: 'Individual component scores and comments', rows: '~4-8/participant' },
-                { name: 'appraisal_form_templates', desc: 'Form structure, sections, and questions', rows: '~5-20/company' },
-                { name: 'appraisal_integration_rules', desc: 'Rules for downstream module updates', rows: '~10-30/company' },
-                { name: 'appraisal_outcome_action_rules', desc: 'Automated actions based on scores', rows: '~5-15/company' }
+                { name: 'appraisal_cycles', desc: 'Evaluation periods with 6 phase deadlines and weights', rows: '~10-50/company' },
+                { name: 'appraisal_participants', desc: 'Employees enrolled with journey status tracking', rows: '~100-10K/cycle' },
+                { name: 'appraisal_scores', desc: 'Component scores (C, R, G, V, 360) and comments', rows: '~5-10/participant' },
+                { name: 'appraisal_score_breakdown', desc: 'Detailed scoring by competency/responsibility', rows: '~10-30/participant' },
+                { name: 'appraisal_kra_snapshots', desc: 'KRA scores for responsibility-based assessment', rows: '~3-8/participant' },
               ].map((table, i) => (
                 <div key={i} className="flex items-start gap-2 p-2 bg-muted/50 rounded text-sm">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -85,17 +85,37 @@ export function OverviewArchitecture() {
               ))}
             </div>
             <div className="space-y-3">
-              <h4 className="font-medium">Supporting Tables</h4>
+              <h4 className="font-medium">Configuration Tables</h4>
               {[
-                { name: 'calibration_sessions', desc: 'Group calibration meeting records', rows: '~1-5/cycle' },
-                { name: 'calibration_adjustments', desc: 'Individual rating adjustments with justification', rows: '~0-500/session' },
-                { name: 'performance_rating_scales', desc: 'Component and overall rating definitions', rows: '~5-10/company' },
-                { name: 'ai_generated_narratives', desc: 'AI-assisted feedback content', rows: '~1/participant' },
-                { name: 'appraisal_action_executions', desc: 'Audit trail of triggered actions', rows: '~0-2/participant' },
-                { name: 'appraisal_score_history', desc: 'Version history of score changes', rows: '~1-5/score' }
+                { name: 'appraisal_form_templates', desc: 'Form structure with versioning (draft/published)', rows: '~5-20/company' },
+                { name: 'appraisal_template_phases', desc: 'Phase configuration per template', rows: '~3-6/template' },
+                { name: 'appraisal_template_sections', desc: 'Form sections with ordering', rows: '~4-10/template' },
+                { name: 'rating_levels', desc: 'Score-to-label mapping with eligibility flags', rows: '~5/company' },
+                { name: 'performance_rating_scales', desc: 'Component rating definitions (1-5 scale)', rows: '~5-10/company' },
+                { name: 'overall_rating_scales', desc: 'Final rating categories', rows: '~5/company' },
               ].map((table, i) => (
                 <div key={i} className="flex items-start gap-2 p-2 bg-muted/50 rounded text-sm">
                   <CheckCircle className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <code className="font-mono text-primary">{table.name}</code>
+                    <p className="text-xs text-muted-foreground">{table.desc}</p>
+                    <p className="text-xs text-muted-foreground italic">Est. size: {table.rows}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-medium">Rules & Integration Tables</h4>
+              {[
+                { name: 'appraisal_outcome_action_rules', desc: 'Score-based actions (PIP, promotion)', rows: '~5-15/company' },
+                { name: 'appraisal_integration_rules', desc: 'Cross-module updates (Nine-Box, Succession)', rows: '~10-30/company' },
+                { name: 'appraisal_action_executions', desc: 'Audit trail of triggered actions', rows: '~0-2/participant' },
+                { name: 'calibration_sessions', desc: 'Group calibration meeting records', rows: '~1-5/cycle' },
+                { name: 'calibration_adjustments', desc: 'Rating adjustments with justification', rows: '~0-500/session' },
+                { name: 'performance_index_settings', desc: 'Trend calculation configuration', rows: '~1/company' },
+              ].map((table, i) => (
+                <div key={i} className="flex items-start gap-2 p-2 bg-muted/50 rounded text-sm">
+                  <CheckCircle className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
                   <div>
                     <code className="font-mono text-primary">{table.name}</code>
                     <p className="text-xs text-muted-foreground">{table.desc}</p>
