@@ -95,6 +95,12 @@
       "noTransactionTypes": "Nenhum tipo de transação encontrado. Configure os tipos de transação em Valores de Pesquisa."
     }
   },
+  "training": {
+    "dashboard": {
+      "title": "Aprendizagem e Desenvolvimento",
+      "subtitle": "Gerencie treinamentos, certificações e crescimento de carreira"
+    }
+  },
   "navigation": {
     "dashboard": "Painel",
     "workforce": "Força de trabalho",
@@ -104,7 +110,7 @@
     "compensation": "Remuneração",
     "benefits": "Benefícios",
     "performance": "Desempenho",
-    "training": "Treinamento",
+    "training": "Aprendizagem e Desenvolvimento",
     "recruitment": "Recrutamento",
     "settings": "Configurações",
     "profile": "Perfil",

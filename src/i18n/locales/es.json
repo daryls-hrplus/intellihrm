@@ -1,5 +1,9 @@
 {
   "training": {
+    "dashboard": {
+      "title": "Aprendizaje y Desarrollo",
+      "subtitle": "Gestione capacitaciones, certificaciones y crecimiento profesional"
+    },
     "groups": {
       "learning": "Aprendizaje",
       "management": "Gestión",
@@ -242,7 +246,7 @@
     "compensation": "Compensación",
     "benefits": "Beneficios",
     "performance": "Desempeño",
-    "training": "Capacitación",
+    "training": "Aprendizaje y Desarrollo",
     "succession": "Planificación de Sucesión",
     "recruitment": "Reclutamiento",
     "hse": "Salud y Seguridad",

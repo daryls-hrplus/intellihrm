@@ -95,6 +95,12 @@
       "noTransactionTypes": "Geen transactietypes gevonden. Configureer transactietypes in Opzoekwaarden."
     }
   },
+  "training": {
+    "dashboard": {
+      "title": "Leren & Ontwikkeling",
+      "subtitle": "Beheer trainingen, certificeringen en carrièregroei"
+    }
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "workforce": "Personeel",
@@ -104,7 +110,7 @@
     "compensation": "Compensatie",
     "benefits": "Secundaire arbeidsvoorwaarden",
     "performance": "Prestaties",
-    "training": "Training",
+    "training": "Leren & Ontwikkeling",
     "recruitment": "Werving",
     "settings": "Instellingen",
     "profile": "Profiel",

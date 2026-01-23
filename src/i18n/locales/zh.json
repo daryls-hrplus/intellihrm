@@ -111,6 +111,12 @@
       }
     }
   },
+  "training": {
+    "dashboard": {
+      "title": "学习与发展",
+      "subtitle": "管理培训、认证和职业发展"
+    }
+  },
   "navigation": {
     "dashboard": "仪表板",
     "workforce": "员工管理",
@@ -120,7 +126,7 @@
     "compensation": "薪酬",
     "benefits": "福利",
     "performance": "绩效",
-    "training": "培训",
+    "training": "学习与发展",
     "recruitment": "招聘",
     "settings": "设置",
     "profile": "个人资料",
