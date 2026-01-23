@@ -224,7 +224,7 @@ export default function EmployeeSelfServicePage() {
         {/* Quick Actions Bar */}
         <QuickActionsBar />
 
-        <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} defaultOpen={true} showToggleButton />
+        <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} defaultOpen={false} showToggleButton />
       </div>
     </AppLayout>
   );

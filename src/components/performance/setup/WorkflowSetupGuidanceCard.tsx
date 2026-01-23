@@ -188,51 +188,20 @@ const processTypeInfo = {
   },
 };
 
-interface AppliedTemplate {
-  processType: string;
-  scopeLevel: string;
-  name: string;
-}
-
 interface WorkflowSetupGuidanceCardProps {
   onApplyTemplate: (template: IndustryTemplate) => void;
   existingProcessTypes?: string[];
-  appliedTemplates?: AppliedTemplate[];
 }
 
 export function WorkflowSetupGuidanceCard({
   onApplyTemplate,
   existingProcessTypes = [],
-  appliedTemplates = [],
 }: WorkflowSetupGuidanceCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedProcess, setSelectedProcess] = useState<string | null>(null);
 
-  // Filter out templates that have already been applied
   const getTemplatesForProcess = (processType: string) =>
-    industryTemplates.filter((t) => {
-      if (t.processType !== processType) return false;
-      
-      // Exclude if already applied (match by processType + scopeLevel + name)
-      const isApplied = appliedTemplates.some(
-        (applied) =>
-          applied.processType === t.processType &&
-          applied.scopeLevel === t.scopeLevel &&
-          applied.name === t.name
-      );
-      
-      return !isApplied;
-    });
-
-  // Count remaining templates across all process types
-  const remainingTemplatesCount = industryTemplates.filter((t) => 
-    !appliedTemplates.some(
-      (applied) =>
-        applied.processType === t.processType &&
-        applied.scopeLevel === t.scopeLevel &&
-        applied.name === t.name
-    )
-  ).length;
+    industryTemplates.filter((t) => t.processType === processType);
 
   const hasExistingWorkflow = (processType: string) =>
     existingProcessTypes.includes(processType);
@@ -256,7 +225,7 @@ export function WorkflowSetupGuidanceCard({
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="text-xs">
                 <Sparkles className="h-3 w-3 mr-1" />
-                {remainingTemplatesCount} Templates Available
+                {industryTemplates.length} Templates
               </Badge>
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -340,60 +309,52 @@ export function WorkflowSetupGuidanceCard({
                     <Sparkles className="h-4 w-4 text-primary" />
                     Recommended Templates
                   </h4>
-                  {getTemplatesForProcess(selectedProcess).length === 0 ? (
-                    <div className="text-center py-6 text-muted-foreground border rounded-lg bg-muted/30">
-                      <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-success" />
-                      <p className="font-medium text-foreground">All workflows configured!</p>
-                      <p className="text-sm">All recommended templates for this process have been applied.</p>
-                    </div>
-                  ) : (
-                    <div className="grid gap-3">
-                      {getTemplatesForProcess(selectedProcess).map((template, idx) => (
-                        <div
-                          key={idx}
-                          className="border rounded-lg p-4 hover:border-primary/50 transition-colors"
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h5 className="font-medium text-sm">
-                                  {template.name}
-                                </h5>
-                                <Badge variant="outline" className="text-xs">
-                                  {template.scopeLevel}
-                                </Badge>
-                              </div>
-                              <p className="text-xs text-muted-foreground mb-2">
-                                {template.description}
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <Users className="h-3 w-3" />
-                                  {template.steps.length} step(s)
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {template.steps.reduce((sum, s) => sum + s.slaHours, 0)}h total SLA
-                                </span>
-                              </div>
+                  <div className="grid gap-3">
+                    {getTemplatesForProcess(selectedProcess).map((template, idx) => (
+                      <div
+                        key={idx}
+                        className="border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h5 className="font-medium text-sm">
+                                {template.name}
+                              </h5>
+                              <Badge variant="outline" className="text-xs">
+                                {template.scopeLevel}
+                              </Badge>
                             </div>
-                            <Button
-                              size="sm"
-                              onClick={() => onApplyTemplate(template)}
-                            >
-                              Apply
-                            </Button>
-                          </div>
-                          <div className="mt-3 pt-3 border-t">
-                            <p className="text-xs text-muted-foreground flex items-start gap-2">
-                              <Lightbulb className="h-3 w-3 text-primary shrink-0 mt-0.5" />
-                              {template.whyRecommended}
+                            <p className="text-xs text-muted-foreground mb-2">
+                              {template.description}
                             </p>
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Users className="h-3 w-3" />
+                                {template.steps.length} step(s)
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {template.steps.reduce((sum, s) => sum + s.slaHours, 0)}h total SLA
+                              </span>
+                            </div>
                           </div>
+                          <Button
+                            size="sm"
+                            onClick={() => onApplyTemplate(template)}
+                          >
+                            Apply
+                          </Button>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <div className="mt-3 pt-3 border-t">
+                          <p className="text-xs text-muted-foreground flex items-start gap-2">
+                            <Lightbulb className="h-3 w-3 text-primary shrink-0 mt-0.5" />
+                            {template.whyRecommended}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

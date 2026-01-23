@@ -341,15 +341,12 @@ export default function MyAppraisalsPage() {
                           <AppraisalJourneyTracker
                             participantId={appraisal.id}
                             cycleId={appraisal.cycle_id}
-                            templateId={appraisal.template_id ?? undefined}
                             participantStatus={appraisal.status}
                             submittedAt={appraisal.submitted_at}
                             reviewedAt={appraisal.reviewed_at}
                             variant="horizontal"
                             showDeadlineWarnings
                             showActorLabels
-                            includeGoals={appraisal.include_goals}
-                            includeCompetencies={appraisal.include_competencies}
                           />
                         </div>
                       </div>

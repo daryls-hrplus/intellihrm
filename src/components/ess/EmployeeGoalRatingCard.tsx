@@ -22,13 +22,9 @@ interface EmployeeGoalRatingCardProps {
   onCommentsChange: (comments: string) => void;
   onAttachEvidence?: () => void;
   readOnly?: boolean;
-  // New props for configurable rating scale
-  ratingLabels?: Record<number, string>;
-  ratingLabel?: string;
 }
 
-// Default performance labels
-const DEFAULT_RATING_LABELS: Record<number, string> = {
+const RATING_LABELS: Record<number, string> = {
   1: "Needs Improvement",
   2: "Below Expectations",
   3: "Meets Expectations",
@@ -49,14 +45,9 @@ export function EmployeeGoalRatingCard({
   onCommentsChange,
   onAttachEvidence,
   readOnly = false,
-  ratingLabels,
-  ratingLabel,
 }: EmployeeGoalRatingCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Use provided labels or fall back to defaults
-  const displayLabels = ratingLabels || DEFAULT_RATING_LABELS;
-  const fieldLabel = ratingLabel || "Your Self-Rating";
   const getRatingColor = (rating: number | null) => {
     if (rating === null) return "text-muted-foreground";
     if (rating >= 4) return "text-green-600";
@@ -108,7 +99,7 @@ export function EmployeeGoalRatingCard({
                       {currentRating.toFixed(1)}
                     </span>
                     <p className="text-xs text-muted-foreground">
-                      {displayLabels[Math.round(currentRating)] || ""}
+                      {RATING_LABELS[Math.round(currentRating)] || ""}
                     </p>
                   </div>
                 )}
@@ -128,7 +119,7 @@ export function EmployeeGoalRatingCard({
               {/* Rating Slider */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">{fieldLabel}</Label>
+                  <Label className="text-sm font-medium">Your Self-Rating</Label>
                   <span className={cn("text-lg font-bold", getRatingColor(currentRating))}>
                     {currentRating !== null ? currentRating.toFixed(1) : "Not rated"}
                   </span>
@@ -145,8 +136,8 @@ export function EmployeeGoalRatingCard({
                       className="py-2"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{displayLabels[minRating] || minRating}</span>
-                      <span>{displayLabels[maxRating] || maxRating}</span>
+                      <span>{RATING_LABELS[minRating]}</span>
+                      <span>{RATING_LABELS[maxRating]}</span>
                     </div>
                   </>
                 )}

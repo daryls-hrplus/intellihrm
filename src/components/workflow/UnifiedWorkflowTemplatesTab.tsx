@@ -269,30 +269,7 @@ export function UnifiedWorkflowTemplatesTab({
     fetchSettings();
   };
 
-  const handleToggleEnabled = async (transactionTypeId: string, enabled: boolean) => {
-    // If enabling and no template is selected, try to auto-select one
-    if (enabled) {
-      const transactionType = transactionTypes.find(t => t.id === transactionTypeId);
-      if (transactionType) {
-        // Find a template that matches this workflow's category
-        const matchingTemplate = workflowTemplates.find(t => {
-          const code = transactionType.code.toLowerCase().replace('perf_', '').replace(/_/g, '_');
-          return t.category?.toLowerCase().includes(code) || 
-                 t.code?.toLowerCase().includes(code);
-        });
-
-        if (matchingTemplate) {
-          // Enable with the matched template
-          await upsertSetting(transactionTypeId, { 
-            workflow_enabled: enabled,
-            workflow_template_id: matchingTemplate.id,
-            auto_start_workflow: true,
-          });
-          return;
-        }
-      }
-    }
-    
+  const handleToggleEnabled = (transactionTypeId: string, enabled: boolean) => {
     upsertSetting(transactionTypeId, { workflow_enabled: enabled });
   };
 

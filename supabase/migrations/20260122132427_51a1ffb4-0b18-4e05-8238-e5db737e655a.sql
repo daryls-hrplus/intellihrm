@@ -1,9 +1,0 @@
--- First, add new values to the workflow_category enum
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'pip_acknowledgment';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'rating_approval';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'rating_release_approval';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'feedback_360_approval';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'succession_approval';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'goal_approval_individual';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'goal_approval_team';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'goal_approval_department';

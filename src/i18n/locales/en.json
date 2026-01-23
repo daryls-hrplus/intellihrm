@@ -5249,8 +5249,8 @@
     "compliance": "Compliance Tracker",
     "complianceDesc": "Track compliance deadlines and requirements",
     "complianceSubtitle": "Monitor compliance deadlines and requirements",
-    "workflowTemplates": "Workflow Management",
-    "workflowTemplatesDesc": "Configure approval workflows and background processing",
+    "workflowTemplates": "Workflow Templates",
+    "workflowTemplatesDesc": "Configure approval workflow templates",
     "approvalDelegations": "Approval Delegations",
     "approvalDelegationsDesc": "Manage approval delegation settings",
     "transactionWorkflowSettings": {

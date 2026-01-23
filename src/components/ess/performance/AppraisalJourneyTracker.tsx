@@ -36,9 +36,6 @@ interface AppraisalJourneyTrackerProps {
   // Employee response tracking
   employeeResponseStatus?: string | null;
   hasEmployeeResponse?: boolean;
-  // Template configuration flags for filtering default stages
-  includeGoals?: boolean;
-  includeCompetencies?: boolean;
   // Display options
   variant?: 'horizontal' | 'vertical' | 'compact';
   showDates?: boolean;
@@ -402,8 +399,6 @@ export function AppraisalJourneyTracker({
   acknowledgmentDeadline,
   employeeResponseStatus,
   hasEmployeeResponse,
-  includeGoals,
-  includeCompetencies,
   variant = 'horizontal',
   showDates = false,
   showActorLabels = true,
@@ -437,10 +432,8 @@ export function AppraisalJourneyTracker({
     hasEmployeeResponse,
   });
 
-  // Use default stages if none loaded, filtered by template config
-  const displayStages = stages.length > 0 
-    ? stages 
-    : getDefaultJourneyStages({ includeGoals });
+  // Use default stages if none loaded
+  const displayStages = stages.length > 0 ? stages : getDefaultJourneyStages();
 
   if (isLoading) {
     return (

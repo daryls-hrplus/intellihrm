@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -48,88 +46,37 @@ import {
   MessageSquare,
   GraduationCap,
   TrendingUp,
-  ExternalLink,
-  Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { WorkflowSetupGuidanceCard, type IndustryTemplate } from "./WorkflowSetupGuidanceCard";
 import { WorkflowQuickStartSection } from "./WorkflowQuickStartSection";
-import type { WorkflowCategory } from "@/hooks/useWorkflow";
 
-interface WorkflowTemplate {
+interface ApprovalRule {
   id: string;
+  company_id: string;
   name: string;
-  code: string;
-  category: string;
-  description: string | null;
-  company_id: string | null;
+  process_type: string;
+  scope_level: string;
+  approval_type: string;
+  requires_hr_approval: boolean;
+  max_approval_days: number | null;
   is_active: boolean;
-  is_global: boolean;
 }
 
-interface WorkflowStep {
+interface ApprovalChainStep {
   id: string;
-  template_id: string;
+  rule_id: string;
   step_order: number;
-  name: string;
   approver_type: string;
   approver_user_id: string | null;
-  use_reporting_line: boolean;
-  escalation_hours: number | null;
-  is_active: boolean;
+  is_optional: boolean;
+  sla_hours: number | null;
 }
 
 interface TalentApprovalWorkflowManagerProps {
   companyId?: string;
 }
-
-// Performance workflow categories in the unified system
-const PERFORMANCE_CATEGORIES: WorkflowCategory[] = [
-  'goal_approval',
-  'rating_approval',
-  'feedback_360_approval',
-  'calibration_approval',
-  'succession_approval',
-  'learning_approval',
-  'pip_acknowledgment',
-  'rating_release_approval',
-];
-
-const categoryToProcessType: Record<string, string> = {
-  goal_approval: 'goals',
-  goal_approval_individual: 'goals',
-  goal_approval_team: 'goals',
-  goal_approval_department: 'goals',
-  rating_approval: 'appraisals',
-  feedback_360_approval: '360_feedback',
-  learning_approval: 'learning',
-  succession_approval: 'succession',
-  calibration_approval: 'appraisals',
-  pip_acknowledgment: 'appraisals',
-  rating_release_approval: 'appraisals',
-};
-
-const processTypeToCategory: Record<string, WorkflowCategory> = {
-  goals: 'goal_approval',
-  appraisals: 'rating_approval',
-  '360_feedback': 'feedback_360_approval',
-  learning: 'learning_approval',
-  succession: 'succession_approval',
-};
-
-// Map workflow categories to transaction type codes for HR Hub sync
-const categoryToTransactionCode: Record<string, string> = {
-  rating_approval: 'PERF_RATING_APPROVAL',
-  pip_acknowledgment: 'PERF_PIP_ACKNOWLEDGMENT',
-  rating_release_approval: 'PERF_RATING_RELEASE',
-  goal_approval: 'PERF_GOAL_APPROVAL_INDIVIDUAL',
-  goal_approval_individual: 'PERF_GOAL_APPROVAL_INDIVIDUAL',
-  goal_approval_team: 'PERF_GOAL_APPROVAL_TEAM',
-  goal_approval_department: 'PERF_GOAL_APPROVAL_DEPARTMENT',
-  feedback_360_approval: 'PERF_360_RELEASE',
-  succession_approval: 'PERF_SUCCESSION_APPROVAL',
-};
 
 const processTypeConfig = {
   goals: { label: "Goals", icon: Target, color: "bg-primary/10 text-primary" },
@@ -146,16 +93,14 @@ const scopeLevelConfig = {
   company: { label: "Company", icon: Building2 },
 };
 
-const approverTypeLabels: Record<string, string> = {
-  manager: "Direct Manager",
-  hr: "HR Representative",
-  position: "Department Head",
-  specific_user: "Specific User",
-  workflow_role: "Workflow Approval Role",
+const approvalTypeLabels: Record<string, string> = {
+  single_level: "Single Level",
+  multi_level: "Multi Level",
+  skip_level: "Skip Level",
+  no_approval: "No Approval Required",
 };
 
-// Map legacy approver types to new system
-const legacyApproverTypeLabels: Record<string, string> = {
+const approverTypeLabels: Record<string, string> = {
   direct_manager: "Direct Manager",
   skip_manager: "Skip-Level Manager",
   hr: "HR Representative",
@@ -164,47 +109,38 @@ const legacyApproverTypeLabels: Record<string, string> = {
 };
 
 export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkflowManagerProps) {
-  const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
-  const [steps, setSteps] = useState<Record<string, WorkflowStep[]>>({});
+  const [rules, setRules] = useState<ApprovalRule[]>([]);
+  const [chainSteps, setChainSteps] = useState<Record<string, ApprovalChainStep[]>>({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [stepDialogOpen, setStepDialogOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate | null>(null);
+  const [selectedRule, setSelectedRule] = useState<ApprovalRule | null>(null);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [filterProcessType, setFilterProcessType] = useState<string>("all");
-  const [companyName, setCompanyName] = useState<string>("");
 
-  const [templateForm, setTemplateForm] = useState({
+  const [ruleForm, setRuleForm] = useState({
     name: "",
     process_type: "goals",
     scope_level: "individual",
+    approval_type: "single_level",
+    requires_hr_approval: false,
+    max_approval_days: "",
     is_active: true,
   });
 
   const [stepForm, setStepForm] = useState({
-    approver_type: "manager",
+    approver_type: "direct_manager",
     approver_user_id: "",
-    use_reporting_line: true,
+    is_optional: false,
     sla_hours: "",
   });
 
   useEffect(() => {
     if (companyId) {
-      fetchTemplates();
+      fetchRules();
       fetchEmployees();
-      fetchCompanyName();
     }
   }, [companyId]);
-
-  const fetchCompanyName = async () => {
-    if (!companyId) return;
-    const { data } = await supabase
-      .from("companies")
-      .select("name")
-      .eq("id", companyId)
-      .single();
-    if (data) setCompanyName(data.name);
-  };
 
   const fetchEmployees = async () => {
     if (!companyId) return;
@@ -216,168 +152,136 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
     setEmployees(data || []);
   };
 
-  const fetchTemplates = async () => {
+  const fetchRules = async () => {
     if (!companyId) return;
     setLoading(true);
     try {
-      // Fetch workflow templates for performance categories
-      const { data: templatesData, error: templatesError } = await supabase
-        .from("workflow_templates")
+      // Fetch rules with process_type from database
+      const { data: rulesData, error: rulesError } = await supabase
+        .from("goal_approval_rules")
         .select("*")
         .eq("company_id", companyId)
-        .in("category", PERFORMANCE_CATEGORIES)
-        .order("name");
+        .order("goal_level");
 
-      if (templatesError) throw templatesError;
-      setTemplates((templatesData || []) as WorkflowTemplate[]);
+      if (rulesError) throw rulesError;
+      
+      // Map the existing goal_level to scope_level, use process_type from DB (defaults to 'goals')
+      const mappedRules = (rulesData || []).map(r => ({
+        ...r,
+        process_type: (r as any).process_type || "goals",
+        scope_level: r.goal_level,
+      })) as ApprovalRule[];
+      
+      setRules(mappedRules);
 
-      // Fetch steps for each template
-      if (templatesData?.length) {
-        const templateIds = templatesData.map(t => t.id);
+      if (rulesData?.length) {
+        const ruleIds = rulesData.map(r => r.id);
         const { data: stepsData, error: stepsError } = await supabase
-          .from("workflow_steps")
+          .from("goal_approval_chain")
           .select("*")
-          .in("template_id", templateIds)
-          .eq("is_active", true)
+          .in("rule_id", ruleIds)
           .order("step_order");
 
         if (stepsError) throw stepsError;
 
-        const stepsMap: Record<string, WorkflowStep[]> = {};
-        ((stepsData || []) as WorkflowStep[]).forEach(step => {
-          if (!stepsMap[step.template_id]) stepsMap[step.template_id] = [];
-          stepsMap[step.template_id].push(step);
+        const stepsMap: Record<string, ApprovalChainStep[]> = {};
+        ((stepsData || []) as ApprovalChainStep[]).forEach(step => {
+          if (!stepsMap[step.rule_id]) stepsMap[step.rule_id] = [];
+          stepsMap[step.rule_id].push(step);
         });
-        setSteps(stepsMap);
+        setChainSteps(stepsMap);
       }
     } catch (error) {
-      console.error("Error fetching workflow templates:", error);
-      toast.error("Failed to load approval workflows");
+      console.error("Error fetching approval rules:", error);
+      toast.error("Failed to load approval rules");
     } finally {
       setLoading(false);
     }
   };
 
-  const generateCode = (name: string): string => {
-    return name.toUpperCase().replace(/[^A-Z0-9]+/g, '_').substring(0, 50) + '_' + Date.now().toString(36).toUpperCase();
-  };
-
-  const handleSaveTemplate = async () => {
+  const handleSaveRule = async () => {
     if (!companyId) return;
 
     try {
-      const category = processTypeToCategory[templateForm.process_type] || 'goal_approval';
-      const templateData = {
+      const ruleData = {
         company_id: companyId,
-        name: templateForm.name || `${templateForm.process_type} - ${templateForm.scope_level} approval`,
-        code: generateCode(templateForm.name || `${templateForm.process_type}_${templateForm.scope_level}`),
-        category: category,
-        description: `Scope: ${templateForm.scope_level}`,
-        is_global: false,
-        is_active: templateForm.is_active,
-        requires_signature: false,
-        requires_letter: false,
-        allow_return_to_previous: true,
-        created_by: companyId,
+        name: ruleForm.name || `${ruleForm.process_type} - ${ruleForm.scope_level} approval`,
+        goal_level: ruleForm.scope_level, // Map back to goal_level for DB
+        approval_type: ruleForm.approval_type,
+        requires_hr_approval: ruleForm.requires_hr_approval,
+        max_approval_days: ruleForm.max_approval_days ? parseInt(ruleForm.max_approval_days) : null,
+        is_active: ruleForm.is_active,
       };
 
-      if (selectedTemplate) {
+      if (selectedRule) {
         const { error } = await supabase
-          .from("workflow_templates")
-          .update({
-            name: templateData.name,
-            description: templateData.description,
-            is_active: templateData.is_active,
-          })
-          .eq("id", selectedTemplate.id);
+          .from("goal_approval_rules")
+          .update(ruleData)
+          .eq("id", selectedRule.id);
         if (error) throw error;
-        
-        // Sync to HR Hub
-        await syncToHRHub(selectedTemplate.id, selectedTemplate.category, templateForm.scope_level);
-        
         toast.success("Approval workflow updated");
       } else {
-        const { data: newTemplate, error } = await supabase
-          .from("workflow_templates")
-          .insert([templateData])
-          .select()
-          .single();
+        const { error } = await supabase
+          .from("goal_approval_rules")
+          .insert([ruleData]);
         if (error) throw error;
-        
-        // Sync to HR Hub
-        if (newTemplate) {
-          await syncToHRHub(newTemplate.id, category, templateForm.scope_level);
-        }
-        
         toast.success("Approval workflow created");
       }
 
       setDialogOpen(false);
-      setSelectedTemplate(null);
-      fetchTemplates();
+      setSelectedRule(null);
+      fetchRules();
     } catch (error) {
-      console.error("Error saving template:", error);
+      console.error("Error saving rule:", error);
       toast.error("Failed to save approval workflow");
     }
   };
 
-  const handleDeleteTemplate = async (templateId: string) => {
+  const handleDeleteRule = async (ruleId: string) => {
     if (!confirm("Are you sure you want to delete this approval workflow?")) return;
 
     try {
-      // Delete steps first
-      await supabase
-        .from("workflow_steps")
-        .delete()
-        .eq("template_id", templateId);
-
-      // Then delete template
       const { error } = await supabase
-        .from("workflow_templates")
+        .from("goal_approval_rules")
         .delete()
-        .eq("id", templateId);
+        .eq("id", ruleId);
       if (error) throw error;
       toast.success("Approval workflow deleted");
-      fetchTemplates();
+      fetchRules();
     } catch (error) {
-      console.error("Error deleting template:", error);
+      console.error("Error deleting rule:", error);
       toast.error("Failed to delete approval workflow");
     }
   };
 
   const handleAddStep = async () => {
-    if (!selectedTemplate) return;
+    if (!selectedRule) return;
 
     try {
-      const currentSteps = steps[selectedTemplate.id] || [];
+      const currentSteps = chainSteps[selectedRule.id] || [];
       const nextOrder = currentSteps.length + 1;
 
       const { error } = await supabase
-        .from("workflow_steps")
+        .from("goal_approval_chain")
         .insert([{
-          template_id: selectedTemplate.id,
+          rule_id: selectedRule.id,
           step_order: nextOrder,
-          name: `Step ${nextOrder}: ${approverTypeLabels[stepForm.approver_type] || stepForm.approver_type}`,
           approver_type: stepForm.approver_type,
           approver_user_id: stepForm.approver_type === "specific_user" ? stepForm.approver_user_id : null,
-          use_reporting_line: stepForm.use_reporting_line,
-          escalation_hours: stepForm.sla_hours ? parseInt(stepForm.sla_hours) : null,
-          is_active: true,
-          requires_signature: false,
-          requires_comment: false,
-          can_delegate: true,
+          is_optional: stepForm.is_optional,
+          sla_hours: stepForm.sla_hours ? parseInt(stepForm.sla_hours) : null,
         }]);
 
       if (error) throw error;
       toast.success("Approval step added");
       setStepDialogOpen(false);
       setStepForm({
-        approver_type: "manager",
+        approver_type: "direct_manager",
         approver_user_id: "",
-        use_reporting_line: true,
+        is_optional: false,
         sla_hours: "",
       });
-      fetchTemplates();
+      fetchRules();
     } catch (error) {
       console.error("Error adding step:", error);
       toast.error("Failed to add approval step");
@@ -387,206 +291,146 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
   const handleDeleteStep = async (stepId: string) => {
     try {
       const { error } = await supabase
-        .from("workflow_steps")
+        .from("goal_approval_chain")
         .delete()
         .eq("id", stepId);
       if (error) throw error;
       toast.success("Approval step removed");
-      fetchTemplates();
+      fetchRules();
     } catch (error) {
       console.error("Error deleting step:", error);
       toast.error("Failed to remove approval step");
     }
   };
 
-  const handleToggleActive = async (template: WorkflowTemplate) => {
+  const handleToggleActive = async (rule: ApprovalRule) => {
     try {
       const { error } = await supabase
-        .from("workflow_templates")
-        .update({ is_active: !template.is_active })
-        .eq("id", template.id);
+        .from("goal_approval_rules")
+        .update({ is_active: !rule.is_active })
+        .eq("id", rule.id);
       if (error) throw error;
-      fetchTemplates();
+      fetchRules();
     } catch (error) {
-      console.error("Error toggling template:", error);
+      console.error("Error toggling rule:", error);
       toast.error("Failed to update workflow");
     }
   };
 
-  const openEditTemplate = (template: WorkflowTemplate) => {
-    setSelectedTemplate(template);
-    const processType = categoryToProcessType[template.category] || "goals";
-    const scopeMatch = template.description?.match(/Scope:\s*(\w+)/i);
-    const scopeLevel = scopeMatch ? scopeMatch[1].toLowerCase() : "individual";
-    
-    setTemplateForm({
-      name: template.name,
-      process_type: processType,
-      scope_level: scopeLevel,
-      is_active: template.is_active,
+  const openEditRule = (rule: ApprovalRule) => {
+    setSelectedRule(rule);
+    setRuleForm({
+      name: rule.name,
+      process_type: rule.process_type || "goals",
+      scope_level: rule.scope_level,
+      approval_type: rule.approval_type,
+      requires_hr_approval: rule.requires_hr_approval,
+      max_approval_days: rule.max_approval_days?.toString() || "",
+      is_active: rule.is_active,
     });
     setDialogOpen(true);
   };
 
-  const openAddStep = (template: WorkflowTemplate) => {
-    setSelectedTemplate(template);
+  const openAddStep = (rule: ApprovalRule) => {
+    setSelectedRule(rule);
     setStepDialogOpen(true);
   };
 
-  // Filter templates by process type
-  const filteredTemplates = filterProcessType === "all" 
-    ? templates 
-    : templates.filter(t => categoryToProcessType[t.category] === filterProcessType);
+  const filteredRules = filterProcessType === "all" 
+    ? rules 
+    : rules.filter(r => r.process_type === filterProcessType);
 
-  // Group templates by process type
-  const groupedTemplates = filteredTemplates.reduce((acc, template) => {
-    const type = categoryToProcessType[template.category] || "goals";
+  // Group rules by process type
+  const groupedRules = filteredRules.reduce((acc, rule) => {
+    const type = rule.process_type || "goals";
     if (!acc[type]) acc[type] = [];
-    acc[type].push(template);
+    acc[type].push(rule);
     return acc;
-  }, {} as Record<string, WorkflowTemplate[]>);
+  }, {} as Record<string, ApprovalRule[]>);
 
-  // Sync workflow template to HR Hub by creating/updating company_transaction_workflow_settings
-  const syncToHRHub = async (templateId: string, category: string, scopeLevel: string) => {
-    if (!companyId) return;
+  if (loading) {
+    return <div className="text-center py-8 text-muted-foreground">Loading approval workflows...</div>;
+  }
 
-    // Determine the correct transaction code based on category and scope
-    let transactionCode = categoryToTransactionCode[category];
-    
-    // For goals, use scope-specific codes
-    if (category === 'goal_approval') {
-      if (scopeLevel === 'team') {
-        transactionCode = 'PERF_GOAL_APPROVAL_TEAM';
-      } else if (scopeLevel === 'department' || scopeLevel === 'company') {
-        transactionCode = 'PERF_GOAL_APPROVAL_DEPARTMENT';
-      } else {
-        transactionCode = 'PERF_GOAL_APPROVAL_INDIVIDUAL';
-      }
-    }
-
-    if (!transactionCode) {
-      console.log("No transaction code mapping for category:", category);
-      return;
-    }
-
-    // Find the transaction type ID
-    const { data: transactionType } = await supabase
-      .from("lookup_values")
-      .select("id")
-      .eq("category", "transaction_type" as never)
-      .eq("code", transactionCode)
-      .single();
-
-    if (!transactionType) {
-      console.log("Transaction type not found:", transactionCode);
-      return;
-    }
-
-    // Upsert the workflow setting
-    const { error } = await supabase
-      .from("company_transaction_workflow_settings")
-      .upsert({
-        company_id: companyId,
-        transaction_type_id: transactionType.id,
-        workflow_enabled: true,
-        workflow_template_id: templateId,
-        auto_start_workflow: true,
-        requires_approval_before_effective: false,
-        is_active: true,
-      }, {
-        onConflict: 'company_id,transaction_type_id',
-      });
-
-    if (error) {
-      console.error("Error syncing to HR Hub:", error);
-    } else {
-      console.log("Successfully synced template to HR Hub:", transactionCode);
-    }
-  };
-
-  // Handle applying templates from WorkflowSetupGuidanceCard
   const handleApplyTemplate = async (template: IndustryTemplate) => {
     if (!companyId) return;
 
+    let createdRuleId: string | null = null;
+
     try {
-      const category = processTypeToCategory[template.processType] || 'goal_approval';
-      
-      // Check for existing template with same category and scope
-      const { data: existingTemplates } = await supabase
-        .from("workflow_templates")
+      // Check for duplicate: same company + process_type + scope_level
+      const { data: existingRules } = await supabase
+        .from("goal_approval_rules")
         .select("id, name")
         .eq("company_id", companyId)
-        .eq("category", category)
-        .ilike("description", `%Scope: ${template.scopeLevel}%`);
+        .eq("goal_level", template.scopeLevel) as { data: { id: string; name: string }[] | null };
 
-      if (existingTemplates && existingTemplates.length > 0) {
+      if (existingRules && existingRules.length > 0) {
         const confirmReplace = confirm(
           `A workflow already exists for ${template.processType} - ${template.scopeLevel}. Replace it?`
         );
         if (!confirmReplace) return;
         
-        // Delete existing template and its steps
-        for (const existing of existingTemplates) {
-          await supabase.from("workflow_steps").delete().eq("template_id", existing.id);
-          await supabase.from("workflow_templates").delete().eq("id", existing.id);
-        }
+        // Delete the existing rule (cascade will remove steps)
+        await supabase
+          .from("goal_approval_rules")
+          .delete()
+          .eq("id", existingRules[0].id);
       }
 
-      // Create the workflow template
-      const { data: newTemplate, error: templateError } = await supabase
-        .from("workflow_templates")
-        .insert([{
-          company_id: companyId,
-          name: template.name,
-          code: generateCode(template.name),
-          category: category,
-          description: `Scope: ${template.scopeLevel}`,
-          is_global: false,
-          is_active: true,
-          requires_signature: false,
-          requires_letter: false,
-          allow_return_to_previous: true,
-          created_by: companyId,
-        }])
+      // Create the rule with process_type
+      const rulePayload = {
+        company_id: companyId,
+        name: template.name,
+        goal_level: template.scopeLevel,
+        process_type: template.processType,
+        approval_type: template.steps.length > 1 ? "multi_level" : "single_level",
+        requires_hr_approval: template.steps.some(s => s.approverType === "hr"),
+        max_approval_days: Math.ceil(template.steps.reduce((sum, s) => sum + s.slaHours, 0) / 24),
+        is_active: true,
+      };
+      
+      const { data: ruleData, error: ruleError } = await supabase
+        .from("goal_approval_rules")
+        .insert([rulePayload as any])
         .select()
         .single();
 
-      if (templateError) throw templateError;
+      if (ruleError) {
+        console.error("Rule insert error:", ruleError);
+        throw new Error(`Failed to create workflow rule: ${ruleError.message}`);
+      }
 
-      // Create workflow steps
-      const stepsToInsert = template.steps.map((step, idx) => {
-        // Map legacy approver types to new system
-        const approverType = step.approverType === 'direct_manager' || step.approverType === 'skip_manager' 
-          ? 'manager' 
-          : step.approverType === 'department_head' 
-            ? 'position' 
-            : step.approverType;
-        
-        return {
-          template_id: newTemplate.id,
-          step_order: idx + 1,
-          name: `Step ${idx + 1}: ${legacyApproverTypeLabels[step.approverType] || step.approverType}`,
-          approver_type: approverType,
-          use_reporting_line: step.approverType === 'direct_manager' || step.approverType === 'skip_manager',
-          escalation_hours: step.slaHours,
-          is_active: true,
-          requires_signature: false,
-          requires_comment: false,
-          can_delegate: true,
-        };
-      });
+      createdRuleId = ruleData.id;
+
+      // Create the steps
+      const stepsToInsert = template.steps.map((step, idx) => ({
+        rule_id: ruleData.id,
+        step_order: idx + 1,
+        approver_type: step.approverType,
+        approver_user_id: null,
+        is_optional: false,
+        sla_hours: step.slaHours,
+      }));
 
       const { error: stepsError } = await supabase
-        .from("workflow_steps")
+        .from("goal_approval_chain")
         .insert(stepsToInsert);
 
-      if (stepsError) throw stepsError;
-
-      // Sync to HR Hub so the workflow shows as enabled there
-      await syncToHRHub(newTemplate.id, category, template.scopeLevel);
+      if (stepsError) {
+        console.error("Steps insert error:", stepsError);
+        // Rollback: delete the rule we just created
+        if (createdRuleId) {
+          await supabase
+            .from("goal_approval_rules")
+            .delete()
+            .eq("id", createdRuleId);
+        }
+        throw new Error(`Failed to create workflow steps: ${stepsError.message}`);
+      }
 
       toast.success(`Applied "${template.name}" template successfully`);
-      fetchTemplates();
+      fetchRules();
     } catch (error: any) {
       console.error("Error applying template:", error);
       toast.error(error.message || "Failed to apply template");
@@ -595,38 +439,17 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
 
   const handleQuickSetup = (processType: string) => {
     setFilterProcessType(processType);
+    // Scroll to guidance section which will show templates for that process
   };
 
-  const existingProcessTypes = [...new Set(templates.map(t => categoryToProcessType[t.category] || "goals"))];
-  
-  // Track which specific templates have been applied
-  const appliedTemplates = templates.map(t => {
-    const scopeMatch = t.description?.match(/Scope:\s*(\w+)/i);
-    return {
-      processType: categoryToProcessType[t.category] || "goals",
-      scopeLevel: scopeMatch ? scopeMatch[1].toLowerCase() : "individual",
-      name: t.name,
-    };
-  });
-
-  if (loading) {
-    return <div className="text-center py-8 text-muted-foreground">Loading approval workflows...</div>;
-  }
+  const existingProcessTypes = [...new Set(rules.map(r => r.process_type))];
 
   return (
     <div className="space-y-6">
-      {/* Company Context Indicator */}
-      <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
-        <Building2 className="h-5 w-5 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Viewing workflows for:</span>
-        <Badge variant="outline" className="font-semibold">{companyName || "Loading..."}</Badge>
-      </div>
-
       {/* AI Guidance Section */}
       <WorkflowSetupGuidanceCard
         onApplyTemplate={handleApplyTemplate}
         existingProcessTypes={existingProcessTypes}
-        appliedTemplates={appliedTemplates}
       />
 
       {/* Quick Start Section */}
@@ -654,23 +477,22 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => { 
-            setSelectedTemplate(null); 
-            setTemplateForm({
-              name: "",
-              process_type: "goals",
-              scope_level: "individual",
-              is_active: true,
-            }); 
-            setDialogOpen(true); 
-          }}>
+          <Button onClick={() => { setSelectedRule(null); setRuleForm({
+            name: "",
+            process_type: "goals",
+            scope_level: "individual",
+            approval_type: "single_level",
+            requires_hr_approval: false,
+            max_approval_days: "",
+            is_active: true,
+          }); setDialogOpen(true); }}>
             <Plus className="mr-2 h-4 w-4" />
             Add Workflow
           </Button>
         </div>
       </div>
 
-      {templates.length === 0 ? (
+      {rules.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Settings2 className="h-12 w-12 text-muted-foreground mb-4" />
@@ -686,7 +508,7 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
         </Card>
       ) : (
         <div className="space-y-6">
-          {Object.entries(groupedTemplates).map(([processType, processTemplates]) => {
+          {Object.entries(groupedRules).map(([processType, processRules]) => {
             const processConfig = processTypeConfig[processType as keyof typeof processTypeConfig] || processTypeConfig.goals;
             const ProcessIcon = processConfig.icon;
             
@@ -699,37 +521,36 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
                     </div>
                     <div>
                       <CardTitle className="text-base">{processConfig.label}</CardTitle>
-                      <CardDescription>{processTemplates.length} workflow{processTemplates.length !== 1 ? 's' : ''} configured</CardDescription>
+                      <CardDescription>{processRules.length} workflow{processRules.length !== 1 ? 's' : ''} configured</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Accordion type="multiple" className="space-y-2">
-                    {processTemplates.map((template) => {
-                      const scopeMatch = template.description?.match(/Scope:\s*(\w+)/i);
-                      const scopeLevel = scopeMatch ? scopeMatch[1].toLowerCase() : "individual";
-                      const scopeConfig = scopeLevelConfig[scopeLevel as keyof typeof scopeLevelConfig] || scopeLevelConfig.individual;
+                    {processRules.map((rule) => {
+                      const scopeConfig = scopeLevelConfig[rule.scope_level as keyof typeof scopeLevelConfig] || scopeLevelConfig.individual;
                       const ScopeIcon = scopeConfig.icon;
-                      const templateSteps = steps[template.id] || [];
+                      const steps = chainSteps[rule.id] || [];
 
                       return (
-                        <AccordionItem key={template.id} value={template.id} className="border rounded-lg">
+                        <AccordionItem key={rule.id} value={rule.id} className="border rounded-lg">
                           <AccordionTrigger className="px-4 hover:no-underline">
                             <div className="flex items-center gap-4 w-full">
                               <div className="flex items-center gap-2">
                                 <ScopeIcon className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-medium">{scopeConfig.label}</span>
                               </div>
-                              <Badge variant={template.is_active ? "default" : "secondary"} className="ml-auto mr-4">
-                                {template.is_active ? "Active" : "Inactive"}
+                              <Badge variant={rule.is_active ? "default" : "secondary"} className="ml-auto mr-4">
+                                {rule.is_active ? "Active" : "Inactive"}
                               </Badge>
                               <span className="text-sm text-muted-foreground">
-                                {templateSteps.length} step{templateSteps.length !== 1 ? 's' : ''}
+                                {approvalTypeLabels[rule.approval_type]}
+                                {rule.requires_hr_approval && " • HR Required"}
                               </span>
                               <div onClick={e => e.stopPropagation()}>
                                 <Switch
-                                  checked={template.is_active}
-                                  onCheckedChange={() => handleToggleActive(template)}
+                                  checked={rule.is_active}
+                                  onCheckedChange={() => handleToggleActive(rule)}
                                 />
                               </div>
                             </div>
@@ -737,19 +558,19 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
                           <AccordionContent className="px-4 pb-4">
                             <div className="space-y-4">
                               <div className="flex items-center justify-between">
-                                <h4 className="font-medium text-sm">Approval Chain ({templateSteps.length} step{templateSteps.length !== 1 ? 's' : ''})</h4>
+                                <h4 className="font-medium text-sm">Approval Chain ({steps.length} step{steps.length !== 1 ? 's' : ''})</h4>
                                 <div className="flex gap-2">
-                                  <Button variant="outline" size="sm" onClick={() => openEditTemplate(template)}>
+                                  <Button variant="outline" size="sm" onClick={() => openEditRule(rule)}>
                                     Edit
                                   </Button>
-                                  <Button variant="outline" size="sm" onClick={() => openAddStep(template)}>
+                                  <Button variant="outline" size="sm" onClick={() => openAddStep(rule)}>
                                     <Plus className="mr-1 h-3 w-3" />
                                     Add Step
                                   </Button>
                                 </div>
                               </div>
 
-                              {templateSteps.length === 0 ? (
+                              {steps.length === 0 ? (
                                 <p className="text-sm text-muted-foreground py-4 text-center">
                                   No approval steps defined. Add steps to define the approval chain.
                                 </p>
@@ -759,18 +580,18 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
                                     <TableRow>
                                       <TableHead className="w-12">#</TableHead>
                                       <TableHead>Approver</TableHead>
-                                      <TableHead>Reporting Line</TableHead>
+                                      <TableHead>Required</TableHead>
                                       <TableHead>SLA</TableHead>
                                       <TableHead className="w-12"></TableHead>
                                     </TableRow>
                                   </TableHeader>
                                   <TableBody>
-                                    {templateSteps.map((step) => (
+                                    {steps.map((step) => (
                                       <TableRow key={step.id}>
                                         <TableCell className="font-medium">{step.step_order}</TableCell>
                                         <TableCell>
                                           <div className="flex items-center gap-2">
-                                            {approverTypeLabels[step.approver_type] || step.name}
+                                            {approverTypeLabels[step.approver_type] || step.approver_type}
                                             {step.approver_user_id && (
                                               <Badge variant="outline" className="text-xs">
                                                 {employees.find(e => e.id === step.approver_user_id)?.full_name || "Unknown"}
@@ -779,15 +600,15 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
                                           </div>
                                         </TableCell>
                                         <TableCell>
-                                          <Badge variant={step.use_reporting_line ? "default" : "secondary"}>
-                                            {step.use_reporting_line ? "Yes" : "No"}
+                                          <Badge variant={step.is_optional ? "secondary" : "default"}>
+                                            {step.is_optional ? "Optional" : "Required"}
                                           </Badge>
                                         </TableCell>
                                         <TableCell>
-                                          {step.escalation_hours ? (
+                                          {step.sla_hours ? (
                                             <span className="flex items-center gap-1 text-sm">
                                               <Clock className="h-3 w-3" />
-                                              {step.escalation_hours}h
+                                              {step.sla_hours}h
                                             </span>
                                           ) : "—"}
                                         </TableCell>
@@ -812,7 +633,7 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
                                   variant="ghost"
                                   size="sm"
                                   className="text-destructive"
-                                  onClick={() => handleDeleteTemplate(template.id)}
+                                  onClick={() => handleDeleteRule(rule.id)}
                                 >
                                   <Trash2 className="mr-1 h-4 w-4" />
                                   Delete Workflow
@@ -831,35 +652,19 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
         </div>
       )}
 
-      {/* Cross-System Navigation Link */}
-      <Alert className="border-primary/20 bg-primary/5">
-        <Info className="h-4 w-4 text-primary" />
-        <AlertDescription className="flex items-center justify-between">
-          <span className="text-sm">
-            These workflows are part of the unified HR Hub workflow engine. For advanced configuration (delegation, escalation, analytics), visit Workflow Management.
-          </span>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/admin/workflow-templates">
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Open Workflow Management
-            </Link>
-          </Button>
-        </AlertDescription>
-      </Alert>
-
       {/* Add/Edit Workflow Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{selectedTemplate ? "Edit Approval Workflow" : "Create Approval Workflow"}</DialogTitle>
+            <DialogTitle>{selectedRule ? "Edit Approval Workflow" : "Create Approval Workflow"}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
               <Label>Workflow Name</Label>
               <Input
-                value={templateForm.name}
-                onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+                value={ruleForm.name}
+                onChange={(e) => setRuleForm({ ...ruleForm, name: e.target.value })}
                 placeholder="e.g., Manager Goal Approval"
               />
             </div>
@@ -868,8 +673,8 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
               <div>
                 <Label>Process Type</Label>
                 <Select
-                  value={templateForm.process_type}
-                  onValueChange={(v) => setTemplateForm({ ...templateForm, process_type: v })}
+                  value={ruleForm.process_type}
+                  onValueChange={(v) => setRuleForm({ ...ruleForm, process_type: v })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -885,8 +690,8 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
               <div>
                 <Label>Scope Level</Label>
                 <Select
-                  value={templateForm.scope_level}
-                  onValueChange={(v) => setTemplateForm({ ...templateForm, scope_level: v })}
+                  value={ruleForm.scope_level}
+                  onValueChange={(v) => setRuleForm({ ...ruleForm, scope_level: v })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -900,18 +705,54 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={templateForm.is_active}
-                onCheckedChange={(c) => setTemplateForm({ ...templateForm, is_active: c })}
+            <div>
+              <Label>Approval Type</Label>
+              <Select
+                value={ruleForm.approval_type}
+                onValueChange={(v) => setRuleForm({ ...ruleForm, approval_type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(approvalTypeLabels).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Max Approval Days (SLA)</Label>
+              <Input
+                type="number"
+                value={ruleForm.max_approval_days}
+                onChange={(e) => setRuleForm({ ...ruleForm, max_approval_days: e.target.value })}
+                placeholder="e.g., 5"
               />
-              <Label>Active</Label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={ruleForm.requires_hr_approval}
+                  onCheckedChange={(c) => setRuleForm({ ...ruleForm, requires_hr_approval: c })}
+                />
+                <Label>Requires HR Approval</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={ruleForm.is_active}
+                  onCheckedChange={(c) => setRuleForm({ ...ruleForm, is_active: c })}
+                />
+                <Label>Active</Label>
+              </div>
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveTemplate}>Save Workflow</Button>
+            <Button onClick={handleSaveRule}>Save Workflow</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -972,10 +813,10 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
 
             <div className="flex items-center gap-2">
               <Switch
-                checked={stepForm.use_reporting_line}
-                onCheckedChange={(c) => setStepForm({ ...stepForm, use_reporting_line: c })}
+                checked={stepForm.is_optional}
+                onCheckedChange={(c) => setStepForm({ ...stepForm, is_optional: c })}
               />
-              <Label>Use Reporting Line</Label>
+              <Label>Optional Step</Label>
             </div>
           </div>
 
@@ -988,5 +829,3 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
     </div>
   );
 }
-
-export { type IndustryTemplate };

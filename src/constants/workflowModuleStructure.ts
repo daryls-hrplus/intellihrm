@@ -178,9 +178,9 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         color: "orange",
         icon: Target,
         workflows: [
-          { code: "rating_approval", name: "Appraisal Rating Approval", description: "Skip-level review and HR sign-off for performance ratings", transactionTypeCode: "PERF_RATING_APPROVAL" },
-          { code: "pip_acknowledgment", name: "PIP Acknowledgment", description: "Employee acknowledgment of performance improvement plans", transactionTypeCode: "PERF_PIP_ACKNOWLEDGMENT" },
-          { code: "rating_release_approval", name: "Rating Release Approval", description: "HR approval before releasing ratings to employees", transactionTypeCode: "PERF_RATING_RELEASE" }
+          { code: "performance", name: "Appraisal Rating Approval", description: "Skip-level review and HR sign-off for performance ratings", transactionTypeCode: null },
+          { code: "pip_acknowledgment", name: "PIP Acknowledgment", description: "Employee acknowledgment of performance improvement plans", transactionTypeCode: null },
+          { code: "rating_release", name: "Rating Release Approval", description: "HR approval before releasing ratings to employees", transactionTypeCode: null }
         ]
       },
       {
@@ -189,9 +189,9 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         color: "lime",
         icon: Target,
         workflows: [
-          { code: "goal_approval_individual", name: "Individual Goal Approval", description: "Manager approval for individual performance goals", transactionTypeCode: "PERF_GOAL_APPROVAL_INDIVIDUAL" },
-          { code: "goal_approval_team", name: "Team Goal Approval", description: "Multi-level approval for team-wide goals", transactionTypeCode: "PERF_GOAL_APPROVAL_TEAM" },
-          { code: "goal_approval_department", name: "Department Goal Approval", description: "Executive approval for department objectives", transactionTypeCode: "PERF_GOAL_APPROVAL_DEPARTMENT" }
+          { code: "goal_approval", name: "Individual Goal Approval", description: "Manager approval for individual performance goals", transactionTypeCode: null },
+          { code: "team_goal_approval", name: "Team Goal Approval", description: "Multi-level approval for team-wide goals", transactionTypeCode: null },
+          { code: "department_goal_approval", name: "Department Goal Approval", description: "Executive approval for department objectives", transactionTypeCode: null }
         ]
       },
       {
@@ -200,7 +200,7 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         color: "cyan",
         icon: MessageSquare,
         workflows: [
-          { code: "feedback_360_approval", name: "360 Results Release", description: "HR quality review before releasing feedback to employees", transactionTypeCode: "PERF_360_RELEASE" }
+          { code: "360_release", name: "360 Results Release", description: "HR quality review before releasing feedback to employees", transactionTypeCode: null }
         ]
       },
       {
@@ -209,7 +209,7 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         color: "purple",
         icon: TrendingUp,
         workflows: [
-          { code: "succession_approval", name: "Succession Plan Approval", description: "HRBP and department head approval for succession nominations", transactionTypeCode: "PERF_SUCCESSION_APPROVAL" }
+          { code: "succession_approval", name: "Succession Plan Approval", description: "HRBP and department head approval for succession nominations", transactionTypeCode: null }
         ]
       }
     ]

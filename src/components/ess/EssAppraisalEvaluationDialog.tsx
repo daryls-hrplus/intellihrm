@@ -37,7 +37,6 @@ import {
   Loader2,
   FileText,
   Lock,
-  Info,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -50,8 +49,6 @@ import { EmployeeResponsibilityCard } from "./EmployeeResponsibilityCard";
 import { EvidenceQuickAttach } from "./EvidenceQuickAttach";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
-import { useRatingScale, getLabelsMap } from "@/hooks/useRatingScale";
-import { RatingScaleInfoBanner } from "./RatingScaleInfoBanner";
 
 interface ScoreItem {
   id?: string;
@@ -64,9 +61,6 @@ interface ScoreItem {
   self_metadata?: Record<string, any>;
   proficiency_indicators?: Record<string, string[]>;
   evidence_count?: number;
-  // Role expectation fields (competencies only)
-  required_level?: number;
-  assessed_level?: number | null;
 }
 
 interface EssAppraisalEvaluationDialogProps {
@@ -99,15 +93,6 @@ export function EssAppraisalEvaluationDialog({
 
   // Check if already submitted - form should be read-only
   const isSubmitted = !!appraisal.submitted_at;
-
-  // Fetch the configured rating scale for this appraisal cycle
-  const { data: ratingScale } = useRatingScale(appraisal.component_scale_id);
-  
-  // Get labels map for passing to child components
-  const ratingLabelsMap = useMemo(() => {
-    if (!ratingScale?.labels) return undefined;
-    return getLabelsMap(ratingScale);
-  }, [ratingScale]);
 
   // Enabled categories from cycle config
   const enabledCategories = useMemo(() => ({
@@ -155,18 +140,6 @@ export function EssAppraisalEvaluationDialog({
       });
 
       if (existingScores && existingScores.length > 0) {
-        // Fetch cascade data to enrich with required/assessed levels
-        let requiredLevelMap = new Map<string, number>();
-        let assessedLevelMap = new Map<string, number | null>();
-        
-        if (user?.id) {
-          const cascadeResult = await fetchCompetencyCascade(user.id);
-          cascadeResult.competencies.forEach(comp => {
-            if (comp.required_level) requiredLevelMap.set(comp.competency_id, comp.required_level);
-            assessedLevelMap.set(comp.competency_id, comp.assessed_level ?? null);
-          });
-        }
-        
         setScores(existingScores.map((s: any) => ({
           id: s.id,
           item_id: s.item_id,
@@ -178,9 +151,6 @@ export function EssAppraisalEvaluationDialog({
           self_metadata: s.self_metadata || {},
           proficiency_indicators: s.metadata?.proficiency_indicators,
           evidence_count: evidenceCountMap[s.item_id] || 0,
-          // Enrich competencies with role expectation data
-          required_level: s.evaluation_type === 'competency' ? requiredLevelMap.get(s.item_id) : undefined,
-          assessed_level: s.evaluation_type === 'competency' ? assessedLevelMap.get(s.item_id) : undefined,
         })));
       } else {
         // Fetch items for this employee to create score entries
@@ -229,9 +199,6 @@ export function EssAppraisalEvaluationDialog({
           self_comments: "",
           proficiency_indicators: comp.proficiency_indicators as any,
           evidence_count: evidenceCountMap[comp.competency_id] || 0,
-          // Role expectation data
-          required_level: comp.required_level,
-          assessed_level: comp.assessed_level,
         });
       });
     }
@@ -484,7 +451,7 @@ export function EssAppraisalEvaluationDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col border-2 border-red-500">
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
@@ -512,11 +479,6 @@ export function EssAppraisalEvaluationDialog({
               </div>
               <Progress value={completionStats.percentage} className="h-2" />
             </div>
-          )}
-
-          {/* Rating Scale Info Banner */}
-          {!loading && (
-            <RatingScaleInfoBanner ratingScale={ratingScale} variant="compact" />
           )}
 
           {loading ? (
@@ -560,7 +522,7 @@ export function EssAppraisalEvaluationDialog({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 mt-4 overflow-y-auto pb-8">
+              <ScrollArea className="flex-1 mt-4">
                 {/* Goals Tab */}
                 {enabledCategories.goals && (
                   <TabsContent value="goals" className="space-y-3 m-0">
@@ -579,8 +541,6 @@ export function EssAppraisalEvaluationDialog({
                           onRatingChange={(r) => handleRatingChange(score.item_id, "goal", r)}
                           onCommentsChange={(c) => handleCommentsChange(score.item_id, "goal", c)}
                           onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "goal")}
-                          ratingLabels={ratingLabelsMap}
-                          ratingLabel="Performance Rating"
                         />
                       ))
                     )}
@@ -604,16 +564,10 @@ export function EssAppraisalEvaluationDialog({
                           selectedBehaviors={score.self_metadata?.demonstrated_behaviors || []}
                           proficiencyIndicators={score.proficiency_indicators}
                           evidenceCount={score.evidence_count}
-                          requiredLevel={score.required_level}
-                          currentAssessedLevel={score.assessed_level}
                           onRatingChange={(r) => handleRatingChange(score.item_id, "competency", r)}
                           onCommentsChange={(c) => handleCommentsChange(score.item_id, "competency", c)}
                           onBehaviorsChange={(b) => handleBehaviorsChange(score.item_id, b)}
                           onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "competency")}
-                          ratingLabels={ratingLabelsMap}
-                          usePerformanceScale={true}
-                          ratingLabel="Performance Rating"
-                          showRoleExpectation={true}
                         />
                       ))
                     )}
@@ -638,8 +592,6 @@ export function EssAppraisalEvaluationDialog({
                           onRatingChange={(r) => handleRatingChange(score.item_id, "responsibility", r)}
                           onCommentsChange={(c) => handleCommentsChange(score.item_id, "responsibility", c)}
                           onAttachEvidence={() => handleAttachEvidence(score.item_id, score.item_name, "responsibility")}
-                          ratingLabels={ratingLabelsMap}
-                          ratingLabel="Performance Rating"
                         />
                       ))
                     )}
@@ -676,7 +628,7 @@ export function EssAppraisalEvaluationDialog({
                     </Alert>
                   )}
                 </TabsContent>
-              </div>
+              </ScrollArea>
             </Tabs>
           )}
 

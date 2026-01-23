@@ -48,8 +48,6 @@ import { AppraisalIntegrationStatus } from "./AppraisalIntegrationStatus";
 import { CommentQualityHints } from "./CommentQualityHints";
 import { SelfRatingIndicator } from "./SelfRatingIndicator";
 import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
-import { useRatingScale, useConversionRules, getLabelsMap } from "@/hooks/useRatingScale";
-import { RatingScaleInfoBanner } from "@/components/ess/RatingScaleInfoBanner";
 
 interface CompetencyMetadata {
   selected_level?: number;
@@ -111,7 +109,6 @@ interface CycleInfo {
   company_id?: string;
   include_values_assessment?: boolean;
   values_weight?: number;
-  component_scale_id?: string | null;
 }
 
 interface ParticipantInfo {
@@ -225,17 +222,6 @@ export function AppraisalEvaluationDialog({
     }
   );
 
-  // Rating scale hook - fetch the configured scale for this appraisal cycle
-  const { data: ratingScale } = useRatingScale(cycleInfo?.component_scale_id);
-  
-  // Conversion rules hook - for proficiency impact preview
-  const { data: conversionRules } = useConversionRules(cycleInfo?.company_id);
-  
-  // Create labels map for passing to child components
-  const ratingLabelsMap = useMemo(() => {
-    return ratingScale ? getLabelsMap(ratingScale) : undefined;
-  }, [ratingScale]);
-
   useEffect(() => {
     if (open && participantId) {
       fetchData();
@@ -248,7 +234,7 @@ export function AppraisalEvaluationDialog({
       // Fetch cycle info including multi_position_mode, company_id, and values settings
       const { data: cycleData } = await supabase
         .from("appraisal_cycles")
-        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode, company_id, include_values_assessment, values_weight, component_scale_id")
+        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode, company_id, include_values_assessment, values_weight")
         .eq("id", cycleId)
         .single();
 
@@ -258,7 +244,6 @@ export function AppraisalEvaluationDialog({
           multi_position_mode: (cycleData.multi_position_mode as "aggregate" | "separate") || "aggregate",
           include_values_assessment: cycleData.include_values_assessment || false,
           values_weight: cycleData.values_weight || 0,
-          component_scale_id: cycleData.component_scale_id,
         });
       }
 
@@ -1401,16 +1386,6 @@ export function AppraisalEvaluationDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Rating Scale Info Banner - shows configured scale for transparency */}
-          {ratingScale && (
-            <RatingScaleInfoBanner 
-              ratingScale={ratingScale}
-              conversionRules={conversionRules}
-              showConversionInfo={!isEmployee}
-              variant="compact"
-            />
-          )}
-
           {/* Role Segment Timeline - show if employee had role changes */}
           {hasRoleChange && roleSegments.length > 1 && (
             <div className="space-y-3">
