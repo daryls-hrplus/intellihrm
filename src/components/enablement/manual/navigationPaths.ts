@@ -4,9 +4,15 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-2-1': ['Performance', 'Setup', '(Multiple areas)'],
   'sec-2-2': ['Performance', 'Setup', 'Foundation', 'Rating Scales'],
   'sec-2-3': ['Performance', 'Setup', 'Foundation', 'Overall Rating Scales'],
+  'sec-2-4a': ['Performance', 'Setup', 'Foundation', 'Skills & Competencies'],
   'sec-2-4': ['Performance', 'Setup', 'Foundation', 'Competencies'],
+  'sec-2-4b': ['Performance', 'Setup', 'Job Profiles', 'Responsibilities'],
+  'sec-2-4c': ['Performance', 'Setup', 'Foundation', 'Performance Trends'],
+  'sec-2-4d': ['Performance', 'Setup', 'Notifications'],
   
   // Part 2: Setup & Configuration - Appraisals (2.5-2.16)
+  'sec-2-readiness': ['Performance', 'Setup', 'Appraisals', 'Readiness'],
+  'sec-2-job-config': ['Performance', 'Setup', 'Job Profiles', 'Assessment Config'],
   'sec-2-5': ['Performance', 'Setup', 'Appraisals', 'Form Templates'],
   'sec-2-6': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles'],
   'sec-2-7': ['Performance', 'Setup', 'Appraisals', 'Performance Categories'],
@@ -20,20 +26,21 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-2-15': ['Performance', 'Setup', 'Appraisals', 'Values Assessment'],
   'sec-2-16': ['Performance', 'Setup', 'Appraisals', 'Goals Integration'],
 
-  // Part 3: Workflows (3.1-3.12)
+  // Part 3: Workflows (3.1-3.13) - Industry-standard order
   'sec-3-1': ['Performance', 'Appraisals', 'Cycles'],
   'sec-3-2': ['Performance', 'Appraisals', 'Cycles', 'Enrollment'],
-  'sec-3-3': ['Manager Self-Service', 'Team Appraisals'],
-  'sec-3-4': ['Employee Self-Service', 'My Performance', 'Appraisals'],
-  'sec-3-5': ['Performance', 'Appraisals', 'Goal Rating'],
-  'sec-3-6': ['Performance', 'Appraisals', 'Competency Assessment'],
-  'sec-3-7': ['Employee Self-Service', 'My Performance', 'Response'],
+  'sec-3-3': ['Employee Self-Service', 'My Performance', 'Appraisals'],
+  'sec-3-4': ['Performance', 'Appraisals', 'Goal Rating'],
+  'sec-3-5': ['Performance', 'Appraisals', 'Responsibility Assessment'],
+  'sec-3-5a': ['Performance', 'Appraisals', 'Competency Assessment'],
+  'sec-3-6': ['Performance', 'Appraisals', 'Values Assessment'],
+  'sec-3-7': ['Manager Self-Service', 'Team Appraisals'],
   'sec-3-8': ['Manager Self-Service', 'Team Appraisals', 'Interviews'],
-  'sec-3-9': ['Performance', 'Appraisals', 'Role Changes'],
-  'sec-3-10': ['Performance', 'Appraisals', 'Finalization'],
-  'sec-3-11': ['Performance', 'Appraisals', 'Rating Release'],
-  'sec-3-12': ['Performance', 'Appraisals', 'Rating Dispute'],
-  'sec-3-13': ['Performance', 'Appraisals', 'Values Assessment'],
+  'sec-3-9': ['Employee Self-Service', 'My Performance', 'Response'],
+  'sec-3-10': ['Performance', 'Appraisals', 'Role Changes'],
+  'sec-3-11': ['Performance', 'Appraisals', 'Finalization'],
+  'sec-3-12': ['Performance', 'Appraisals', 'Rating Release'],
+  'sec-3-13': ['Performance', 'Appraisals', 'Rating Dispute'],
 
   // Part 4: Calibration Sessions
   'sec-4-1': ['Performance', 'Calibration', 'Overview'],
@@ -89,7 +96,11 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
   ],
   'sec-2-4': [
     { sectionId: 'sec-2-5', title: 'Form Templates' },
-    { sectionId: 'sec-3-2', title: 'Manager Workflow' },
+    { sectionId: 'sec-3-5a', title: 'Competency Assessment' },
+  ],
+  'sec-2-4b': [
+    { sectionId: 'sec-2-job-config', title: 'Job Assessment Configuration' },
+    { sectionId: 'sec-3-5', title: 'Responsibility/KRA Assessment' },
   ],
   'sec-2-5': [
     { sectionId: 'sec-2-4', title: 'Competency Library' },
@@ -113,11 +124,26 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
   ],
   'sec-3-1': [
     { sectionId: 'sec-2-6', title: 'Cycle Configuration' },
-    { sectionId: 'sec-3-2', title: 'Manager Workflow' },
+    { sectionId: 'sec-3-7', title: 'Manager Evaluation' },
   ],
-  'sec-3-2': [
+  'sec-3-3': [
+    { sectionId: 'sec-3-4', title: 'Goal Rating' },
+    { sectionId: 'sec-3-5', title: 'Responsibility/KRA Assessment' },
+    { sectionId: 'sec-3-7', title: 'Manager Evaluation' },
+  ],
+  'sec-3-5': [
+    { sectionId: 'sec-2-4b', title: 'Responsibility & KRA Configuration' },
+    { sectionId: 'sec-3-4', title: 'Goal Rating' },
+    { sectionId: 'sec-3-5a', title: 'Competency Assessment' },
+  ],
+  'sec-3-6': [
+    { sectionId: 'sec-2-15', title: 'Values Assessment Configuration' },
+    { sectionId: 'sec-3-5a', title: 'Competency Assessment' },
+    { sectionId: 'sec-4-1', title: 'Calibration Sessions' },
+  ],
+  'sec-3-7': [
     { sectionId: 'sec-5-1', title: 'AI Feedback Assistant' },
-    { sectionId: 'sec-3-3', title: 'Employee Response' },
+    { sectionId: 'sec-3-8', title: 'Interview Scheduling' },
   ],
   'sec-4-1': [
     { sectionId: 'sec-4-2', title: 'Nine-Box Grid' },
@@ -125,7 +151,7 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
   ],
   'sec-5-1': [
     { sectionId: 'sec-5-2', title: 'Bias Detection' },
-    { sectionId: 'sec-3-2', title: 'Manager Workflow' },
+    { sectionId: 'sec-3-7', title: 'Manager Workflow' },
   ],
   'sec-5-6': [
     { sectionId: 'sec-6-1', title: 'Intelligence Hub Dashboard' },
