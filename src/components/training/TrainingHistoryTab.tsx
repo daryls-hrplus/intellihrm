@@ -33,7 +33,7 @@ interface ExternalTraining {
   training_name: string;
   provider_name: string | null;
   end_date: string | null;
-  training_hours: number | null;
+  duration_hours: number | null;
   certificate_url: string | null;
 }
 
@@ -93,7 +93,7 @@ export function TrainingHistoryTab({ employeeId, companyId }: TrainingHistoryTab
       // External Training
       supabase
         .from('external_training_records')
-        .select('id, training_name, provider_name, end_date, training_hours, certificate_url')
+        .select('id, training_name, provider_name, end_date, duration_hours, certificate_url')
         .eq(employeeId ? 'employee_id' : 'company_id', employeeId || companyId)
         .order('end_date', { ascending: false }),
       
@@ -148,7 +148,7 @@ export function TrainingHistoryTab({ employeeId, companyId }: TrainingHistoryTab
   const completedEnrollments = lmsEnrollments.filter(e => e.status === 'completed');
   const totalHours = 
     completedEnrollments.reduce((sum, e) => sum + (e.course?.duration_hours || 0), 0) +
-    externalTraining.reduce((sum, e) => sum + (e.training_hours || 0), 0);
+    externalTraining.reduce((sum, e) => sum + (e.duration_hours || 0), 0);
 
   const getSourceBadge = (sourceType: string | null) => {
     if (!sourceType) return null;
@@ -270,7 +270,7 @@ export function TrainingHistoryTab({ employeeId, companyId }: TrainingHistoryTab
                       type: 'external',
                       date: e.end_date || '',
                       title: e.training_name,
-                      subtitle: `${e.provider_name || 'External'} • ${e.training_hours || 0}h`,
+                      subtitle: `${e.provider_name || 'External'} • ${e.duration_hours || 0}h`,
                       id: e.id
                     })),
                     ...filterByYear(certificates, 'issued_at').map(c => ({
@@ -351,7 +351,7 @@ export function TrainingHistoryTab({ employeeId, companyId }: TrainingHistoryTab
                         <div>
                           <p className="font-medium">{training.training_name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {training.provider_name || 'External Provider'} • {training.training_hours || 0}h
+                            {training.provider_name || 'External Provider'} • {training.duration_hours || 0}h
                           </p>
                         </div>
                       </div>

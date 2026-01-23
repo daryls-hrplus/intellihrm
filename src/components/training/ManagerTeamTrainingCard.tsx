@@ -68,22 +68,26 @@ export function ManagerTeamTrainingCard({ managerId, companyId }: ManagerTeamTra
     setLoading(true);
     
     // Get team members (direct reports)
-    const { data: team } = await supabase
+    // Cast supabase to any to avoid deep type instantiation with complex schemas
+    const client = supabase as any;
+    const teamResult = await client
       .from('profiles')
       .select('id, full_name')
       .eq('manager_id', managerId)
       .eq('is_active', true);
     
-    if (!team || team.length === 0) {
+    const team = (teamResult.data || []) as TeamMember[];
+    
+    if (team.length === 0) {
       setLoading(false);
       return;
     }
     
-    setTeamMembers(team as TeamMember[]);
+    setTeamMembers(team);
     const teamIds = team.map(t => t.id);
     
     // Get enrollments for team
-    const { data: enrollments } = await supabase
+    const enrollmentsResult = await client
       .from('lms_enrollments')
       .select(`
         id, user_id, status, due_date,
@@ -91,11 +95,13 @@ export function ManagerTeamTrainingCard({ managerId, companyId }: ManagerTeamTra
       `)
       .in('user_id', teamIds);
     
+    const enrollments = (enrollmentsResult.data || []) as any[];
+    
     // Get expiring certifications (next 60 days)
     const today = new Date();
     const sixtyDaysFromNow = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000);
     
-    const { data: certs } = await supabase
+    const certsResult = await client
       .from('employee_recertifications')
       .select(`
         id, employee_id, expiry_date,
@@ -107,6 +113,8 @@ export function ManagerTeamTrainingCard({ managerId, companyId }: ManagerTeamTra
       .gte('expiry_date', today.toISOString().split('T')[0])
       .lte('expiry_date', sixtyDaysFromNow.toISOString().split('T')[0])
       .order('expiry_date', { ascending: true });
+    
+    const certs = (certsResult.data || []) as any[];
     
     // Process enrollment summaries
     const summaries: EnrollmentSummary[] = team.map(member => {
