@@ -4,3 +4,8 @@ export { ManagerScoringPatternsSection } from './ManagerScoringPatterns';
 export { TrendAnalysisPredictions } from './TrendAnalysisPredictions';
 export { PerformanceIntelligenceHubSection } from './PerformanceIntelligenceHubSection';
 export { TalentUnifiedDashboardSection } from './TalentUnifiedDashboardSection';
+export { ManagerEffectivenessAnalytics } from './ManagerEffectivenessAnalytics';
+export { EmployeePerformanceIndex } from './EmployeePerformanceIndex';
+export { ReportBuilderConfiguration } from './ReportBuilderConfiguration';
+export { ScheduledReportsExports } from './ScheduledReportsExports';
+export { BIDashboardCustomization } from './BIDashboardCustomization';

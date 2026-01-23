@@ -52,10 +52,10 @@ const DISTRIBUTION_WORKFLOW = `graph TB
 
 export function PerformanceDistributionAnalysis() {
   return (
-    <Card id="sec-6-2">
+    <Card id="sec-6-3">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 6.2</Badge>
+          <Badge variant="outline">Section 6.3</Badge>
           <Badge className="gap-1 bg-blue-600 text-white"><Clock className="h-3 w-3" />~10 min read</Badge>
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />HR User / Admin</Badge>
         </div>
