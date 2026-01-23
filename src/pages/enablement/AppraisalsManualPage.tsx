@@ -85,10 +85,8 @@ export default function AppraisalsManualPage() {
     };
 
     const scrollWithOffset = (el: HTMLElement) => {
-      // Keep the section header visible below the sticky top bar
-      const headerOffset = 140;
-      const y = el.getBoundingClientRect().top + window.scrollY - headerOffset;
-      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      // Content is inside a scrollable container, not the window
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
     const tryScroll = () => {
