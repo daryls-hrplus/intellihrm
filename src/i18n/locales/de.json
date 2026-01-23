@@ -99,6 +99,12 @@
       "noTransactionTypes": "Keine Transaktionstypen gefunden. Bitte konfigurieren Sie Transaktionstypen in den Nachschlagewerten."
     }
   },
+  "training": {
+    "dashboard": {
+      "title": "Lernen & Entwicklung",
+      "subtitle": "Schulungen, Zertifizierungen und Karriereentwicklung verwalten"
+    }
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "workforce": "Personal",
@@ -108,7 +114,7 @@
     "compensation": "Vergütung",
     "benefits": "Sozialleistungen",
     "performance": "Leistung",
-    "training": "Schulung",
+    "training": "Lernen & Entwicklung",
     "recruitment": "Rekrutierung",
     "settings": "Einstellungen",
     "profile": "Profil",

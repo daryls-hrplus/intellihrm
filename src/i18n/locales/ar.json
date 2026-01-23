@@ -1,5 +1,9 @@
 {
   "training": {
+    "dashboard": {
+      "title": "التعلم والتطوير",
+      "subtitle": "إدارة التدريبات والشهادات والنمو الوظيفي"
+    },
     "groups": {
       "learning": "التعلم",
       "management": "الإدارة",
@@ -238,7 +242,7 @@
     "compensation": "التعويضات",
     "benefits": "المزايا",
     "performance": "الأداء",
-    "training": "التدريب",
+    "training": "التعلم والتطوير",
     "succession": "تخطيط التعاقب",
     "recruitment": "التوظيف",
     "hse": "الصحة والسلامة",

@@ -1,5 +1,9 @@
 {
   "training": {
+    "dashboard": {
+      "title": "Formation et Développement",
+      "subtitle": "Gérez les formations, certifications et évolution de carrière"
+    },
     "groups": {
       "learning": "Apprentissage",
       "management": "Gestion",
@@ -242,7 +246,7 @@
     "compensation": "Rémunération",
     "benefits": "Avantages",
     "performance": "Performance",
-    "training": "Formation",
+    "training": "Formation et Développement",
     "succession": "Planification de la Relève",
     "recruitment": "Recrutement",
     "hse": "Santé et Sécurité",

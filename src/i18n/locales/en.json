@@ -7129,8 +7129,8 @@
   },
   "training": {
     "dashboard": {
-      "title": "Training",
-      "subtitle": "Learning and development"
+      "title": "Learning & Development",
+      "subtitle": "Manage training, certifications, and career growth"
     },
     "stats": {
       "coursesAvailable": "Courses Available",
