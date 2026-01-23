@@ -512,6 +512,7 @@ export const MyMentorshipPage = lazy(() => import('@/pages/ess/MyMentorshipPage'
 export const EssNotificationPreferencesPage = lazy(() => import('@/pages/ess/NotificationPreferencesPage'));
 export const MyRemindersPage = lazy(() => import('@/pages/ess/MyRemindersPage'));
 export const MyChangeRequestsPage = lazy(() => import('@/pages/ess/MyChangeRequestsPage'));
+export const MyDocumentsPage = lazy(() => import('@/pages/ess/MyDocumentsPage'));
 
 // MSS pages
 export const ManagerSelfServicePage = lazy(() => import('@/pages/mss/ManagerSelfServicePage'));
