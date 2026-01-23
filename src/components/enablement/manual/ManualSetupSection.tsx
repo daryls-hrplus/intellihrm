@@ -47,7 +47,7 @@ const APPRAISALS_SECTION_IDS = new Set([
   'sec-2-16',
 ]);
 
-const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4a', 'sec-2-4', 'sec-2-1-workflows', 'sec-2-4b']);
+const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4a', 'sec-2-4', 'sec-2-4c', 'sec-2-1-workflows', 'sec-2-4b']);
 
 export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProps) {
   const [openGroups, setOpenGroups] = useState<string[]>(['foundation']);
@@ -105,7 +105,7 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
               <Badge variant="outline" className="ml-auto">8 sections</Badge>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="pt-4 space-y-6">
+          <AccordionContent forceMount className="pt-4 space-y-6 data-[state=closed]:hidden">
             <section id="sec-2-1" data-manual-anchor="sec-2-1" className="scroll-mt-32">
               <SetupPrerequisites />
             </section>
@@ -121,7 +121,7 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             <section id="sec-2-4" data-manual-anchor="sec-2-4" className="scroll-mt-32">
               <SetupCompetencies />
             </section>
-            <section id="sec-2-13" data-manual-anchor="sec-2-13" className="scroll-mt-32">
+            <section id="sec-2-4c" data-manual-anchor="sec-2-4c" className="scroll-mt-32">
               <SetupIndexSettings />
             </section>
             <section id="sec-2-1-workflows" data-manual-anchor="sec-2-1-workflows" className="scroll-mt-32">
@@ -149,7 +149,7 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
               <Badge variant="outline" className="ml-auto">14 sections</Badge>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="pt-4 space-y-6">
+          <AccordionContent forceMount className="pt-4 space-y-6 data-[state=closed]:hidden">
             <section id="sec-2-readiness" data-manual-anchor="sec-2-readiness" className="scroll-mt-32">
               <SetupReadiness />
             </section>
@@ -170,9 +170,6 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             </section>
             <section id="sec-2-6" data-manual-anchor="sec-2-6" className="scroll-mt-32">
               <SetupAppraisalCycles />
-            </section>
-            <section id="sec-2-9" data-manual-anchor="sec-2-9" className="scroll-mt-32">
-              <SetupIntegrationRules />
             </section>
             <section id="sec-2-10" data-manual-anchor="sec-2-10" className="scroll-mt-32">
               <SetupEmployeeResponse />
