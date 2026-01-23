@@ -613,6 +613,11 @@ const App = () => (
             <Route path="/enablement/route-registry" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.RouteRegistryPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/product-capabilities" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ProductCapabilitiesPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/ui-color-semantics" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.UIColorSemanticsGuidePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/quickstarts" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.QuickStartGuidesPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/quickstart/learning-development" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.LnDQuickStartPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/checklists" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ImplementationChecklistsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/modules" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ModulesIndexPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/modules/:moduleId" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ModuleDocumentationPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
 
             {/* Strategic Planning Routes */}
             <Route path="/strategic-planning" element={<ProtectedRoute><LazyPage><Pages.StrategicPlanningHubPage /></LazyPage></ProtectedRoute>} />
