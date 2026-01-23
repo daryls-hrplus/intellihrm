@@ -14,9 +14,7 @@ import {
   UserMinus,
   Clock,
   Briefcase,
-  Award,
-  MessageSquare,
-  TrendingUp
+  Award
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -178,9 +176,8 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         color: "orange",
         icon: Target,
         workflows: [
-          { code: "performance", name: "Appraisal Rating Approval", description: "Skip-level review and HR sign-off for performance ratings", transactionTypeCode: null },
-          { code: "pip_acknowledgment", name: "PIP Acknowledgment", description: "Employee acknowledgment of performance improvement plans", transactionTypeCode: null },
-          { code: "rating_release", name: "Rating Release Approval", description: "HR approval before releasing ratings to employees", transactionTypeCode: null }
+          { code: "performance", name: "Appraisal Acknowledgment", transactionTypeCode: null },
+          { code: "pip_acknowledgment", name: "PIP Acknowledgment", transactionTypeCode: null }
         ]
       },
       {
@@ -189,27 +186,7 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         color: "lime",
         icon: Target,
         workflows: [
-          { code: "goal_approval", name: "Individual Goal Approval", description: "Manager approval for individual performance goals", transactionTypeCode: null },
-          { code: "team_goal_approval", name: "Team Goal Approval", description: "Multi-level approval for team-wide goals", transactionTypeCode: null },
-          { code: "department_goal_approval", name: "Department Goal Approval", description: "Executive approval for department objectives", transactionTypeCode: null }
-        ]
-      },
-      {
-        id: "feedback",
-        name: "360° Feedback",
-        color: "cyan",
-        icon: MessageSquare,
-        workflows: [
-          { code: "360_release", name: "360 Results Release", description: "HR quality review before releasing feedback to employees", transactionTypeCode: null }
-        ]
-      },
-      {
-        id: "succession",
-        name: "Succession Planning",
-        color: "purple",
-        icon: TrendingUp,
-        workflows: [
-          { code: "succession_approval", name: "Succession Plan Approval", description: "HRBP and department head approval for succession nominations", transactionTypeCode: null }
+          { code: "goal_approval", name: "Goal Approval", transactionTypeCode: null }
         ]
       }
     ]

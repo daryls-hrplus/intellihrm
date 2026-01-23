@@ -49,8 +49,6 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { WorkflowSetupGuidanceCard, type IndustryTemplate } from "./WorkflowSetupGuidanceCard";
-import { WorkflowQuickStartSection } from "./WorkflowQuickStartSection";
 
 interface ApprovalRule {
   id: string;
@@ -156,7 +154,7 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
     if (!companyId) return;
     setLoading(true);
     try {
-      // Fetch rules with process_type from database
+      // Still using goal_approval_rules table but treating it as unified
       const { data: rulesData, error: rulesError } = await supabase
         .from("goal_approval_rules")
         .select("*")
@@ -165,10 +163,10 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
 
       if (rulesError) throw rulesError;
       
-      // Map the existing goal_level to scope_level, use process_type from DB (defaults to 'goals')
+      // Map the existing goal_level to scope_level for the unified view
       const mappedRules = (rulesData || []).map(r => ({
         ...r,
-        process_type: (r as any).process_type || "goals",
+        process_type: "goals", // Default to goals for existing rules
         scope_level: r.goal_level,
       })) as ApprovalRule[];
       
@@ -352,117 +350,13 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
     return <div className="text-center py-8 text-muted-foreground">Loading approval workflows...</div>;
   }
 
-  const handleApplyTemplate = async (template: IndustryTemplate) => {
-    if (!companyId) return;
-
-    let createdRuleId: string | null = null;
-
-    try {
-      // Check for duplicate: same company + process_type + scope_level
-      const { data: existingRules } = await supabase
-        .from("goal_approval_rules")
-        .select("id, name")
-        .eq("company_id", companyId)
-        .eq("goal_level", template.scopeLevel) as { data: { id: string; name: string }[] | null };
-
-      if (existingRules && existingRules.length > 0) {
-        const confirmReplace = confirm(
-          `A workflow already exists for ${template.processType} - ${template.scopeLevel}. Replace it?`
-        );
-        if (!confirmReplace) return;
-        
-        // Delete the existing rule (cascade will remove steps)
-        await supabase
-          .from("goal_approval_rules")
-          .delete()
-          .eq("id", existingRules[0].id);
-      }
-
-      // Create the rule with process_type
-      const rulePayload = {
-        company_id: companyId,
-        name: template.name,
-        goal_level: template.scopeLevel,
-        process_type: template.processType,
-        approval_type: template.steps.length > 1 ? "multi_level" : "single_level",
-        requires_hr_approval: template.steps.some(s => s.approverType === "hr"),
-        max_approval_days: Math.ceil(template.steps.reduce((sum, s) => sum + s.slaHours, 0) / 24),
-        is_active: true,
-      };
-      
-      const { data: ruleData, error: ruleError } = await supabase
-        .from("goal_approval_rules")
-        .insert([rulePayload as any])
-        .select()
-        .single();
-
-      if (ruleError) {
-        console.error("Rule insert error:", ruleError);
-        throw new Error(`Failed to create workflow rule: ${ruleError.message}`);
-      }
-
-      createdRuleId = ruleData.id;
-
-      // Create the steps
-      const stepsToInsert = template.steps.map((step, idx) => ({
-        rule_id: ruleData.id,
-        step_order: idx + 1,
-        approver_type: step.approverType,
-        approver_user_id: null,
-        is_optional: false,
-        sla_hours: step.slaHours,
-      }));
-
-      const { error: stepsError } = await supabase
-        .from("goal_approval_chain")
-        .insert(stepsToInsert);
-
-      if (stepsError) {
-        console.error("Steps insert error:", stepsError);
-        // Rollback: delete the rule we just created
-        if (createdRuleId) {
-          await supabase
-            .from("goal_approval_rules")
-            .delete()
-            .eq("id", createdRuleId);
-        }
-        throw new Error(`Failed to create workflow steps: ${stepsError.message}`);
-      }
-
-      toast.success(`Applied "${template.name}" template successfully`);
-      fetchRules();
-    } catch (error: any) {
-      console.error("Error applying template:", error);
-      toast.error(error.message || "Failed to apply template");
-    }
-  };
-
-  const handleQuickSetup = (processType: string) => {
-    setFilterProcessType(processType);
-    // Scroll to guidance section which will show templates for that process
-  };
-
-  const existingProcessTypes = [...new Set(rules.map(r => r.process_type))];
-
   return (
     <div className="space-y-6">
-      {/* AI Guidance Section */}
-      <WorkflowSetupGuidanceCard
-        onApplyTemplate={handleApplyTemplate}
-        existingProcessTypes={existingProcessTypes}
-      />
-
-      {/* Quick Start Section */}
-      <WorkflowQuickStartSection
-        onQuickSetup={handleQuickSetup}
-        existingProcessTypes={existingProcessTypes}
-      />
-
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Configured Approval Workflows</h3>
+          <h3 className="text-lg font-semibold">Talent Approval Workflows</h3>
           <p className="text-sm text-muted-foreground">
-            Manage approval chains for Goals, Appraisals, 360 Feedback, and other talent processes
+            Configure approval workflows for Goals, Appraisals, 360 Feedback, and other talent processes
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -496,13 +390,10 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Settings2 className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium mb-2">No approval workflows configured yet</p>
-            <p className="text-muted-foreground mb-4 text-center max-w-md">
-              Use the AI-powered guidance above to apply industry-standard templates, or create a custom workflow.
-            </p>
+            <p className="text-muted-foreground mb-4">No approval workflows configured</p>
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Create Custom Workflow
+              Create First Workflow
             </Button>
           </CardContent>
         </Card>

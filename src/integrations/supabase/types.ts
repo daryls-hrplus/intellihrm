@@ -29813,7 +29813,6 @@ export type Database = {
           is_active: boolean
           max_approval_days: number | null
           name: string
-          process_type: string
           requires_hr_approval: boolean | null
           updated_at: string
         }
@@ -29829,7 +29828,6 @@ export type Database = {
           is_active?: boolean
           max_approval_days?: number | null
           name: string
-          process_type?: string
           requires_hr_approval?: boolean | null
           updated_at?: string
         }
@@ -29845,7 +29843,6 @@ export type Database = {
           is_active?: boolean
           max_approval_days?: number | null
           name?: string
-          process_type?: string
           requires_hr_approval?: boolean | null
           updated_at?: string
         }

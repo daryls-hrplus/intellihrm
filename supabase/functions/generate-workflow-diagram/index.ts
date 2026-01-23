@@ -68,27 +68,18 @@ serve(async (req) => {
     const systemPrompt = `You are an expert at creating Mermaid.js flowchart diagrams for business workflows.
 Generate a clear, professional Mermaid flowchart diagram based on the workflow template provided.
 
-CRITICAL SYNTAX RULES - YOU MUST FOLLOW THESE EXACTLY:
+Rules:
 1. Use the 'flowchart TD' (top-down) direction
 2. Use descriptive node IDs like 'start', 'step1', 'decision1', 'end_approve', 'end_reject'
-3. Node syntax:
-   - Start node: start((Start))
-   - End nodes: end_approve((Approved)) or end_reject((Rejected))
-   - Regular steps: step1[Step Name]
-   - Decision/conditional steps: decision1{Approve?}
-4. NEVER use parentheses () inside square brackets [] or curly braces {}
-   - WRONG: step1[Submit to Manager (If Applicable)]
-   - CORRECT: step1[Submit to Manager]
-5. NEVER use special characters like (), [], {}, <>, | inside node labels
-6. Use simple alphanumeric text with spaces, hyphens, and basic punctuation only
-7. KEEP LABELS SHORT - Maximum 3-4 words per label. Abbreviate if needed:
-   - WRONG: step1[Employee Submits PIP Acknowledgment Form]
-   - CORRECT: step1[Submit PIP Form]
-   - WRONG: step2[System Generates PIP Letter Document]
-   - CORRECT: step2[Generate Letter]
-8. Include escalation paths if defined
-9. Show the flow clearly from start to possible end states
-10. Add styling at the end:
+3. Style the nodes appropriately:
+   - Start node: Use ((Start)) for circle
+   - End nodes: Use ((Approved)) or ((Rejected)) for circles
+   - Regular steps: Use [Step Name] for rectangles
+   - Decision/conditional steps: Use {Condition?} for diamonds
+4. Include escalation paths if defined
+5. Show the flow clearly from start to possible end states
+6. Keep labels concise but informative
+7. Add styling at the end for visual appeal:
    - classDef startEnd fill:#10b981,stroke:#059669,color:#fff
    - classDef approval fill:#3b82f6,stroke:#2563eb,color:#fff
    - classDef decision fill:#f59e0b,stroke:#d97706,color:#fff
@@ -154,56 +145,10 @@ Create a professional flowchart showing the complete approval process from submi
     }
 
     // Clean up the response - remove any markdown code blocks if present
-    let cleanedCode = mermaidCode
+    const cleanedCode = mermaidCode
       .replace(/```mermaid\n?/g, '')
       .replace(/```\n?/g, '')
       .trim();
-    
-    // Helper function to sanitize and truncate content inside node labels
-    const sanitizeLabel = (content: string): string => {
-      let sanitized = content
-        .replace(/\(/g, ' - ')
-        .replace(/\)/g, '')
-        .replace(/\[/g, '')
-        .replace(/\]/g, '')
-        .replace(/\{/g, '')
-        .replace(/\}/g, '')
-        .replace(/</g, '')
-        .replace(/>/g, '')
-        .replace(/"/g, "'")
-        .replace(/\|/g, ' ')
-        .replace(/\?/g, '') // Remove question marks that can cause issues
-        .replace(/;/g, '') // Remove semicolons
-        .replace(/:/g, ' ') // Replace colons with spaces
-        .replace(/\s+/g, ' ')
-        .trim();
-      
-      // Truncate to max 25 characters to prevent overflow
-      if (sanitized.length > 25) {
-        sanitized = sanitized.substring(0, 22) + '...';
-      }
-      
-      return sanitized;
-    };
-    
-    // Sanitize content inside square brackets [...] - regular steps
-    cleanedCode = cleanedCode.replace(/\[([^\]]*)\]/g, (_match: string, content: string) => {
-      return `[${sanitizeLabel(content)}]`;
-    });
-    
-    // Sanitize content inside curly braces {...} - decision nodes
-    cleanedCode = cleanedCode.replace(/\{([^}]*)\}/g, (_match: string, content: string) => {
-      // For decision nodes, keep it very short and add ? back at end
-      let label = sanitizeLabel(content);
-      if (label.length > 15) {
-        label = label.substring(0, 12) + '...';
-      }
-      // Add ? for decision clarity if not already present
-      if (!label.endsWith('?') && !label.endsWith('...')) {
-        label += '?';
-      }
-      return `{${label}}`;
-    });
 
     console.log('Generated Mermaid code:', cleanedCode.substring(0, 200) + '...');
 

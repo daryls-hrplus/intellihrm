@@ -26,12 +26,9 @@ mermaid.initialize({
   theme: "default",
   securityLevel: "loose",
   flowchart: {
-    useMaxWidth: false,
+    useMaxWidth: true,
     htmlLabels: true,
     curve: "basis",
-    nodeSpacing: 50,
-    rankSpacing: 80,
-    wrappingWidth: 200,
   },
 });
 
