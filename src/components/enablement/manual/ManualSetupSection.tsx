@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Settings, FileText } from 'lucide-react';
 import {
   SetupPrerequisites,
+  SetupReadiness,
+  SetupJobAssessmentConfig,
   SetupRatingScales,
   SetupOverallScales,
   SetupSkillsCompetencies,
@@ -29,6 +31,8 @@ type ManualSetupSectionProps = {
 };
 
 const APPRAISALS_SECTION_IDS = new Set([
+  'sec-2-readiness',
+  'sec-2-job-config',
   'sec-2-5',
   'sec-2-6',
   'sec-2-7',
@@ -139,21 +143,30 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
                   Forms, cycles, categories, actions, and integrations
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto">12 sections</Badge>
+              <Badge variant="outline" className="ml-auto">14 sections</Badge>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4 space-y-6">
+            <section id="sec-2-readiness" data-manual-anchor="sec-2-readiness" className="scroll-mt-32">
+              <SetupReadiness />
+            </section>
+            <section id="sec-2-job-config" data-manual-anchor="sec-2-job-config" className="scroll-mt-32">
+              <SetupJobAssessmentConfig />
+            </section>
             <section id="sec-2-5" data-manual-anchor="sec-2-5" className="scroll-mt-32">
               <SetupFormTemplates />
-            </section>
-            <section id="sec-2-6" data-manual-anchor="sec-2-6" className="scroll-mt-32">
-              <SetupAppraisalCycles />
             </section>
             <section id="sec-2-7" data-manual-anchor="sec-2-7" className="scroll-mt-32">
               <SetupPerformanceCategories />
             </section>
             <section id="sec-2-8" data-manual-anchor="sec-2-8" className="scroll-mt-32">
               <SetupActionRules />
+            </section>
+            <section id="sec-2-9" data-manual-anchor="sec-2-9" className="scroll-mt-32">
+              <SetupIntegrationRules />
+            </section>
+            <section id="sec-2-6" data-manual-anchor="sec-2-6" className="scroll-mt-32">
+              <SetupAppraisalCycles />
             </section>
             <section id="sec-2-9" data-manual-anchor="sec-2-9" className="scroll-mt-32">
               <SetupIntegrationRules />
