@@ -27,6 +27,25 @@ export interface Feedback360ReportData {
   }>;
   companyName?: string;
   companyLogo?: string;
+  // AI Insights (optional)
+  aiInsights?: {
+    summary?: string;
+    themes?: string[];
+    blindSpots?: string[];
+  };
+}
+
+// Template sections configuration (matches feedback_report_templates.sections_config)
+export interface ReportSectionsConfig {
+  executive_summary?: boolean;
+  score_breakdown?: boolean;
+  category_analysis?: boolean;
+  question_details?: boolean;
+  verbatim_comments?: boolean;
+  anonymized_themes?: boolean;
+  comparison_to_norm?: boolean;
+  development_suggestions?: boolean;
+  ai_insights?: boolean;
 }
 
 export interface PDFGenerationOptions {
@@ -35,18 +54,34 @@ export interface PDFGenerationOptions {
   includeInterpretationGuide?: boolean;
   includeDevelopmentPlan?: boolean;
   brandColor?: string;
+  // Template-based configuration
+  sectionsConfig?: ReportSectionsConfig;
+  contentDepth?: 'high_level' | 'summary' | 'detailed' | 'comprehensive';
+  audienceType?: 'executive' | 'manager' | 'individual_contributor' | 'hr' | 'self';
 }
 
 export async function generateFeedback360PDF(
   data: Feedback360ReportData,
   options: PDFGenerationOptions = {}
 ): Promise<Blob> {
+  // Apply template sections config if provided
+  const sectionsConfig = options.sectionsConfig || {};
+  
   const {
-    includeCoverPage = true,
-    includeComments = true,
+    includeCoverPage = sectionsConfig.executive_summary !== false,
+    includeComments = sectionsConfig.verbatim_comments !== false,
     includeInterpretationGuide = true,
     brandColor = '#6366f1',
+    contentDepth = 'summary',
   } = options;
+  
+  // Determine which sections to include based on template config
+  const showExecutiveSummary = sectionsConfig.executive_summary !== false;
+  const showScoreBreakdown = sectionsConfig.score_breakdown !== false;
+  const showCategoryAnalysis = sectionsConfig.category_analysis !== false;
+  const showDevelopmentSuggestions = sectionsConfig.development_suggestions !== false;
+  const showAIInsights = sectionsConfig.ai_insights === true && data.aiInsights;
+  const showComparison = sectionsConfig.comparison_to_norm === true;
 
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -154,120 +189,189 @@ export async function generateFeedback360PDF(
     yPos += 15;
   }
 
-  // Executive Summary
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0);
-  doc.text('Executive Summary', margin, yPos);
-  yPos += 12;
-
-  // Key metrics row
-  const metricWidth = contentWidth / 3;
-  
-  // Overall Score
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-  doc.text(data.overallScore.toFixed(1), margin + metricWidth / 2, yPos, { align: 'center' });
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100);
-  doc.text('Overall Score', margin + metricWidth / 2, yPos + 8, { align: 'center' });
-  
-  // Response Rate
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0);
-  doc.text(`${Math.round(data.responseRate)}%`, margin + metricWidth + metricWidth / 2, yPos, { align: 'center' });
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100);
-  doc.text('Response Rate', margin + metricWidth + metricWidth / 2, yPos + 8, { align: 'center' });
-  
-  // Total Raters
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0);
-  doc.text(String(data.totalRaters), margin + metricWidth * 2 + metricWidth / 2, yPos, { align: 'center' });
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100);
-  doc.text('Total Raters', margin + metricWidth * 2 + metricWidth / 2, yPos + 8, { align: 'center' });
-  
-  yPos += 25;
-
-  // Category Scores
-  checkPageBreak(60);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0);
-  doc.text('Scores by Category', margin, yPos);
-  yPos += 10;
-
-  data.categoryScores.forEach(category => {
-    checkPageBreak(15);
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
+  // Executive Summary (conditional)
+  if (showExecutiveSummary) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(0);
-    doc.text(category.name, margin, yPos);
-    doc.text(category.score.toFixed(1), pageWidth - margin - 10, yPos, { align: 'right' });
-    
-    yPos += 4;
-    drawProgressBar(margin, yPos, contentWidth - 20, category.score);
+    doc.text('Executive Summary', margin, yPos);
     yPos += 12;
-  });
 
-  // Rater Group Scores
-  checkPageBreak(60);
-  yPos += 5;
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Scores by Rater Group', margin, yPos);
-  yPos += 10;
-
-  data.raterGroupScores.forEach(group => {
-    checkPageBreak(15);
+    // Key metrics row
+    const metricWidth = contentWidth / 3;
     
+    // Overall Score
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text(data.overallScore.toFixed(1), margin + metricWidth / 2, yPos, { align: 'center' });
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`${group.group} (${group.count})`, margin, yPos);
-    doc.text(group.score.toFixed(1), pageWidth - margin - 10, yPos, { align: 'right' });
+    doc.setTextColor(100);
+    doc.text('Overall Score', margin + metricWidth / 2, yPos + 8, { align: 'center' });
     
-    yPos += 4;
-    drawProgressBar(margin, yPos, contentWidth - 20, group.score);
-    yPos += 12;
-  });
+    // Response Rate
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text(`${Math.round(data.responseRate)}%`, margin + metricWidth + metricWidth / 2, yPos, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100);
+    doc.text('Response Rate', margin + metricWidth + metricWidth / 2, yPos + 8, { align: 'center' });
+    
+    // Total Raters
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text(String(data.totalRaters), margin + metricWidth * 2 + metricWidth / 2, yPos, { align: 'center' });
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100);
+    doc.text('Total Raters', margin + metricWidth * 2 + metricWidth / 2, yPos + 8, { align: 'center' });
+    
+    yPos += 25;
+  }
 
-  // Strengths & Development Areas
-  checkPageBreak(80);
-  yPos += 10;
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Key Strengths', margin, yPos);
-  yPos += 8;
+  // Category Scores (conditional)
+  if (showCategoryAnalysis) {
+    checkPageBreak(60);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text('Scores by Category', margin, yPos);
+    yPos += 10;
 
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  data.strengths.slice(0, 5).forEach(strength => {
-    checkPageBreak(8);
-    doc.text(`• ${strength}`, margin + 5, yPos);
-    yPos += 6;
-  });
+    data.categoryScores.forEach(category => {
+      checkPageBreak(15);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0);
+      doc.text(category.name, margin, yPos);
+      doc.text(category.score.toFixed(1), pageWidth - margin - 10, yPos, { align: 'right' });
+      
+      // Show benchmark comparison if enabled and available
+      if (showComparison && category.benchmark) {
+        const diff = category.score - category.benchmark;
+        const diffText = diff >= 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1);
+        doc.setTextColor(diff >= 0 ? 34 : 239, diff >= 0 ? 197 : 68, diff >= 0 ? 94 : 68);
+        doc.text(diffText, pageWidth - margin - 30, yPos, { align: 'right' });
+        doc.setTextColor(0);
+      }
+      
+      yPos += 4;
+      drawProgressBar(margin, yPos, contentWidth - 20, category.score);
+      yPos += 12;
+    });
+  }
 
-  yPos += 10;
-  checkPageBreak(40);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Development Areas', margin, yPos);
-  yPos += 8;
+  // Rater Group Scores (conditional - part of score breakdown)
+  if (showScoreBreakdown) {
+    checkPageBreak(60);
+    yPos += 5;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Scores by Rater Group', margin, yPos);
+    yPos += 10;
 
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  data.developmentAreas.slice(0, 5).forEach(area => {
-    checkPageBreak(8);
-    doc.text(`• ${area}`, margin + 5, yPos);
-    yPos += 6;
-  });
+    data.raterGroupScores.forEach(group => {
+      checkPageBreak(15);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${group.group} (${group.count})`, margin, yPos);
+      doc.text(group.score.toFixed(1), pageWidth - margin - 10, yPos, { align: 'right' });
+      
+      yPos += 4;
+      drawProgressBar(margin, yPos, contentWidth - 20, group.score);
+      yPos += 12;
+    });
+  }
+
+  // Strengths & Development Areas (conditional)
+  if (showDevelopmentSuggestions) {
+    checkPageBreak(80);
+    yPos += 10;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Key Strengths', margin, yPos);
+    yPos += 8;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const strengthsCount = contentDepth === 'high_level' ? 3 : contentDepth === 'comprehensive' ? 7 : 5;
+    data.strengths.slice(0, strengthsCount).forEach(strength => {
+      checkPageBreak(8);
+      doc.text(`• ${strength}`, margin + 5, yPos);
+      yPos += 6;
+    });
+
+    yPos += 10;
+    checkPageBreak(40);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Development Areas', margin, yPos);
+    yPos += 8;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    data.developmentAreas.slice(0, strengthsCount).forEach(area => {
+      checkPageBreak(8);
+      doc.text(`• ${area}`, margin + 5, yPos);
+      yPos += 6;
+    });
+  }
+
+  // AI Insights section (conditional)
+  if (showAIInsights && data.aiInsights) {
+    checkPageBreak(60);
+    yPos += 15;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('AI-Generated Insights', margin, yPos);
+    yPos += 10;
+
+    if (data.aiInsights.summary) {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const summaryLines = doc.splitTextToSize(data.aiInsights.summary, contentWidth);
+      summaryLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin, yPos);
+        yPos += 6;
+      });
+      yPos += 5;
+    }
+
+    if (data.aiInsights.themes && data.aiInsights.themes.length > 0) {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Key Themes:', margin, yPos);
+      yPos += 6;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      data.aiInsights.themes.forEach(theme => {
+        checkPageBreak(6);
+        doc.text(`• ${theme}`, margin + 5, yPos);
+        yPos += 6;
+      });
+    }
+
+    if (data.aiInsights.blindSpots && data.aiInsights.blindSpots.length > 0) {
+      yPos += 5;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Potential Blind Spots:', margin, yPos);
+      yPos += 6;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      data.aiInsights.blindSpots.forEach(spot => {
+        checkPageBreak(6);
+        doc.text(`• ${spot}`, margin + 5, yPos);
+        yPos += 6;
+      });
+    }
+  }
 
   // Comments section
   if (includeComments && data.comments && data.comments.length > 0) {

@@ -129,10 +129,16 @@ export function ReviewCycleDialog({
     min_peer_reviewers: 3,
     max_peer_reviewers: 5,
     cycle_type: getInitialCycleType(),
+    // 360 Options
+    hide_rating_points: true,
+    exclude_self_from_average: true,
+    allow_peer_nomination: false,
+    require_comments: false,
   });
 
   useEffect(() => {
     if (cycle) {
+      const cycleAny = cycle as any;
       setFormData({
         name: cycle.name,
         description: cycle.description || "",
@@ -148,6 +154,10 @@ export function ReviewCycleDialog({
         min_peer_reviewers: cycle.min_peer_reviewers || 3,
         max_peer_reviewers: cycle.max_peer_reviewers || 5,
         cycle_type: (cycle.cycle_type as ReviewCycleType) || getInitialCycleType(),
+        hide_rating_points: cycleAny.hide_rating_points ?? true,
+        exclude_self_from_average: cycleAny.exclude_self_from_average ?? true,
+        allow_peer_nomination: cycleAny.allow_peer_nomination ?? false,
+        require_comments: cycleAny.require_comments ?? false,
       });
     } else {
       setFormData({
@@ -165,6 +175,10 @@ export function ReviewCycleDialog({
         min_peer_reviewers: 3,
         max_peer_reviewers: 5,
         cycle_type: getInitialCycleType(),
+        hide_rating_points: true,
+        exclude_self_from_average: true,
+        allow_peer_nomination: false,
+        require_comments: false,
       });
     }
     // Reset overlap state
@@ -229,6 +243,11 @@ export function ReviewCycleDialog({
         is_manager_cycle: formData.cycle_type === "manager_360",
         cycle_type: formData.cycle_type,
         visibility_rules: JSON.parse(JSON.stringify(visibilityRules)),
+        // 360 Options
+        hide_rating_points: formData.hide_rating_points,
+        exclude_self_from_average: formData.exclude_self_from_average,
+        allow_peer_nomination: formData.allow_peer_nomination,
+        require_comments: formData.require_comments,
       };
 
       if (cycle) {
@@ -606,7 +625,70 @@ export function ReviewCycleDialog({
             </>
           )}
 
-          {/* Signal Routing & Policy (Collapsible) */}
+          {/* 360 Feedback Options */}
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="font-semibold">360° Feedback Options</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Hide Rating Points</p>
+                  <p className="text-sm text-muted-foreground">
+                    Employees only see labels (e.g., "Meets Expectations"), not numeric scores
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.hide_rating_points}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, hide_rating_points: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Exclude Self from Average</p>
+                  <p className="text-sm text-muted-foreground">
+                    Self-ratings are shown separately, not included in overall score
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.exclude_self_from_average}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, exclude_self_from_average: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Allow Peer Nomination</p>
+                  <p className="text-sm text-muted-foreground">
+                    Employees can suggest peers to review them (subject to approval)
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.allow_peer_nomination}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, allow_peer_nomination: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Require Comments</p>
+                  <p className="text-sm text-muted-foreground">
+                    Raters must provide written feedback for each rating
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.require_comments}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, require_comments: checked })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
           <Collapsible open={showRoutingPolicy} onOpenChange={setShowRoutingPolicy}>
             <CollapsibleTrigger asChild>
               <Button variant="outline" type="button" className="w-full justify-between">
