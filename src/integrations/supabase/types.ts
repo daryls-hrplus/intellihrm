@@ -26365,6 +26365,7 @@ export type Database = {
       feedback_360_cycles: {
         Row: {
           ai_tone_setting: string | null
+          allow_peer_nomination: boolean | null
           anonymity_threshold: number | null
           appraisal_cycle_id: string | null
           cloned_from_id: string | null
@@ -26374,19 +26375,24 @@ export type Database = {
           cycle_purpose: string | null
           description: string | null
           end_date: string
+          exclude_self_from_average: boolean | null
           feed_to_appraisal: boolean | null
           feed_to_nine_box: boolean | null
           feed_to_succession: boolean | null
           feed_to_talent_profile: boolean | null
+          hide_rating_points: boolean | null
           id: string
           include_in_analytics: boolean | null
           is_standalone: boolean
           is_template: boolean | null
+          manager_approval_required: boolean | null
           name: string
+          nomination_deadline: string | null
           nomination_window_end: string | null
           nomination_window_start: string | null
           reminder_days_before: number[] | null
           report_template_config: Json | null
+          require_comments: boolean | null
           response_window_end: string | null
           response_window_start: string | null
           results_release_date: string | null
@@ -26403,6 +26409,7 @@ export type Database = {
         }
         Insert: {
           ai_tone_setting?: string | null
+          allow_peer_nomination?: boolean | null
           anonymity_threshold?: number | null
           appraisal_cycle_id?: string | null
           cloned_from_id?: string | null
@@ -26412,19 +26419,24 @@ export type Database = {
           cycle_purpose?: string | null
           description?: string | null
           end_date: string
+          exclude_self_from_average?: boolean | null
           feed_to_appraisal?: boolean | null
           feed_to_nine_box?: boolean | null
           feed_to_succession?: boolean | null
           feed_to_talent_profile?: boolean | null
+          hide_rating_points?: boolean | null
           id?: string
           include_in_analytics?: boolean | null
           is_standalone?: boolean
           is_template?: boolean | null
+          manager_approval_required?: boolean | null
           name: string
+          nomination_deadline?: string | null
           nomination_window_end?: string | null
           nomination_window_start?: string | null
           reminder_days_before?: number[] | null
           report_template_config?: Json | null
+          require_comments?: boolean | null
           response_window_end?: string | null
           response_window_start?: string | null
           results_release_date?: string | null
@@ -26441,6 +26453,7 @@ export type Database = {
         }
         Update: {
           ai_tone_setting?: string | null
+          allow_peer_nomination?: boolean | null
           anonymity_threshold?: number | null
           appraisal_cycle_id?: string | null
           cloned_from_id?: string | null
@@ -26450,19 +26463,24 @@ export type Database = {
           cycle_purpose?: string | null
           description?: string | null
           end_date?: string
+          exclude_self_from_average?: boolean | null
           feed_to_appraisal?: boolean | null
           feed_to_nine_box?: boolean | null
           feed_to_succession?: boolean | null
           feed_to_talent_profile?: boolean | null
+          hide_rating_points?: boolean | null
           id?: string
           include_in_analytics?: boolean | null
           is_standalone?: boolean
           is_template?: boolean | null
+          manager_approval_required?: boolean | null
           name?: string
+          nomination_deadline?: string | null
           nomination_window_end?: string | null
           nomination_window_start?: string | null
           reminder_days_before?: number[] | null
           report_template_config?: Json | null
+          require_comments?: boolean | null
           response_window_end?: string | null
           response_window_start?: string | null
           results_release_date?: string | null
@@ -61689,6 +61707,7 @@ export type Database = {
       }
       review_cycles: {
         Row: {
+          allow_peer_nomination: boolean | null
           cloned_from_id: string | null
           company_id: string
           created_at: string
@@ -61696,7 +61715,9 @@ export type Database = {
           cycle_type: string
           description: string | null
           end_date: string
+          exclude_self_from_average: boolean | null
           feedback_deadline: string | null
+          hide_rating_points: boolean | null
           id: string
           include_direct_report_review: boolean | null
           include_manager_review: boolean | null
@@ -61704,11 +61725,14 @@ export type Database = {
           include_self_review: boolean | null
           is_manager_cycle: boolean | null
           is_template: boolean | null
+          manager_approval_required: boolean | null
           max_peer_reviewers: number | null
           min_peer_reviewers: number | null
           name: string
+          nomination_deadline: string | null
           peer_nomination_deadline: string | null
           rating_scale_id: string | null
+          require_comments: boolean | null
           results_released_at: string | null
           results_released_by: string | null
           self_review_deadline: string | null
@@ -61720,6 +61744,7 @@ export type Database = {
           visibility_rules: Json | null
         }
         Insert: {
+          allow_peer_nomination?: boolean | null
           cloned_from_id?: string | null
           company_id: string
           created_at?: string
@@ -61727,7 +61752,9 @@ export type Database = {
           cycle_type?: string
           description?: string | null
           end_date: string
+          exclude_self_from_average?: boolean | null
           feedback_deadline?: string | null
+          hide_rating_points?: boolean | null
           id?: string
           include_direct_report_review?: boolean | null
           include_manager_review?: boolean | null
@@ -61735,11 +61762,14 @@ export type Database = {
           include_self_review?: boolean | null
           is_manager_cycle?: boolean | null
           is_template?: boolean | null
+          manager_approval_required?: boolean | null
           max_peer_reviewers?: number | null
           min_peer_reviewers?: number | null
           name: string
+          nomination_deadline?: string | null
           peer_nomination_deadline?: string | null
           rating_scale_id?: string | null
+          require_comments?: boolean | null
           results_released_at?: string | null
           results_released_by?: string | null
           self_review_deadline?: string | null
@@ -61751,6 +61781,7 @@ export type Database = {
           visibility_rules?: Json | null
         }
         Update: {
+          allow_peer_nomination?: boolean | null
           cloned_from_id?: string | null
           company_id?: string
           created_at?: string
@@ -61758,7 +61789,9 @@ export type Database = {
           cycle_type?: string
           description?: string | null
           end_date?: string
+          exclude_self_from_average?: boolean | null
           feedback_deadline?: string | null
+          hide_rating_points?: boolean | null
           id?: string
           include_direct_report_review?: boolean | null
           include_manager_review?: boolean | null
@@ -61766,11 +61799,14 @@ export type Database = {
           include_self_review?: boolean | null
           is_manager_cycle?: boolean | null
           is_template?: boolean | null
+          manager_approval_required?: boolean | null
           max_peer_reviewers?: number | null
           min_peer_reviewers?: number | null
           name?: string
+          nomination_deadline?: string | null
           peer_nomination_deadline?: string | null
           rating_scale_id?: string | null
+          require_comments?: boolean | null
           results_released_at?: string | null
           results_released_by?: string | null
           self_review_deadline?: string | null
