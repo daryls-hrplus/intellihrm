@@ -35,6 +35,7 @@ import {
   Briefcase,
   Shield,
   Link2,
+  Flag,
 } from "lucide-react";
 
 export default function CompensationDashboardPage() {
@@ -63,6 +64,7 @@ export default function CompensationDashboardPage() {
     positionBudgeting: { title: "Position Budgeting", description: "Workforce planning with position-based budgets, scenarios & what-if modeling", href: "/compensation/position-budget", icon: Briefcase, color: "bg-purple-500/10 text-purple-600", tabCode: "position_budgeting" },
     minimumWageCompliance: { title: "Minimum Wage Compliance", description: "Monitor and manage minimum wage compliance across your workforce", href: "/compensation/minimum-wage", icon: Shield, color: "bg-red-500/10 text-red-600", tabCode: "minimum_wage_compliance" },
     fteReconciliation: { title: "FTE Reconciliation", description: "Review discrepancies between seat FTE allocations and compensation records", href: "/compensation/fte-reconciliation", icon: Link2, color: "bg-cyan-500/10 text-cyan-600", tabCode: "fte_reconciliation" },
+    reviewFlags: { title: "Performance Review Flags", description: "Review compensation actions triggered by performance appraisals", href: "/compensation/review-flags", icon: Flag, color: "bg-amber-500/10 text-amber-600", tabCode: "review_flags" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -79,7 +81,7 @@ export default function CompensationDashboardPage() {
     },
     {
       titleKey: "Incentives",
-      items: filterByAccess([allModules.meritCycles, allModules.bonus, allModules.equity, allModules.totalRewards]),
+      items: filterByAccess([allModules.meritCycles, allModules.bonus, allModules.equity, allModules.totalRewards, allModules.reviewFlags]),
     },
     {
       titleKey: "Analytics & Benchmarking",

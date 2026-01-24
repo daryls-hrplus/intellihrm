@@ -77,10 +77,25 @@ export function useCompensationStats(companyId: string, asOfDate: Date) {
 
         const { data: pendingReviews } = await pendingQuery;
 
+        // Fetch pending compensation review flags (from appraisal integrations)
+        let flagsQuery = supabase
+          .from("compensation_review_flags")
+          .select("id, company_id")
+          .eq("status", "pending");
+
+        if (companyId && companyId !== "all") {
+          flagsQuery = flagsQuery.eq("company_id", companyId);
+        }
+
+        const { data: pendingFlags } = await flagsQuery;
+
+        // Combine both counts for total pending reviews
+        const totalPendingReviews = (pendingReviews?.length || 0) + (pendingFlags?.length || 0);
+
         setStats({
           totalPayroll,
           employeesPaid,
-          pendingReviews: pendingReviews?.length || 0,
+          pendingReviews: totalPendingReviews,
           avgSalary,
           isLoading: false,
         });
