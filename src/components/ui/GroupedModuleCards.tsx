@@ -1,5 +1,5 @@
 import { useState, forwardRef, useImperativeHandle } from "react";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
@@ -81,11 +81,17 @@ const sectionIcons: Record<string, LucideIcon> = {
 
 export const GroupedModuleCards = forwardRef<GroupedModuleCardsHandle, GroupedModuleCardsProps>(
   function GroupedModuleCards({ sections, defaultOpen = false, sectionBadges = {}, showToggleButton = false }, ref) {
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   
   // Track open sections - default state based on defaultOpen prop
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [allExpanded, setAllExpanded] = useState(defaultOpen);
+  
+  // Helper to infer module code from route
+  const inferModuleFromRoute = (route: string): string => {
+    const segments = route.split('/').filter(Boolean);
+    return segments[0] || 'dashboard';
+  };
 
   // Filter out empty sections
   const nonEmptySections = sections.filter(section => section.items.length > 0);
@@ -205,7 +211,12 @@ export const GroupedModuleCards = forwardRef<GroupedModuleCardsHandle, GroupedMo
                   {section.items.map((item) => (
                     <div
                       key={item.href}
-                      onClick={() => navigate(item.href)}
+                      onClick={() => navigateToList({
+                        route: item.href,
+                        title: item.title,
+                        moduleCode: inferModuleFromRoute(item.href),
+                        icon: item.icon,
+                      })}
                       className="flex items-start gap-3 p-3 rounded-lg border transition-all hover:bg-muted hover:shadow-sm cursor-pointer group"
                     >
                       <div className={`p-2 rounded-lg ${item.color} transition-transform group-hover:scale-105`}>
