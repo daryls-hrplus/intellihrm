@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +37,7 @@ import {
 // Hub sections and quick actions are now defined inside the component for i18n
 
 export default function HRHubDashboardPage() {
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const { t } = useLanguage();
   const { company } = useAuth();
 
@@ -235,7 +235,12 @@ export default function HRHubDashboardPage() {
               {quickActions.map((action) => (
                 <button
                   key={action.titleKey}
-                  onClick={() => navigate(action.href)}
+                  onClick={() => navigateToList({
+                    route: action.href,
+                    title: t(action.titleKey),
+                    moduleCode: "hrHub",
+                    icon: action.icon,
+                  })}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-background border hover:bg-muted transition-colors"
                 >
                   <action.icon className="h-4 w-4 text-primary" />
@@ -257,7 +262,12 @@ export default function HRHubDashboardPage() {
                 {section.items.map((item) => (
                   <div
                     key={item.titleKey}
-                    onClick={() => !item.badge && navigate(item.href)}
+                    onClick={() => !item.badge && navigateToList({
+                      route: item.href,
+                      title: t(item.titleKey),
+                      moduleCode: "hrHub",
+                      icon: item.icon,
+                    })}
                     className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
                       item.badge
                         ? "opacity-60 cursor-not-allowed"

@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Plus, FileText, Folder, Trash2, Edit, Eye, ChevronLeft, Building2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { format } from "date-fns";
 
 interface Company {
@@ -67,7 +67,7 @@ const TASK_TYPES = [
 
 export default function SOPManagementPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const queryClient = useQueryClient();
   const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
@@ -326,7 +326,11 @@ export default function SOPManagementPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/hr-hub")}>
+        <Button variant="ghost" size="icon" onClick={() => navigateToList({
+          route: "/hr-hub",
+          title: t("hrHub.title"),
+          moduleCode: "hrHub",
+        })}>
           <ChevronLeft className="h-5 w-5" />
         </Button>
         <div>

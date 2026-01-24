@@ -50,11 +50,11 @@ import {
   PolarRadiusAxis,
 } from "recharts";
 import { usePulseSurveyMutations } from "@/hooks/usePulseSurveys";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 export default function SentimentMonitoringPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const { analyzeSentiment } = usePulseSurveyMutations();
 
@@ -362,7 +362,11 @@ export default function SentimentMonitoringPage() {
               <Button
                 variant="link"
                 className="p-0 h-auto mt-2"
-                onClick={() => navigate("/employee-relations/surveys")}
+                onClick={() => navigateToList({
+                  route: "/employee-relations/surveys",
+                  title: "Surveys",
+                  moduleCode: "employeeRelations",
+                })}
               >
                 View Surveys <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
