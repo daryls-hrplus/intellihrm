@@ -616,6 +616,7 @@ const App = () => (
             <Route path="/enablement/quickstarts/admin" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.QuickStartAdminPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/quickstarts" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.QuickStartGuidesPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/quickstart/learning-development" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.LnDQuickStartPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/quickstart/:moduleSlug" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.DynamicQuickStartPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/checklists" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ImplementationChecklistsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/modules" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ModulesIndexPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/modules/:moduleId" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ModuleDocumentationPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
