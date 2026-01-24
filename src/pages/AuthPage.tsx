@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -48,11 +48,21 @@ export default function AuthPage() {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Redirect if already logged in
+  // Redirect if already logged in - must be in useEffect
+  useEffect(() => {
+    if (user) {
+      const from = location.state?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, location.state]);
+
+  // Show loading while checking auth state and redirecting
   if (user) {
-    const from = location.state?.from?.pathname || "/dashboard";
-    navigate(from, { replace: true });
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
