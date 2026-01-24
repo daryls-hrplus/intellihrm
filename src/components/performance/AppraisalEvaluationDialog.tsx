@@ -48,6 +48,7 @@ import { AppraisalIntegrationStatus } from "./AppraisalIntegrationStatus";
 import { CommentQualityHints } from "./CommentQualityHints";
 import { SelfRatingIndicator } from "./SelfRatingIndicator";
 import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
+import { AppraisalGoalsSection } from "./AppraisalGoalsSection";
 
 interface CompetencyMetadata {
   selected_level?: number;
@@ -163,6 +164,10 @@ export function AppraisalEvaluationDialog({
   // Action enforcement state
   const [showEnforcementDialog, setShowEnforcementDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
+  
+  // Goal integration state
+  const [linkedGoalCycleId, setLinkedGoalCycleId] = useState<string | null>(null);
+  const [goalRatingsFromSection, setGoalRatingsFromSection] = useState<Array<{ goal_id: string; rating: number | null; comments: string }>>([]);
 
   const { fetchSegments } = useAppraisalRoleSegments();
   
@@ -245,6 +250,14 @@ export function AppraisalEvaluationDialog({
           include_values_assessment: cycleData.include_values_assessment || false,
           values_weight: cycleData.values_weight || 0,
         });
+        
+        // Fetch linked_goal_cycle_id separately to handle backward compatibility
+        const { data: linkedData } = await supabase
+          .from("appraisal_cycles")
+          .select("linked_goal_cycle_id")
+          .eq("id", cycleId)
+          .single();
+        setLinkedGoalCycleId((linkedData as any)?.linked_goal_cycle_id || null);
       }
 
       // Fetch participant info
@@ -1679,7 +1692,20 @@ export function AppraisalEvaluationDialog({
             </TabsContent>
 
             <TabsContent value="goals" className="mt-4">
-              {renderScoreItems("goal")}
+              {linkedGoalCycleId && employeeId ? (
+                <AppraisalGoalsSection
+                  employeeId={employeeId}
+                  linkedGoalCycleId={linkedGoalCycleId}
+                  participantId={participantId}
+                  isEmployee={isEmployee}
+                  minRating={cycleInfo?.min_rating || 1}
+                  maxRating={cycleInfo?.max_rating || 5}
+                  onGoalScoresChange={setGoalRatingsFromSection}
+                  readOnly={false}
+                />
+              ) : (
+                renderScoreItems("goal")
+              )}
             </TabsContent>
 
             {cycleInfo?.include_values_assessment && cycleInfo.company_id && employeeId && (
