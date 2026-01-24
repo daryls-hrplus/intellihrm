@@ -6,8 +6,10 @@ import { DraggableSidebar } from "./DraggableSidebar";
 import { AppHeader } from "./AppHeader";
 import { WorkspaceTabBar } from "./WorkspaceTabBar";
 import { RealtimeNotifications } from "./RealtimeNotifications";
+import { SessionRecoveryManager } from "./SessionRecoveryManager";
 import { TabProvider } from "@/contexts/TabContext";
 import { useTabKeyboardShortcuts } from "@/hooks/useTabKeyboardShortcuts";
+import { TabCloseConfirmDialog } from "@/components/dialogs/TabCloseConfirmDialog";
 import {
   TourProvider,
   TourEngine,
@@ -18,8 +20,20 @@ import {
 import { HelpButton } from "@/components/help";
 
 function TabKeyboardHandler({ children }: { children: React.ReactNode }) {
-  useTabKeyboardShortcuts();
-  return <>{children}</>;
+  const { pendingCloseTab, confirmClose, cancelClose } = useTabKeyboardShortcuts();
+  
+  return (
+    <>
+      {children}
+      {/* Dialog for keyboard shortcut (Ctrl+W) close with unsaved changes */}
+      <TabCloseConfirmDialog
+        open={pendingCloseTab !== null}
+        tab={pendingCloseTab}
+        onConfirm={confirmClose}
+        onCancel={cancelClose}
+      />
+    </>
+  );
 }
 
 export function ProtectedLayout() {
@@ -46,6 +60,7 @@ export function ProtectedLayout() {
     <TabProvider>
       <TourProvider>
         <TabKeyboardHandler>
+          <SessionRecoveryManager />
           <div className="min-h-screen bg-background">
             <RealtimeNotifications />
             <DraggableSidebar />
@@ -71,3 +86,4 @@ export function ProtectedLayout() {
     </TabProvider>
   );
 }
+

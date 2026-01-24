@@ -1,29 +1,67 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTabContext } from "@/contexts/TabContext";
+import { useTabContext, WorkspaceTab } from "@/contexts/TabContext";
 
-export function useTabKeyboardShortcuts() {
+interface UseTabKeyboardShortcutsReturn {
+  /**
+   * Tab pending close confirmation (for dialog integration)
+   */
+  pendingCloseTab: WorkspaceTab | null;
+  /**
+   * Confirm close of pending tab
+   */
+  confirmClose: () => void;
+  /**
+   * Cancel close of pending tab
+   */
+  cancelClose: () => void;
+}
+
+export function useTabKeyboardShortcuts(): UseTabKeyboardShortcutsReturn {
   const { tabs, activeTabId, closeTab, focusTab } = useTabContext();
   const navigate = useNavigate();
+  
+  // State for dialog-based close flow
+  const [pendingCloseTab, setPendingCloseTab] = useState<WorkspaceTab | null>(null);
+
+  const executeCloseTab = useCallback((tabId: string) => {
+    closeTab(tabId);
+    // Navigate to next tab
+    const remainingTabs = tabs.filter(t => t.id !== tabId);
+    if (remainingTabs.length > 0) {
+      const sortedByActive = [...remainingTabs].sort(
+        (a, b) => new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
+      );
+      focusTab(sortedByActive[0].id);
+      navigate(sortedByActive[0].route);
+    }
+  }, [tabs, closeTab, focusTab, navigate]);
+
+  const confirmClose = useCallback(() => {
+    if (pendingCloseTab) {
+      executeCloseTab(pendingCloseTab.id);
+      setPendingCloseTab(null);
+    }
+  }, [pendingCloseTab, executeCloseTab]);
+
+  const cancelClose = useCallback(() => {
+    setPendingCloseTab(null);
+  }, []);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
     const modKey = isMac ? e.metaKey : e.ctrlKey;
 
-    // Ctrl/Cmd + W - Close current tab
+    // Ctrl/Cmd + W - Close current tab (with unsaved changes check)
     if (modKey && e.key === "w") {
       e.preventDefault();
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab && !activeTab.isPinned) {
-        closeTab(activeTabId!);
-        // Navigate to next tab
-        const remainingTabs = tabs.filter(t => t.id !== activeTabId);
-        if (remainingTabs.length > 0) {
-          const sortedByActive = [...remainingTabs].sort(
-            (a, b) => new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
-          );
-          focusTab(sortedByActive[0].id);
-          navigate(sortedByActive[0].route);
+        if (activeTab.hasUnsavedChanges) {
+          // Set pending tab for dialog confirmation
+          setPendingCloseTab(activeTab);
+        } else {
+          executeCloseTab(activeTabId!);
         }
       }
     }
@@ -58,10 +96,17 @@ export function useTabKeyboardShortcuts() {
         navigate(targetTab.route);
       }
     }
-  }, [tabs, activeTabId, closeTab, focusTab, navigate]);
+  }, [tabs, activeTabId, executeCloseTab, focusTab, navigate]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  return {
+    pendingCloseTab,
+    confirmClose,
+    cancelClose,
+  };
 }
+
