@@ -70,14 +70,16 @@ function getGuideHref(moduleCode: string) {
 }
 
 function getEstimatedMinutes(template: QuickStartTemplateRow): number {
-  const setupSteps = template.setup_steps as unknown[];
-  if (!Array.isArray(setupSteps)) return 15;
+  const setupSteps = template.setup_steps;
+  if (!Array.isArray(setupSteps) || setupSteps.length === 0) return 15;
   
-  return setupSteps.reduce((acc: number, step: unknown) => {
+  let total = 0;
+  for (const step of setupSteps) {
     const s = step as { estimatedTime?: string };
     const minutes = parseInt(s.estimatedTime || "0");
-    return acc + (isNaN(minutes) ? 0 : minutes);
-  }, 0 as number) || 15;
+    if (!isNaN(minutes)) total += minutes;
+  }
+  return total || 15;
 }
 
 function getPrerequisitesCount(template: QuickStartTemplateRow): number {
