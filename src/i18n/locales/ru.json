@@ -92,6 +92,14 @@
       "noTransactionTypes": "Типы транзакций не найдены. Настройте типы транзакций в Справочных Значениях."
     }
   },
+  "workforce": {
+    "unassignedEmployees": "Неназначенные сотрудники",
+    "needPositionAssignment": "Сотрудники, нуждающиеся в назначении должности",
+    "assign": "Назначить",
+    "viewAllUnassigned": "Показать всех неназначенных",
+    "goToAssignments": "Перейти к назначениям",
+    "moreUnassigned": "еще неназначенных сотрудников"
+  },
   "navigation": {
     "dashboard": "Панель управления",
     "workforce": "Персонал",

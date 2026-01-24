@@ -101,6 +101,14 @@
       "subtitle": "Beheer trainingen, certificeringen en carrièregroei"
     }
   },
+  "workforce": {
+    "unassignedEmployees": "Niet-toegewezen Medewerkers",
+    "needPositionAssignment": "Medewerkers die positietoewijzing nodig hebben",
+    "assign": "Toewijzen",
+    "viewAllUnassigned": "Bekijk Alle Niet-toegewezen",
+    "goToAssignments": "Ga naar Toewijzingen",
+    "moreUnassigned": "meer niet-toegewezen medewerkers"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "workforce": "Personeel",

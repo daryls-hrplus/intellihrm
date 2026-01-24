@@ -293,6 +293,12 @@
   },
   "workforce": {
     "title": "Gestion du Personnel",
+    "unassignedEmployees": "Employés Non Assignés",
+    "needPositionAssignment": "Employés nécessitant une affectation de poste",
+    "assign": "Assigner",
+    "viewAllUnassigned": "Voir Tous les Non Assignés",
+    "goToAssignments": "Aller aux Affectations",
+    "moreUnassigned": "autres employés non assignés",
     "description": "Gérez le personnel, les départements et les postes de votre organisation",
     "employeeCount": "Total des Employés",
     "departmentCount": "Départements",

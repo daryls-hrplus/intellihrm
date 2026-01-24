@@ -289,6 +289,12 @@
   },
   "workforce": {
     "title": "إدارة القوى العاملة",
+    "unassignedEmployees": "الموظفون غير المعينين",
+    "needPositionAssignment": "الموظفون الذين يحتاجون إلى تعيين منصب",
+    "assign": "تعيين",
+    "viewAllUnassigned": "عرض جميع غير المعينين",
+    "goToAssignments": "الذهاب إلى التعيينات",
+    "moreUnassigned": "المزيد من الموظفين غير المعينين",
     "description": "إدارة القوى العاملة والأقسام والوظائف في مؤسستك",
     "employeeCount": "إجمالي الموظفين",
     "departmentCount": "الأقسام",
