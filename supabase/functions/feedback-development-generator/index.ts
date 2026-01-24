@@ -22,6 +22,9 @@ interface GenerateRequest {
   companyId: string;
   selectedSignalIds: string[];
   signals: Signal[];
+  // Auto-select mode for automated integrations
+  autoSelect?: boolean;
+  gapThreshold?: number;
 }
 
 serve(async (req) => {
@@ -36,11 +39,56 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body: GenerateRequest = await req.json();
-    const { cycleId, employeeId, companyId, selectedSignalIds, signals } = body;
+    let { cycleId, employeeId, companyId, signals, autoSelect, gapThreshold } = body;
+
+    // Auto-select mode: fetch signals from cycle and filter by gap threshold
+    if (autoSelect) {
+      console.log(`Auto-select mode enabled for employee ${employeeId}, cycle ${cycleId}`);
+      
+      const threshold = gapThreshold || 0.5;
+      
+      // Fetch signals from talent signal snapshots for this cycle
+      const { data: cycleSignals, error: signalsError } = await supabase
+        .from('talent_signal_snapshots')
+        .select('id, signal_code, signal_name, category, score, benchmark_score')
+        .eq('source_cycle_id', cycleId)
+        .eq('employee_id', employeeId);
+      
+      if (signalsError) {
+        console.error('Error fetching signals for auto-select:', signalsError);
+      } else if (cycleSignals && cycleSignals.length > 0) {
+        // Filter signals by gap threshold or low score
+        signals = cycleSignals
+          .map(s => ({
+            ...s,
+            gap: s.benchmark_score ? s.benchmark_score - s.score : 0
+          }))
+          .filter(s => s.gap > threshold || s.score < 3);
+        
+        console.log(`Auto-selected ${signals.length} signals from ${cycleSignals.length} available`);
+      } else {
+        console.log('No signals found for auto-select, using provided signals');
+      }
+    }
 
     console.log(`Generating development themes for employee ${employeeId}, ${signals.length} signals selected`);
 
     if (!employeeId || !companyId || !signals.length) {
+      // If no signals to process in auto-select mode, return success with empty result
+      if (autoSelect) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            themes: [],
+            recommendationsCount: 0,
+            message: 'No signals with gaps above threshold'
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          }
+        );
+      }
       throw new Error('Missing required fields: employeeId, companyId, or signals');
     }
 
