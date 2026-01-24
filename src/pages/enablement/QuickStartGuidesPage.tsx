@@ -18,138 +18,109 @@ import {
   ArrowRight,
   CheckCircle2,
   Zap,
+  Settings2,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuickStartTemplates, type QuickStartTemplateRow } from "@/hooks/useQuickStartTemplates";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface QuickStartGuide {
-  id: string;
-  moduleCode: string;
-  title: string;
-  description: string;
-  icon: React.ElementType;
-  color: string;
-  estimatedMinutes: number;
-  prerequisites: number;
-  status: "available" | "coming-soon";
-  href: string;
+const ICON_MAP: Record<string, React.ElementType> = {
+  GraduationCap,
+  Target,
+  Users,
+  Clock,
+  Heart,
+  DollarSign,
+  Shield,
+  Rocket,
+  Goal: Target,
+};
+
+function getIcon(iconName: string): React.ElementType {
+  return ICON_MAP[iconName] || BookOpen;
 }
 
-const QUICK_START_GUIDES: QuickStartGuide[] = [
-  {
-    id: "learning-development",
-    moduleCode: "LND",
-    title: "Learning & Development",
-    description: "Set up courses, learning paths, and certifications in under 15 minutes",
-    icon: GraduationCap,
-    color: "bg-emerald-500/10 text-emerald-600",
-    estimatedMinutes: 15,
-    prerequisites: 5,
-    status: "available",
-    href: "/enablement/quickstart/learning-development",
-  },
-  {
-    id: "performance",
-    moduleCode: "PERF",
-    title: "Performance Management",
-    description: "Configure appraisal cycles, forms, and rating scales quickly",
-    icon: Target,
-    color: "bg-primary/10 text-primary",
-    estimatedMinutes: 20,
-    prerequisites: 6,
-    status: "coming-soon",
-    href: "/enablement/quickstart/performance",
-  },
-  {
-    id: "goals",
-    moduleCode: "GOALS",
-    title: "Goals Management",
-    description: "Set up goal cycles, templates, and OKR frameworks",
-    icon: Target,
-    color: "bg-green-500/10 text-green-600",
-    estimatedMinutes: 10,
-    prerequisites: 3,
-    status: "coming-soon",
-    href: "/enablement/quickstart/goals",
-  },
-  {
-    id: "workforce",
-    moduleCode: "WFM",
-    title: "Workforce Management",
-    description: "Configure org structure, positions, and employee records",
-    icon: Users,
-    color: "bg-blue-500/10 text-blue-600",
-    estimatedMinutes: 25,
-    prerequisites: 8,
-    status: "coming-soon",
-    href: "/enablement/quickstart/workforce",
-  },
-  {
-    id: "time-attendance",
-    moduleCode: "TNA",
-    title: "Time & Attendance",
-    description: "Set up shifts, schedules, and attendance tracking",
-    icon: Clock,
-    color: "bg-amber-500/10 text-amber-600",
-    estimatedMinutes: 20,
-    prerequisites: 5,
-    status: "coming-soon",
-    href: "/enablement/quickstart/time-attendance",
-  },
-  {
-    id: "benefits",
-    moduleCode: "BEN",
-    title: "Benefits Administration",
-    description: "Configure benefit plans, enrollment periods, and eligibility",
-    icon: Heart,
-    color: "bg-rose-500/10 text-rose-600",
-    estimatedMinutes: 15,
-    prerequisites: 4,
-    status: "coming-soon",
-    href: "/enablement/quickstart/benefits",
-  },
-  {
-    id: "compensation",
-    moduleCode: "COMP",
-    title: "Compensation Management",
-    description: "Set up salary grades, pay structures, and compensation cycles",
-    icon: DollarSign,
-    color: "bg-violet-500/10 text-violet-600",
-    estimatedMinutes: 20,
-    prerequisites: 6,
-    status: "coming-soon",
-    href: "/enablement/quickstart/compensation",
-  },
-  {
-    id: "admin-security",
-    moduleCode: "ADMIN",
-    title: "Admin & Security",
-    description: "Configure roles, permissions, and security policies",
-    icon: Shield,
-    color: "bg-red-500/10 text-red-600",
-    estimatedMinutes: 30,
-    prerequisites: 4,
-    status: "coming-soon",
-    href: "/enablement/quickstart/admin-security",
-  },
-];
+function getColorClasses(colorClass: string) {
+  const colorMap: Record<string, string> = {
+    emerald: "bg-emerald-500/10 text-emerald-600",
+    purple: "bg-purple-500/10 text-purple-600",
+    blue: "bg-blue-500/10 text-blue-600",
+    cyan: "bg-cyan-500/10 text-cyan-600",
+    orange: "bg-orange-500/10 text-orange-600",
+    rose: "bg-rose-500/10 text-rose-600",
+    green: "bg-green-500/10 text-green-600",
+    slate: "bg-slate-500/10 text-slate-600",
+  };
+  return colorMap[colorClass] || "bg-primary/10 text-primary";
+}
+
+function getGuideHref(moduleCode: string) {
+  const pathMap: Record<string, string> = {
+    LND: "/enablement/quickstart/learning-development",
+    PERF: "/enablement/quickstart/performance",
+    GOALS: "/enablement/quickstart/goals",
+    WFM: "/enablement/quickstart/workforce",
+    TIME: "/enablement/quickstart/time-attendance",
+    BEN: "/enablement/quickstart/benefits",
+    COMP: "/enablement/quickstart/compensation",
+    SEC: "/enablement/quickstart/admin-security",
+  };
+  return pathMap[moduleCode] || `/enablement/quickstart/${moduleCode.toLowerCase()}`;
+}
+
+function getEstimatedMinutes(template: QuickStartTemplateRow): number {
+  const setupSteps = template.setup_steps as unknown[];
+  if (!Array.isArray(setupSteps)) return 15;
+  
+  return setupSteps.reduce((acc: number, step: unknown) => {
+    const s = step as { estimatedTime?: string };
+    const minutes = parseInt(s.estimatedTime || "0");
+    return acc + (isNaN(minutes) ? 0 : minutes);
+  }, 0 as number) || 15;
+}
+
+function getPrerequisitesCount(template: QuickStartTemplateRow): number {
+  const prereqs = template.prerequisites as unknown[];
+  return Array.isArray(prereqs) ? prereqs.length : 0;
+}
 
 export default function QuickStartGuidesPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Fetch all templates (published only for regular users)
+  const { data: templates, isLoading } = useQuickStartTemplates(true);
 
   const filteredGuides = useMemo(() => {
-    if (!searchQuery.trim()) return QUICK_START_GUIDES;
+    if (!templates) return [];
+    
+    const allGuides = templates.map((template) => ({
+      id: template.module_code.toLowerCase(),
+      moduleCode: template.module_code,
+      title: template.breadcrumb_label || template.title.replace(" Quick Start", ""),
+      description: template.subtitle || "",
+      icon: getIcon(template.icon_name),
+      color: getColorClasses(template.color_class),
+      estimatedMinutes: getEstimatedMinutes(template),
+      prerequisites: getPrerequisitesCount(template),
+      status: template.status as "published" | "draft",
+      href: getGuideHref(template.module_code),
+    }));
+    
+    if (!searchQuery.trim()) return allGuides;
+    
     const query = searchQuery.toLowerCase();
-    return QUICK_START_GUIDES.filter(
+    return allGuides.filter(
       (guide) =>
         guide.title.toLowerCase().includes(query) ||
         guide.description.toLowerCase().includes(query) ||
         guide.moduleCode.toLowerCase().includes(query)
     );
-  }, [searchQuery]);
+  }, [templates, searchQuery]);
 
-  const availableCount = QUICK_START_GUIDES.filter((g) => g.status === "available").length;
+  const availableCount = filteredGuides.filter((g) => g.status === "published").length;
+  const totalCount = filteredGuides.length;
 
   return (
     <AppLayout>
@@ -172,10 +143,20 @@ export default function QuickStartGuidesPage() {
               Get modules up and running in 10-30 minutes with step-by-step setup guides
             </p>
           </div>
-          <Badge variant="secondary" className="text-sm">
-            <Zap className="h-3 w-3 mr-1" />
-            {availableCount} of {QUICK_START_GUIDES.length} Available
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-sm">
+              <Zap className="h-3 w-3 mr-1" />
+              {availableCount} of {totalCount} Available
+            </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/enablement/quickstarts/admin")}
+            >
+              <Settings2 className="h-4 w-4 mr-2" />
+              Admin
+            </Button>
+          </div>
         </div>
 
         {/* Search */}
@@ -206,70 +187,91 @@ export default function QuickStartGuidesPage() {
           </CardContent>
         </Card>
 
-        {/* Guides Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredGuides.map((guide) => {
-            const Icon = guide.icon;
-            const isAvailable = guide.status === "available";
-
-            return (
-              <Card
-                key={guide.id}
-                className={`relative transition-all ${
-                  isAvailable
-                    ? "hover:shadow-md hover:border-primary/30 cursor-pointer"
-                    : "opacity-60"
-                }`}
-                onClick={() => isAvailable && navigate(guide.href)}
-              >
-                {!isAvailable && (
-                  <Badge
-                    variant="secondary"
-                    className="absolute top-3 right-3 text-xs"
-                  >
-                    Coming Soon
-                  </Badge>
-                )}
+        {/* Loading State */}
+        {isLoading && (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i}>
                 <CardHeader className="pb-3">
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${guide.color}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-base">{guide.title}</CardTitle>
-                      <Badge variant="outline" className="mt-1 text-xs">
-                        {guide.moduleCode}
-                      </Badge>
-                    </div>
-                  </div>
+                  <Skeleton className="h-12 w-12 rounded-lg" />
+                  <Skeleton className="h-5 w-3/4 mt-2" />
+                  <Skeleton className="h-4 w-1/4" />
                 </CardHeader>
-                <CardContent className="pt-0 space-y-3">
-                  <CardDescription className="text-sm">
-                    {guide.description}
-                  </CardDescription>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {guide.estimatedMinutes} min
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      {guide.prerequisites} prerequisites
-                    </span>
-                  </div>
-                  {isAvailable && (
-                    <Button variant="ghost" size="sm" className="w-full mt-2">
-                      Start Guide
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  )}
+                <CardContent className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {filteredGuides.length === 0 && (
+        {/* Guides Grid */}
+        {!isLoading && (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredGuides.map((guide) => {
+              const Icon = guide.icon;
+              const isAvailable = guide.status === "published";
+
+              return (
+                <Card
+                  key={guide.id}
+                  className={`relative transition-all ${
+                    isAvailable
+                      ? "hover:shadow-md hover:border-primary/30 cursor-pointer"
+                      : "opacity-60"
+                  }`}
+                  onClick={() => isAvailable && navigate(guide.href)}
+                >
+                  {!isAvailable && (
+                    <Badge
+                      variant="secondary"
+                      className="absolute top-3 right-3 text-xs"
+                    >
+                      Coming Soon
+                    </Badge>
+                  )}
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-lg ${guide.color}`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="text-base">{guide.title}</CardTitle>
+                        <Badge variant="outline" className="mt-1 text-xs">
+                          {guide.moduleCode}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-3">
+                    <CardDescription className="text-sm">
+                      {guide.description}
+                    </CardDescription>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {guide.estimatedMinutes} min
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" />
+                        {guide.prerequisites} prerequisites
+                      </span>
+                    </div>
+                    {isAvailable && (
+                      <Button variant="ghost" size="sm" className="w-full mt-2">
+                        Start Guide
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {!isLoading && filteredGuides.length === 0 && (
           <Card className="p-8 text-center">
             <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium">No guides found</h3>

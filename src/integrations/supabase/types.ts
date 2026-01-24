@@ -22952,6 +22952,90 @@ export type Database = {
           },
         ]
       }
+      enablement_quickstart_templates: {
+        Row: {
+          breadcrumb_label: string | null
+          color_class: string
+          content_strategy_questions: Json | null
+          created_at: string
+          created_by: string | null
+          full_config_time: string | null
+          icon_name: string
+          id: string
+          integration_checklist: Json | null
+          module_code: string
+          next_steps: Json | null
+          pitfalls: Json
+          prerequisites: Json
+          quick_setup_time: string | null
+          roles: Json
+          rollout_options: Json | null
+          rollout_recommendation: string | null
+          setup_steps: Json
+          status: string
+          subtitle: string | null
+          success_metrics: Json | null
+          title: string
+          updated_at: string
+          verification_checks: Json | null
+          version: string | null
+        }
+        Insert: {
+          breadcrumb_label?: string | null
+          color_class?: string
+          content_strategy_questions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          full_config_time?: string | null
+          icon_name: string
+          id?: string
+          integration_checklist?: Json | null
+          module_code: string
+          next_steps?: Json | null
+          pitfalls?: Json
+          prerequisites?: Json
+          quick_setup_time?: string | null
+          roles?: Json
+          rollout_options?: Json | null
+          rollout_recommendation?: string | null
+          setup_steps?: Json
+          status?: string
+          subtitle?: string | null
+          success_metrics?: Json | null
+          title: string
+          updated_at?: string
+          verification_checks?: Json | null
+          version?: string | null
+        }
+        Update: {
+          breadcrumb_label?: string | null
+          color_class?: string
+          content_strategy_questions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          full_config_time?: string | null
+          icon_name?: string
+          id?: string
+          integration_checklist?: Json | null
+          module_code?: string
+          next_steps?: Json | null
+          pitfalls?: Json
+          prerequisites?: Json
+          quick_setup_time?: string | null
+          roles?: Json
+          rollout_options?: Json | null
+          rollout_recommendation?: string | null
+          setup_steps?: Json
+          status?: string
+          subtitle?: string | null
+          success_metrics?: Json | null
+          title?: string
+          updated_at?: string
+          verification_checks?: Json | null
+          version?: string | null
+        }
+        Relationships: []
+      }
       enablement_releases: {
         Row: {
           created_at: string | null
