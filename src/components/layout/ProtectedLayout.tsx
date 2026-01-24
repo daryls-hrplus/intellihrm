@@ -4,7 +4,10 @@ import { useMenuPermissions } from "@/hooks/useMenuPermissions";
 import { Loader2 } from "lucide-react";
 import { DraggableSidebar } from "./DraggableSidebar";
 import { AppHeader } from "./AppHeader";
+import { WorkspaceTabBar } from "./WorkspaceTabBar";
 import { RealtimeNotifications } from "./RealtimeNotifications";
+import { TabProvider } from "@/contexts/TabContext";
+import { useTabKeyboardShortcuts } from "@/hooks/useTabKeyboardShortcuts";
 import {
   TourProvider,
   TourEngine,
@@ -13,6 +16,11 @@ import {
   FirstTimeUserDetector,
 } from "@/components/tours";
 import { HelpButton } from "@/components/help";
+
+function TabKeyboardHandler({ children }: { children: React.ReactNode }) {
+  useTabKeyboardShortcuts();
+  return <>{children}</>;
+}
 
 export function ProtectedLayout() {
   const { user, isLoading } = useAuth();
@@ -35,26 +43,31 @@ export function ProtectedLayout() {
   }
 
   return (
-    <TourProvider>
-      <div className="min-h-screen bg-background">
-        <RealtimeNotifications />
-        <DraggableSidebar />
-        <main className="lg:pl-64 transition-all duration-300">
-          <div className="min-h-screen p-4 lg:p-8">
-            <AppHeader />
-            <Outlet />
+    <TabProvider>
+      <TourProvider>
+        <TabKeyboardHandler>
+          <div className="min-h-screen bg-background">
+            <RealtimeNotifications />
+            <DraggableSidebar />
+            <main className="lg:pl-64 transition-all duration-300">
+              <div className="min-h-screen p-4 lg:p-8">
+                <AppHeader />
+                <WorkspaceTabBar />
+                <Outlet />
+              </div>
+            </main>
+            
+            {/* Tour System Components */}
+            <TourEngine />
+            <FloatingHelpButton />
+            <HelpPanel />
+            <FirstTimeUserDetector />
+            
+            {/* Video Help System */}
+            <HelpButton />
           </div>
-        </main>
-        
-        {/* Tour System Components */}
-        <TourEngine />
-        <FloatingHelpButton />
-        <HelpPanel />
-        <FirstTimeUserDetector />
-        
-        {/* Video Help System */}
-        <HelpButton />
-      </div>
-    </TourProvider>
+        </TabKeyboardHandler>
+      </TourProvider>
+    </TabProvider>
   );
 }
