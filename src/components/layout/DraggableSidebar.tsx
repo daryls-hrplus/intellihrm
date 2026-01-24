@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { supportedLanguages } from "@/i18n/config";
 import { useMenuPermissions } from "@/hooks/useMenuPermissions";
+import { useTabContext, DASHBOARD_TAB_ID } from "@/contexts/TabContext";
 import {
   LayoutDashboard,
   Users,
@@ -77,6 +78,7 @@ export function DraggableSidebar() {
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { focusTab, tabs } = useTabContext();
 
   const currentLanguage = supportedLanguages.find(lang => lang.code === i18n.language)?.name || "English";
 
@@ -228,13 +230,28 @@ export function DraggableSidebar() {
             const Icon = item.icon;
             const isActive = isActiveRoute(item.href);
             
+            // Handle module click - focus Dashboard tab and navigate
+            const handleModuleClick = (e: React.MouseEvent) => {
+              e.preventDefault();
+              setIsMobileOpen(false);
+              
+              // Focus the Dashboard tab (keeps other tabs open)
+              const dashboardTab = tabs.find(t => t.id === DASHBOARD_TAB_ID);
+              if (dashboardTab) {
+                focusTab(DASHBOARD_TAB_ID);
+              }
+              
+              // Navigate to the module dashboard
+              navigate(item.href);
+            };
+            
             return (
-              <NavLink
+              <a
                 key={item.moduleCode}
-                to={item.href}
-                onClick={() => setIsMobileOpen(false)}
+                href={item.href}
+                onClick={handleModuleClick}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all cursor-pointer",
                   isActive
                     ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
                     : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -242,7 +259,7 @@ export function DraggableSidebar() {
               >
                 <Icon className="h-5 w-5 shrink-0" />
                 {!isCollapsed && <span className="flex-1">{t(item.title)}</span>}
-              </NavLink>
+              </a>
             );
           })}
         </nav>

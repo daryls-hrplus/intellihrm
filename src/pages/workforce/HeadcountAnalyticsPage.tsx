@@ -12,7 +12,8 @@ import {
 import { BarChart3, Building2, Loader2, ArrowLeft } from "lucide-react";
 import { HeadcountAnalytics } from "@/components/admin/HeadcountAnalytics";
 import { supabase } from "@/integrations/supabase/client";
-import { NavLink } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface Company {
   id: string;
@@ -24,6 +25,15 @@ export default function HeadcountAnalyticsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const { navigateToList } = useWorkspaceNavigation();
+
+  const handleBackToWorkforce = () => {
+    navigateToList({
+      route: "/workforce",
+      title: "Workforce",
+      moduleCode: "workforce",
+    });
+  };
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -54,12 +64,14 @@ export default function HeadcountAnalyticsPage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <NavLink
-              to="/workforce"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted"
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleBackToWorkforce}
+              className="h-10 w-10"
             >
               <ArrowLeft className="h-5 w-5" />
-            </NavLink>
+            </Button>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
                 <BarChart3 className="h-5 w-5 text-blue-500" />

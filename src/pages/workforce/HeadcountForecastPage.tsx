@@ -2,11 +2,22 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Brain, ArrowLeft } from "lucide-react";
 import { HeadcountForecast } from "@/components/admin/HeadcountForecast";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 export default function HeadcountForecastPage() {
   const [searchParams] = useSearchParams();
   const sharedScenarioToken = searchParams.get("scenario");
+  const { navigateToList } = useWorkspaceNavigation();
+
+  const handleBackToWorkforce = () => {
+    navigateToList({
+      route: "/workforce",
+      title: "Workforce",
+      moduleCode: "workforce",
+    });
+  };
 
   return (
     <AppLayout>
@@ -20,12 +31,14 @@ export default function HeadcountForecastPage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <NavLink
-              to="/workforce"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted"
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleBackToWorkforce}
+              className="h-10 w-10"
             >
               <ArrowLeft className="h-5 w-5" />
-            </NavLink>
+            </Button>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500/10">
                 <Brain className="h-5 w-5 text-pink-500" />

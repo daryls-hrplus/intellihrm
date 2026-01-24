@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useNavigate } from 'react-router-dom';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,7 +63,7 @@ import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 export default function OffboardingPage() {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { 
     isLoading, 
     fetchTemplates, 
@@ -483,7 +483,14 @@ export default function OffboardingPage() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => navigate(`/workforce/offboarding/${instance.id}`)}
+                            onClick={() => navigateToRecord({
+                              route: `/workforce/offboarding/${instance.id}`,
+                              title: instance.profiles?.full_name || 'Offboarding',
+                              subtitle: 'Offboarding',
+                              moduleCode: 'workforce',
+                              contextType: 'offboarding',
+                              contextId: instance.id,
+                            })}
                           >
                             {t('common.viewDetails')}
                           </Button>
