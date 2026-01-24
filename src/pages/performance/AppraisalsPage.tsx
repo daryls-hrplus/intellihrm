@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -9,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import {
   Plus,
   Calendar,
@@ -103,7 +103,7 @@ const statusColors: Record<string, string> = {
 export default function AppraisalsPage() {
   usePageAudit('appraisals', 'Performance');
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigateToSetup, navigateToList, navigateToRecord } = useWorkspaceNavigation();
   const { user, company, isAdmin, isHRManager } = useAuth();
   const [activeTab, setActiveTab] = useState("cycles");
   const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
@@ -311,10 +311,10 @@ export default function AppraisalsPage() {
                 This page is for HR Administrators. Please use the Employee Self-Service or Manager portals for your appraisals.
               </p>
               <div className="flex gap-3 mt-6 justify-center">
-                <Button variant="outline" onClick={() => navigate("/ess/my-appraisals")}>
+                <Button variant="outline" onClick={() => navigateToList({ route: "/ess/my-appraisals", title: "My Appraisals", moduleCode: "ess" })}>
                   My Appraisals
                 </Button>
-                <Button onClick={() => navigate("/mss/appraisals")}>
+                <Button onClick={() => navigateToList({ route: "/mss/appraisals", title: "Team Appraisals", moduleCode: "mss" })}>
                   Team Appraisals
                 </Button>
               </div>
@@ -366,7 +366,7 @@ export default function AppraisalsPage() {
             )}
             
             {/* Quick Action Buttons */}
-            <Button variant="outline" size="sm" onClick={() => navigate("/performance/setup")}>
+            <Button variant="outline" size="sm" onClick={() => navigateToSetup({ route: "/performance/setup", title: "Performance Setup", moduleCode: "performance" })}>
               <Settings className="mr-2 h-4 w-4" />
               Setup
             </Button>
@@ -678,7 +678,7 @@ export default function AppraisalsPage() {
                   <h3 className="text-lg font-semibold">Performance Analytics</h3>
                   <p className="text-sm text-muted-foreground">Organization-wide performance insights</p>
                 </div>
-                <Button onClick={() => navigate("/performance/intelligence-hub")}>
+                <Button onClick={() => navigateToList({ route: "/performance/intelligence-hub", title: "Intelligence Hub", moduleCode: "performance" })}>
                   <Brain className="mr-2 h-4 w-4" />
                   Intelligence Hub
                 </Button>
@@ -695,7 +695,7 @@ export default function AppraisalsPage() {
                   <h3 className="text-lg font-semibold">Calibration Sessions</h3>
                   <p className="text-sm text-muted-foreground">Review and manage calibration sessions</p>
                 </div>
-                <Button onClick={() => navigate("/performance/calibration")}>
+                <Button onClick={() => navigateToList({ route: "/performance/calibration", title: "Calibration Workspace", moduleCode: "performance" })}>
                   <ExternalLink className="mr-2 h-4 w-4" />
                   Calibration Workspace
                 </Button>
@@ -711,7 +711,7 @@ export default function AppraisalsPage() {
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Scale className="h-12 w-12 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">No calibration sessions created yet</p>
-                    <Button onClick={() => navigate("/performance/calibration")}>
+                    <Button onClick={() => navigateToList({ route: "/performance/calibration", title: "Calibration Workspace", moduleCode: "performance" })}>
                       <Plus className="mr-2 h-4 w-4" />
                       Create Session
                     </Button>
@@ -723,8 +723,8 @@ export default function AppraisalsPage() {
                     <CalibrationSessionCard
                       key={session.id}
                       session={session}
-                      onOpen={() => navigate(`/performance/calibration/${session.id}`)}
-                      onEdit={() => navigate("/performance/calibration")}
+                      onOpen={() => navigateToRecord({ route: `/performance/calibration/${session.id}`, title: session.name, subtitle: "Calibration Session", moduleCode: "performance", contextType: "calibration_session", contextId: session.id })}
+                      onEdit={() => navigateToList({ route: "/performance/calibration", title: "Calibration Workspace", moduleCode: "performance" })}
                     />
                   ))}
                 </div>

@@ -1,36 +1,68 @@
 import { forwardRef } from "react";
-import { NavLink } from "react-router-dom";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-interface BreadcrumbItem {
+export interface BreadcrumbItem {
   label: string;
   href?: string;
 }
 
-interface BreadcrumbsProps {
+export interface BreadcrumbsProps {
   items: BreadcrumbItem[];
 }
 
+/**
+ * Breadcrumbs component - clicking opens a new tab instead of navigating
+ * This keeps the current tab intact while allowing users to open parent pages
+ */
 export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(
   ({ items }, ref) => {
+    const { navigateToList } = useWorkspaceNavigation();
+
+    const inferModuleFromRoute = (href: string): string => {
+      const segments = href.split('/').filter(Boolean);
+      return segments[0] || 'dashboard';
+    };
+
+    const handleBreadcrumbClick = (item: BreadcrumbItem) => {
+      if (!item.href) return;
+      
+      navigateToList({
+        route: item.href,
+        title: item.label,
+        moduleCode: inferModuleFromRoute(item.href),
+      });
+    };
+
     return (
       <nav ref={ref} className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
-        <NavLink
-          to="/"
-          className="flex items-center gap-1 hover:text-foreground transition-colors"
-        >
-          <Home className="h-4 w-4" />
-        </NavLink>
         {items.map((item, index) => (
           <div key={index} className="flex items-center gap-1">
-            <ChevronRight className="h-4 w-4" />
+            {index > 0 && <ChevronRight className="h-4 w-4" />}
             {item.href ? (
-              <NavLink
-                to={item.href}
-                className="hover:text-foreground transition-colors"
-              >
-                {item.label}
-              </NavLink>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleBreadcrumbClick(item)}
+                    className={cn(
+                      "hover:text-foreground transition-colors flex items-center gap-1",
+                      "hover:underline underline-offset-2"
+                    )}
+                  >
+                    {item.label}
+                    <ExternalLink className="h-3 w-3 opacity-50" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Opens in new tab</p>
+                </TooltipContent>
+              </Tooltip>
             ) : (
               <span className="text-foreground font-medium">{item.label}</span>
             )}
