@@ -52,6 +52,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Rocket,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -62,6 +64,8 @@ import {
   usePublishQuickStartTemplate,
   type QuickStartTemplateRow,
 } from "@/hooks/useQuickStartTemplates";
+import { useGenerateQuickStartContent } from "@/hooks/useGenerateQuickStartContent";
+import { getModuleInfo } from "@/lib/quickstartModuleMapping";
 
 const ICON_OPTIONS = [
   { value: "GraduationCap", label: "Graduation Cap", icon: GraduationCap },
@@ -95,6 +99,7 @@ export default function QuickStartAdminPage() {
   const { data: templates, isLoading } = useQuickStartTemplates(true);
   const updateMutation = useUpdateQuickStartTemplate();
   const publishMutation = usePublishQuickStartTemplate();
+  const { generateContent, isGenerating } = useGenerateQuickStartContent();
   
   const [editingTemplate, setEditingTemplate] = useState<QuickStartTemplateRow | null>(null);
   const [editedData, setEditedData] = useState<Partial<QuickStartTemplateRow>>({});
@@ -174,6 +179,43 @@ export default function QuickStartAdminPage() {
       setEditedData((prev) => ({ ...prev, [field]: parsed }));
     } catch {
       // Invalid JSON, don't update
+    }
+  };
+
+  const handleGenerateContent = async () => {
+    if (!editingTemplate) return;
+    
+    const moduleInfo = getModuleInfo(editingTemplate.module_code);
+    if (!moduleInfo) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Unknown module code. Cannot generate content.",
+      });
+      return;
+    }
+
+    const generated = await generateContent(editingTemplate.module_code);
+    if (generated) {
+      setEditedData((prev) => ({
+        ...prev,
+        roles: generated.roles,
+        prerequisites: generated.prerequisites,
+        pitfalls: generated.pitfalls,
+        content_strategy_questions: generated.contentStrategyQuestions,
+        setup_steps: generated.setupSteps,
+        rollout_options: generated.rolloutOptions,
+        rollout_recommendation: generated.rolloutRecommendation,
+        verification_checks: generated.verificationChecks,
+        integration_checklist: generated.integrationChecklist,
+        success_metrics: generated.successMetrics,
+        quick_setup_time: "15-30 minutes",
+        full_config_time: "2-4 hours",
+      }));
+      toast({
+        title: "Content Generated",
+        description: "AI-generated content has been added to all fields. Review and save when ready.",
+      });
     }
   };
 
@@ -320,15 +362,38 @@ export default function QuickStartAdminPage() {
         </Card>
 
         {/* Edit Dialog */}
-        <Dialog open={!!editingTemplate} onOpenChange={() => setEditingTemplate(null)}>
+        <Dialog open={!!editingTemplate} onOpenChange={() => !isGenerating && setEditingTemplate(null)}>
           <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>
-                Edit {editingTemplate?.module_code} Quick Start Guide
-              </DialogTitle>
-              <DialogDescription>
-                Modify the content for this Quick Start Guide. All fields use JSON format for arrays.
-              </DialogDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <DialogTitle>
+                    Edit {editingTemplate?.module_code} Quick Start Guide
+                  </DialogTitle>
+                  <DialogDescription>
+                    Modify the content for this Quick Start Guide. All fields use JSON format for arrays.
+                  </DialogDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateContent}
+                  disabled={isGenerating}
+                  className="flex items-center gap-2"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Generate with AI
+                    </>
+                  )}
+                </Button>
+              </div>
             </DialogHeader>
             
             <ScrollArea className="max-h-[60vh] pr-4">

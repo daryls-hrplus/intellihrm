@@ -443,3 +443,6 @@ verify_jwt = false
 
 [functions.release-appraisal-ratings]
 verify_jwt = false
+
+[functions.generate-quickstart-content]
+verify_jwt = false
