@@ -271,8 +271,13 @@ async function fetchTriggerData(supabase: any, participantId: string): Promise<T
 
 function evaluateRuleCondition(rule: IntegrationRule, data: TriggerData, triggerEvent: string): boolean {
   // Check trigger event matches
-  if (rule.trigger_event !== triggerEvent && rule.trigger_event !== 'appraisal_finalized') {
+  if (rule.trigger_event !== triggerEvent) {
     return false;
+  }
+
+  // 'always' condition type - always matches when trigger event matches
+  if (rule.condition_type === 'always') {
+    return true;
   }
 
   // Get the score to evaluate based on condition_section
@@ -360,6 +365,9 @@ async function executeRuleAction(
       
       case 'training':
         return await executeTrainingAction(supabase, rule, data, config);
+      
+      case 'development':
+        return await executeDevelopmentAction(supabase, rule, data, config);
       
       default:
         return { success: false, error: `Unknown target module: ${rule.target_module}` };
@@ -574,6 +582,70 @@ async function executeTrainingAction(
     
     default:
       return { success: false, error: `Unknown training action type: ${actionType}` };
+  }
+}
+
+// Development action handler for 360 feedback → development themes integration
+async function executeDevelopmentAction(
+  supabase: any,
+  rule: IntegrationRule,
+  data: TriggerData,
+  config: Record<string, unknown>
+): Promise<{ success: boolean; targetRecordId?: string; error?: string }> {
+  const actionType = rule.action_type;
+  
+  switch (actionType) {
+    case 'generate_themes': {
+      // Call the feedback-development-generator function with auto-select mode
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      
+      try {
+        const response = await fetch(
+          `${supabaseUrl}/functions/v1/feedback-development-generator`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              cycleId: data.cycle_id,
+              employeeId: data.employee_id,
+              companyId: data.company_id,
+              autoSelect: true,
+              gapThreshold: config.gap_threshold || 0.5,
+              selectedSignalIds: [],
+              signals: [],
+            }),
+          }
+        );
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          return { success: false, error: `Development generator failed: ${errorText}` };
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+          return { success: false, error: result.error || 'Theme generation failed' };
+        }
+        
+        return { 
+          success: true, 
+          targetRecordId: result.themes?.[0]?.id || `${result.themes?.length || 0} themes generated`
+        };
+      } catch (fetchError) {
+        return { 
+          success: false, 
+          error: fetchError instanceof Error ? fetchError.message : 'Failed to call development generator' 
+        };
+      }
+    }
+    
+    default:
+      return { success: false, error: `Unknown development action type: ${actionType}` };
   }
 }
 
