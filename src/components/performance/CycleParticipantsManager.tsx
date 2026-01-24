@@ -27,9 +27,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Search, UserPlus, Trash2, Users } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, Search, UserPlus, Trash2, Users, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ExternalRaterInvitation } from "@/components/feedback/external/ExternalRaterInvitation";
 
 interface Participant {
   id: string;
@@ -70,9 +72,11 @@ export function CycleParticipantsManager({
   const [searchQuery, setSearchQuery] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const [raterCategories, setRaterCategories] = useState<Array<{ id: string; name: string; is_external?: boolean }>>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
+  const [selectedParticipantForExternal, setSelectedParticipantForExternal] = useState<Participant | null>(null);
 
   useEffect(() => {
     if (open && cycleId) {
@@ -82,8 +86,24 @@ export function CycleParticipantsManager({
 
   const fetchData = async () => {
     setLoading(true);
-    await Promise.all([fetchParticipants(), fetchEmployees(), fetchDepartments()]);
+    await Promise.all([fetchParticipants(), fetchEmployees(), fetchDepartments(), fetchRaterCategories()]);
     setLoading(false);
+  };
+
+  const fetchRaterCategories = async () => {
+    const { data, error } = await supabase
+      .from("feedback_360_rater_categories")
+      .select("id, name, is_external")
+      .eq("company_id", companyId)
+      .eq("is_active", true)
+      .order("display_order");
+
+    if (error) {
+      console.error("Error fetching rater categories:", error);
+      return;
+    }
+
+    setRaterCategories(data || []);
   };
 
   const fetchParticipants = async () => {
@@ -410,14 +430,28 @@ export function CycleParticipantsManager({
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => handleRemoveParticipant(participant.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          {raterCategories.some(c => c.is_external) && (
+                            <ExternalRaterInvitation
+                              cycleId={cycleId}
+                              subjectEmployeeId={participant.employee_id}
+                              subjectEmployeeName={participant.employee?.full_name || 'Employee'}
+                              companyId={companyId}
+                              raterCategories={raterCategories}
+                              onInviteSent={() => {
+                                toast.success('External rater invited');
+                              }}
+                            />
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => handleRemoveParticipant(participant.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

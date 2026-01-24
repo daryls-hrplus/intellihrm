@@ -25,7 +25,9 @@ import { ReportDownloadButton, type ExportFormat } from "@/components/feedback/r
 import { ReportIntroduction } from "@/components/feedback/reports/ReportIntroduction";
 import { ScoreInterpretationGuide } from "@/components/feedback/reports/ScoreInterpretationGuide";
 import { LimitationsDisclaimer } from "@/components/feedback/reports/LimitationsDisclaimer";
-import { generateFeedback360PDF, downloadPDF, type Feedback360ReportData } from "@/utils/feedback360ReportPdf";
+import { ReportTemplateSelector } from "@/components/feedback/reports/ReportTemplateSelector";
+import { generateFeedback360PDF, downloadPDF, type Feedback360ReportData, type ReportSectionsConfig } from "@/utils/feedback360ReportPdf";
+import { type FeedbackReportTemplate } from "@/hooks/useFeedbackReportTemplates";
 import { toast } from "sonner";
 
 interface Participation {
@@ -70,7 +72,7 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
   const [loading, setLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat | null>(null);
-
+  const [selectedTemplate, setSelectedTemplate] = useState<FeedbackReportTemplate | null>(null);
   const completedParticipations = participations.filter((p) => p.status === "completed");
   
   const selectedParticipationData = completedParticipations.find(p => p.id === selectedParticipation);
@@ -202,7 +204,14 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
           companyName: company?.name,
         };
         
-        const blob = await generateFeedback360PDF(reportData);
+        // Apply template configuration if selected
+        const pdfOptions = selectedTemplate ? {
+          sectionsConfig: selectedTemplate.sections_config as ReportSectionsConfig,
+          contentDepth: selectedTemplate.content_depth,
+          audienceType: selectedTemplate.audience_type,
+        } : {};
+        
+        const blob = await generateFeedback360PDF(reportData, pdfOptions);
         downloadPDF(blob, `360_Feedback_Report_${new Date().toISOString().split('T')[0]}.pdf`);
         toast.success('PDF report downloaded');
       } else if (format === 'docx') {
@@ -254,7 +263,15 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
           </Select>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <ReportTemplateSelector
+            companyId={companyId}
+            onSelect={setSelectedTemplate}
+            selectedTemplateId={selectedTemplate?.id}
+            defaultAudienceType="individual_contributor"
+            showLabel={false}
+            className="w-[200px]"
+          />
           <ReportDownloadButton 
             onExport={handleExport}
             isExporting={isExporting}

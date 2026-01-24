@@ -32,6 +32,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Team360OverviewWidget } from '@/components/mss';
 
 interface DirectReport {
   employee_id: string;
@@ -100,6 +101,9 @@ export default function MssTeamPage() {
             {t('mss.dashboard.myTeamDesc')}
           </p>
         </div>
+
+        {/* Team 360 Overview Widget */}
+        <Team360OverviewWidget />
 
         {/* Stats Card */}
         <Card>
