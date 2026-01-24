@@ -36,6 +36,7 @@ const ManualPublishingPage = lazy(() => import('@/pages/enablement/ManualPublish
 const ContentLifecyclePage = lazy(() => import('@/pages/enablement/ContentLifecyclePage'));
 const RouteRegistryPage = lazy(() => import('@/pages/enablement/RouteRegistryPage'));
 const QuickStartGuidesPage = lazy(() => import('@/pages/enablement/QuickStartGuidesPage'));
+const QuickStartAdminPage = lazy(() => import('@/pages/enablement/QuickStartAdminPage'));
 const ImplementationChecklistsPage = lazy(() => import('@/pages/enablement/ImplementationChecklistsPage'));
 const ModulesIndexPage = lazy(() => import('@/pages/enablement/ModulesIndexPage'));
 const ModuleDocumentationPage = lazy(() => import('@/pages/enablement/ModuleDocumentationPage'));
@@ -88,6 +89,7 @@ export function EnablementRoutes() {
       <Route path="/enablement/content-lifecycle" element={<EnablementRoute><ContentLifecyclePage /></EnablementRoute>} />
       <Route path="/enablement/route-registry" element={<EnablementRoute><RouteRegistryPage /></EnablementRoute>} />
       <Route path="/enablement/quickstarts" element={<EnablementRoute><QuickStartGuidesPage /></EnablementRoute>} />
+      <Route path="/enablement/quickstarts/admin" element={<EnablementRoute><QuickStartAdminPage /></EnablementRoute>} />
       <Route path="/enablement/quickstart/learning-development" element={<EnablementRoute><LnDQuickStartPage /></EnablementRoute>} />
       <Route path="/enablement/checklists" element={<EnablementRoute><ImplementationChecklistsPage /></EnablementRoute>} />
       <Route path="/enablement/modules" element={<EnablementRoute><ModulesIndexPage /></EnablementRoute>} />
