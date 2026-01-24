@@ -8,8 +8,9 @@ interface TranslationsProviderProps {
  * Provider component that loads translations from the database
  * and keeps them in sync with real-time updates.
  * 
- * Wraps the app to ensure translations are loaded before rendering.
- * Falls back to static JSON files during initial load.
+ * Must be placed INSIDE BrowserRouter since it uses useLocation.
+ * Skips database loading for public routes (homepage, auth, demo).
+ * Uses sessionStorage caching to avoid refetching on navigation.
  */
 export function TranslationsProvider({ children }: TranslationsProviderProps) {
   const { isLoaded, error } = useTranslationsLoader();

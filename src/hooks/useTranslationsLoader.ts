@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import i18n from '@/i18n/config';
 import type { SupportedLanguage } from '@/i18n/config';
@@ -18,6 +19,14 @@ interface TranslationRow {
 
 type NestedObject = { [key: string]: string | NestedObject };
 
+// Session storage key for cached translations
+const CACHE_KEY = 'hrplus_translations_cache';
+const CACHE_VERSION_KEY = 'hrplus_translations_version';
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
+// Public routes that don't need database translations
+const PUBLIC_ROUTES = ['/', '/auth', '/demo', '/subscription'];
+
 /**
  * Convert flat dot-notation keys to nested object structure
  */
@@ -35,7 +44,6 @@ function unflattenObject(flat: Record<string, string>): NestedObject {
       if (!(part in current) || typeof current[part] !== 'object') {
         current[part] = {};
       }
-      // Create a new reference to avoid modifying frozen objects
       const next = current[part];
       if (typeof next === 'object' && next !== null) {
         current = next as NestedObject;
@@ -72,17 +80,87 @@ function buildLanguageResource(
   return unflattenObject(flat);
 }
 
+/**
+ * Check if cache is still valid
+ */
+function isCacheValid(): boolean {
+  try {
+    const version = sessionStorage.getItem(CACHE_VERSION_KEY);
+    if (!version) return false;
+    
+    const timestamp = parseInt(version, 10);
+    return Date.now() - timestamp < CACHE_DURATION;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get cached translations from sessionStorage
+ */
+function getCachedTranslations(): { translations: TranslationRow[]; languages: SupportedLanguage[] } | null {
+  try {
+    if (!isCacheValid()) return null;
+    
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+    
+    return JSON.parse(cached);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Cache translations to sessionStorage
+ */
+function cacheTranslations(translations: TranslationRow[], languages: SupportedLanguage[]): void {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ translations, languages }));
+    sessionStorage.setItem(CACHE_VERSION_KEY, Date.now().toString());
+  } catch {
+    // Ignore storage errors (quota exceeded, etc.)
+  }
+}
+
 export function useTranslationsLoader() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const loadingRef = useRef(false);
+  const hasAppliedCacheRef = useRef(false);
+  const location = useLocation();
 
-  const loadTranslations = useCallback(async () => {
+  // Check if current route is public
+  const isPublicRoute = PUBLIC_ROUTES.some(route => 
+    location.pathname === route || location.pathname.startsWith(`${route}/`)
+  );
+
+  const applyTranslations = useCallback((translations: TranslationRow[], languages: SupportedLanguage[]) => {
+    languages.forEach((langCode) => {
+      const resource = buildLanguageResource(translations, langCode);
+      i18n.addResourceBundle(langCode, 'translation', resource, true, true);
+    });
+  }, []);
+
+  const loadTranslations = useCallback(async (forceRefresh = false) => {
     // Prevent concurrent loads
     if (loadingRef.current) return;
     loadingRef.current = true;
 
     try {
+      // Check sessionStorage cache first (unless forcing refresh)
+      if (!forceRefresh) {
+        const cached = getCachedTranslations();
+        if (cached && !hasAppliedCacheRef.current) {
+          applyTranslations(cached.translations, cached.languages);
+          hasAppliedCacheRef.current = true;
+          setIsLoaded(true);
+          loadingRef.current = false;
+          console.log(`Applied ${cached.translations.length} cached translations`);
+          return;
+        }
+      }
+
       // Fetch active company languages
       const { data: companies, error: companyError } = await supabase
         .from('companies')
@@ -140,11 +218,10 @@ export function useTranslationsLoader() {
         return;
       }
 
-      // Build and add resources only for active company languages
-      companyLanguages.forEach((langCode) => {
-        const resource = buildLanguageResource(allTranslations, langCode);
-        i18n.addResourceBundle(langCode, 'translation', resource, true, true);
-      });
+      // Apply translations and cache them
+      applyTranslations(allTranslations, companyLanguages);
+      cacheTranslations(allTranslations, companyLanguages);
+      hasAppliedCacheRef.current = true;
 
       console.log(`Loaded ${allTranslations.length} translations for ${companyLanguages.length} languages: ${companyLanguages.join(', ')}`);
       setIsLoaded(true);
@@ -156,11 +233,19 @@ export function useTranslationsLoader() {
     } finally {
       loadingRef.current = false;
     }
-  }, []);
+  }, [applyTranslations]);
 
   useEffect(() => {
+    // Skip loading for public routes - use static translations only
+    if (isPublicRoute) {
+      setIsLoaded(true);
+      return;
+    }
+
+    // For protected routes, load from cache or database
     loadTranslations();
 
+    // Only subscribe to realtime updates for non-public routes
     const channel = supabase
       .channel('translations-changes')
       .on(
@@ -172,7 +257,7 @@ export function useTranslationsLoader() {
         },
         () => {
           console.log('Translation change detected, reloading...');
-          loadTranslations();
+          loadTranslations(true); // Force refresh on changes
         }
       )
       .subscribe();
@@ -180,7 +265,7 @@ export function useTranslationsLoader() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loadTranslations]);
+  }, [loadTranslations, isPublicRoute]);
 
-  return { isLoaded, error, reload: loadTranslations };
+  return { isLoaded, error, reload: () => loadTranslations(true) };
 }

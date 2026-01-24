@@ -45,10 +45,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <TooltipProvider>
-        <TranslationsProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <TranslationsProvider>
             <AuthProvider>
             <Routes>
             {/* Public Landing Page at Root */}
@@ -693,9 +693,9 @@ const App = () => (
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
             </Routes>
-          </AuthProvider>
+            </AuthProvider>
+          </TranslationsProvider>
         </BrowserRouter>
-        </TranslationsProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
