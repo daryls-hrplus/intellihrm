@@ -113,19 +113,19 @@ export function Team360OverviewWidget() {
       // Sort by days until deadline
       upcomingDeadlines.sort((a, b) => a.daysUntil - b.daysUntil);
 
-      // Get direct reports with their 360 status
-      const { data: reports } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('manager_id', user.id)
-        .limit(5);
+      // Get direct reports using RPC to avoid type inference issues
+      const { data: reports } = await supabase.rpc('get_manager_direct_reports', {
+        p_manager_id: user.id
+      });
+      
+      const limitedReports = (reports || []).slice(0, 5);
 
       const memberStatuses: TeamMemberStatus[] = [];
-      for (const report of (reports || [])) {
+      for (const report of limitedReports) {
         const { data: participation } = await supabase
           .from('review_participants')
           .select('status, review_cycle_id')
-          .eq('employee_id', report.id)
+          .eq('employee_id', report.employee_id)
           .order('created_at', { ascending: false })
           .limit(1);
 
@@ -148,8 +148,8 @@ export function Team360OverviewWidget() {
         }
 
         memberStatuses.push({
-          id: report.id,
-          name: report.full_name || 'Unknown',
+          id: report.employee_id,
+          name: report.employee_name || 'Unknown',
           cycleStatus: memberCycleStatus,
           completionRate,
         });
