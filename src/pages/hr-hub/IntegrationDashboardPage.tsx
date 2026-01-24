@@ -33,7 +33,7 @@ import {
   Grid3X3,
   TrendingUp
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface Company {
   id: string;
@@ -72,7 +72,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function IntegrationDashboardPage() {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
@@ -150,16 +150,22 @@ export default function IntegrationDashboardPage() {
   const navigateToTarget = (log: IntegrationLog) => {
     if (!log.target_record_id) return;
     
-    const routes: Record<string, string> = {
-      nine_box: '/succession/nine-box',
-      succession: '/succession/plans',
-      idp: '/ess/development',
-      pip: '/performance/pips',
-      compensation: '/compensation/history'
+    const routeConfig: Record<string, { route: string; title: string; moduleCode: string }> = {
+      nine_box: { route: '/succession/nine-box', title: '9-Box', moduleCode: 'succession' },
+      succession: { route: '/succession/plans', title: 'Succession Plans', moduleCode: 'succession' },
+      idp: { route: '/ess/development', title: 'Development', moduleCode: 'ess' },
+      pip: { route: '/performance/pips', title: 'PIPs', moduleCode: 'performance' },
+      compensation: { route: '/compensation/history', title: 'Compensation History', moduleCode: 'compensation' },
     };
 
-    const route = routes[log.target_module];
-    if (route) navigate(route);
+    const config = routeConfig[log.target_module];
+    if (config) {
+      navigateToList({
+        route: config.route,
+        title: config.title,
+        moduleCode: config.moduleCode,
+      });
+    }
   };
 
   const breadcrumbItems = [
