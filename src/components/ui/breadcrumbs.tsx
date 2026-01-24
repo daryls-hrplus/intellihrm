@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { NavLink } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 
@@ -10,30 +11,34 @@ interface BreadcrumbsProps {
   items: BreadcrumbItem[];
 }
 
-export function Breadcrumbs({ items }: BreadcrumbsProps) {
-  return (
-    <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
-      <NavLink
-        to="/"
-        className="flex items-center gap-1 hover:text-foreground transition-colors"
-      >
-        <Home className="h-4 w-4" />
-      </NavLink>
-      {items.map((item, index) => (
-        <div key={index} className="flex items-center gap-1">
-          <ChevronRight className="h-4 w-4" />
-          {item.href ? (
-            <NavLink
-              to={item.href}
-              className="hover:text-foreground transition-colors"
-            >
-              {item.label}
-            </NavLink>
-          ) : (
-            <span className="text-foreground font-medium">{item.label}</span>
-          )}
-        </div>
-      ))}
-    </nav>
-  );
-}
+export const Breadcrumbs = forwardRef<HTMLElement, BreadcrumbsProps>(
+  ({ items }, ref) => {
+    return (
+      <nav ref={ref} className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
+        <NavLink
+          to="/"
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
+        >
+          <Home className="h-4 w-4" />
+        </NavLink>
+        {items.map((item, index) => (
+          <div key={index} className="flex items-center gap-1">
+            <ChevronRight className="h-4 w-4" />
+            {item.href ? (
+              <NavLink
+                to={item.href}
+                className="hover:text-foreground transition-colors"
+              >
+                {item.label}
+              </NavLink>
+            ) : (
+              <span className="text-foreground font-medium">{item.label}</span>
+            )}
+          </div>
+        ))}
+      </nav>
+    );
+  }
+);
+
+Breadcrumbs.displayName = "Breadcrumbs";
