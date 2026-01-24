@@ -2,9 +2,9 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { usePageAudit } from "@/hooks/usePageAudit";
-import { useNavigate } from "react-router-dom";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import {
@@ -23,6 +23,7 @@ import {
   Trash2,
   LayoutGrid,
   List,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -91,6 +92,7 @@ interface Company {
 export default function EmployeesPage() {
   usePageAudit('employees', 'Workforce');
   const { t } = useLanguage();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const [searchQuery, setSearchQuery] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -105,10 +107,22 @@ export default function EmployeesPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState<Employee | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const navigate = useNavigate();
   const { logView, logAction } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
   const hasLoggedView = useRef(false);
+
+  // Navigate to employee profile in a new tab
+  const handleViewEmployee = (employee: Employee) => {
+    navigateToRecord({
+      route: `/workforce/employees/${employee.id}`,
+      title: employee.full_name,
+      subtitle: "Employee",
+      moduleCode: "workforce",
+      contextType: "employee",
+      contextId: employee.id,
+      icon: User,
+    });
+  };
 
   useEffect(() => {
     fetchCompanies();
@@ -685,7 +699,7 @@ export default function EmployeesPage() {
                     {employee.is_active ? t("workforce.active") : t("workforce.unassigned")}
                   </span>
                   <button 
-                    onClick={() => navigate(`/workforce/employees/${employee.id}`)}
+                    onClick={() => handleViewEmployee(employee)}
                     className="text-sm font-medium text-primary hover:underline"
                   >
                     {t("workforce.viewProfile")}
@@ -716,7 +730,7 @@ export default function EmployeesPage() {
                   <TableRow 
                     key={employee.id} 
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => navigate(`/workforce/employees/${employee.id}`)}
+                    onClick={() => handleViewEmployee(employee)}
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
