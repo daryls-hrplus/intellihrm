@@ -47,6 +47,7 @@ import {
   Send,
   Trophy,
   AlertTriangle,
+  Lightbulb,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -68,6 +69,7 @@ import { RatingVisibilityTimeline } from "@/components/performance/RatingVisibil
 import { PersonalInsightsCard } from "@/components/performance/insights/PersonalInsightsCard";
 import { GoalNotificationBell } from "@/components/performance/goals/GoalNotificationBell";
 import { GoalSkillGapCard } from "@/components/performance/goals/GoalSkillGapCard";
+import { GoalTemplateBrowser } from "@/components/performance/GoalTemplateBrowser";
 import { ESSGoalsCheckInsTab } from "@/components/ess/goals/ESSGoalsCheckInsTab";
 import { ESSGoalsAdjustmentsTab } from "@/components/ess/goals/ESSGoalsAdjustmentsTab";
 import { ESSGoalsDisputesTab } from "@/components/ess/goals/ESSGoalsDisputesTab";
@@ -136,6 +138,17 @@ export default function MyGoalsPage() {
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<GoalRatingSubmission | null>(null);
   const [pendingAcknowledgments, setPendingAcknowledgments] = useState<GoalRatingSubmission[]>([]);
+  
+  // Template browser state
+  const [templateBrowserOpen, setTemplateBrowserOpen] = useState(false);
+  const [templateToUse, setTemplateToUse] = useState<{
+    name: string;
+    description: string | null;
+    goal_type: string;
+    category: string | null;
+    default_weighting: number | null;
+    suggested_metrics: { metrics?: string[]; measurement_frequency?: string } | null;
+  } | null>(null);
   
   const { getOverdueCheckIns, getRequestedCheckIns } = useGoalCheckIns();
   const [pendingCheckIns, setPendingCheckIns] = useState<Record<string, { dueDate: string | null; daysToDue: number | null }>>({});
@@ -364,6 +377,10 @@ export default function MyGoalsPage() {
             <Button variant="outline" onClick={() => setShowAnalytics(!showAnalytics)}>
               <BarChart3 className="mr-2 h-4 w-4" />
               {showAnalytics ? t("pages.myGoals.hideAnalytics") : t("pages.myGoals.showAnalytics")}
+            </Button>
+            <Button variant="outline" onClick={() => setTemplateBrowserOpen(true)}>
+              <Lightbulb className="mr-2 h-4 w-4" />
+              Templates
             </Button>
             <Button onClick={() => setCreateGoalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -1066,6 +1083,17 @@ export default function MyGoalsPage() {
           companyId={company?.id}
           employees={user ? [{ id: user.id, full_name: "Me" }] : []}
           onSuccess={fetchGoals}
+        />
+
+        {/* Goal Template Browser */}
+        <GoalTemplateBrowser
+          open={templateBrowserOpen}
+          onOpenChange={setTemplateBrowserOpen}
+          companyId={company?.id}
+          onSelectTemplate={() => {
+            setTemplateBrowserOpen(false);
+            setCreateGoalOpen(true);
+          }}
         />
         
         {/* Rating Acknowledgment Dialog */}

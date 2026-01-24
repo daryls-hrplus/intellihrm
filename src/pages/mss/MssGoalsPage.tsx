@@ -54,6 +54,7 @@ import { GoalQualityReport } from "@/components/performance/insights/GoalQuality
 import { GoalNotificationBell } from "@/components/performance/goals/GoalNotificationBell";
 import { EnhancedCoachingNudges } from "@/components/performance/insights/EnhancedCoachingNudges";
 import { GoalSkillGapCard } from "@/components/performance/goals/GoalSkillGapCard";
+import { GoalHierarchyView } from "@/components/performance/GoalHierarchyView";
 import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
 import { useGoalAdjustments } from "@/hooks/useGoalAdjustments";
 import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
@@ -620,6 +621,10 @@ const statusColors: Record<GoalStatus, string> = {
               <TrendingUp className="h-4 w-4" />
               Team Insights
             </TabsTrigger>
+            <TabsTrigger value="hierarchy" className="gap-2">
+              <Target className="h-4 w-4" />
+              Goal Hierarchy
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="team-goals" className="mt-6 space-y-4">
@@ -1013,6 +1018,11 @@ const statusColors: Record<GoalStatus, string> = {
                 companyId={company?.id}
               />
             </div>
+          </TabsContent>
+
+          {/* Goal Hierarchy Tab */}
+          <TabsContent value="hierarchy" className="mt-6">
+            <GoalHierarchyView companyId={company?.id} showAlignments />
           </TabsContent>
         </Tabs>
 
