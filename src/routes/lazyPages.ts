@@ -110,6 +110,7 @@ export const ContentLifecyclePage = lazy(() => import('@/pages/enablement/Conten
 export const ManualsIndexPage = lazy(() => import('@/pages/enablement/ManualsIndexPage'));
 export const ProductCapabilitiesPage = lazy(() => import('@/pages/enablement/ProductCapabilitiesPage'));
 export const QuickStartGuidesPage = lazy(() => import('@/pages/enablement/QuickStartGuidesPage'));
+export const QuickStartAdminPage = lazy(() => import('@/pages/enablement/QuickStartAdminPage'));
 export const ImplementationChecklistsPage = lazy(() => import('@/pages/enablement/ImplementationChecklistsPage'));
 export const ModulesIndexPage = lazy(() => import('@/pages/enablement/ModulesIndexPage'));
 export const ModuleDocumentationPage = lazy(() => import('@/pages/enablement/ModuleDocumentationPage'));
