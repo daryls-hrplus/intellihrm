@@ -88,8 +88,8 @@ export function EnablementRoutes() {
       <Route path="/enablement/manual-publishing" element={<EnablementRoute><ManualPublishingPage /></EnablementRoute>} />
       <Route path="/enablement/content-lifecycle" element={<EnablementRoute><ContentLifecyclePage /></EnablementRoute>} />
       <Route path="/enablement/route-registry" element={<EnablementRoute><RouteRegistryPage /></EnablementRoute>} />
-      <Route path="/enablement/quickstarts" element={<EnablementRoute><QuickStartGuidesPage /></EnablementRoute>} />
       <Route path="/enablement/quickstarts/admin" element={<EnablementRoute><QuickStartAdminPage /></EnablementRoute>} />
+      <Route path="/enablement/quickstarts" element={<EnablementRoute><QuickStartGuidesPage /></EnablementRoute>} />
       <Route path="/enablement/quickstart/learning-development" element={<EnablementRoute><LnDQuickStartPage /></EnablementRoute>} />
       <Route path="/enablement/checklists" element={<EnablementRoute><ImplementationChecklistsPage /></EnablementRoute>} />
       <Route path="/enablement/modules" element={<EnablementRoute><ModulesIndexPage /></EnablementRoute>} />
