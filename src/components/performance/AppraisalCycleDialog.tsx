@@ -14,8 +14,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, GitMerge, FileText, AlertTriangle, Target, ClipboardList, Goal, Heart, Rocket, Clock } from "lucide-react";
+import { Users, GitMerge, FileText, AlertTriangle, Target, ClipboardList, Goal, Heart, Rocket, Clock, Link2 } from "lucide-react";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
+import { useActiveGoalCycles } from "@/hooks/useGoalCycles";
 import { format } from "date-fns";
 import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
@@ -115,6 +116,7 @@ interface AppraisalCycle {
   multi_position_mode?: string;
   template_id?: string;
   cycle_type?: string;
+  linked_goal_cycle_id?: string | null;
 }
 
 interface AppraisalCycleDialogProps {
@@ -142,7 +144,7 @@ export function AppraisalCycleDialog({
   const [loading, setLoading] = useState(false);
   const [showWeightWarning, setShowWeightWarning] = useState(false);
   const { templates } = useAppraisalFormTemplates(companyId || "");
-  
+  const { cycles: goalCycles } = useActiveGoalCycles(companyId);
   // Overlap detection state
   const [overlappingCycles, setOverlappingCycles] = useState<Array<{ id: string; name: string; start_date: string; end_date: string; cycle_type: string }>>([]);
   const [overlapAcknowledged, setOverlapAcknowledged] = useState(false);
@@ -188,6 +190,7 @@ export function AppraisalCycleDialog({
     multi_position_mode: "aggregate" as "aggregate" | "separate",
     template_id: "",
     cycle_type: getInitialCycleType(),
+    linked_goal_cycle_id: "" as string,
   });
 
   useEffect(() => {
@@ -214,6 +217,7 @@ export function AppraisalCycleDialog({
         multi_position_mode: (cycle.multi_position_mode as "aggregate" | "separate") || "aggregate",
         template_id: cycle.template_id || "",
         cycle_type: (cycle.cycle_type as AppraisalCycleType) || getInitialCycleType(),
+        linked_goal_cycle_id: cycle.linked_goal_cycle_id || "",
       });
     } else {
       // Auto-select default template if available
@@ -240,6 +244,7 @@ export function AppraisalCycleDialog({
         multi_position_mode: "aggregate",
         template_id: defaultTemplate?.id || "",
         cycle_type: getInitialCycleType(),
+        linked_goal_cycle_id: "",
       });
     }
   }, [cycle, templates, isProbationReview, isManagerCycle]);
@@ -385,6 +390,8 @@ export function AppraisalCycleDialog({
         template_id: formData.template_id || null,
         created_by: user?.id,
         cycle_type: formData.cycle_type,
+        // Link to goal cycle for Goals module integration
+        linked_goal_cycle_id: formData.linked_goal_cycle_id || null,
         // Keep boolean flags for backward compatibility
         is_probation_review: formData.cycle_type === "probation",
         is_manager_cycle: formData.cycle_type === "manager_360",
@@ -581,6 +588,49 @@ export function AppraisalCycleDialog({
               )}
             </div>
           </div>
+
+          {/* Goal Cycle Linking - for Goals Module Integration */}
+          {categoryState.goals && formData.goal_weight > 0 && (
+            <Card className="border-primary/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Link2 className="h-4 w-4" />
+                  Link Goal Cycle
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Link a goal cycle to pull employee goals into this appraisal
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Select
+                  value={formData.linked_goal_cycle_id || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, linked_goal_cycle_id: value === "none" ? "" : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a goal cycle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No goal cycle linked</SelectItem>
+                    {goalCycles.map((gc) => (
+                      <SelectItem key={gc.id} value={gc.id}>
+                        {gc.name} ({format(new Date(gc.start_date), "MMM yyyy")} - {format(new Date(gc.end_date), "MMM yyyy")})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.linked_goal_cycle_id && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Employee goals from this cycle will appear in the appraisal form for rating.
+                  </p>
+                )}
+                {!formData.linked_goal_cycle_id && (
+                  <p className="text-xs text-amber-600 mt-2">
+                    Without a linked goal cycle, goals will be pulled from job templates instead of the Goals module.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Phase-Specific Deadlines */}
           <Card className="border-muted">
