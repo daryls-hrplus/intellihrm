@@ -17,7 +17,6 @@ interface EmployeeRow {
 }
 
 interface EmployeeInsertRecord {
-  id: string;
   email: string;
   full_name: string;
   first_name: string | null;
@@ -27,8 +26,6 @@ interface EmployeeInsertRecord {
   gender: string | null;
   marital_status: string | null;
   date_of_birth: string | null;
-  is_active: boolean;
-  invitation_status: string;
 }
 
 interface TransformResult {
@@ -118,18 +115,7 @@ const COUNTRY_NAME_TO_ISO2: Record<string, string> = {
   "costa rica": "CR",
 };
 
-function createUuid(): string {
-  if (typeof crypto !== "undefined" && typeof (crypto as any).randomUUID === "function") {
-    return (crypto as any).randomUUID();
-  }
-
-  // RFC4122 v4 fallback (good enough for client-side IDs)
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
+// UUID generation removed - auth.users will provide the ID via trigger
 
 export async function transformEmployeesData(
   rows: EmployeeRow[],
@@ -295,11 +281,8 @@ export async function transformEmployeesData(
       }
     }
 
-    const id = createUuid();
-
-    // Add to transformed records
+    // Add to transformed records (no ID - auth.users will provide it via trigger)
     transformed.push({
-      id,
       email,
       full_name: fullName,
       first_name: row.first_name.trim(),
@@ -309,8 +292,6 @@ export async function transformEmployeesData(
       gender,
       marital_status: maritalStatus,
       date_of_birth: dateOfBirth,
-      is_active: true,
-      invitation_status: "pending",
     });
 
     // Track this email as now "existing" to prevent duplicates within the same import
