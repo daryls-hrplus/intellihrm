@@ -117,6 +117,14 @@
       "subtitle": "管理培训、认证和职业发展"
     }
   },
+  "workforce": {
+    "unassignedEmployees": "未分配员工",
+    "needPositionAssignment": "需要职位分配的员工",
+    "assign": "分配",
+    "viewAllUnassigned": "查看所有未分配",
+    "goToAssignments": "前往分配",
+    "moreUnassigned": "更多未分配员工"
+  },
   "navigation": {
     "dashboard": "仪表板",
     "workforce": "员工管理",

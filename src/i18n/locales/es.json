@@ -293,6 +293,12 @@
   },
   "workforce": {
     "title": "Gestión de Personal",
+    "unassignedEmployees": "Empleados Sin Asignar",
+    "needPositionAssignment": "Empleados que necesitan asignación de puesto",
+    "assign": "Asignar",
+    "viewAllUnassigned": "Ver Todos Sin Asignar",
+    "goToAssignments": "Ir a Asignaciones",
+    "moreUnassigned": "más empleados sin asignar",
     "description": "Gestiona el personal, departamentos y posiciones de tu organización",
     "employeeCount": "Total de Empleados",
     "departmentCount": "Departamentos",

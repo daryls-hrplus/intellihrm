@@ -384,10 +384,12 @@ export default function EmployeesPage() {
         </div>
 
         {/* Unassigned Employees Widget */}
-        <UnassignedEmployeesWidget
-          unassignedEmployees={unassignedEmployees}
-          onFilterUnassigned={() => setStatusFilter("unassigned")}
-        />
+        {selectedCompanyId !== "all" && (
+          <UnassignedEmployeesWidget
+            unassignedEmployees={unassignedEmployees}
+            onFilterUnassigned={() => setStatusFilter("unassigned")}
+          />
+        )}
 
         {/* Filters */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center animate-slide-up">

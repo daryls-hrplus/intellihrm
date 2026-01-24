@@ -105,6 +105,14 @@
       "subtitle": "Schulungen, Zertifizierungen und Karriereentwicklung verwalten"
     }
   },
+  "workforce": {
+    "unassignedEmployees": "Nicht zugewiesene Mitarbeiter",
+    "needPositionAssignment": "Mitarbeiter, die eine Positionszuweisung benötigen",
+    "assign": "Zuweisen",
+    "viewAllUnassigned": "Alle nicht zugewiesenen anzeigen",
+    "goToAssignments": "Zu Zuweisungen gehen",
+    "moreUnassigned": "weitere nicht zugewiesene Mitarbeiter"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "workforce": "Personal",

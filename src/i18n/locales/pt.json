@@ -101,6 +101,14 @@
       "subtitle": "Gerencie treinamentos, certificações e crescimento de carreira"
     }
   },
+  "workforce": {
+    "unassignedEmployees": "Funcionários Não Atribuídos",
+    "needPositionAssignment": "Funcionários que precisam de atribuição de cargo",
+    "assign": "Atribuir",
+    "viewAllUnassigned": "Ver Todos Não Atribuídos",
+    "goToAssignments": "Ir para Atribuições",
+    "moreUnassigned": "mais funcionários não atribuídos"
+  },
   "navigation": {
     "dashboard": "Painel",
     "workforce": "Força de trabalho",
