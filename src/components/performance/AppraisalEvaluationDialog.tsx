@@ -540,8 +540,37 @@ export function AppraisalEvaluationDialog({
       }
     }
 
-    let goals: { id: string; title: string; weight: number }[] = [];
-    if (positions && positions.length > 0) {
+    // Fetch employee's actual performance goals from Goals module (not job_goals templates)
+    let goals: { id: string; title: string; weight: number; self_rating?: number | null; manager_rating?: number | null; progress_percentage?: number }[] = [];
+    
+    // First try to get linked goal cycle from appraisal cycle
+    const { data: cycleWithGoals } = await supabase
+      .from("appraisal_cycles")
+      .select("linked_goal_cycle_id")
+      .eq("id", cycleId)
+      .single();
+    
+    const linkedGoalCycleId = (cycleWithGoals as any)?.linked_goal_cycle_id;
+    
+    if (linkedGoalCycleId) {
+      // Fetch from performance_goals - the actual employee goals from Goals module
+      const { data: performanceGoals } = await supabase
+        .from("performance_goals")
+        .select("id, title, weighting, self_rating, manager_rating, progress_percentage")
+        .eq("employee_id", employeeId)
+        .eq("goal_cycle_id", linkedGoalCycleId)
+        .in("status", ["active", "completed", "in_progress", "approved"]);
+      
+      goals = (performanceGoals || []).map((g: any) => ({
+        id: g.id,
+        title: g.title,
+        weight: g.weighting || 0,
+        self_rating: g.self_rating,
+        manager_rating: g.manager_rating,
+        progress_percentage: g.progress_percentage || 0
+      }));
+    } else if (positions && positions.length > 0) {
+      // Fallback to job_goals if no goal cycle linked (backward compatibility)
       const jobIds = positions
         .map((p: any) => p.positions?.job_id)
         .filter(Boolean);
