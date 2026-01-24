@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { 
   Upload, 
@@ -17,7 +19,8 @@ import {
   Shield,
   Clock,
   Download,
-  FileWarning
+  FileWarning,
+  Key
 } from "lucide-react";
 import { transformPositionsData, generateFailureReport } from "./positionsTransformer";
 import { transformSalaryGradesData, generateSalaryGradesFailureReport } from "./salaryGradesTransformer";
@@ -43,6 +46,8 @@ interface WizardStepCommitProps {
   isCommitting: boolean;
   committedCount: number;
   compensationModel?: CompensationModel | null;
+  defaultPassword?: string | null;
+  onDefaultPasswordChange?: (password: string) => void;
   onBatchCreated: (batchId: string) => void;
   onCommitStart: () => void;
   onCommitComplete: (count: number) => void;
@@ -80,6 +85,8 @@ export function WizardStepCommit({
   isCommitting,
   committedCount,
   compensationModel,
+  defaultPassword,
+  onDefaultPasswordChange,
   onBatchCreated,
   onCommitStart,
   onCommitComplete,
@@ -581,7 +588,13 @@ export function WizardStepCommit({
         }
         setProgress(90);
       } else if (importType === "employees") {
-        // Employees import - transform and insert profiles
+        // Employees import - use bulk-import-users edge function to create auth users
+        // This ensures the profiles.id foreign key constraint is satisfied
+        
+        if (!defaultPassword || defaultPassword.length < 6) {
+          throw new Error("Default password must be at least 6 characters for employee import");
+        }
+        
         setProgress(30);
         const transformResult = await transformEmployeesData(validData, companyId);
         
@@ -589,67 +602,117 @@ export function WizardStepCommit({
         allWarnings.push(...transformResult.warnings);
         failedCount = transformResult.errors.length;
         
-        setProgress(50);
+        setProgress(40);
 
         if (transformResult.transformed.length > 0) {
-          const batchSize = 50;
-          for (let i = 0; i < transformResult.transformed.length; i += batchSize) {
-            const batch = transformResult.transformed.slice(i, i + batchSize);
-            
-            const { data: insertData, error: insertError } = await (supabase as any)
-              .from("profiles")
-              .insert(batch)
-              .select("id, email");
+          // Prepare users for edge function (format: { email, full_name, company_id })
+          const usersForEdgeFunction = transformResult.transformed.map(emp => ({
+            email: emp.email,
+            full_name: emp.full_name,
+            company_id: emp.company_id || companyId,
+          }));
 
-            if (insertError) {
-              batch.forEach((_, idx) => {
-                allErrors.push({ 
-                  rowIndex: i + idx, 
-                  row: validData[i + idx], 
-                  error: insertError.message 
-                });
-              });
-              failedCount += batch.length;
+          // Call the bulk-import-users edge function to create auth users
+          const { data: edgeFunctionResult, error: edgeFunctionError } = await supabase.functions.invoke(
+            "bulk-import-users",
+            {
+              body: {
+                users: usersForEdgeFunction,
+                defaultPassword,
+              },
+            }
+          );
+
+          if (edgeFunctionError) {
+            throw new Error(`Edge function error: ${edgeFunctionError.message}`);
+          }
+
+          setProgress(60);
+
+          // Process results from edge function
+          const results = edgeFunctionResult?.results || [];
+          const successfulEmails = new Set<string>();
+          
+          for (let i = 0; i < results.length; i++) {
+            const result = results[i];
+            if (result.success) {
+              successfulEmails.add(result.email.toLowerCase());
+              successCount++;
             } else {
-              successCount += batch.length;
-              importedIds.push(...(insertData?.map((d) => d.id) || []));
-
-              // Create email-to-id mapping for related records
-              const emailToId = new Map(
-                insertData?.map((d) => [d.email.toLowerCase(), d.id]) || []
+              // Find the original row index
+              const originalIndex = transformResult.transformed.findIndex(
+                t => t.email.toLowerCase() === result.email.toLowerCase()
               );
+              allErrors.push({
+                rowIndex: originalIndex >= 0 ? originalIndex + 2 : i + 2,
+                row: validData[originalIndex >= 0 ? originalIndex : i],
+                error: result.error || "Failed to create user",
+              });
+              failedCount++;
+            }
+          }
 
-              // Insert address records if any
-              const addressBatch = transformResult.addressRecords.filter(
-                (a) => emailToId.has(a.email.toLowerCase())
-              );
-              if (addressBatch.length > 0) {
-                const addressInserts = addressBatch.map((a) => ({
-                  employee_id: emailToId.get(a.email.toLowerCase())!,
-                  address_type: "home",
-                  address_line_1: a.address,
-                  city: a.city,
-                  country: a.country,
-                  is_primary: true,
-                }));
-                await (supabase as any).from("employee_addresses").insert(addressInserts);
-              }
+          setProgress(70);
 
-              // Insert contact records if any
-              const contactBatch = transformResult.contactRecords.filter(
-                (c) => emailToId.has(c.email.toLowerCase())
-              );
-              if (contactBatch.length > 0) {
-                const contactInserts = contactBatch.map((c) => ({
-                  employee_id: emailToId.get(c.email.toLowerCase())!,
-                  contact_type: "phone",
-                  contact_value: c.phone,
-                  is_primary: true,
-                }));
-                await (supabase as any).from("employee_contacts").insert(contactInserts);
+          // Now update the profiles with additional fields not covered by edge function
+          // (date_of_birth, gender, marital_status, nationality)
+          for (const emp of transformResult.transformed) {
+            if (successfulEmails.has(emp.email.toLowerCase())) {
+              // Fetch the profile ID by email
+              const { data: profileData } = await (supabase as any)
+                .from("profiles")
+                .select("id")
+                .eq("email", emp.email.toLowerCase())
+                .maybeSingle();
+
+              if (profileData?.id) {
+                importedIds.push(profileData.id);
+                
+                // Update profile with additional fields
+                const updateFields: Record<string, any> = {};
+                if (emp.date_of_birth) updateFields.date_of_birth = emp.date_of_birth;
+                if (emp.gender) updateFields.gender = emp.gender;
+                if (emp.marital_status) updateFields.marital_status = emp.marital_status;
+                if (emp.nationality) updateFields.nationality = emp.nationality;
+                if (emp.first_name) updateFields.first_name = emp.first_name;
+                if (emp.first_last_name) updateFields.first_last_name = emp.first_last_name;
+                
+                if (Object.keys(updateFields).length > 0) {
+                  await (supabase as any)
+                    .from("profiles")
+                    .update(updateFields)
+                    .eq("id", profileData.id);
+                }
+
+                // Insert address records if any
+                const addressRecord = transformResult.addressRecords.find(
+                  a => a.email.toLowerCase() === emp.email.toLowerCase()
+                );
+                if (addressRecord) {
+                  await (supabase as any).from("employee_addresses").insert({
+                    employee_id: profileData.id,
+                    address_type: "home",
+                    address_line_1: addressRecord.address,
+                    city: addressRecord.city,
+                    country: addressRecord.country,
+                    is_primary: true,
+                  });
+                }
+
+                // Insert contact records if any
+                const contactRecord = transformResult.contactRecords.find(
+                  c => c.email.toLowerCase() === emp.email.toLowerCase()
+                );
+                if (contactRecord) {
+                  await (supabase as any).from("employee_contacts").insert({
+                    employee_id: profileData.id,
+                    contact_type: "phone",
+                    contact_value: contactRecord.phone,
+                    is_primary: true,
+                  });
+                }
               }
             }
-            setProgress(50 + Math.round((i / transformResult.transformed.length) * 40));
           }
         }
         setProgress(90);
@@ -817,6 +880,35 @@ export function WizardStepCommit({
           </div>
         </CardContent>
       </Card>
+
+      {/* Password Input for Employees Import */}
+      {importType === "employees" && !isCommitting && committedCount === 0 && (
+        <Card className="border-primary/30">
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Key className="h-5 w-5 text-primary" />
+              Default Password for New Users
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              All imported employees will be created as users with this password. They can change it after their first login.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="default-password">Default Password (min 6 characters)</Label>
+              <Input
+                id="default-password"
+                type="password"
+                placeholder="Enter default password..."
+                value={defaultPassword || ""}
+                onChange={(e) => onDefaultPasswordChange?.(e.target.value)}
+                className="max-w-sm"
+              />
+              {defaultPassword && defaultPassword.length < 6 && (
+                <p className="text-sm text-destructive">Password must be at least 6 characters</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Confirmation */}
       {!isCommitting && committedCount === 0 && (
