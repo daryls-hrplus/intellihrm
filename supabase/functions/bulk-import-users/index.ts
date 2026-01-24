@@ -19,6 +19,18 @@ interface ImportResult {
   error?: string;
 }
 
+// Generate a secure random password
+function generateSecurePassword(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
+  const array = new Uint8Array(20);
+  crypto.getRandomValues(array);
+  let password = '';
+  for (let i = 0; i < 20; i++) {
+    password += chars[array[i] % chars.length];
+  }
+  return password;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -54,14 +66,10 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Only admins can import users");
     }
 
-    const { users, defaultPassword }: { users: UserImportRow[]; defaultPassword: string } = await req.json();
+    const { users }: { users: UserImportRow[] } = await req.json();
 
     if (!users || !Array.isArray(users) || users.length === 0) {
       throw new Error("No users provided for import");
-    }
-
-    if (!defaultPassword || defaultPassword.length < 6) {
-      throw new Error("Default password must be at least 6 characters");
     }
 
     console.log(`Starting bulk import of ${users.length} users`);
@@ -99,10 +107,13 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
+        // Generate a unique secure password for this user
+        const password = generateSecurePassword();
+
         // Create auth user
         const { data: authData, error: createError } = await supabase.auth.admin.createUser({
           email,
-          password: defaultPassword,
+          password,
           email_confirm: true,
           user_metadata: {
             full_name: userData.full_name || email.split("@")[0],

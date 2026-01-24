@@ -43,8 +43,6 @@ export interface WizardState {
   pendingImportType: string | null;
   // Track if prerequisites have been checked/passed
   prerequisitesChecked: boolean;
-  // Default password for employee imports
-  defaultPassword: string | null;
 }
 
 interface ImportWizardProps {
@@ -97,7 +95,6 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
     completedImports: [],
     pendingImportType: null,
     prerequisitesChecked: false,
-    defaultPassword: null,
   });
 
   // Dynamic steps based on selected import type and compensation model
@@ -287,7 +284,6 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
       completedImports: [],
       pendingImportType: null,
       prerequisitesChecked: false,
-      defaultPassword: null,
     });
     setCurrentStep(1); // Go to company selection
   };
@@ -502,8 +498,6 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             isCommitting={state.isCommitting}
             committedCount={state.committedCount}
             compensationModel={state.compensationModel}
-            defaultPassword={state.defaultPassword}
-            onDefaultPasswordChange={(password) => updateState({ defaultPassword: password })}
             onBatchCreated={(batchId) => updateState({ batchId })}
             onCommitStart={() => updateState({ isCommitting: true })}
             onCommitComplete={(count) => updateState({ isCommitting: false, committedCount: count })}
@@ -522,7 +516,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
           );
         }
         return (
-          <WizardStepCommit
+        <WizardStepCommit
             importType={state.importType!}
             companyId={state.companyId}
             parsedData={state.parsedData}
@@ -531,8 +525,6 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             isCommitting={state.isCommitting}
             committedCount={state.committedCount}
             compensationModel={state.compensationModel}
-            defaultPassword={state.defaultPassword}
-            onDefaultPasswordChange={(password) => updateState({ defaultPassword: password })}
             onBatchCreated={(batchId) => updateState({ batchId })}
             onCommitStart={() => updateState({ isCommitting: true })}
             onCommitComplete={(count) => updateState({ isCommitting: false, committedCount: count })}
@@ -550,8 +542,6 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             isCommitting={state.isCommitting}
             committedCount={state.committedCount}
             compensationModel={state.compensationModel}
-            defaultPassword={state.defaultPassword}
-            onDefaultPasswordChange={(password) => updateState({ defaultPassword: password })}
             onBatchCreated={(batchId) => updateState({ batchId })}
             onCommitStart={() => updateState({ isCommitting: true })}
             onCommitComplete={(count) => updateState({ isCommitting: false, committedCount: count })}
