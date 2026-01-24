@@ -429,23 +429,15 @@ export default function EnablementHubPage() {
       ],
     },
     {
-      titleKey: "Platform Standards",
+      titleKey: "Governance & Standards",
       items: [
         {
-          title: "Platform Standards Hub",
-          description: "Enterprise patterns, design guidelines, and architectural standards",
+          title: "Platform Standards",
+          description: "5 enterprise patterns including Navigation, Color Semantics, and Accessibility",
           href: "/enablement/standards",
           icon: Eye,
           color: "bg-primary/10 text-primary",
-          badge: "New",
-        },
-        {
-          title: "UI Color Semantics Standard",
-          description: "Enterprise-grade color usage rules for HRMS interfaces",
-          href: "/enablement/ui-color-semantics",
-          icon: Eye,
-          color: "bg-primary/10 text-primary",
-          badge: "Governance",
+          badge: "2 Published",
         },
       ],
     },
