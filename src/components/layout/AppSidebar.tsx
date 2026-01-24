@@ -6,6 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { supportedLanguages } from "@/i18n/config";
 import { useMenuPermissions } from "@/hooks/useMenuPermissions";
+import { useLogoutWithTabValidation } from "@/hooks/useLogoutWithTabValidation";
+import { LogoutWarningDialog } from "@/components/dialogs/LogoutWarningDialog";
 import {
   LayoutDashboard,
   Users,
@@ -103,10 +105,7 @@ export function AppSidebar() {
     fetchTerritory();
   }, [company?.territory_id]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
-  };
+  const { logout, showWarning, tabsWithChanges, confirmLogout, cancelLogout } = useLogoutWithTabValidation();
 
   const filteredNavItems = navItems.filter((item) => {
     // First check role-based access (legacy)
@@ -280,7 +279,7 @@ export function AppSidebar() {
                 </div>
               </NavLink>
               <button
-                onClick={handleSignOut}
+                onClick={logout}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
               >
                 <LogOut className="h-4 w-4" />
@@ -289,7 +288,7 @@ export function AppSidebar() {
             </div>
           ) : (
             <button
-              onClick={handleSignOut}
+              onClick={logout}
               className="flex w-full items-center justify-center rounded-lg p-2 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
             >
               <LogOut className="h-5 w-5" />
@@ -297,6 +296,13 @@ export function AppSidebar() {
           )}
         </div>
       </aside>
+      
+      <LogoutWarningDialog
+        open={showWarning}
+        tabsWithChanges={tabsWithChanges}
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+      />
     </>
   );
 }

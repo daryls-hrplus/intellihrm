@@ -14,6 +14,8 @@ export interface WorkspaceTab {
   hasUnsavedChanges: boolean;
   openedAt: Date;
   lastActiveAt: Date;
+  /** Tab-scoped state storage that persists across tab switches */
+  state?: Record<string, unknown>;
 }
 
 export interface OpenTabConfig {
@@ -40,6 +42,16 @@ interface TabContextValue {
   closeOthers: (tabId: string) => void;
   getActiveTab: () => WorkspaceTab | undefined;
   findTabByContext: (contextType: string, contextId: string) => WorkspaceTab | undefined;
+  /** Get tab-scoped state for a specific tab */
+  getTabState: <T = Record<string, unknown>>(tabId: string) => T | undefined;
+  /** Set entire tab state (replaces existing) */
+  setTabState: (tabId: string, state: Record<string, unknown>) => void;
+  /** Update tab state (merges with existing) */
+  updateTabState: (tabId: string, partialState: Record<string, unknown>) => void;
+  /** Check if any tab has unsaved changes */
+  hasAnyUnsavedChanges: () => boolean;
+  /** Get all tabs with unsaved changes */
+  getTabsWithUnsavedChanges: () => WorkspaceTab[];
 }
 
 const TabContext = createContext<TabContextValue | null>(null);
@@ -56,6 +68,10 @@ interface SerializedTab {
   contextId?: string;
   contextType?: string;
   isPinned: boolean;
+  /** Persisted tab state - limited to 50KB per tab */
+  state?: Record<string, unknown>;
+  /** Flag to detect if tab had unsaved changes (for session recovery) */
+  hadUnsavedChanges?: boolean;
 }
 
 function generateTabId(): string {
@@ -75,17 +91,33 @@ function createDashboardTab(): WorkspaceTab {
   };
 }
 
+const MAX_STATE_SIZE_BYTES = 50 * 1024; // 50KB per tab
+
 function serializeTabs(tabs: WorkspaceTab[]): string {
-  const serializable: SerializedTab[] = tabs.map(tab => ({
-    id: tab.id,
-    route: tab.route,
-    title: tab.title,
-    subtitle: tab.subtitle,
-    moduleCode: tab.moduleCode,
-    contextId: tab.contextId,
-    contextType: tab.contextType,
-    isPinned: tab.isPinned,
-  }));
+  const serializable: SerializedTab[] = tabs.map(tab => {
+    // Limit state size to prevent storage bloat
+    let stateToSave = tab.state;
+    if (stateToSave) {
+      const stateJson = JSON.stringify(stateToSave);
+      if (stateJson.length > MAX_STATE_SIZE_BYTES) {
+        console.warn(`Tab "${tab.title}" state exceeds 50KB limit, state will not be persisted`);
+        stateToSave = undefined;
+      }
+    }
+
+    return {
+      id: tab.id,
+      route: tab.route,
+      title: tab.title,
+      subtitle: tab.subtitle,
+      moduleCode: tab.moduleCode,
+      contextId: tab.contextId,
+      contextType: tab.contextType,
+      isPinned: tab.isPinned,
+      state: stateToSave,
+      hadUnsavedChanges: tab.hasUnsavedChanges,
+    };
+  });
   return JSON.stringify(serializable);
 }
 
@@ -94,8 +126,16 @@ function deserializeTabs(json: string): WorkspaceTab[] {
     const parsed: SerializedTab[] = JSON.parse(json);
     const now = new Date();
     return parsed.map(tab => ({
-      ...tab,
-      hasUnsavedChanges: false,
+      id: tab.id,
+      route: tab.route,
+      title: tab.title,
+      subtitle: tab.subtitle,
+      moduleCode: tab.moduleCode,
+      contextId: tab.contextId,
+      contextType: tab.contextType,
+      isPinned: tab.isPinned,
+      state: tab.state, // Restore persisted state
+      hasUnsavedChanges: false, // Always reset to false on restore
       openedAt: now,
       lastActiveAt: now,
     }));
@@ -251,6 +291,32 @@ export function TabProvider({ children }: TabProviderProps) {
     return tabs.find(t => t.id === activeTabId);
   }, [tabs, activeTabId]);
 
+  // Tab state management methods
+  const getTabState = useCallback(<T = Record<string, unknown>>(tabId: string): T | undefined => {
+    const tab = tabs.find(t => t.id === tabId);
+    return tab?.state as T | undefined;
+  }, [tabs]);
+
+  const setTabState = useCallback((tabId: string, state: Record<string, unknown>) => {
+    setTabs(prev => prev.map(t =>
+      t.id === tabId ? { ...t, state } : t
+    ));
+  }, []);
+
+  const updateTabState = useCallback((tabId: string, partialState: Record<string, unknown>) => {
+    setTabs(prev => prev.map(t =>
+      t.id === tabId ? { ...t, state: { ...t.state, ...partialState } } : t
+    ));
+  }, []);
+
+  const hasAnyUnsavedChanges = useCallback((): boolean => {
+    return tabs.some(t => t.hasUnsavedChanges);
+  }, [tabs]);
+
+  const getTabsWithUnsavedChanges = useCallback((): WorkspaceTab[] => {
+    return tabs.filter(t => t.hasUnsavedChanges);
+  }, [tabs]);
+
   const value: TabContextValue = {
     tabs,
     activeTabId,
@@ -263,6 +329,11 @@ export function TabProvider({ children }: TabProviderProps) {
     closeOthers,
     getActiveTab,
     findTabByContext,
+    getTabState,
+    setTabState,
+    updateTabState,
+    hasAnyUnsavedChanges,
+    getTabsWithUnsavedChanges,
   };
 
   return (
