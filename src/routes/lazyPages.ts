@@ -228,6 +228,7 @@ export const PositionBudgetCostConfigPage = lazy(() => import('@/pages/compensat
 export const MinimumWageCompliancePage = lazy(() => import('@/pages/compensation/MinimumWageCompliancePage'));
 export const MinimumWageConfigPage = lazy(() => import('@/pages/compensation/MinimumWageConfigPage'));
 export const CompensationFTEReconciliationPage = lazy(() => import('@/pages/compensation/CompensationFTEReconciliationPage'));
+export const CompensationReviewFlagsPage = lazy(() => import('@/pages/compensation/CompensationReviewFlagsPage'));
 
 // Benefits pages
 export const BenefitsDashboardPage = lazy(() => import('@/pages/benefits/BenefitsDashboardPage'));
