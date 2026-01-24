@@ -5,9 +5,9 @@ import { PositionsManagement } from "@/components/admin/PositionsManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { UserCheck, Building2, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useMenuPermissions } from "@/hooks/useMenuPermissions";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import {
   Select,
   SelectContent,
@@ -25,11 +25,20 @@ interface Company {
 export default function PositionsPage() {
   const { t } = useLanguage();
   const { hasMenuAccess } = useMenuPermissions();
+  const { navigateToList } = useWorkspaceNavigation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   
   const hasCompensationAccess = hasMenuAccess("compensation");
+
+  const handleViewSalaryGrades = () => {
+    navigateToList({
+      route: "/compensation/salary-grades",
+      title: t("compensation.salaryGrades"),
+      moduleCode: "compensation",
+    });
+  };
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -72,11 +81,9 @@ export default function PositionsPage() {
 
           <div className="flex items-center gap-4">
             {hasCompensationAccess && (
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/compensation/salary-grades">
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  {t("workforce.viewSalaryGrades")}
-                </Link>
+              <Button variant="outline" size="sm" onClick={handleViewSalaryGrades}>
+                <DollarSign className="h-4 w-4 mr-2" />
+                {t("workforce.viewSalaryGrades")}
               </Button>
             )}
 

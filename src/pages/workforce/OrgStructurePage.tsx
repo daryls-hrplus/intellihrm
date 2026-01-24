@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { NavLink } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface Company {
   id: string;
@@ -24,6 +25,15 @@ export default function OrgStructurePage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const { navigateToList } = useWorkspaceNavigation();
+
+  const handleBackToWorkforce = () => {
+    navigateToList({
+      route: "/workforce",
+      title: "Workforce",
+      moduleCode: "workforce",
+    });
+  };
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -52,12 +62,14 @@ export default function OrgStructurePage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <NavLink
-              to="/workforce"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted"
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleBackToWorkforce}
+              className="h-10 w-10"
             >
               <ArrowLeft className="h-5 w-5" />
-            </NavLink>
+            </Button>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-500/10">
                 <Network className="h-5 w-5 text-teal-500" />

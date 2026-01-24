@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,7 +66,7 @@ interface Qualification {
 
 export default function QualificationsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
@@ -493,7 +493,14 @@ export default function QualificationsPage() {
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => navigate(`/workforce/employees/${q.employee_id}?tab=qualifications`)}>
+                                <DropdownMenuItem onClick={() => navigateToRecord({
+                                  route: `/workforce/employees/${q.employee_id}?tab=qualifications`,
+                                  title: q.profiles?.full_name || 'Employee',
+                                  subtitle: 'Employee',
+                                  moduleCode: 'workforce',
+                                  contextType: 'employee',
+                                  contextId: q.employee_id,
+                                })}>
                                   <User className="h-4 w-4 mr-2" />
                                   View Employee Profile
                                 </DropdownMenuItem>

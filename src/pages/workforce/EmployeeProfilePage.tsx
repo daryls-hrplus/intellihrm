@@ -1,10 +1,11 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,7 +131,7 @@ interface EmployeeProfile {
 
 export default function EmployeeProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useLanguage();
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
@@ -301,6 +302,15 @@ export default function EmployeeProfilePage() {
     );
   }
 
+  // Handle back navigation with tab-awareness
+  const handleBackToEmployees = () => {
+    navigateToList({
+      route: "/workforce/employees",
+      title: t("workforce.employees"),
+      moduleCode: "workforce",
+    });
+  };
+
   if (!employee) {
     return (
       <AppLayout>
@@ -308,7 +318,7 @@ export default function EmployeeProfilePage() {
           <User className="h-16 w-16 text-muted-foreground/50" />
           <h2 className="mt-4 text-xl font-semibold text-foreground">{t("workforce.profile.employeeNotFound")}</h2>
           <p className="mt-2 text-muted-foreground">{t("workforce.profile.employeeNotFoundDescription")}</p>
-          <Button onClick={() => navigate('/workforce/employees')} className="mt-4">
+          <Button onClick={handleBackToEmployees} className="mt-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t("workforce.profile.backToEmployees")}
           </Button>
