@@ -91,116 +91,116 @@ export function F360Architecture() {
         <CardContent>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Cycle Management */}
-            <div className="p-3 rounded-lg border bg-cyan-500/5">
+            <div className="p-3 rounded-lg border bg-cyan-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-cyan-700 mb-2">Cycle Management</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>feedback_360_cycles</code></li>
-                <li><code>review_cycles</code></li>
-                <li><code>review_participants</code></li>
-                <li><code>feedback_submissions</code></li>
+                <li><code className="break-all">feedback_360_cycles</code></li>
+                <li><code className="break-all">review_cycles</code></li>
+                <li><code className="break-all">review_participants</code></li>
+                <li><code className="break-all">feedback_submissions</code></li>
               </ul>
             </div>
             
             {/* Raters & Nominations */}
-            <div className="p-3 rounded-lg border bg-emerald-500/5">
+            <div className="p-3 rounded-lg border bg-emerald-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-emerald-700 mb-2">Raters & Nominations</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>feedback_360_rater_categories</code></li>
-                <li><code>feedback_360_requests</code></li>
-                <li><code>peer_nominations</code></li>
-                <li><code>rater_relationships</code></li>
-                <li><code>rater_exceptions</code></li>
+                <li><code className="break-all">feedback_360_rater_categories</code></li>
+                <li><code className="break-all">feedback_360_requests</code></li>
+                <li><code className="break-all">peer_nominations</code></li>
+                <li><code className="break-all">rater_relationships</code></li>
+                <li><code className="break-all">rater_exceptions</code></li>
               </ul>
             </div>
             
             {/* Questions & Responses */}
-            <div className="p-3 rounded-lg border bg-violet-500/5">
+            <div className="p-3 rounded-lg border bg-violet-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-violet-700 mb-2">Questions & Responses</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>feedback_360_questions</code></li>
-                <li><code>feedback_360_responses</code></li>
-                <li><code>feedback_question_categories</code></li>
-                <li><code>feedback_frameworks</code></li>
+                <li><code className="break-all">feedback_360_questions</code></li>
+                <li><code className="break-all">feedback_360_responses</code></li>
+                <li><code className="break-all">feedback_question_categories</code></li>
+                <li><code className="break-all">feedback_frameworks</code></li>
               </ul>
             </div>
             
             {/* Governance */}
-            <div className="p-3 rounded-lg border bg-rose-500/5">
+            <div className="p-3 rounded-lg border bg-rose-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-rose-700 mb-2">Governance</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>feedback_consent_records</code></li>
-                <li><code>feedback_data_policies</code></li>
-                <li><code>feedback_investigation_requests</code></li>
-                <li><code>feedback_investigation_access_log</code></li>
-                <li><code>feedback_exceptions</code></li>
+                <li><code className="break-all">feedback_consent_records</code></li>
+                <li><code className="break-all">feedback_data_policies</code></li>
+                <li><code className="break-all">feedback_investigation_requests</code></li>
+                <li><code className="break-all">feedback_investigation_access_log</code></li>
+                <li><code className="break-all">feedback_exceptions</code></li>
               </ul>
             </div>
             
             {/* AI & Signals */}
-            <div className="p-3 rounded-lg border bg-amber-500/5">
+            <div className="p-3 rounded-lg border bg-amber-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-amber-700 mb-2">AI & Signals</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>talent_signal_definitions</code></li>
-                <li><code>talent_signal_snapshots</code></li>
-                <li><code>development_themes</code></li>
-                <li><code>feedback_writing_quality</code></li>
-                <li><code>feedback_writing_suggestions</code></li>
-                <li><code>feedback_ai_action_logs</code></li>
+                <li><code className="break-all">talent_signal_definitions</code></li>
+                <li><code className="break-all">talent_signal_snapshots</code></li>
+                <li><code className="break-all">development_themes</code></li>
+                <li><code className="break-all">feedback_writing_quality</code></li>
+                <li><code className="break-all">feedback_writing_suggestions</code></li>
+                <li><code className="break-all">feedback_ai_action_logs</code></li>
               </ul>
             </div>
             
             {/* Reports & Templates */}
-            <div className="p-3 rounded-lg border bg-blue-500/5">
+            <div className="p-3 rounded-lg border bg-blue-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-blue-700 mb-2">Reports & Templates</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>feedback_report_templates</code></li>
-                <li><code>feedback_report_sections</code></li>
-                <li><code>nine_box_signal_mappings</code></li>
+                <li><code className="break-all">feedback_report_templates</code></li>
+                <li><code className="break-all">feedback_report_sections</code></li>
+                <li><code className="break-all">nine_box_signal_mappings</code></li>
               </ul>
             </div>
             
             {/* Integration */}
-            <div className="p-3 rounded-lg border bg-indigo-500/5">
+            <div className="p-3 rounded-lg border bg-indigo-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-indigo-700 mb-2">Integration</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>appraisal_360_scores</code></li>
-                <li><code>appraisal_participants</code></li>
-                <li><code>continuous_feedback</code></li>
-                <li><code>idp_recommendations</code></li>
+                <li><code className="break-all">appraisal_360_scores</code></li>
+                <li><code className="break-all">appraisal_participants</code></li>
+                <li><code className="break-all">continuous_feedback</code></li>
+                <li><code className="break-all">idp_recommendations</code></li>
               </ul>
             </div>
             
             {/* Notifications & Reminders */}
-            <div className="p-3 rounded-lg border bg-orange-500/5">
-              <h4 className="font-semibold text-sm text-orange-700 mb-2">Notifications & Reminders</h4>
+            <div className="p-3 rounded-lg border bg-orange-500/5 min-w-0">
+              <h4 className="font-semibold text-sm text-orange-700 mb-2 whitespace-nowrap">Notifications & Reminders</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>reminder_event_types</code></li>
-                <li><code>reminder_rules</code></li>
-                <li><code>employee_reminders</code></li>
-                <li><code>reminder_delivery_log</code></li>
-                <li><code>employee_reminder_preferences</code></li>
+                <li><code className="break-all">reminder_event_types</code></li>
+                <li><code className="break-all">reminder_rules</code></li>
+                <li><code className="break-all">employee_reminders</code></li>
+                <li><code className="break-all">reminder_delivery_log</code></li>
+                <li><code className="break-all">employee_reminder_preferences</code></li>
               </ul>
             </div>
             
             {/* Workflows */}
-            <div className="p-3 rounded-lg border bg-teal-500/5">
+            <div className="p-3 rounded-lg border bg-teal-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-teal-700 mb-2">Workflows</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>workflow_templates</code></li>
-                <li><code>workflow_steps</code></li>
-                <li><code>workflow_instances</code></li>
-                <li><code>workflow_step_actions</code></li>
-                <li><code>workflow_audit_events</code></li>
+                <li><code className="break-all">workflow_templates</code></li>
+                <li><code className="break-all">workflow_steps</code></li>
+                <li><code className="break-all">workflow_instances</code></li>
+                <li><code className="break-all">workflow_step_actions</code></li>
+                <li><code className="break-all">workflow_audit_events</code></li>
               </ul>
             </div>
             
             {/* Audit & Logging */}
-            <div className="p-3 rounded-lg border bg-slate-500/5">
+            <div className="p-3 rounded-lg border bg-slate-500/5 min-w-0">
               <h4 className="font-semibold text-sm text-slate-700 mb-2">Audit & Logging</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li><code>audit_logs</code></li>
-                <li><code>notification_logs</code></li>
-                <li><code>feedback_ai_action_logs</code></li>
+                <li><code className="break-all">audit_logs</code></li>
+                <li><code className="break-all">notification_logs</code></li>
+                <li><code className="break-all">feedback_ai_action_logs</code></li>
               </ul>
             </div>
           </div>
