@@ -2,17 +2,20 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamSuccessionStatus } from "@/hooks/useSuccessionCandidates";
-import { TrendingUp, Users, Star, AlertTriangle, CheckCircle, Clock, Target } from "lucide-react";
+import { TrendingUp, Users, Star, AlertTriangle, CheckCircle, Clock, Target, ClipboardCheck, ArrowRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 export default function MssSuccessionPage() {
   const { t } = useLanguage();
   const { profile } = useAuth();
+  const { navigateToList } = useWorkspaceNavigation();
 
   // Fetch team succession data using the new hook
   const { teamMembers, successionPlans, isLoading } = useTeamSuccessionStatus(profile?.id);
@@ -46,18 +49,32 @@ export default function MssSuccessionPage() {
           ]}
         />
 
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10">
-            <TrendingUp className="h-5 w-5 text-cyan-600" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10">
+              <TrendingUp className="h-5 w-5 text-cyan-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                {t("mss.modules.succession.title", "Team Succession")}
+              </h1>
+              <p className="text-muted-foreground">
+                {t("mss.modules.succession.description", "View succession readiness for your team")}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {t("mss.modules.succession.title", "Team Succession")}
-            </h1>
-            <p className="text-muted-foreground">
-              {t("mss.modules.succession.description", "View succession readiness for your team")}
-            </p>
-          </div>
+          
+          <Button
+            onClick={() => navigateToList({
+              route: "/mss/readiness-assessments",
+              title: "Readiness Assessments",
+              moduleCode: "mss",
+            })}
+          >
+            <ClipboardCheck className="h-4 w-4 mr-2" />
+            Pending Assessments
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
         </div>
 
         {/* Summary Cards */}
