@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { useTabState } from "@/hooks/useTabState";
 import {
   Heart,
   AlertTriangle,
@@ -35,10 +36,16 @@ interface Stats {
 export default function EmployeeRelationsDashboardPage() {
   const { t } = useTranslation();
   const { hasTabAccess } = useGranularPermissions();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("all");
-  const [stats, setStats] = useState<Stats>({ openCases: 0, pendingGrievances: 0, recognitionsThisMonth: 0, activeUnions: 0 });
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId } = tabState;
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
@@ -68,45 +75,35 @@ export default function EmployeeRelationsDashboardPage() {
     enabled: !!selectedCompanyId,
   });
 
+  const { data: stats, isLoading: isLoadingStats } = useQuery({
+    queryKey: ["er-stats", selectedCompanyId],
+    queryFn: async () => {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const [casesRes, grievancesRes, recognitionsRes, unionsRes] = await Promise.all([
+        supabase.from("er_cases").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("status", "open"),
+        supabase.from("grievances").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).in("status", ["filed", "under_review", "in_progress"]),
+        supabase.from("er_recognition").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).gte("award_date", startOfMonth.toISOString().split('T')[0]),
+        supabase.from("unions").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("is_active", true),
+      ]);
+
+      return {
+        openCases: casesRes.count || 0,
+        pendingGrievances: grievancesRes.count || 0,
+        recognitionsThisMonth: recognitionsRes.count || 0,
+        activeUnions: unionsRes.count || 0,
+      };
+    },
+    enabled: !!selectedCompanyId,
+  });
+
   useEffect(() => {
     if (companies.length > 0 && !selectedCompanyId) {
-      setSelectedCompanyId(companies[0].id);
+      setTabState({ selectedCompanyId: companies[0].id });
     }
-  }, [companies, selectedCompanyId]);
-
-  useEffect(() => {
-    setSelectedDepartmentId("all");
-  }, [selectedCompanyId]);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (!selectedCompanyId) return;
-      setIsLoadingStats(true);
-      try {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-
-        const [casesRes, grievancesRes, recognitionsRes, unionsRes] = await Promise.all([
-          supabase.from("er_cases").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("status", "open"),
-          supabase.from("grievances").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).in("status", ["filed", "under_review", "in_progress"]),
-          supabase.from("er_recognition").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).gte("award_date", startOfMonth.toISOString().split('T')[0]),
-          supabase.from("unions").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("is_active", true),
-        ]);
-        setStats({
-          openCases: casesRes.count || 0,
-          pendingGrievances: grievancesRes.count || 0,
-          recognitionsThisMonth: recognitionsRes.count || 0,
-          activeUnions: unionsRes.count || 0,
-        });
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-      } finally {
-        setIsLoadingStats(false);
-      }
-    };
-    fetchStats();
-  }, [selectedCompanyId]);
+  }, [companies, selectedCompanyId, setTabState]);
 
   const allModules = {
     analytics: { title: t("employeeRelationsModule.analytics.title"), description: t("employeeRelationsModule.analytics.description"), href: `/employee-relations/analytics?company=${selectedCompanyId}&department=${selectedDepartmentId}`, icon: BarChart3, color: "bg-violet-500/10 text-violet-500", tabCode: "analytics" },
@@ -143,11 +140,13 @@ export default function EmployeeRelationsDashboardPage() {
     },
   ];
 
+  const currentStats: Stats = stats || { openCases: 0, pendingGrievances: 0, recognitionsThisMonth: 0, activeUnions: 0 };
+
   const statCards = [
-    { label: t("employeeRelationsModule.stats.openCases"), value: stats.openCases, icon: AlertTriangle, color: "bg-warning/10 text-warning" },
-    { label: t("employeeRelationsModule.stats.pendingGrievances"), value: stats.pendingGrievances, icon: FileText, color: "bg-orange-500/10 text-orange-500" },
-    { label: t("employeeRelationsModule.stats.recognitionsThisMonth"), value: stats.recognitionsThisMonth, icon: Award, color: "bg-amber-500/10 text-amber-500" },
-    { label: t("employeeRelationsModule.stats.activeUnions"), value: stats.activeUnions, icon: Users, color: "bg-primary/10 text-primary" },
+    { label: t("employeeRelationsModule.stats.openCases"), value: currentStats.openCases, icon: AlertTriangle, color: "bg-warning/10 text-warning" },
+    { label: t("employeeRelationsModule.stats.pendingGrievances"), value: currentStats.pendingGrievances, icon: FileText, color: "bg-orange-500/10 text-orange-500" },
+    { label: t("employeeRelationsModule.stats.recognitionsThisMonth"), value: currentStats.recognitionsThisMonth, icon: Award, color: "bg-amber-500/10 text-amber-500" },
+    { label: t("employeeRelationsModule.stats.activeUnions"), value: currentStats.activeUnions, icon: Users, color: "bg-primary/10 text-primary" },
   ];
 
   const breadcrumbItems = [
@@ -175,7 +174,7 @@ export default function EmployeeRelationsDashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v, selectedDepartmentId: "all" })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={t('common.selectCompany')} />
                 </SelectTrigger>
@@ -187,7 +186,7 @@ export default function EmployeeRelationsDashboardPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+              <Select value={selectedDepartmentId} onValueChange={(v) => setTabState({ selectedDepartmentId: v })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={t('common.selectDepartment')} />
                 </SelectTrigger>
