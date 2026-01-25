@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { Users, Plus, Edit, Trash2 } from "lucide-react";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -50,7 +51,6 @@ interface ShiftAssignment {
 export default function ShiftAssignmentsPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -66,6 +66,12 @@ export default function ShiftAssignmentsPage() {
     rotation_pattern: "",
     notes: ""
   });
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
 
   const breadcrumbItems = [
     { label: t("navigation.timeAttendance"), href: "/time-attendance" },
@@ -95,7 +101,7 @@ export default function ShiftAssignmentsPage() {
       return;
     }
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
     setLoading(false);

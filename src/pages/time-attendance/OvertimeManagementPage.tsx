@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, parseISO, differenceInHours } from "date-fns";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 import { 
   Clock, 
   Plus,
@@ -52,7 +53,6 @@ interface OvertimeRequest {
 export default function OvertimeManagementPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [requests, setRequests] = useState<OvertimeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -61,7 +61,13 @@ export default function OvertimeManagementPage() {
   const [actionType, setActionType] = useState<'approve' | 'reject'>('approve');
   const [rejectionReason, setRejectionReason] = useState("");
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
-  const [statusFilter, setStatusFilter] = useState("all");
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "", statusFilter: "all" },
+  });
+  const { selectedCompany, statusFilter } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
+  const setStatusFilter = (v: string) => setTabState({ statusFilter: v });
 
   const [newRequest, setNewRequest] = useState({
     employee_id: "",

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Copy } from "lucide-react";
 import { ShiftTemplatesTab } from "@/components/time-attendance/shifts/ShiftTemplatesTab";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -17,8 +18,13 @@ interface Company {
 export default function ShiftTemplatesPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
 
   useEffect(() => {
     loadCompanies();
@@ -36,7 +42,7 @@ export default function ShiftTemplatesPage() {
       return;
     }
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
     setLoading(false);

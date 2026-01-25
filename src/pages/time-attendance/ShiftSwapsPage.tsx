@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { 
@@ -22,10 +21,10 @@ import {
   XCircle, 
   AlertCircle, 
   Clock,
-  User,
-  Calendar
+  User
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 
 interface ShiftSwapRequest {
   id: string;
@@ -66,10 +65,15 @@ const breadcrumbItems = [
 export default function ShiftSwapsPage() {
   const { company, user } = useAuth();
   const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedRequest, setSelectedRequest] = useState<ShiftSwapRequest | null>(null);
   const [managerNotes, setManagerNotes] = useState("");
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { searchTerm: "", statusFilter: "all" },
+  });
+  const { searchTerm, statusFilter } = tabState;
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
+  const setStatusFilter = (v: string) => setTabState({ statusFilter: v });
 
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ["shift-swap-requests", company?.id, statusFilter],
