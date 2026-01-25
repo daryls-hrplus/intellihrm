@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,9 +35,12 @@ import {
   Rocket
 } from "lucide-react";
 import { useClientProvisioning, type DemoRegistrationStatus } from "@/hooks/useClientProvisioning";
-import { formatDistanceToNow, format } from "date-fns";
-import { NavLink, useNavigate } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import { NewDemoRegistrationDialog } from "@/components/admin/provisioning/NewDemoRegistrationDialog";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useState } from "react";
 
 const STATUS_CONFIG: Record<DemoRegistrationStatus, { label: string; color: string; icon: React.ElementType }> = {
   pending: { label: "Pending", color: "bg-muted text-muted-foreground", icon: Clock },
@@ -50,9 +53,19 @@ const STATUS_CONFIG: Record<DemoRegistrationStatus, { label: string; color: stri
 
 export default function ClientRegistryPage() {
   const navigate = useNavigate();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { registrations, isLoading, startProvisioning } = useClientProvisioning();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: "",
+      statusFilter: "all",
+    },
+    syncToUrl: ["statusFilter"],
+  });
+  
+  const { searchQuery, statusFilter } = tabState;
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
 
   const filteredRegistrations = registrations.filter(reg => {
@@ -81,6 +94,12 @@ export default function ClientRegistryPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Admin", href: "/admin" },
+            { label: "Client Registry" },
+          ]}
+        />
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -163,11 +182,11 @@ export default function ClientRegistryPage() {
                 <Input
                   placeholder="Search by company, contact, or email..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setTabState({ searchQuery: e.target.value })}
                   className="pl-10"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -249,11 +268,17 @@ export default function ClientRegistryPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                asChild
+                                onClick={() => navigateToRecord({
+                                  route: `/admin/clients/${reg.id}`,
+                                  title: reg.company_name,
+                                  subtitle: "Client",
+                                  moduleCode: "admin",
+                                  contextType: "client",
+                                  contextId: reg.id,
+                                  icon: Building2,
+                                })}
                               >
-                                <NavLink to={`/admin/clients/${reg.id}`}>
-                                  <Eye className="h-4 w-4" />
-                                </NavLink>
+                                <Eye className="h-4 w-4" />
                               </Button>
                               {(reg.status === "demo_active" || reg.status === "pending") && (
                                 <Button
@@ -269,12 +294,10 @@ export default function ClientRegistryPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  asChild
+                                  onClick={() => navigate(`/admin/clients/${reg.id}/provision`)}
                                 >
-                                  <NavLink to={`/admin/clients/${reg.id}/provision`}>
-                                    <PlayCircle className="mr-1 h-4 w-4" />
-                                    Continue
-                                  </NavLink>
+                                  <PlayCircle className="mr-1 h-4 w-4" />
+                                  Continue
                                 </Button>
                               )}
                             </div>

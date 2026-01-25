@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, FileText, Download, Trash2, Globe, Lock, Upload, X, Loader2, Building2 } from "lucide-react";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -57,14 +58,22 @@ export default function CompanyDocumentsPage() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCategory: "all",
+      selectedCompanyFilter: "all",
+    },
+    syncToUrl: ["selectedCompanyFilter"],
+  });
+  const { selectedCategory, selectedCompanyFilter } = tabState;
+
   const [documents, setDocuments] = useState<CompanyDocument[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>("all");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const [formData, setFormData] = useState({
@@ -262,7 +271,7 @@ export default function CompanyDocumentsPage() {
         </div>
 
         <div className="flex gap-4 flex-wrap">
-          <Select value={selectedCompanyFilter} onValueChange={setSelectedCompanyFilter}>
+          <Select value={selectedCompanyFilter} onValueChange={(v) => setTabState({ selectedCompanyFilter: v })}>
             <SelectTrigger className="w-[220px]">
               <Building2 className="h-4 w-4 mr-2" />
               <SelectValue placeholder="All Companies" />
@@ -274,7 +283,7 @@ export default function CompanyDocumentsPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <Select value={selectedCategory} onValueChange={(v) => setTabState({ selectedCategory: v })}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>

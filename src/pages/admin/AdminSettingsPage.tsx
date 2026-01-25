@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle, Video, FileText, MapPin } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle, Video, FileText, MapPin } from "lucide-react";
 import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface SystemSetting {
@@ -325,14 +325,13 @@ export default function AdminSettingsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Admin", href: "/admin" },
+            { label: "System Settings" },
+          ]}
+        />
         <div className="animate-fade-in">
-          <NavLink
-            to="/admin"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Admin
-          </NavLink>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Settings className="h-5 w-5 text-primary" />

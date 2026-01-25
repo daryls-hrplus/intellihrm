@@ -57,6 +57,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function AdminOnboardingPage() {
   usePageAudit('onboarding_templates', 'Admin');
@@ -78,17 +79,24 @@ export default function AdminOnboardingPage() {
     getOnboardingProgress
   } = useOnboarding();
 
-  const [activeTab, setActiveTab] = useState('instances');
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "instances",
+      searchQuery: "",
+      selectedCompany: "all",
+      selectedStatus: "all",
+    },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab, searchQuery, selectedCompany, selectedStatus } = tabState;
+
   const [templates, setTemplates] = useState<OnboardingTemplate[]>([]);
   const [instances, setInstances] = useState<OnboardingInstance[]>([]);
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]);
   const [employees, setEmployees] = useState<{ id: string; full_name: string; email: string }[]>([]);
   const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
-  
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCompany, setSelectedCompany] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   
   // Template Dialog
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
@@ -436,7 +444,7 @@ export default function AdminOnboardingPage() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="instances">Active Onboarding</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
@@ -454,11 +462,11 @@ export default function AdminOnboardingPage() {
                   <Input
                     placeholder="Search employees..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => setTabState({ searchQuery: e.target.value })}
                     className="pl-10 w-64"
                   />
                 </div>
-                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <Select value={selectedCompany} onValueChange={(v) => setTabState({ selectedCompany: v })}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="All Companies" />
                   </SelectTrigger>
@@ -469,7 +477,7 @@ export default function AdminOnboardingPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <Select value={selectedStatus} onValueChange={(v) => setTabState({ selectedStatus: v })}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
@@ -577,7 +585,7 @@ export default function AdminOnboardingPage() {
                 <Input
                   placeholder="Search templates..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setTabState({ searchQuery: e.target.value })}
                   className="pl-10 w-64"
                 />
               </div>
