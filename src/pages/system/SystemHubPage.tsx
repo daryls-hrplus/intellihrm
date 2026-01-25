@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import {
   Settings,
   Webhook,
@@ -73,7 +73,7 @@ const recentActivity = [
 ];
 
 export default function SystemHubPage() {
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
 
   const breadcrumbItems = [{ label: "Integration & Administration" }];
 
@@ -130,7 +130,12 @@ export default function SystemHubPage() {
             <Card
               key={module.title}
               className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => navigate(module.href)}
+              onClick={() => navigateToList({
+                route: module.href,
+                title: module.title,
+                moduleCode: "system",
+                icon: module.icon,
+              })}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -160,7 +165,12 @@ export default function SystemHubPage() {
                 <CardDescription>Latest system and security events</CardDescription>
               </div>
               <button
-                onClick={() => navigate("/audit-logs")}
+                onClick={() => navigateToList({
+                  route: "/audit-logs",
+                  title: "Audit Logs",
+                  moduleCode: "system",
+                  icon: History,
+                })}
                 className="text-sm text-primary flex items-center gap-1 hover:underline"
               >
                 View All <ArrowRight className="h-4 w-4" />
@@ -201,28 +211,48 @@ export default function SystemHubPage() {
           <CardContent>
             <div className="flex flex-wrap gap-3">
               <button
-                onClick={() => navigate("/api-management")}
+                onClick={() => navigateToList({
+                  route: "/api-management",
+                  title: "API Management",
+                  moduleCode: "system",
+                  icon: Webhook,
+                })}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 <Webhook className="h-4 w-4" />
                 Manage APIs
               </button>
               <button
-                onClick={() => navigate("/audit-logs")}
+                onClick={() => navigateToList({
+                  route: "/audit-logs",
+                  title: "Audit Logs",
+                  moduleCode: "system",
+                  icon: History,
+                })}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
               >
                 <History className="h-4 w-4" />
                 View Logs
               </button>
               <button
-                onClick={() => navigate("/security-settings")}
+                onClick={() => navigateToList({
+                  route: "/security-settings",
+                  title: "Security Settings",
+                  moduleCode: "system",
+                  icon: Shield,
+                })}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
               >
                 <Shield className="h-4 w-4" />
                 Security
               </button>
               <button
-                onClick={() => navigate("/system-config")}
+                onClick={() => navigateToList({
+                  route: "/system-config",
+                  title: "System Configuration",
+                  moduleCode: "system",
+                  icon: Cog,
+                })}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
               >
                 <Cog className="h-4 w-4" />
