@@ -16,15 +16,24 @@ import { useRecruitment } from "@/hooks/useRecruitment";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function RequisitionsPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const [searchTerm, setSearchTerm] = useState("");
   const [isRequisitionDialogOpen, setIsRequisitionDialogOpen] = useState(false);
   const [selectedRequisition, setSelectedRequisition] = useState<string | null>(null);
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, searchTerm } = tabState;
 
   const { 
     requisitions, 
@@ -154,7 +163,7 @@ export default function RequisitionsPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={setSelectedCompanyId} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id })} 
             />
           </div>
         </div>
@@ -165,7 +174,7 @@ export default function RequisitionsPage() {
             <Input
               placeholder={t("recruitment.actions.searchRequisitions")}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setTabState({ searchTerm: e.target.value })}
               className="pl-10"
             />
           </div>

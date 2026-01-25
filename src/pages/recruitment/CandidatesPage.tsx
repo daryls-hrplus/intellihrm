@@ -12,13 +12,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Users, Plus, Search } from "lucide-react";
 import { useRecruitment } from "@/hooks/useRecruitment";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function CandidatesPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const [searchTerm, setSearchTerm] = useState("");
   const [isCandidateDialogOpen, setIsCandidateDialogOpen] = useState(false);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, searchTerm } = tabState;
 
   const { candidates, candidatesLoading, createCandidate } = useRecruitment(selectedCompanyId || undefined);
 
@@ -90,7 +99,7 @@ export default function CandidatesPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={setSelectedCompanyId} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id })} 
             />
           </div>
         </div>
@@ -101,7 +110,7 @@ export default function CandidatesPage() {
             <Input
               placeholder="Search candidates..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setTabState({ searchTerm: e.target.value })}
               className="pl-10"
             />
           </div>

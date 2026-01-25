@@ -3,11 +3,20 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Mail } from "lucide-react";
 import { EmailTemplatesTab } from "@/components/recruitment/EmailTemplatesTab";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function EmailTemplatesPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId } = tabState;
 
   return (
     <AppLayout>
@@ -32,7 +41,7 @@ export default function EmailTemplatesPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={setSelectedCompanyId} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id })} 
             />
           </div>
         </div>

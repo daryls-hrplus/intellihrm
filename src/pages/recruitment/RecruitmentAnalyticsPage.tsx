@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Building2, Loader2 } from "lucide-react";
 import { RecruitmentAnalytics } from "@/components/recruitment/RecruitmentAnalytics";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -22,13 +23,22 @@ export default function RecruitmentAnalyticsPage() {
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
 
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
   const [isLoading, setIsLoading] = useState(true);
 
   // Data states
   const [requisitions, setRequisitions] = useState<any[]>([]);
   const [candidates, setCandidates] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      activeTab: "charts",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, activeTab } = tabState;
 
   // Fetch companies
   useEffect(() => {
@@ -47,9 +57,9 @@ export default function RecruitmentAnalyticsPage() {
   // Set default company
   useEffect(() => {
     if (company?.id && !selectedCompanyId) {
-      setSelectedCompanyId(company.id);
+      setTabState({ selectedCompanyId: company.id });
     }
-  }, [company?.id, selectedCompanyId]);
+  }, [company?.id, selectedCompanyId, setTabState]);
 
   // Fetch analytics data
   useEffect(() => {
@@ -114,7 +124,7 @@ export default function RecruitmentAnalyticsPage() {
           </div>
           <div className="flex items-center gap-2">
             {isAdminOrHR && companies.length > 1 && (
-              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
                 <SelectTrigger className="w-[180px]">
                   <Building2 className="mr-2 h-4 w-4" />
                   <SelectValue placeholder={t("common.company")} />
@@ -129,7 +139,7 @@ export default function RecruitmentAnalyticsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="charts" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList>
             <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
             <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
