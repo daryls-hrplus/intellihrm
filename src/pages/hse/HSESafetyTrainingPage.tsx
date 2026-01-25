@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useHSE, HSESafetyTraining, HSETrainingRecord } from "@/hooks/useHSE";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +40,6 @@ import {
   HardHat,
   Plus,
   Search,
-  ChevronLeft,
   GraduationCap,
   Clock,
   Users,
@@ -45,7 +47,6 @@ import {
 } from "lucide-react";
 import { addMonths, isPast } from "date-fns";
 import { getTodayString, toDateString, formatDateForDisplay } from "@/utils/dateUtils";
-import { NavLink } from "react-router-dom";
 import { toast } from "sonner";
 
 const trainingTypes = [
@@ -65,9 +66,26 @@ const recordStatusOptions = [
 
 export default function HSESafetyTrainingPage() {
   const { t } = useLanguage();
-  const [companyId, setCompanyId] = useState<string>("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("courses");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+      activeTab: "courses",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, searchTerm, activeTab } = tabState;
+
+  // Initialize company from auth context
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [recordDialogOpen, setRecordDialogOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<HSESafetyTraining | null>(null);
@@ -85,18 +103,18 @@ export default function HSESafetyTrainingPage() {
   });
 
   const { data: employees = [] } = useQuery<{ id: string; full_name: string }[]>({
-    queryKey: ["employees", companyId],
+    queryKey: ["employees", selectedCompanyId],
     queryFn: async (): Promise<{ id: string; full_name: string }[]> => {
-      if (!companyId) return [];
+      if (!selectedCompanyId) return [];
       const query = supabase.from("profiles").select("id, full_name") as any;
-      const result = await query.eq("company_id", companyId).eq("is_active", true);
+      const result = await query.eq("company_id", selectedCompanyId).eq("is_active", true);
       return result.data || [];
     },
-    enabled: !!companyId,
+    enabled: !!selectedCompanyId,
   });
 
   const { safetyTrainings, trainingsLoading, createSafetyTraining, trainingRecords, recordsLoading } =
-    useHSE(companyId || undefined);
+    useHSE(selectedCompanyId || undefined);
 
   const createTrainingRecord = useMutation({
     mutationFn: async (data: Partial<HSETrainingRecord>) => {
@@ -135,7 +153,7 @@ export default function HSESafetyTrainingPage() {
     } else {
       setSelectedTraining(null);
       setFormData({
-        company_id: companyId,
+        company_id: selectedCompanyId,
         training_type: "induction",
         is_mandatory: false,
         is_active: true,
@@ -153,7 +171,7 @@ export default function HSESafetyTrainingPage() {
 
   const handleOpenRecordDialog = (training?: HSESafetyTraining) => {
     setRecordFormData({
-      company_id: companyId,
+      company_id: selectedCompanyId,
       training_id: training?.id,
       training_date: getTodayString(),
       status: "scheduled",
@@ -188,10 +206,14 @@ export default function HSESafetyTrainingPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t("hseModule.title"), href: "/hse" },
+            { label: t("hseModule.safetyTraining.title") },
+          ]}
+        />
+
         <div className="flex items-center gap-4">
-          <NavLink to="/hse" className="text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-5 w-5" />
-          </NavLink>
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/10">
             <HardHat className="h-5 w-5 text-warning" />
           </div>
@@ -253,7 +275,7 @@ export default function HSESafetyTrainingPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-4">
-              <Select value={companyId} onValueChange={setCompanyId}>
+              <Select value={selectedCompanyId} onValueChange={(id) => setTabState({ selectedCompanyId: id })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
@@ -271,19 +293,19 @@ export default function HSESafetyTrainingPage() {
                 <Input
                   placeholder="Search..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setTabState({ searchTerm: e.target.value })}
                   className="pl-9"
                 />
               </div>
 
               {activeTab === "courses" && (
-                <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
+                <Button onClick={() => handleOpenDialog()} disabled={!selectedCompanyId}>
                   <Plus className="mr-2 h-4 w-4" />
                   {t("hseModule.safetyTraining.addTraining")}
                 </Button>
               )}
               {activeTab === "records" && (
-                <Button onClick={() => handleOpenRecordDialog()} disabled={!companyId}>
+                <Button onClick={() => handleOpenRecordDialog()} disabled={!selectedCompanyId}>
                   <Plus className="mr-2 h-4 w-4" />
                   {t("hseModule.safetyTraining.addRecord")}
                 </Button>
@@ -293,7 +315,7 @@ export default function HSESafetyTrainingPage() {
         </Card>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="courses">{t("hseModule.safetyTraining.tabs.courses")}</TabsTrigger>
             <TabsTrigger value="records">{t("hseModule.safetyTraining.tabs.records")}</TabsTrigger>
@@ -303,29 +325,29 @@ export default function HSESafetyTrainingPage() {
             <Card>
               <CardContent className="p-0">
                 <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("common.code")}</TableHead>
-                  <TableHead>{t("hseModule.common.title")}</TableHead>
-                  <TableHead>{t("common.type")}</TableHead>
-                  <TableHead>{t("hseModule.safetyTraining.duration")}</TableHead>
-                  <TableHead>{t("hseModule.safetyTraining.frequency")}</TableHead>
-                  <TableHead>{t("hseModule.safetyTraining.mandatory")}</TableHead>
-                  <TableHead>{t("common.status")}</TableHead>
-                  <TableHead>{t("common.actions")}</TableHead>
-                </TableRow>
-              </TableHeader>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("common.code")}</TableHead>
+                      <TableHead>{t("hseModule.common.title")}</TableHead>
+                      <TableHead>{t("common.type")}</TableHead>
+                      <TableHead>{t("hseModule.safetyTraining.duration")}</TableHead>
+                      <TableHead>{t("hseModule.safetyTraining.frequency")}</TableHead>
+                      <TableHead>{t("hseModule.safetyTraining.mandatory")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("common.actions")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
                   <TableBody>
-                {trainingsLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
-                      {t("hseModule.common.loading")}
-                    </TableCell>
-                  </TableRow>
-                ) : filteredTrainings.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      {t("hseModule.safetyTraining.noTrainingCourses")}
+                    {trainingsLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8">
+                          {t("hseModule.common.loading")}
+                        </TableCell>
+                      </TableRow>
+                    ) : filteredTrainings.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                          {t("hseModule.safetyTraining.noTrainingCourses")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -380,28 +402,28 @@ export default function HSESafetyTrainingPage() {
             <Card>
               <CardContent className="p-0">
                 <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("common.employee")}</TableHead>
-                  <TableHead>{t("training.title")}</TableHead>
-                  <TableHead>{t("hseModule.safetyTraining.trainingDate")}</TableHead>
-                  <TableHead>{t("hseModule.safetyTraining.expiryDate")}</TableHead>
-                  <TableHead>{t("hseModule.safetyTraining.score")}</TableHead>
-                  <TableHead>{t("common.status")}</TableHead>
-                  <TableHead>{t("hseModule.safetyTraining.certificate")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recordsLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      {t("hseModule.common.loading")}
-                    </TableCell>
-                  </TableRow>
-                ) : filteredRecords.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      {t("hseModule.safetyTraining.noTrainingRecords")}
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("common.employee")}</TableHead>
+                      <TableHead>{t("training.title")}</TableHead>
+                      <TableHead>{t("hseModule.safetyTraining.trainingDate")}</TableHead>
+                      <TableHead>{t("hseModule.safetyTraining.expiryDate")}</TableHead>
+                      <TableHead>{t("hseModule.safetyTraining.score")}</TableHead>
+                      <TableHead>{t("common.status")}</TableHead>
+                      <TableHead>{t("hseModule.safetyTraining.certificate")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recordsLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8">
+                          {t("hseModule.common.loading")}
+                        </TableCell>
+                      </TableRow>
+                    ) : filteredRecords.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          {t("hseModule.safetyTraining.noTrainingRecords")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -431,7 +453,13 @@ export default function HSESafetyTrainingPage() {
                             {record.score !== null ? `${record.score}%` : "-"}
                           </TableCell>
                           <TableCell>{getStatusBadge(record.status)}</TableCell>
-                          <TableCell>{record.certificate_number || "-"}</TableCell>
+                          <TableCell>
+                            {record.certificate_number ? (
+                              <Badge variant="outline">{record.certificate_number}</Badge>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
@@ -444,7 +472,7 @@ export default function HSESafetyTrainingPage() {
 
         {/* Training Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedTraining ? t("hseModule.safetyTraining.editTraining") : t("hseModule.safetyTraining.addTraining")}
@@ -492,7 +520,7 @@ export default function HSESafetyTrainingPage() {
                     type="number"
                     value={formData.duration_hours || ""}
                     onChange={(e) =>
-                      setFormData({ ...formData, duration_hours: parseFloat(e.target.value) || null })
+                      setFormData({ ...formData, duration_hours: parseInt(e.target.value) })
                     }
                   />
                 </div>
@@ -502,43 +530,41 @@ export default function HSESafetyTrainingPage() {
                     type="number"
                     value={formData.frequency_months || ""}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        frequency_months: parseInt(e.target.value) || null,
-                      })
+                      setFormData({ ...formData, frequency_months: parseInt(e.target.value) })
                     }
                     placeholder="Leave empty for one-time"
                   />
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.is_mandatory || false}
+                      onCheckedChange={(c) => setFormData({ ...formData, is_mandatory: c })}
+                    />
+                    <Label>Mandatory</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.is_active ?? true}
+                      onCheckedChange={(c) => setFormData({ ...formData, is_active: c })}
+                    />
+                    <Label>Active</Label>
+                  </div>
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label>Description</Label>
                   <Textarea
                     value={formData.description || ""}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
                   />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formData.is_mandatory || false}
-                    onCheckedChange={(v) => setFormData({ ...formData, is_mandatory: v })}
-                  />
-                  <Label>Mandatory</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formData.is_active !== false}
-                    onCheckedChange={(v) => setFormData({ ...formData, is_active: v })}
-                  />
-                  <Label>Active</Label>
                 </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={createSafetyTraining.isPending}>
-                  {selectedTraining ? "Update" : "Create"} Training
-                </Button>
+                <Button type="submit">{t("common.save")}</Button>
               </div>
             </form>
           </DialogContent>
@@ -546,11 +572,29 @@ export default function HSESafetyTrainingPage() {
 
         {/* Record Dialog */}
         <Dialog open={recordDialogOpen} onOpenChange={setRecordDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Training Record</DialogTitle>
+              <DialogTitle>{t("hseModule.safetyTraining.addRecord")}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleRecordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Training *</Label>
+                <Select
+                  value={recordFormData.training_id || ""}
+                  onValueChange={(v) => setRecordFormData({ ...recordFormData, training_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select training" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {safetyTrainings.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label>Employee *</Label>
                 <Select
@@ -569,43 +613,15 @@ export default function HSESafetyTrainingPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Training *</Label>
-                <Select
-                  value={recordFormData.training_id || ""}
-                  onValueChange={(v) => {
-                    const training = safetyTrainings.find((t) => t.id === v);
-                    setRecordFormData({
-                      ...recordFormData,
-                      training_id: v,
-                      expiry_date: training?.frequency_months
-                        ? toDateString(addMonths(new Date(), training.frequency_months))
-                        : undefined,
-                    });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select training" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {safetyTrainings.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>
-                        {t.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Training Date *</Label>
+                  <Label>Training Date</Label>
                   <Input
                     type="date"
                     value={recordFormData.training_date || ""}
                     onChange={(e) =>
                       setRecordFormData({ ...recordFormData, training_date: e.target.value })
                     }
-                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -619,55 +635,11 @@ export default function HSESafetyTrainingPage() {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <Select
-                  value={recordFormData.status}
-                  onValueChange={(v) => setRecordFormData({ ...recordFormData, status: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {recordStatusOptions.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Score (%)</Label>
-                  <Input
-                    type="number"
-                    value={recordFormData.score || ""}
-                    onChange={(e) =>
-                      setRecordFormData({
-                        ...recordFormData,
-                        score: parseFloat(e.target.value) || null,
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Trainer Name</Label>
-                  <Input
-                    value={recordFormData.trainer_name || ""}
-                    onChange={(e) =>
-                      setRecordFormData({ ...recordFormData, trainer_name: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setRecordDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={createTrainingRecord.isPending}>
-                  Create Record
-                </Button>
+                <Button type="submit">{t("common.save")}</Button>
               </div>
             </form>
           </DialogContent>
