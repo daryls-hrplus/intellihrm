@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useTabState } from "@/hooks/useTabState";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -61,14 +62,21 @@ export default function AISecurityViolationsPage() {
   usePageAudit('ai_security', 'Admin');
   const [violations, setViolations] = useState<Violation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [reviewedFilter, setReviewedFilter] = useState<string>("all");
   const [selectedViolation, setSelectedViolation] = useState<Violation | null>(null);
   const [reviewNotes, setReviewNotes] = useState("");
   const [isReviewing, setIsReviewing] = useState(false);
   const { toast } = useToast();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: "",
+      severityFilter: "all",
+      typeFilter: "all",
+      reviewedFilter: "all",
+    },
+    syncToUrl: ["severityFilter", "reviewedFilter"],
+  });
+  const { searchQuery, severityFilter, typeFilter, reviewedFilter } = tabState;
 
   useEffect(() => {
     fetchViolations();
@@ -267,13 +275,13 @@ export default function AISecurityViolationsPage() {
               type="text"
               placeholder="Search by query or user..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setTabState({ searchQuery: e.target.value })}
               className="h-10 w-full rounded-lg border border-input bg-background pl-10 pr-4 text-foreground"
             />
           </div>
           <select
             value={severityFilter}
-            onChange={(e) => setSeverityFilter(e.target.value)}
+            onChange={(e) => setTabState({ severityFilter: e.target.value })}
             className="h-10 rounded-lg border border-input bg-background px-3 text-foreground"
           >
             <option value="all">All Severities</option>
@@ -284,7 +292,7 @@ export default function AISecurityViolationsPage() {
           </select>
           <select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            onChange={(e) => setTabState({ typeFilter: e.target.value })}
             className="h-10 rounded-lg border border-input bg-background px-3 text-foreground"
           >
             <option value="all">All Types</option>
@@ -295,7 +303,7 @@ export default function AISecurityViolationsPage() {
           </select>
           <select
             value={reviewedFilter}
-            onChange={(e) => setReviewedFilter(e.target.value)}
+            onChange={(e) => setTabState({ reviewedFilter: e.target.value })}
             className="h-10 rounded-lg border border-input bg-background px-3 text-foreground"
           >
             <option value="all">All Status</option>

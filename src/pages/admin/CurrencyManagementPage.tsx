@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTabState } from "@/hooks/useTabState";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -45,7 +46,13 @@ export default function CurrencyManagementPage() {
   usePageAudit('currencies', 'Admin');
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("currencies");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "currencies" },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab } = tabState;
+  
   
   // Currency dialog state
   const [currencyDialogOpen, setCurrencyDialogOpen] = useState(false);
@@ -320,7 +327,7 @@ export default function CurrencyManagementPage() {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="currencies">
               <DollarSign className="h-4 w-4 mr-2" />

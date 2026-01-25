@@ -32,7 +32,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { NavLink } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { Button as NavigationButton } from "@/components/ui/button";
 
 interface ParsedUser {
   email: string;
@@ -56,6 +57,7 @@ export default function AdminBulkImportPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<ImportResult[] | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const { navigateToList } = useWorkspaceNavigation();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -203,12 +205,17 @@ export default function AdminBulkImportPage() {
         />
 
         <div className="flex items-center gap-3">
-          <NavLink
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted"
+          <NavigationButton
+            variant="outline"
+            size="icon"
+            onClick={() => navigateToList({
+              route: "/admin",
+              title: "Admin",
+              moduleCode: "admin",
+            })}
           >
             <ArrowLeft className="h-5 w-5" />
-          </NavLink>
+          </NavigationButton>
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Users className="h-8 w-8 text-primary" />

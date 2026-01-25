@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useTabState } from "@/hooks/useTabState";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PageTourPrompt } from "@/components/tours/PageTourPrompt";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,8 +78,12 @@ const emptyDivisionFormData: DivisionFormData = { name: "", code: "", descriptio
 export default function AdminCompanyGroupsPage() {
   const [groups, setGroups] = useState<CompanyGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { searchQuery: "" },
+  });
+  const { searchQuery } = tabState;
   const [expandedDivisions, setExpandedDivisions] = useState<Set<string>>(new Set());
   
   // Group Modal
@@ -562,7 +567,7 @@ export default function AdminCompanyGroupsPage() {
             type="text"
             placeholder="Search groups and divisions..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => setTabState({ searchQuery: e.target.value })}
             className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
