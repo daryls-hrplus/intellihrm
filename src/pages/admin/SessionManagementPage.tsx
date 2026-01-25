@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 interface SessionSettings {
   idleTimeoutMinutes: number;
@@ -100,6 +101,12 @@ export default function SessionManagementPage() {
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>(mockActiveSessions);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { searchQuery: "" },
+    syncToUrl: [],
+  });
+  const { searchQuery } = tabState;
 
   const handleSettingChange = <K extends keyof SessionSettings>(
     key: K,

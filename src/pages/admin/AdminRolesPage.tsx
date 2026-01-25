@@ -46,7 +46,7 @@ import {
   Menu as MenuIcon,
   Settings2,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { cn } from "@/lib/utils";
 import { Json } from "@/integrations/supabase/types";
 
@@ -95,7 +95,7 @@ export default function AdminRolesPage() {
   const { logView } = useAuditLog();
   const hasLoggedView = useRef(false);
   const { subscription } = useSubscription();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
 
   // Get subscribed modules (or all if in trial/no subscription)
   const subscribedModules = subscription?.status === 'active' 
@@ -358,7 +358,11 @@ export default function AdminRolesPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(`/admin/granular-permissions?role=${role.id}`)}
+                    onClick={() => navigateToList({
+                      route: `/admin/granular-permissions?role=${role.id}`,
+                      title: "Granular Permissions",
+                      moduleCode: "admin",
+                    })}
                   >
                     <Settings2 className="mr-1.5 h-3.5 w-3.5" />
                     Permissions
