@@ -10,17 +10,24 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Building2, Calendar, Users, Clock, CheckCircle, AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function OpenEnrollmentTrackerPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [enrollmentPeriods, setEnrollmentPeriods] = useState<any[]>([]);
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
   const [enrollmentStats, setEnrollmentStats] = useState<any>({});
   const [employeeStatus, setEmployeeStatus] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "", selectedPeriod: "" },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany, selectedPeriod } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v, selectedPeriod: "" });
+  const setSelectedPeriod = (v: string) => setTabState({ selectedPeriod: v });
 
   useEffect(() => {
     fetchCompanies();
@@ -41,7 +48,7 @@ export default function OpenEnrollmentTrackerPage() {
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
   };
@@ -54,7 +61,7 @@ export default function OpenEnrollmentTrackerPage() {
       .order("start_date", { ascending: false });
     
     setEnrollmentPeriods(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedPeriod) {
       setSelectedPeriod(data[0].id);
     }
   };

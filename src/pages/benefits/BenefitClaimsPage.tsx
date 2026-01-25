@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plus, Pencil, Receipt, Check, X } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 
 interface BenefitClaim {
   id: string;
@@ -59,10 +60,16 @@ export default function BenefitClaimsPage() {
   const [claims, setClaims] = useState<BenefitClaim[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingClaim, setEditingClaim] = useState<BenefitClaim | null>(null);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   
   const [formData, setFormData] = useState({
     enrollment_id: "",
@@ -92,7 +99,7 @@ export default function BenefitClaimsPage() {
     const { data } = await supabase.from('companies').select('id, name').eq('is_active', true).order('name');
     if (data) {
       setCompanies(data);
-      if (data.length > 0) setSelectedCompanyId(data[0].id);
+      if (data.length > 0 && !selectedCompanyId) setSelectedCompanyId(data[0].id);
     }
   };
 

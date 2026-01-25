@@ -18,17 +18,24 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Building2, Settings } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function AutoEnrollmentRulesPage() {
   const { t } = useTranslation();
   const { logAction } = useAuditLog();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [plans, setPlans] = useState<any[]>([]);
   const [rules, setRules] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<any>(null);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -58,7 +65,7 @@ export default function AutoEnrollmentRulesPage() {
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
   };

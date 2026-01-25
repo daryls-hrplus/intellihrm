@@ -11,16 +11,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Building2, Calculator, DollarSign, Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function BenefitCalculatorPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [plans, setPlans] = useState<any[]>([]);
-  const [selectedPlans, setSelectedPlans] = useState<string[]>([]);
   const [calculations, setCalculations] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "", selectedPlans: [] as string[] },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany, selectedPlans } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v, selectedPlans: [] });
 
   useEffect(() => {
     fetchCompanies();
@@ -39,7 +45,7 @@ export default function BenefitCalculatorPage() {
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
   };
@@ -58,7 +64,6 @@ export default function BenefitCalculatorPage() {
         .order("name");
 
       setPlans(data || []);
-      setSelectedPlans([]);
     } catch (error) {
       console.error("Error fetching plans:", error);
     } finally {
@@ -67,11 +72,11 @@ export default function BenefitCalculatorPage() {
   };
 
   const togglePlan = (planId: string) => {
-    setSelectedPlans(prev =>
-      prev.includes(planId)
-        ? prev.filter(id => id !== planId)
-        : [...prev, planId]
-    );
+    setTabState({
+      selectedPlans: selectedPlans.includes(planId)
+        ? selectedPlans.filter(id => id !== planId)
+        : [...selectedPlans, planId]
+    });
   };
 
   const calculateCosts = () => {

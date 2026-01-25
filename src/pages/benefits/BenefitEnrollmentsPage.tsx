@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plus, Pencil, Check, X, UserCheck, Filter, RotateCcw } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 
 interface BenefitEnrollment {
   id: string;
@@ -66,16 +67,34 @@ export default function BenefitEnrollmentsPage() {
   const [plans, setPlans] = useState<BenefitPlan[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEnrollment, setEditingEnrollment] = useState<BenefitEnrollment | null>(null);
   
-  // Filter states
-  const [filterEmployeeId, setFilterEmployeeId] = useState<string>("all");
-  const [filterPlanId, setFilterPlanId] = useState<string>("all");
-  const [filterEffectiveDateFrom, setFilterEffectiveDateFrom] = useState<string>("");
-  const [filterEffectiveDateTo, setFilterEffectiveDateTo] = useState<string>("");
+  // Tab state persistence for filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      filterEmployeeId: "all",
+      filterPlanId: "all",
+      filterEffectiveDateFrom: "",
+      filterEffectiveDateTo: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, filterEmployeeId, filterPlanId, filterEffectiveDateFrom, filterEffectiveDateTo } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ 
+    selectedCompanyId: v, 
+    filterEmployeeId: "all", 
+    filterPlanId: "all",
+    filterEffectiveDateFrom: "",
+    filterEffectiveDateTo: "" 
+  });
+  const setFilterEmployeeId = (v: string) => setTabState({ filterEmployeeId: v });
+  const setFilterPlanId = (v: string) => setTabState({ filterPlanId: v });
+  const setFilterEffectiveDateFrom = (v: string) => setTabState({ filterEffectiveDateFrom: v });
+  const setFilterEffectiveDateTo = (v: string) => setTabState({ filterEffectiveDateTo: v });
   
   const [formData, setFormData] = useState({
     employee_id: "",
@@ -110,7 +129,7 @@ export default function BenefitEnrollmentsPage() {
     const { data } = await supabase.from('companies').select('id, name').eq('is_active', true).order('name');
     if (data) {
       setCompanies(data);
-      if (data.length > 0) setSelectedCompanyId(data[0].id);
+      if (data.length > 0 && !selectedCompanyId) setSelectedCompanyId(data[0].id);
     }
   };
 
@@ -309,10 +328,12 @@ export default function BenefitEnrollmentsPage() {
   }, [enrollments, filterEmployeeId, filterPlanId, filterEffectiveDateFrom, filterEffectiveDateTo]);
 
   const clearFilters = () => {
-    setFilterEmployeeId("all");
-    setFilterPlanId("all");
-    setFilterEffectiveDateFrom("");
-    setFilterEffectiveDateTo("");
+    setTabState({
+      filterEmployeeId: "all",
+      filterPlanId: "all",
+      filterEffectiveDateFrom: "",
+      filterEffectiveDateTo: ""
+    });
   };
 
   const hasActiveFilters = filterEmployeeId !== "all" || filterPlanId !== "all" || filterEffectiveDateFrom || filterEffectiveDateTo;

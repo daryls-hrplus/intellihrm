@@ -10,15 +10,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Check, X, Scale } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function PlanComparisonPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [plans, setPlans] = useState<any[]>([]);
-  const [selectedPlans, setSelectedPlans] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "", selectedPlans: [] as string[] },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany, selectedPlans } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v, selectedPlans: [] });
 
   useEffect(() => {
     fetchCompanies();
@@ -33,7 +39,7 @@ export default function PlanComparisonPage() {
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
   };
@@ -52,7 +58,6 @@ export default function PlanComparisonPage() {
         .order("name");
 
       setPlans(data || []);
-      setSelectedPlans([]);
     } catch (error) {
       console.error("Error fetching plans:", error);
     } finally {
@@ -61,11 +66,11 @@ export default function PlanComparisonPage() {
   };
 
   const togglePlanSelection = (planId: string) => {
-    setSelectedPlans(prev => 
-      prev.includes(planId) 
-        ? prev.filter(id => id !== planId)
-        : prev.length < 4 ? [...prev, planId] : prev
-    );
+    setTabState({
+      selectedPlans: selectedPlans.includes(planId) 
+        ? selectedPlans.filter(id => id !== planId)
+        : selectedPlans.length < 4 ? [...selectedPlans, planId] : selectedPlans
+    });
   };
 
   const comparisonPlans = plans.filter(p => selectedPlans.includes(p.id));

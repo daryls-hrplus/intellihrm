@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FolderOpen } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 interface BenefitCategory {
   id: string;
@@ -47,10 +48,16 @@ export default function BenefitCategoriesPage() {
   
   const [categories, setCategories] = useState<BenefitCategory[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<BenefitCategory | null>(null);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   
   const [formData, setFormData] = useState({
     name: "",
@@ -76,7 +83,7 @@ export default function BenefitCategoriesPage() {
     const { data } = await supabase.from('companies').select('id, name').eq('is_active', true).order('name');
     if (data) {
       setCompanies(data);
-      if (data.length > 0) setSelectedCompanyId(data[0].id);
+      if (data.length > 0 && !selectedCompanyId) setSelectedCompanyId(data[0].id);
     }
   };
 

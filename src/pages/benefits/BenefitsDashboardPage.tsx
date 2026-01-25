@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { useTabState } from "@/hooks/useTabState";
 import {
   Select,
   SelectContent,
@@ -50,7 +51,14 @@ export default function BenefitsDashboardPage() {
   const { t } = useTranslation();
   const { hasTabAccess } = useGranularPermissions();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "all" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  
   const [stats, setStats] = useState<DashboardStats>({
     activePlans: 0,
     enrolledUsers: 0,

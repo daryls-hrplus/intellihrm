@@ -10,15 +10,22 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Building2, Clock, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function WaitingPeriodTrackingPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [waitingPeriods, setWaitingPeriods] = useState<any[]>([]);
   const [stats, setStats] = useState({ waiting: 0, eligible: 0, enrolled: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
 
   useEffect(() => {
     fetchCompanies();
@@ -33,7 +40,7 @@ export default function WaitingPeriodTrackingPage() {
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
   };

@@ -35,6 +35,7 @@ import { CountrySelect } from "@/components/ui/country-select";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Building2, Globe, Phone, Mail } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 
 const providerTypes = [
   { value: "insurance", label: "Insurance" },
@@ -48,8 +49,14 @@ export default function BenefitProvidersPage() {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<any>(null);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
 
   useEffect(() => {
     setSelectedCountry(editingProvider?.country || "");

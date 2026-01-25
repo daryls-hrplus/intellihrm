@@ -11,19 +11,26 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, Users, DollarSign, FileText, Building2 } from "lucide-react";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
+import { useTabState } from "@/hooks/useTabState";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(142, 76%, 36%)', 'hsl(38, 92%, 50%)', 'hsl(0, 84%, 60%)'];
 
 export default function BenefitAnalyticsPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("all");
   const [enrollmentStats, setEnrollmentStats] = useState<any>({});
   const [costData, setCostData] = useState<any[]>([]);
   const [claimsData, setClaimsData] = useState<any>({});
   const [planDistribution, setPlanDistribution] = useState<any[]>([]);
   const [enrollmentTrends, setEnrollmentTrends] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "all", activeTab: "enrollments" },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany, activeTab } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
 
   useEffect(() => {
     fetchCompanies();
@@ -222,7 +229,7 @@ export default function BenefitAnalyticsPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="enrollments" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList>
             <TabsTrigger value="enrollments">Enrollment Trends</TabsTrigger>
             <TabsTrigger value="costs">Cost Analysis</TabsTrigger>
