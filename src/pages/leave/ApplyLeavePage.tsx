@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { CalendarPlus, CalendarDays } from "lucide-react";
+import { CalendarPlus, CalendarDays, Calendar as CalendarIcon } from "lucide-react";
 import { format, differenceInDays, addDays } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import {
   Select,
   SelectContent,
@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 
 export default function ApplyLeavePage() {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const { leaveTypes, leaveBalances, createLeaveRequest, loadingTypes } = useLeaveManagement();
   const [formData, setFormData] = useState({
     leave_type_id: "",
@@ -75,7 +75,12 @@ export default function ApplyLeavePage() {
       status: "pending",
     });
 
-    navigate("/leave/my-leave");
+    navigateToList({
+      route: "/leave/my-leave",
+      title: "My Leave",
+      moduleCode: "leave",
+      icon: CalendarIcon,
+    });
   };
 
   const isValid = formData.leave_type_id && formData.start_date && formData.end_date && duration > 0;
@@ -155,7 +160,7 @@ export default function ApplyLeavePage() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
+                  <CalendarComponent
                     mode="single"
                     selected={formData.start_date}
                     onSelect={(date) => {
@@ -202,7 +207,7 @@ export default function ApplyLeavePage() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
+                  <CalendarComponent
                     mode="single"
                     selected={formData.end_date}
                     onSelect={(date) => setFormData({ ...formData, end_date: date })}
@@ -273,7 +278,15 @@ export default function ApplyLeavePage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={() => navigate("/leave")}>
+            <Button
+              variant="outline"
+              onClick={() => navigateToList({
+                route: "/leave",
+                title: "Leave Management",
+                moduleCode: "leave",
+                icon: CalendarIcon,
+              })}
+            >
               {t("leave.common.cancel")}
             </Button>
             <Button 

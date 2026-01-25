@@ -8,6 +8,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Textarea } from "@/components/ui/textarea";
 import { CalendarCheck, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 import {
   Table,
   TableBody,
@@ -37,7 +38,14 @@ export default function LeaveApprovalsPage() {
   const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
   const [reviewNotes, setReviewNotes] = useState("");
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>("pending");
+  
+  // Tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { statusFilter: "pending" },
+    syncToUrl: ["statusFilter"],
+  });
+  const { statusFilter } = tabState;
+  const setStatusFilter = (v: string) => setTabState({ statusFilter: v });
 
   const filteredRequests = allLeaveRequests.filter((r) => 
     statusFilter === "all" ? true : r.status === statusFilter

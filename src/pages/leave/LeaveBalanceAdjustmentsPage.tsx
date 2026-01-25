@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,10 +87,19 @@ interface Adjustment {
 
 export default function LeaveBalanceAdjustmentsPage() {
   const { t } = useLanguage();
-  const { user, isAdmin, hasRole } = useAuth();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
+  const { user, company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  
+  // Tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: isAdminOrHR ? (company?.id || "") : (company?.id || ""),
+      selectedDepartmentId: "all",
+    },
+  });
+  const { selectedCompanyId, selectedDepartmentId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v, selectedDepartmentId: "all" });
+  const setSelectedDepartmentId = (v: string) => setTabState({ selectedDepartmentId: v });
 
   const ADJUSTMENT_TYPES = [
     { value: "add", label: t("leave.balanceAdjustments.addDays"), icon: TrendingUp },
