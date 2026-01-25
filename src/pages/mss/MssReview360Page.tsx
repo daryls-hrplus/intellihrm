@@ -23,7 +23,6 @@ import {
   Info,
   ArrowRight,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -35,6 +34,8 @@ import { FeedbackFormDialog } from "@/components/performance/FeedbackFormDialog"
 import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface ReviewCycle {
   id: string;
@@ -99,8 +100,20 @@ const reviewerTypeLabels: Record<string, string> = {
 
 
   const { user, company } = useAuth();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("team-cycles");
+  const { navigateToList } = useWorkspaceNavigation();
+
+  // Tab and analytics state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "team-cycles",
+      showAnalytics: false,
+    },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab, showAnalytics } = tabState;
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+  const setShowAnalytics = (v: boolean) => setTabState({ showAnalytics: v });
+
   const [myTeamCycles, setMyTeamCycles] = useState<ReviewCycle[]>([]);
   const [pendingFeedback, setPendingFeedback] = useState<FeedbackItem[]>([]);
   const [completedFeedback, setCompletedFeedback] = useState<FeedbackItem[]>([]);
@@ -113,7 +126,6 @@ const reviewerTypeLabels: Record<string, string> = {
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
-  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -341,7 +353,12 @@ const reviewerTypeLabels: Record<string, string> = {
                 go to <strong>My Team</strong> and select a team member's <strong>360 Feedback</strong> tab.
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/mss/team')}>
+            <Button variant="outline" size="sm" onClick={() => navigateToList({
+              route: '/mss/team',
+              title: t("mss.myTeam.title", "My Team"),
+              moduleCode: "mss",
+              icon: Users,
+            })}>
               View My Team
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

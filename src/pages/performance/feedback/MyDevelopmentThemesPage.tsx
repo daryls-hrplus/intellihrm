@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,11 +19,19 @@ import { useDevelopmentThemes } from '@/hooks/feedback/useDevelopmentThemes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useTabState } from '@/hooks/useTabState';
 
 export default function MyDevelopmentThemesPage() {
   const { t } = useLanguage();
   const { user, profile } = useAuth();
-  const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
+
+  // Tab state persistence for selected theme
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedThemeId: null as string | null },
+  });
+  const { selectedThemeId } = tabState;
+  const setSelectedThemeId = (v: string | null) => setTabState({ selectedThemeId: v });
+
   // Only fetch themes that have been released to the employee
   const { data: themes } = useDevelopmentThemes(user?.id, true);
 
