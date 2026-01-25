@@ -21,9 +21,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NavLink } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrainingHistoryTab } from "@/components/training/TrainingHistoryTab";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface Enrollment {
   id: string;
@@ -62,6 +62,7 @@ interface Certificate {
 export default function MyTrainingPage() {
   const { t } = useLanguage();
   const { user, profile } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -201,22 +202,31 @@ export default function MyTrainingPage() {
           )}
         </div>
 
-        <Button asChild className="mt-4">
-          <NavLink to={`/training/course/${enrollment.course_id}`}>
-            {enrollment.status === "completed" ? (
-              <>
-                <CheckCircle className="mr-2 h-4 w-4" /> {t("pages.myTraining.reviewCourse")}
-              </>
-            ) : enrollment.status === "in_progress" ? (
-              <>
-                <Play className="mr-2 h-4 w-4" /> {t("pages.myTraining.continue")}
-              </>
-            ) : (
-              <>
-                <Play className="mr-2 h-4 w-4" /> {t("pages.myTraining.startCourse")}
-              </>
-            )}
-          </NavLink>
+        <Button 
+          className="mt-4"
+          onClick={() => navigateToRecord({
+            route: `/training/course/${enrollment.course_id}`,
+            title: enrollment.course.title,
+            subtitle: "Course",
+            moduleCode: "training",
+            contextType: "course",
+            contextId: enrollment.course_id,
+            icon: BookOpen,
+          })}
+        >
+          {enrollment.status === "completed" ? (
+            <>
+              <CheckCircle className="mr-2 h-4 w-4" /> {t("pages.myTraining.reviewCourse")}
+            </>
+          ) : enrollment.status === "in_progress" ? (
+            <>
+              <Play className="mr-2 h-4 w-4" /> {t("pages.myTraining.continue")}
+            </>
+          ) : (
+            <>
+              <Play className="mr-2 h-4 w-4" /> {t("pages.myTraining.startCourse")}
+            </>
+          )}
         </Button>
       </div>
     </div>
@@ -337,8 +347,19 @@ export default function MyTrainingPage() {
                   <p className="mt-2 text-sm text-muted-foreground">
                     Browse the course catalog to start learning
                   </p>
-                  <Button asChild className="mt-4">
-                    <NavLink to="/training/catalog">Browse Courses</NavLink>
+                  <Button 
+                    className="mt-4"
+                    onClick={() => navigateToRecord({
+                      route: "/training/catalog",
+                      title: "Course Catalog",
+                      subtitle: "Training",
+                      moduleCode: "training",
+                      contextType: "catalog",
+                      contextId: "catalog",
+                      icon: BookOpen,
+                    })}
+                  >
+                    Browse Courses
                   </Button>
                 </div>
               ) : (

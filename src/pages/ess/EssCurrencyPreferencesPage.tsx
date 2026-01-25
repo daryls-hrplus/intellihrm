@@ -1,11 +1,11 @@
-import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronRight, Globe, Info } from "lucide-react";
+import { Globe, Info } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmployeeCurrencyPreferenceForm } from "@/components/payroll/EmployeeCurrencyPreferenceForm";
 
@@ -75,14 +75,13 @@ export default function EssCurrencyPreferencesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/ess" className="hover:text-foreground transition-colors">Employee Self Service</Link>
-          <ChevronRight className="h-4 w-4" />
-          <Link to="/ess/compensation" className="hover:text-foreground transition-colors">My Compensation</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Currency Preferences</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: "Employee Self-Service", href: "/ess" },
+            { label: "My Compensation", href: "/ess/compensation" },
+            { label: "Currency Preferences" },
+          ]}
+        />
 
         <div className="flex items-center gap-3">
           <div className="rounded-lg bg-teal-500/10 p-3">
