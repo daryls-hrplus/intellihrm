@@ -188,7 +188,7 @@ export function ReadinessAssessmentForm({
       return assessorResponses.length > 0;
     });
     // Assume 2 assessor types minimum (manager + hr)
-    return (completedAssessors.size / 2) * 100;
+    return (completedAssessors.length / 2) * 100;
   };
 
   if (loading) {
