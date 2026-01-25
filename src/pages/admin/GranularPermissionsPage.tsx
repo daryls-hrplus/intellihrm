@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +58,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Role {
   id: string;
@@ -170,12 +170,19 @@ const breadcrumbItems = [
 
 export default function GranularPermissionsPage() {
   usePageAudit('permissions', 'Admin');
-  const [searchParams] = useSearchParams();
-  const roleIdFromUrl = searchParams.get("role");
   const accordionRef = useRef<HTMLDivElement>(null);
   
+  // Tab state for selected role and open accordions
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedRoleId: "",
+      openAccordions: [] as string[],
+    },
+    syncToUrl: ["selectedRoleId"],
+  });
+  const { selectedRoleId, openAccordions } = tabState;
+  
   const [roles, setRoles] = useState<Role[]>([]);
-  const [selectedRoleId, setSelectedRoleId] = useState<string>("");
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
   const [rolePermissions, setRolePermissions] = useState<Record<string, RolePermission>>({});
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -195,7 +202,6 @@ export default function GranularPermissionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [openAccordions, setOpenAccordions] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -208,6 +214,20 @@ export default function GranularPermissionsPage() {
       fetchRoleAccess(selectedRoleId);
     }
   }, [selectedRoleId]);
+
+  // Update accordion state via tabState
+  const setOpenAccordions = (value: string[] | ((prev: string[]) => string[])) => {
+    if (typeof value === 'function') {
+      setTabState({ openAccordions: value(openAccordions) });
+    } else {
+      setTabState({ openAccordions: value });
+    }
+  };
+
+  // Update selected role via tabState
+  const setSelectedRoleId = (value: string) => {
+    setTabState({ selectedRoleId: value });
+  };
 
   const fetchInitialData = async () => {
     try {
@@ -236,11 +256,9 @@ export default function GranularPermissionsPage() {
       setPositionTypes(positionTypesRes.data || []);
       setPayGroups(payGroupsRes.data || []);
 
-      // Use role from URL if provided, otherwise first role
-      if (roleIdFromUrl && rolesRes.data?.find(r => r.id === roleIdFromUrl)) {
-        setSelectedRoleId(roleIdFromUrl);
-      } else if (rolesRes.data && rolesRes.data.length > 0) {
-        setSelectedRoleId(rolesRes.data[0].id);
+      // Set default role if not already set from tab state
+      if (!selectedRoleId && rolesRes.data && rolesRes.data.length > 0) {
+        setTabState({ selectedRoleId: rolesRes.data[0].id });
       }
     } catch (error) {
       console.error("Error fetching data:", error);
