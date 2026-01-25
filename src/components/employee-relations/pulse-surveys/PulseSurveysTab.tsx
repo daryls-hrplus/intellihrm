@@ -16,9 +16,11 @@ import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface PulseSurveysTabProps {
   companyId: string;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
-export function PulseSurveysTab({ companyId }: PulseSurveysTabProps) {
+export function PulseSurveysTab({ companyId, activeTab = "surveys", onTabChange }: PulseSurveysTabProps) {
   const { t } = useTranslation();
   const { data: surveys = [], isLoading } = usePulseSurveys(companyId);
   const { updateSurvey } = usePulseSurveyMutations();
@@ -51,7 +53,7 @@ export function PulseSurveysTab({ companyId }: PulseSurveysTabProps) {
   }
 
   return (
-    <Tabs defaultValue="surveys" className="space-y-6">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
       <TabsList>
         <TabsTrigger value="surveys" className="gap-2">
           <Activity className="h-4 w-4" />

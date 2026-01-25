@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -7,12 +6,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PulseSurveysTab } from "@/components/employee-relations/pulse-surveys/PulseSurveysTab";
+import { useTabState } from "@/hooks/useTabState";
 import { Activity } from "lucide-react";
 
 export default function ERSurveysPage() {
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(searchParams.get("company") || "");
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      activeTab: "surveys",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, activeTab } = tabState;
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
@@ -25,9 +33,9 @@ export default function ERSurveysPage() {
 
   useEffect(() => {
     if (companies.length > 0 && !selectedCompanyId) {
-      setSelectedCompanyId(companies[0].id);
+      setTabState({ selectedCompanyId: companies[0].id });
     }
-  }, [companies, selectedCompanyId]);
+  }, [companies, selectedCompanyId, setTabState]);
 
   const breadcrumbItems = [
     { label: t("common.home"), href: "/" },
@@ -49,14 +57,20 @@ export default function ERSurveysPage() {
               <p className="text-muted-foreground">AI-powered employee sentiment tracking and insights</p>
             </div>
           </div>
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
             <SelectTrigger className="w-[200px]"><SelectValue placeholder={t("common.selectCompany")} /></SelectTrigger>
             <SelectContent>
               {companies.map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
             </SelectContent>
           </Select>
         </div>
-        {selectedCompanyId && <PulseSurveysTab companyId={selectedCompanyId} />}
+        {selectedCompanyId && (
+          <PulseSurveysTab 
+            companyId={selectedCompanyId} 
+            activeTab={activeTab}
+            onTabChange={(v) => setTabState({ activeTab: v })}
+          />
+        )}
       </div>
     </AppLayout>
   );

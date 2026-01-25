@@ -70,6 +70,8 @@ import {
   ArrowUpCircle, Tags, ScrollText, FileWarning, ClipboardPen,
   // Recruitment icons
   FlaskConical, UsersRound,
+  // Employee Relations icons
+  Gavel, DoorOpen,
   type LucideIcon,
 } from "lucide-react";
 
@@ -254,6 +256,9 @@ export const iconRegistry: Record<string, LucideIcon> = {
   // Recruitment icons
   FlaskConical,
   UsersRound,
+  // Employee Relations icons
+  Gavel,
+  DoorOpen,
 };
 
 /**

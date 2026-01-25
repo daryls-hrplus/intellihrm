@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -8,14 +7,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ERAnalytics } from "@/components/employee-relations/ERAnalytics";
+import { useTabState } from "@/hooks/useTabState";
 import { BarChart3 } from "lucide-react";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 export default function ERAnalyticsPage() {
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(searchParams.get("company") || "");
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>(searchParams.get("department") || "all");
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+      activeTab: "charts",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId, activeTab } = tabState;
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
@@ -38,9 +46,9 @@ export default function ERAnalyticsPage() {
 
   useEffect(() => {
     if (companies.length > 0 && !selectedCompanyId) {
-      setSelectedCompanyId(companies[0].id);
+      setTabState({ selectedCompanyId: companies[0].id });
     }
-  }, [companies, selectedCompanyId]);
+  }, [companies, selectedCompanyId, setTabState]);
 
   const breadcrumbItems = [
     { label: t("common.home"), href: "/" },
@@ -63,13 +71,13 @@ export default function ERAnalyticsPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v, selectedDepartmentId: "all" })}>
               <SelectTrigger className="w-[200px]"><SelectValue placeholder={t("common.selectCompany")} /></SelectTrigger>
               <SelectContent>
                 {companies.map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
               </SelectContent>
             </Select>
-            <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+            <Select value={selectedDepartmentId} onValueChange={(v) => setTabState({ selectedDepartmentId: v })}>
               <SelectTrigger className="w-[200px]"><SelectValue placeholder={t("common.selectDepartment")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("workforce.allDepartments")}</SelectItem>
@@ -78,7 +86,7 @@ export default function ERAnalyticsPage() {
             </Select>
           </div>
         </div>
-        <Tabs defaultValue="charts" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList>
             <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
             <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>

@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +6,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Scale, MessageSquare, FileEdit, AlertTriangle, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, FileText, Scale, MessageSquare, FileEdit, AlertTriangle, Loader2, Sparkles, Building2 } from 'lucide-react';
 import { CBAOverviewTab } from '@/components/employee-relations/cba/CBAOverviewTab';
 import { CBAArticlesTab } from '@/components/employee-relations/cba/CBAArticlesTab';
 import { CBARulesTab } from '@/components/employee-relations/cba/CBARulesTab';
@@ -15,14 +14,25 @@ import { CBANegotiationsTab } from '@/components/employee-relations/cba/CBANegot
 import { CBAAmendmentsTab } from '@/components/employee-relations/cba/CBAAmendmentsTab';
 import { CBAViolationsTab } from '@/components/employee-relations/cba/CBAViolationsTab';
 import { CBAImportWizard } from '@/components/employee-relations/cba/CBAImportWizard';
+import { useTabState } from '@/hooks/useTabState';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
+import { useState } from 'react';
 
 export default function CBADetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('overview');
+  const { navigateToList } = useWorkspaceNavigation();
   const [showImportWizard, setShowImportWizard] = useState(false);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "overview",
+    },
+    syncToUrl: ["activeTab"],
+  });
+
+  const { activeTab } = tabState;
 
   const { data: agreement, isLoading } = useQuery({
     queryKey: ['collective_agreement', id],
@@ -45,6 +55,15 @@ export default function CBADetailPage() {
     { label: agreement?.title || 'Agreement' },
   ];
 
+  const handleBackClick = () => {
+    navigateToList({
+      route: '/employee-relations/unions',
+      title: t('employeeRelationsModule.unions.title'),
+      moduleCode: 'employee_relations',
+      icon: Building2,
+    });
+  };
+
   if (isLoading) {
     return (
       <AppLayout>
@@ -60,7 +79,7 @@ export default function CBADetailPage() {
       <AppLayout>
         <div className="container mx-auto py-6">
           <p className="text-muted-foreground">Agreement not found</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
+          <Button variant="outline" className="mt-4" onClick={handleBackClick}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Go Back
           </Button>
@@ -76,7 +95,7 @@ export default function CBADetailPage() {
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="icon" onClick={handleBackClick}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -104,7 +123,7 @@ export default function CBADetailPage() {
           }}
         />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="articles" className="gap-2">
