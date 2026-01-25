@@ -74,6 +74,8 @@ import {
   Gavel, DoorOpen,
   // Company Property icons
   Package, Clipboard,
+  // Enablement icons
+  Rocket, Map as MapIcon, MousePointer, CalendarClock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -270,17 +272,11 @@ export const iconRegistry: Record<string, LucideIcon> = {
   Wrench,
   // Enablement icons
   Rocket,
-  Map,
+  Map: MapIcon,
   Kanban,
   FolderTree,
   CalendarClock,
   MousePointer,
-  PanelLeft,
-  PanelRight,
-  FileSearch,
-  Route,
-  BookText,
-  Layers,
 };
 
 /**
