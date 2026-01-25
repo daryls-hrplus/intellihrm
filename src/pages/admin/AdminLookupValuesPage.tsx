@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LookupValuesManagement } from "@/components/admin/LookupValuesManagement";
 import { SystemReferenceDataTabs } from "@/components/admin/SystemReferenceDataTabs";
@@ -7,6 +6,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePageAudit } from "@/hooks/usePageAudit";
 import { Settings, Database } from "lucide-react";
+import { useTabState } from "@/hooks/useTabState";
 
 const breadcrumbs = [
   { label: "Admin", href: "/admin" },
@@ -14,7 +14,11 @@ const breadcrumbs = [
 ];
 
 export default function AdminLookupValuesPage() {
-  const [activeTab, setActiveTab] = useState("configurable");
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "configurable" },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab } = tabState;
   usePageAudit('lookup_values', 'Admin');
   
   return (
@@ -29,7 +33,7 @@ export default function AdminLookupValuesPage() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="configurable" className="gap-2">
               <Settings className="h-4 w-4" />

@@ -30,6 +30,7 @@ import {
   Users,
   Building2,
 } from "lucide-react";
+import { useTabState } from "@/hooks/useTabState";
 
 interface PiiAccessLog {
   id: string;
@@ -69,11 +70,15 @@ export default function AdminPiiAccessPage() {
   const [usersWithPii, setUsersWithPii] = useState<UserWithPiiAccess[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
-  const [timeFilter, setTimeFilter] = useState("7d");
-  const [userFilter, setUserFilter] = useState("all");
   const { toast } = useToast();
   const { logView, logExport } = useAuditLog();
   const hasLoggedView = useRef(false);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { timeFilter: "7d", userFilter: "all" },
+    syncToUrl: ["timeFilter"],
+  });
+  const { timeFilter, userFilter } = tabState;
 
   useEffect(() => {
     fetchData();
@@ -386,7 +391,7 @@ export default function AdminPiiAccessPage() {
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <Select value={timeFilter} onValueChange={setTimeFilter}>
+            <Select value={timeFilter} onValueChange={(v) => setTabState({ timeFilter: v })}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue />
               </SelectTrigger>
@@ -401,7 +406,7 @@ export default function AdminPiiAccessPage() {
 
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={userFilter} onValueChange={setUserFilter}>
+            <Select value={userFilter} onValueChange={(v) => setTabState({ userFilter: v })}>
               <SelectTrigger className="w-[160px]">
                 <SelectValue />
               </SelectTrigger>

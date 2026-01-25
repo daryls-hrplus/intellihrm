@@ -50,6 +50,7 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 const ITEMS_PER_PAGE = 20;
 const AI_BATCH_SIZE = 20; // Process translations in batches
@@ -84,17 +85,24 @@ export default function TranslationsPage() {
     fetchTranslations,
   } = useDatabaseTranslations();
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: "",
+      filterCategory: "__all__",
+      filterStatus: "all" as "all" | "complete" | "incomplete",
+      selectedLanguage: "en" as SupportedLanguage,
+      currentPage: 1,
+    },
+    syncToUrl: ["selectedLanguage"],
+  });
+  const { searchQuery, filterCategory, filterStatus, selectedLanguage, currentPage } = tabState;
+
   const [isImporting, setIsImporting] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
-  const [filterCategory, setFilterCategory] = useState<string>("__all__");
-  const [filterStatus, setFilterStatus] = useState<"all" | "complete" | "incomplete">("all");
-  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>("en");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTranslation, setEditingTranslation] = useState<Translation | null>(null);
   const [formData, setFormData] = useState<TranslationInput>(emptyTranslation);
   const [isSaving, setIsSaving] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   
   // Inline editing state
   const [editingInlineId, setEditingInlineId] = useState<string | null>(null);
@@ -159,7 +167,7 @@ export default function TranslationsPage() {
 
   // Reset page when filters change
   useMemo(() => {
-    setCurrentPage(1);
+    setTabState({ currentPage: 1 });
   }, [searchQuery, filterCategory, filterStatus, selectedLanguage]);
 
   const handleOpenDialog = (translation?: Translation) => {
@@ -479,7 +487,7 @@ export default function TranslationsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs value={selectedLanguage} onValueChange={(v) => setSelectedLanguage(v as SupportedLanguage)}>
+            <Tabs value={selectedLanguage} onValueChange={(v) => setTabState({ selectedLanguage: v as SupportedLanguage })}>
               <TabsList className="flex flex-wrap h-auto gap-1 bg-transparent p-0">
                 {supportedLanguages.map((lang) => {
                   const progress = languageProgress[lang.code] || 0;

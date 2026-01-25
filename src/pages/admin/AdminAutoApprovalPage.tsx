@@ -42,11 +42,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Pencil, Trash2, ArrowLeft, Zap, Info } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Zap, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { NavLink } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 const MENU_MODULES = [
   { code: "dashboard", name: "Dashboard" },
@@ -269,15 +269,11 @@ export default function AdminAutoApprovalPage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <NavLink
-              to="/admin"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </NavLink>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <Zap className="h-8 w-8 text-primary" />
+              <h1 className="text-2xl font-bold tracking-tight">
                 Access Request Auto-Approval
               </h1>
               <p className="text-muted-foreground">
@@ -296,9 +292,7 @@ export default function AdminAutoApprovalPage() {
           <AlertDescription>
             This page controls <strong>module access</strong> auto-approvals (e.g., when users request access to Leave or Workforce modules).
             For employee self-service <strong>data change</strong> approvals (address, banking, etc.), go to{" "}
-            <NavLink to="/admin/ess-administration?tab=policies" className="text-primary underline hover:no-underline">
-              ESS Administration → Approval Policies
-            </NavLink>.
+            ESS Administration → Approval Policies.
           </AlertDescription>
         </Alert>
 

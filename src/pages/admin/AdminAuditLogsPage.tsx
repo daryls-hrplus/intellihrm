@@ -72,6 +72,7 @@ import { AuditLogTrendChart } from "@/components/admin/audit/AuditLogTrendChart"
 import { getRiskLevel, getRiskBadgeStyles, getEntityLink, formatEntityType } from "@/utils/auditLogUtils";
 import { getModuleFromEntityType, getEntityTypesForModule, availableModules } from "@/utils/auditModuleMapping";
 import { Link } from "react-router-dom";
+import { useTabState } from "@/hooks/useTabState";
 
 type SortField = 'created_at' | 'user_name' | 'action' | 'risk' | 'module' | 'entity_type' | 'entity_name';
 type SortDirection = 'asc' | 'desc';
@@ -128,21 +129,10 @@ const PAGE_SIZE = 20;
 export default function AdminAuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [actionFilter, setActionFilter] = useState<AuditAction | "all">("all");
-  const [entityFilter, setEntityFilter] = useState<string>("all");
-  const [moduleFilter, setModuleFilter] = useState<string>("all");
-  const [userFilter, setUserFilter] = useState<string>("all");
-  const [riskFilter, setRiskFilter] = useState<string>("all");
-  const [dateFrom, setDateFrom] = useState<Date | undefined>();
-  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
-  const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [entityTypes, setEntityTypes] = useState<string[]>([]);
   const [users, setUsers] = useState<UserOption[]>([]);
-  const [sortField, setSortField] = useState<SortField>('created_at');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [summaryStats, setSummaryStats] = useState<SummaryStats>({
     total: 0,
     creates: 0,
@@ -158,6 +148,30 @@ export default function AdminAuditLogsPage() {
   const { toast } = useToast();
   const { logView, logExport } = useAuditLog();
   const hasLoggedView = useRef(false);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: "",
+      actionFilter: "all" as AuditAction | "all",
+      entityFilter: "all",
+      moduleFilter: "all",
+      userFilter: "all",
+      riskFilter: "all",
+      dateFrom: "",
+      dateTo: "",
+      page: 0,
+      sortField: "created_at" as SortField,
+      sortDirection: "desc" as SortDirection,
+    },
+    syncToUrl: ["actionFilter", "moduleFilter"],
+  });
+  const { 
+    searchQuery, actionFilter, entityFilter, moduleFilter, 
+    userFilter, riskFilter, dateFrom, dateTo, page, sortField, sortDirection 
+  } = tabState;
+
+  const dateFromParsed = dateFrom ? new Date(dateFrom) : undefined;
+  const dateToParsed = dateTo ? new Date(dateTo) : undefined;
 
   const buildBaseQuery = () => {
     let query = supabase.from('audit_logs').select('*', { count: 'exact' });
@@ -178,11 +192,11 @@ export default function AdminAuditLogsPage() {
     if (userFilter !== 'all') {
       query = query.eq('user_id', userFilter);
     }
-    if (dateFrom) {
-      query = query.gte('created_at', dateFrom.toISOString());
+    if (dateFromParsed) {
+      query = query.gte('created_at', dateFromParsed.toISOString());
     }
-    if (dateTo) {
-      const endOfDay = new Date(dateTo);
+    if (dateToParsed) {
+      const endOfDay = new Date(dateToParsed);
       endOfDay.setHours(23, 59, 59, 999);
       query = query.lte('created_at', endOfDay.toISOString());
     }
@@ -288,9 +302,9 @@ export default function AdminAuditLogsPage() {
 
         if (entityFilter !== 'all') query = query.eq('entity_type', entityFilter);
         if (userFilter !== 'all') query = query.eq('user_id', userFilter);
-        if (dateFrom) query = query.gte('created_at', dateFrom.toISOString());
-        if (dateTo) {
-          const endOfDay = new Date(dateTo);
+        if (dateFromParsed) query = query.gte('created_at', dateFromParsed.toISOString());
+        if (dateToParsed) {
+          const endOfDay = new Date(dateToParsed);
           endOfDay.setHours(23, 59, 59, 999);
           query = query.lte('created_at', endOfDay.toISOString());
         }
@@ -309,9 +323,9 @@ export default function AdminAuditLogsPage() {
 
       if (entityFilter !== 'all') userQuery = userQuery.eq('entity_type', entityFilter);
       if (userFilter !== 'all') userQuery = userQuery.eq('user_id', userFilter);
-      if (dateFrom) userQuery = userQuery.gte('created_at', dateFrom.toISOString());
-      if (dateTo) {
-        const endOfDay = new Date(dateTo);
+      if (dateFromParsed) userQuery = userQuery.gte('created_at', dateFromParsed.toISOString());
+      if (dateToParsed) {
+        const endOfDay = new Date(dateToParsed);
         endOfDay.setHours(23, 59, 59, 999);
         userQuery = userQuery.lte('created_at', endOfDay.toISOString());
       }
@@ -336,9 +350,9 @@ export default function AdminAuditLogsPage() {
       if (actionFilter !== 'all') highRiskQuery = highRiskQuery.eq('action', actionFilter);
       if (entityFilter !== 'all') highRiskQuery = highRiskQuery.eq('entity_type', entityFilter);
       if (userFilter !== 'all') highRiskQuery = highRiskQuery.eq('user_id', userFilter);
-      if (dateFrom) highRiskQuery = highRiskQuery.gte('created_at', dateFrom.toISOString());
-      if (dateTo) {
-        const endOfDay = new Date(dateTo);
+      if (dateFromParsed) highRiskQuery = highRiskQuery.gte('created_at', dateFromParsed.toISOString());
+      if (dateToParsed) {
+        const endOfDay = new Date(dateToParsed);
         endOfDay.setHours(23, 59, 59, 999);
         highRiskQuery = highRiskQuery.lte('created_at', endOfDay.toISOString());
       }
@@ -443,12 +457,10 @@ export default function AdminAuditLogsPage() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      setTabState({ sortDirection: sortDirection === 'asc' ? 'desc' : 'asc' });
     } else {
-      setSortField(field);
-      setSortDirection('desc');
+      setTabState({ sortField: field, sortDirection: 'desc', page: 0 });
     }
-    setPage(0);
   };
 
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => {
@@ -475,19 +487,21 @@ export default function AdminAuditLogsPage() {
   };
 
   const clearFilters = () => {
-    setSearchQuery("");
-    setActionFilter("all");
-    setEntityFilter("all");
-    setModuleFilter("all");
-    setUserFilter("all");
-    setRiskFilter("all");
-    setDateFrom(undefined);
-    setDateTo(undefined);
-    setPage(0);
+    setTabState({
+      searchQuery: "",
+      actionFilter: "all",
+      entityFilter: "all",
+      moduleFilter: "all",
+      userFilter: "all",
+      riskFilter: "all",
+      dateFrom: "",
+      dateTo: "",
+      page: 0,
+    });
   };
 
   const hasActiveFilters = searchQuery || actionFilter !== 'all' || entityFilter !== 'all' || 
-    moduleFilter !== 'all' || userFilter !== 'all' || riskFilter !== 'all' || dateFrom || dateTo;
+    moduleFilter !== 'all' || userFilter !== 'all' || riskFilter !== 'all' || dateFromParsed || dateToParsed;
 
   // Apply client-side risk filter
   const filteredLogs = riskFilter === 'all' 
@@ -499,13 +513,19 @@ export default function AdminAuditLogsPage() {
     const today = new Date();
     switch (preset) {
       case 'today':
-        setDateFrom(today);
-        setDateTo(today);
+        setTabState({ dateFrom: today.toISOString(), dateTo: today.toISOString(), page: 0 });
         break;
       case 'last7':
-        setDateFrom(subDays(today, 7));
-        setDateTo(today);
+        setTabState({ dateFrom: subDays(today, 7).toISOString(), dateTo: today.toISOString(), page: 0 });
         break;
+      case 'last30':
+        setTabState({ dateFrom: subDays(today, 30).toISOString(), dateTo: today.toISOString(), page: 0 });
+        break;
+      case 'thisMonth':
+        setTabState({ dateFrom: startOfMonth(today).toISOString(), dateTo: today.toISOString(), page: 0 });
+        break;
+    }
+  };
       case 'last30':
         setDateFrom(subDays(today, 30));
         setDateTo(today);

@@ -65,6 +65,9 @@ import {
   MessageCircle,
   // Succession icons
   Grid3X3, TrendingDown, Route, AlertTriangle,
+  // Admin & Security icons
+  ShieldAlert, Fingerprint, KeyRound, Cog, Webhook,
+  ArrowUpCircle, Tags, ScrollText, FileWarning, ClipboardPen,
   type LucideIcon,
 } from "lucide-react";
 
@@ -234,6 +237,18 @@ export const iconRegistry: Record<string, LucideIcon> = {
   NotebookPen,
   Pen,
   BookMarked,
+  // Admin & Security icons
+  ShieldAlert,
+  Fingerprint,
+  KeyRound,
+  Cog,
+  Webhook,
+  ArrowUpCircle,
+  Tags,
+  ScrollText,
+  FileWarning,
+  ClipboardPen,
+  GitBranch,
 };
 
 /**
