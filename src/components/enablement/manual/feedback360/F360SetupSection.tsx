@@ -14,17 +14,29 @@ import {
   Radio, 
   UserPlus, 
   Copy,
-  Target
+  Target,
+  Workflow,
+  Bell,
+  Puzzle,
+  TrendingUp
 } from 'lucide-react';
 import {
+  // Core Framework Integration
+  F360ApprovalWorkflows,
+  F360Notifications,
+  F360CompetencyIntegration,
+  F360PerformanceTrends,
+  // Core Configuration
   F360Prerequisites,
   F360RaterCategories,
   F360QuestionBank,
   F360BehavioralAnchors,
   F360RatingScales,
+  // Reporting & Visibility
   F360ReportTemplates,
   F360VisibilityRules,
   F360FrameworkLibrary,
+  // Advanced Configuration
   F360SignalDefinitions,
   F360ExternalRaters,
   F360CycleTemplates,
@@ -37,7 +49,10 @@ interface F360SetupSectionProps {
 export function F360SetupSection({ selectedSectionId }: F360SetupSectionProps) {
   // Determine which accordion items should be open based on selectedSectionId
   const getDefaultOpen = () => {
-    if (!selectedSectionId) return ['core'];
+    if (!selectedSectionId) return ['core-framework'];
+    if (selectedSectionId.startsWith('sec-2-0')) {
+      return ['core-framework'];
+    }
     if (selectedSectionId.startsWith('sec-2-1') || 
         selectedSectionId.startsWith('sec-2-2') || 
         selectedSectionId.startsWith('sec-2-3') || 
@@ -55,7 +70,7 @@ export function F360SetupSection({ selectedSectionId }: F360SetupSectionProps) {
         selectedSectionId.startsWith('sec-2-11')) {
       return ['advanced'];
     }
-    return ['core'];
+    return ['core-framework'];
   };
 
   return (
@@ -92,36 +107,83 @@ export function F360SetupSection({ selectedSectionId }: F360SetupSectionProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Settings className="h-5 w-5" />
-            Chapter Contents (11 Sections)
+            Chapter Contents (15 Sections)
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[
-              { id: '2.1', title: 'Prerequisites', icon: CheckCircle2 },
-              { id: '2.2', title: 'Rater Categories', icon: Users },
-              { id: '2.3', title: 'Question Bank', icon: FileText },
-              { id: '2.4', title: 'Behavioral Anchors', icon: Anchor },
-              { id: '2.5', title: 'Rating Scales', icon: Sliders },
-              { id: '2.6', title: 'Report Templates', icon: FileBarChart },
-              { id: '2.7', title: 'Visibility Rules', icon: Eye },
-              { id: '2.8', title: 'Framework Library', icon: Library },
-              { id: '2.9', title: 'Signal Definitions', icon: Radio },
-              { id: '2.10', title: 'External Raters', icon: UserPlus },
-              { id: '2.11', title: 'Cycle Templates', icon: Copy },
-            ].map((section) => (
-              <div key={section.id} className="flex items-center gap-2 p-2 rounded-lg border text-sm">
-                <section.icon className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{section.id}</span>
-                <span className="text-muted-foreground">{section.title}</span>
-              </div>
-            ))}
+        <CardContent className="space-y-4">
+          {/* Core Framework Integration */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Core Framework Integration</h4>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
+              {[
+                { id: '2.0a', title: 'Approval Workflows', icon: Workflow },
+                { id: '2.0b', title: 'Notifications', icon: Bell },
+                { id: '2.0c', title: 'Competencies', icon: Puzzle },
+                { id: '2.0d', title: 'Performance Trends', icon: TrendingUp },
+              ].map((section) => (
+                <div key={section.id} className="flex items-center gap-2 p-2 rounded-lg border bg-primary/5 text-sm">
+                  <section.icon className="h-4 w-4 text-primary" />
+                  <span className="font-medium">{section.id}</span>
+                  <span className="text-muted-foreground truncate">{section.title}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Core + Reporting + Advanced */}
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">360-Specific Configuration</h4>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {[
+                { id: '2.1', title: 'Prerequisites', icon: CheckCircle2 },
+                { id: '2.2', title: 'Rater Categories', icon: Users },
+                { id: '2.3', title: 'Question Bank', icon: FileText },
+                { id: '2.4', title: 'Behavioral Anchors', icon: Anchor },
+                { id: '2.5', title: 'Rating Scales', icon: Sliders },
+                { id: '2.6', title: 'Report Templates', icon: FileBarChart },
+                { id: '2.7', title: 'Visibility Rules', icon: Eye },
+                { id: '2.8', title: 'Framework Library', icon: Library },
+                { id: '2.9', title: 'Signal Definitions', icon: Radio },
+                { id: '2.10', title: 'External Raters', icon: UserPlus },
+                { id: '2.11', title: 'Cycle Templates', icon: Copy },
+              ].map((section) => (
+                <div key={section.id} className="flex items-center gap-2 p-2 rounded-lg border text-sm">
+                  <section.icon className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{section.id}</span>
+                  <span className="text-muted-foreground truncate">{section.title}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Accordion Sections */}
       <Accordion type="multiple" defaultValue={getDefaultOpen()} className="space-y-4">
+        {/* Core Framework Integration */}
+        <AccordionItem value="core-framework" className="border rounded-lg border-primary/30">
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3">
+              <Badge className="bg-primary/10 text-primary border-primary/30">Sections 2.0a - 2.0d</Badge>
+              <span className="font-semibold">Core Framework Integration</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-8">
+            <section id="sec-2-0a" data-manual-anchor="sec-2-0a" className="scroll-mt-32">
+              <F360ApprovalWorkflows />
+            </section>
+            <section id="sec-2-0b" data-manual-anchor="sec-2-0b" className="scroll-mt-32">
+              <F360Notifications />
+            </section>
+            <section id="sec-2-0c" data-manual-anchor="sec-2-0c" className="scroll-mt-32">
+              <F360CompetencyIntegration />
+            </section>
+            <section id="sec-2-0d" data-manual-anchor="sec-2-0d" className="scroll-mt-32">
+              <F360PerformanceTrends />
+            </section>
+          </AccordionContent>
+        </AccordionItem>
+
         {/* Core Configuration */}
         <AccordionItem value="core" className="border rounded-lg">
           <AccordionTrigger className="px-4 hover:no-underline">
