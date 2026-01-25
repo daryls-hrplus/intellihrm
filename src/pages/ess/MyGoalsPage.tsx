@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTabState } from "@/hooks/useTabState";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,16 +114,31 @@ export default function MyGoalsPage() {
   const { user, company } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  // Tab-scoped state persistence for filters and active tab
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: "",
+      statusFilter: "all",
+      typeFilter: "all",
+      showAnalytics: true,
+      activeTab: "active-goals",
+    },
+    syncToUrl: ["statusFilter", "activeTab"],
+  });
+
+  const { searchQuery, statusFilter, typeFilter, showAnalytics, activeTab } = tabState;
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
+  const setStatusFilter = (v: string) => setTabState({ statusFilter: v });
+  const setTypeFilter = (v: string) => setTabState({ typeFilter: v });
+  const setShowAnalytics = (v: boolean) => setTabState({ showAnalytics: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+
+  // Dialog states remain local (appropriate for modals)
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [contactManagerOpen, setContactManagerOpen] = useState(false);
   const [createGoalOpen, setCreateGoalOpen] = useState(false);
-  const [showAnalytics, setShowAnalytics] = useState(true);
-  const [activeTab, setActiveTab] = useState("active-goals");
   
   // Check-in, Milestones, History dialogs
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);

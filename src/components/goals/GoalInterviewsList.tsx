@@ -8,6 +8,7 @@ import { GoalInterviewCard } from "./GoalInterviewCard";
 import { ScheduleGoalInterviewDialog } from "./ScheduleGoalInterviewDialog";
 import { GoalInterviewCalendar } from "./GoalInterviewCalendar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTabState } from "@/hooks/useTabState";
 
 interface GoalInterviewsListProps {
   userId: string;
@@ -15,10 +16,21 @@ interface GoalInterviewsListProps {
 }
 
 export function GoalInterviewsList({ userId, userRole }: GoalInterviewsListProps) {
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  // Tab-scoped state persistence for view mode and filter
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      viewMode: "list" as "list" | "calendar",
+      statusFilter: "all",
+    },
+  });
+
+  const { viewMode, statusFilter } = tabState;
+  const setViewMode = (v: "list" | "calendar") => setTabState({ viewMode: v });
+  const setStatusFilter = (v: string) => setTabState({ statusFilter: v });
+
+  // Dialog states remain local (appropriate for modals)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [selectedInterview, setSelectedInterview] = useState<any>(null);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const {
     interviews,
