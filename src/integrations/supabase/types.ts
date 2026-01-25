@@ -48900,6 +48900,59 @@ export type Database = {
           },
         ]
       }
+      nine_box_indicator_configs: {
+        Row: {
+          color_code: string | null
+          company_id: string
+          created_at: string | null
+          custom_label: string | null
+          default_label: string
+          description: string | null
+          id: string
+          performance_level: number
+          potential_level: number
+          suggested_actions: string | null
+          updated_at: string | null
+          use_custom_label: boolean | null
+        }
+        Insert: {
+          color_code?: string | null
+          company_id: string
+          created_at?: string | null
+          custom_label?: string | null
+          default_label: string
+          description?: string | null
+          id?: string
+          performance_level: number
+          potential_level: number
+          suggested_actions?: string | null
+          updated_at?: string | null
+          use_custom_label?: boolean | null
+        }
+        Update: {
+          color_code?: string | null
+          company_id?: string
+          created_at?: string | null
+          custom_label?: string | null
+          default_label?: string
+          description?: string | null
+          id?: string
+          performance_level?: number
+          potential_level?: number
+          suggested_actions?: string | null
+          updated_at?: string | null
+          use_custom_label?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_box_indicator_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nine_box_rating_sources: {
         Row: {
           axis: string
@@ -59622,6 +59675,336 @@ export type Database = {
           },
         ]
       }
+      readiness_assessment_categories: {
+        Row: {
+          category_name: string
+          company_id: string
+          created_at: string | null
+          form_id: string | null
+          id: string
+          sort_order: number | null
+        }
+        Insert: {
+          category_name: string
+          company_id: string
+          created_at?: string | null
+          form_id?: string | null
+          id?: string
+          sort_order?: number | null
+        }
+        Update: {
+          category_name?: string
+          company_id?: string
+          created_at?: string | null
+          form_id?: string | null
+          id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_assessment_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_categories_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_assessment_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      readiness_assessment_events: {
+        Row: {
+          candidate_id: string
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          due_date: string | null
+          form_id: string | null
+          id: string
+          initiated_by: string | null
+          overall_score: number | null
+          readiness_band: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_id: string
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          form_id?: string | null
+          id?: string
+          initiated_by?: string | null
+          overall_score?: number | null
+          readiness_band?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          form_id?: string | null
+          id?: string
+          initiated_by?: string | null
+          overall_score?: number | null
+          readiness_band?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_assessment_events_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "succession_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_events_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_assessment_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_events_initiated_by_fkey"
+            columns: ["initiated_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_events_initiated_by_fkey"
+            columns: ["initiated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      readiness_assessment_forms: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          staff_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          staff_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          staff_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_assessment_forms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      readiness_assessment_indicators: {
+        Row: {
+          assessor_type: string
+          category_id: string | null
+          created_at: string | null
+          form_id: string
+          id: string
+          indicator_name: string
+          rating_scale_max: number | null
+          scoring_guide_high: string | null
+          scoring_guide_low: string | null
+          scoring_guide_mid: string | null
+          sort_order: number | null
+          weight_percent: number
+        }
+        Insert: {
+          assessor_type?: string
+          category_id?: string | null
+          created_at?: string | null
+          form_id: string
+          id?: string
+          indicator_name: string
+          rating_scale_max?: number | null
+          scoring_guide_high?: string | null
+          scoring_guide_low?: string | null
+          scoring_guide_mid?: string | null
+          sort_order?: number | null
+          weight_percent?: number
+        }
+        Update: {
+          assessor_type?: string
+          category_id?: string | null
+          created_at?: string | null
+          form_id?: string
+          id?: string
+          indicator_name?: string
+          rating_scale_max?: number | null
+          scoring_guide_high?: string | null
+          scoring_guide_low?: string | null
+          scoring_guide_mid?: string | null
+          sort_order?: number | null
+          weight_percent?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_assessment_indicators_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_assessment_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_indicators_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_assessment_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      readiness_assessment_responses: {
+        Row: {
+          assessor_id: string
+          assessor_type: string
+          comments: string | null
+          created_at: string | null
+          event_id: string
+          id: string
+          indicator_id: string
+          rating: number
+          submitted_at: string | null
+        }
+        Insert: {
+          assessor_id: string
+          assessor_type: string
+          comments?: string | null
+          created_at?: string | null
+          event_id: string
+          id?: string
+          indicator_id: string
+          rating: number
+          submitted_at?: string | null
+        }
+        Update: {
+          assessor_id?: string
+          assessor_type?: string
+          comments?: string | null
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          indicator_id?: string
+          rating?: number
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_assessment_responses_assessor_id_fkey"
+            columns: ["assessor_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_responses_assessor_id_fkey"
+            columns: ["assessor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_responses_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_assessment_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "readiness_assessment_responses_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_assessment_indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      readiness_rating_bands: {
+        Row: {
+          color_code: string | null
+          company_id: string
+          created_at: string | null
+          id: string
+          max_percentage: number
+          min_percentage: number
+          rating_label: string
+          sort_order: number | null
+        }
+        Insert: {
+          color_code?: string | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          max_percentage: number
+          min_percentage: number
+          rating_label: string
+          sort_order?: number | null
+        }
+        Update: {
+          color_code?: string | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          max_percentage?: number
+          min_percentage?: number
+          rating_label?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_rating_bands_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recertification_requirements: {
         Row: {
           certification_name: string
@@ -67296,6 +67679,88 @@ export type Database = {
         }
         Relationships: []
       }
+      succession_assessor_types: {
+        Row: {
+          applies_to_staff_types: string[] | null
+          company_id: string
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          is_required: boolean | null
+          sort_order: number | null
+          type_code: string
+          type_label: string
+        }
+        Insert: {
+          applies_to_staff_types?: string[] | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          is_required?: boolean | null
+          sort_order?: number | null
+          type_code: string
+          type_label: string
+        }
+        Update: {
+          applies_to_staff_types?: string[] | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          is_required?: boolean | null
+          sort_order?: number | null
+          type_code?: string
+          type_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_assessor_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      succession_availability_reasons: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string | null
+          description: string
+          id: string
+          is_active: boolean | null
+          sort_order: number | null
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string | null
+          description: string
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_availability_reasons_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       succession_candidate_evidence: {
         Row: {
           candidate_id: string | null
@@ -67373,11 +67838,14 @@ export type Database = {
           id: string
           is_promotion_blocked: boolean | null
           last_risk_check_at: string | null
+          latest_readiness_band: string | null
+          latest_readiness_score: number | null
           nominated_by: string | null
           notes: string | null
           performance_risk_id: string | null
           plan_id: string
           ranking: number | null
+          readiness_assessed_at: string | null
           readiness_level: string
           readiness_timeline: string | null
           status: string
@@ -67392,11 +67860,14 @@ export type Database = {
           id?: string
           is_promotion_blocked?: boolean | null
           last_risk_check_at?: string | null
+          latest_readiness_band?: string | null
+          latest_readiness_score?: number | null
           nominated_by?: string | null
           notes?: string | null
           performance_risk_id?: string | null
           plan_id: string
           ranking?: number | null
+          readiness_assessed_at?: string | null
           readiness_level?: string
           readiness_timeline?: string | null
           status?: string
@@ -67411,11 +67882,14 @@ export type Database = {
           id?: string
           is_promotion_blocked?: boolean | null
           last_risk_check_at?: string | null
+          latest_readiness_band?: string | null
+          latest_readiness_score?: number | null
           nominated_by?: string | null
           notes?: string | null
           performance_risk_id?: string | null
           plan_id?: string
           ranking?: number | null
+          readiness_assessed_at?: string | null
           readiness_level?: string
           readiness_timeline?: string | null
           status?: string
@@ -67599,6 +68073,8 @@ export type Database = {
       }
       succession_plans: {
         Row: {
+          availability_reason_id: string | null
+          calculated_risk_level: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -67611,8 +68087,10 @@ export type Database = {
           notes_en: string | null
           plan_name: string
           plan_name_en: string | null
+          position_criticality: string | null
           position_id: string
           priority: string
+          replacement_difficulty: string | null
           risk_level: string
           start_date: string
           status: string
@@ -67620,6 +68098,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          availability_reason_id?: string | null
+          calculated_risk_level?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -67632,8 +68112,10 @@ export type Database = {
           notes_en?: string | null
           plan_name: string
           plan_name_en?: string | null
+          position_criticality?: string | null
           position_id: string
           priority?: string
+          replacement_difficulty?: string | null
           risk_level?: string
           start_date?: string
           status?: string
@@ -67641,6 +68123,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          availability_reason_id?: string | null
+          calculated_risk_level?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -67653,8 +68137,10 @@ export type Database = {
           notes_en?: string | null
           plan_name?: string
           plan_name_en?: string | null
+          position_criticality?: string | null
           position_id?: string
           priority?: string
+          replacement_difficulty?: string | null
           risk_level?: string
           start_date?: string
           status?: string
@@ -67662,6 +68148,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "succession_plans_availability_reason_id_fkey"
+            columns: ["availability_reason_id"]
+            isOneToOne: false
+            referencedRelation: "succession_availability_reasons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "succession_plans_company_id_fkey"
             columns: ["company_id"]
