@@ -31,6 +31,69 @@ export function F360Prerequisites() {
         </CardContent>
       </Card>
 
+      {/* Core Framework Prerequisites */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Settings className="h-5 w-5 text-primary" />
+            Core Framework Prerequisites (Shared Setup)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground mb-3">
+            These shared configurations are managed in <code className="bg-muted px-1.5 py-0.5 rounded text-xs">Performance → Setup → Core Framework</code> and 
+            apply across all Performance modules (Goals, Appraisals, 360 Feedback, Recognition).
+          </p>
+          {[
+            {
+              item: 'Approval Workflows Configured',
+              path: 'Core Framework → Workflows',
+              details: 'At least one 360-applicable workflow configured (e.g., Results Release, Nomination Approval)',
+              validation: 'Workflow template with category "360 Feedback" exists and is active',
+              section: 'See Section 2.0a'
+            },
+            {
+              item: 'Notification Rules Defined',
+              path: 'Core Framework → Notifications',
+              details: 'Reminder rules for 360 event types (invitations, deadlines, results release)',
+              validation: 'Event types with category "performance_360" have associated rules',
+              section: 'See Section 2.0b'
+            },
+            {
+              item: 'Competency Framework Active',
+              path: 'Core Framework → Competencies',
+              details: 'Competency library with behavioral indicators for question linking and structured feedback',
+              validation: 'At least one competency framework is active with defined competencies',
+              section: 'See Section 2.0c'
+            },
+            {
+              item: 'Performance Index Configured',
+              path: 'Core Framework → Performance Trends',
+              details: 'Decision on whether 360 scores contribute to Performance Index and at what weight',
+              validation: 'Performance Index settings include 360 weight configuration',
+              section: 'See Section 2.0d'
+            }
+          ].map((prereq, i) => (
+            <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-background">
+              <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-medium">{prereq.item}</span>
+                  <Badge className="text-xs bg-primary/10 text-primary">{prereq.path}</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{prereq.details}</p>
+                <div className="flex items-center gap-3 mt-1">
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-medium">Validation:</span> {prereq.validation}
+                  </p>
+                  <Badge variant="outline" className="text-xs">{prereq.section}</Badge>
+                </div>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
       {/* Critical Prerequisites */}
       <Card>
         <CardHeader>
@@ -55,7 +118,7 @@ export function F360Prerequisites() {
             },
             {
               item: 'Rating Scales Defined',
-              path: 'Performance → Setup → Rating Scales',
+              path: 'Performance → Setup → Core Framework → Rating Scales',
               details: 'At least one 360-compatible rating scale (typically 1-5) with behavioral descriptions',
               validation: 'Scale with purpose "360_feedback" or "universal" exists and is active'
             },
@@ -159,25 +222,47 @@ export function F360Prerequisites() {
           <p className="text-sm text-muted-foreground mb-4">
             Follow this sequence to ensure proper configuration dependencies. Each step builds on the previous.
           </p>
-          <div className="flex items-center gap-2 flex-wrap text-sm">
-            {[
-              { label: 'Rating Scales', icon: Settings },
-              { label: 'Competencies', icon: Target },
-              { label: 'Question Bank', icon: FileText },
-              { label: 'Rater Categories', icon: Users },
-              { label: 'Visibility Rules', icon: Shield },
-              { label: 'Report Templates', icon: FileText },
-              { label: 'Email Templates', icon: Mail },
-              { label: 'Cycle Configuration', icon: Settings }
-            ].map((step, i, arr) => (
-              <div key={i} className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border bg-muted/50">
-                  <step.icon className="h-3.5 w-3.5" />
-                  <span>{step.label}</span>
-                </div>
-                {i < arr.length - 1 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+          <div className="space-y-3">
+            <div className="p-3 rounded-lg border bg-primary/5">
+              <p className="text-xs font-medium text-primary mb-2">Phase 1: Core Framework (Shared)</p>
+              <div className="flex items-center gap-2 flex-wrap text-sm">
+                {[
+                  { label: 'Workflows', icon: Settings },
+                  { label: 'Notifications', icon: Mail },
+                  { label: 'Competencies', icon: Target },
+                  { label: 'Performance Trends', icon: Settings }
+                ].map((step, i, arr) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border bg-background">
+                      <step.icon className="h-3.5 w-3.5" />
+                      <span>{step.label}</span>
+                    </div>
+                    {i < arr.length - 1 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="p-3 rounded-lg border">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Phase 2: 360-Specific Configuration</p>
+              <div className="flex items-center gap-2 flex-wrap text-sm">
+                {[
+                  { label: 'Rating Scales', icon: Settings },
+                  { label: 'Question Bank', icon: FileText },
+                  { label: 'Rater Categories', icon: Users },
+                  { label: 'Visibility Rules', icon: Shield },
+                  { label: 'Report Templates', icon: FileText },
+                  { label: 'Cycle Config', icon: Settings }
+                ].map((step, i, arr) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border bg-muted/50">
+                      <step.icon className="h-3.5 w-3.5" />
+                      <span>{step.label}</span>
+                    </div>
+                    {i < arr.length - 1 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
