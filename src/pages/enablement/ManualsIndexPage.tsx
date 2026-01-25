@@ -3,7 +3,6 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Shield,
@@ -15,6 +14,7 @@ import {
   ChevronRight,
   Clock,
 } from "lucide-react";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 const manuals = [
   {
@@ -97,9 +97,29 @@ const manuals = [
 ];
 
 export default function ManualsIndexPage() {
-  const navigate = useNavigate();
+  const { navigateToRecord, navigateToList } = useWorkspaceNavigation();
   
   const totalSections = manuals.reduce((acc, m) => acc + m.sections, 0);
+
+  const handleManualClick = (manual: typeof manuals[0]) => {
+    navigateToRecord({
+      route: manual.href,
+      title: manual.title,
+      subtitle: "Manual",
+      moduleCode: "enablement",
+      contextType: "manual",
+      contextId: manual.id,
+      icon: BookOpen,
+    });
+  };
+
+  const handlePublishClick = () => {
+    navigateToList({
+      route: "/enablement/manual-publishing",
+      title: "Manual Publishing",
+      moduleCode: "enablement",
+    });
+  };
 
   return (
     <AppLayout>
@@ -150,7 +170,7 @@ export default function ManualsIndexPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate("/enablement/manual-publishing")}
+                onClick={handlePublishClick}
               >
                 Publish to Help Center
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -167,7 +187,7 @@ export default function ManualsIndexPage() {
               <Card
                 key={manual.id}
                 className={`group cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 ${manual.color} border`}
-                onClick={() => navigate(manual.href)}
+                onClick={() => handleManualClick(manual)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -211,7 +231,11 @@ export default function ManualsIndexPage() {
               <Button
                 variant="outline"
                 className="justify-start"
-                onClick={() => navigate("/enablement/docs-generator")}
+                onClick={() => navigateToList({
+                  route: "/enablement/docs-generator",
+                  title: "Generate Documentation",
+                  moduleCode: "enablement",
+                })}
               >
                 <FileText className="h-4 w-4 mr-2" />
                 Generate Documentation
@@ -219,7 +243,7 @@ export default function ManualsIndexPage() {
               <Button
                 variant="outline"
                 className="justify-start"
-                onClick={() => navigate("/enablement/manual-publishing")}
+                onClick={handlePublishClick}
               >
                 <ArrowRight className="h-4 w-4 mr-2" />
                 Publish to Help Center
@@ -227,7 +251,11 @@ export default function ManualsIndexPage() {
               <Button
                 variant="outline"
                 className="justify-start"
-                onClick={() => navigate("/enablement")}
+                onClick={() => navigateToList({
+                  route: "/enablement",
+                  title: "Content Hub",
+                  moduleCode: "enablement",
+                })}
               >
                 <BookOpen className="h-4 w-4 mr-2" />
                 Back to Content Hub

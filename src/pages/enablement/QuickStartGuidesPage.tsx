@@ -20,10 +20,11 @@ import {
   Zap,
   Settings2,
 } from "lucide-react";
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 import { useQuickStartTemplates, type QuickStartTemplateRow } from "@/hooks/useQuickStartTemplates";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   GraduationCap,
@@ -88,8 +89,12 @@ function getPrerequisitesCount(template: QuickStartTemplateRow): number {
 }
 
 export default function QuickStartGuidesPage() {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { navigateToRecord, navigateToList } = useWorkspaceNavigation();
+  
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { searchQuery: "" },
+  });
   
   // Fetch all templates (published only for regular users)
   const { data: templates, isLoading } = useQuickStartTemplates(true);
@@ -110,19 +115,41 @@ export default function QuickStartGuidesPage() {
       href: getGuideHref(template.module_code),
     }));
     
-    if (!searchQuery.trim()) return allGuides;
+    if (!tabState.searchQuery.trim()) return allGuides;
     
-    const query = searchQuery.toLowerCase();
+    const query = tabState.searchQuery.toLowerCase();
     return allGuides.filter(
       (guide) =>
         guide.title.toLowerCase().includes(query) ||
         guide.description.toLowerCase().includes(query) ||
         guide.moduleCode.toLowerCase().includes(query)
     );
-  }, [templates, searchQuery]);
+  }, [templates, tabState.searchQuery]);
 
   const availableCount = filteredGuides.filter((g) => g.status === "published").length;
   const totalCount = filteredGuides.length;
+
+  const handleGuideClick = (guide: typeof filteredGuides[0]) => {
+    if (guide.status !== "published") return;
+    navigateToRecord({
+      route: guide.href,
+      title: guide.title,
+      subtitle: "Quick Start",
+      moduleCode: "enablement",
+      contextType: "quickstart",
+      contextId: guide.moduleCode,
+      icon: Rocket,
+    });
+  };
+
+  const handleAdminClick = () => {
+    navigateToList({
+      route: "/enablement/quickstarts/admin",
+      title: "Quick Start Admin",
+      moduleCode: "enablement",
+      icon: Settings2,
+    });
+  };
 
   return (
     <AppLayout>
@@ -153,7 +180,7 @@ export default function QuickStartGuidesPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("/enablement/quickstarts/admin")}
+              onClick={handleAdminClick}
             >
               <Settings2 className="h-4 w-4 mr-2" />
               Admin
@@ -166,8 +193,8 @@ export default function QuickStartGuidesPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search quick start guides..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={tabState.searchQuery}
+            onChange={(e) => setTabState({ searchQuery: e.target.value })}
             className="pl-10"
           />
         </div>
@@ -223,7 +250,7 @@ export default function QuickStartGuidesPage() {
                       ? "hover:shadow-md hover:border-primary/30 cursor-pointer"
                       : "opacity-60"
                   }`}
-                  onClick={() => isAvailable && navigate(guide.href)}
+                  onClick={() => handleGuideClick(guide)}
                 >
                   {!isAvailable && (
                     <Badge

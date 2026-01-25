@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,15 +50,23 @@ import { EnablementWelcomeBanner } from "@/components/enablement/EnablementWelco
 import { useEnablementContentStatus, useEnablementReleases } from "@/hooks/useEnablementData";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 export default function EnablementHubPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tabParam = searchParams.get("tab");
-  const [activeTab, setActiveTab] = useState(tabParam || "dashboard");
+  const { navigateToList, navigateToSetup } = useWorkspaceNavigation();
+  
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "dashboard",
+      showAdvanced: false,
+    },
+    syncToUrl: ["activeTab"],
+  });
+
   const [syncDialogOpen, setSyncDialogOpen] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [showWelcome, setShowWelcome] = useState(() => {
     const dismissed = localStorage.getItem('enablement-welcome-dismissed');
     return dismissed !== 'true';
@@ -443,23 +450,12 @@ export default function EnablementHubPage() {
     },
   ], []);
 
-  // Sync tab state with URL
-  useEffect(() => {
-    const validTabs = ["workflow", "releases", "coverage", "videos", "dap", "rise"];
-    if (tabParam && validTabs.includes(tabParam)) {
-      setActiveTab(tabParam);
-    } else if (!tabParam) {
-      setActiveTab("dashboard");
-    }
-  }, [tabParam]);
-
   const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    if (tab === "dashboard") {
-      setSearchParams({});
-    } else {
-      setSearchParams({ tab });
-    }
+    setTabState({ activeTab: tab });
+  };
+
+  const handleAdvancedToggle = (open: boolean) => {
+    setTabState({ showAdvanced: open });
   };
 
   // Check if user has published content (only count published, not in-development)
@@ -468,6 +464,15 @@ export default function EnablementHubPage() {
   const handleDismissWelcome = () => {
     setShowWelcome(false);
     localStorage.setItem('enablement-welcome-dismissed', 'true');
+  };
+
+  const handleNavigateToDocsGenerator = () => {
+    navigateToList({
+      route: "/enablement/docs-generator",
+      title: "AI Documentation Generator",
+      moduleCode: "enablement",
+      icon: Sparkles,
+    });
   };
 
   return (
@@ -498,7 +503,7 @@ export default function EnablementHubPage() {
               <Kanban className="h-4 w-4 mr-2" />
               View Workflow
             </Button>
-            <Button onClick={() => navigate("/enablement/docs-generator")}>
+            <Button onClick={handleNavigateToDocsGenerator}>
               <Sparkles className="h-4 w-4 mr-2" />
               Create Content
             </Button>
@@ -580,7 +585,7 @@ export default function EnablementHubPage() {
         )}
 
         {/* Main Content - Tabs for workflow views, cards for navigation */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+        <Tabs value={tabState.activeTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList>
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
@@ -601,14 +606,14 @@ export default function EnablementHubPage() {
             <GroupedModuleCards sections={primarySections} defaultOpen={true} />
 
             {/* Advanced Section Toggle */}
-            <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+            <Collapsible open={tabState.showAdvanced} onOpenChange={handleAdvancedToggle}>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" className="w-full justify-between h-12 text-muted-foreground hover:text-foreground">
                   <span className="flex items-center gap-2">
-                    {showAdvanced ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    {showAdvanced ? "Hide Advanced Features" : "Show Advanced Features"}
+                    {tabState.showAdvanced ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {tabState.showAdvanced ? "Hide Advanced Features" : "Show Advanced Features"}
                   </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`h-4 w-4 transition-transform ${tabState.showAdvanced ? "rotate-180" : ""}`} />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-4">
