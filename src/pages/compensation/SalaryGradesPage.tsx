@@ -37,6 +37,7 @@ import { Layers, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useCompensation, SalaryGrade } from "@/hooks/useCompensation";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -55,9 +56,19 @@ export default function SalaryGradesPage() {
     deleteSalaryGrade,
   } = useCompensation();
 
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+
   const [grades, setGrades] = useState<SalaryGrade[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SalaryGrade | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -93,7 +104,10 @@ export default function SalaryGradesPage() {
 
     if (data && data.length > 0) {
       setCompanies(data);
-      setSelectedCompanyId(data[0].id);
+      // Only set default if no existing tab state
+      if (!selectedCompanyId) {
+        setSelectedCompanyId(data[0].id);
+      }
     }
   };
 

@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,12 +8,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Scale, Plus, AlertTriangle, CheckCircle, Info, ChevronRight, Building2 } from "lucide-react";
+import { Scale, Plus, AlertTriangle, CheckCircle, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function PayEquityPage() {
   const { t } = useTranslation();
-  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      companyFilter: "all",
+    },
+    syncToUrl: ["companyFilter"],
+  });
+  
+  const { companyFilter } = tabState;
+  const setCompanyFilter = (v: string) => setTabState({ companyFilter: v });
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-filter"],
@@ -69,12 +79,12 @@ export default function PayEquityPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">{t("compensation.payEquity.title")}</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: t("compensation.title"), href: "/compensation" },
+            { label: t("compensation.payEquity.title") },
+          ]}
+        />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

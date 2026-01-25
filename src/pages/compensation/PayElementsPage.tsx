@@ -38,6 +38,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { getTodayString } from "@/utils/dateUtils";
 import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -58,11 +59,21 @@ export default function PayElementsPage() {
     fetchLookupValues,
   } = useCompensation();
 
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+
   const [payElements, setPayElements] = useState<PayElement[]>([]);
   const [elementTypes, setElementTypes] = useState<LookupValue[]>([]);
   const [prorationMethods, setProrationMethods] = useState<LookupValue[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<PayElement | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -112,7 +123,10 @@ export default function PayElementsPage() {
 
     if (companiesData && companiesData.length > 0) {
       setCompanies(companiesData);
-      setSelectedCompanyId(companiesData[0].id);
+      // Only set default if no existing tab state
+      if (!selectedCompanyId) {
+        setSelectedCompanyId(companiesData[0].id);
+      }
     }
   };
 

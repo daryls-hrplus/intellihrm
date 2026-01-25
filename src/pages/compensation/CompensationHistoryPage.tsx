@@ -23,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -37,12 +38,26 @@ interface PayGroup {
 export default function CompensationHistoryPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [changeTypeFilter, setChangeTypeFilter] = useState<string>("all");
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchTerm: "",
+      changeTypeFilter: "all",
+      selectedCompanyId: "",
+      selectedPayGroupId: "all",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { searchTerm, changeTypeFilter, selectedCompanyId, selectedPayGroupId } = tabState;
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
+  const setChangeTypeFilter = (v: string) => setTabState({ changeTypeFilter: v });
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v, selectedPayGroupId: "all" });
+  const setSelectedPayGroupId = (v: string) => setTabState({ selectedPayGroupId: v });
+  
   const [companies, setCompanies] = useState<Company[]>([]);
   const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [selectedPayGroupId, setSelectedPayGroupId] = useState<string>("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
