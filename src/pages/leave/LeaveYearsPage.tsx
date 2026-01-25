@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useLeaveCompanyFilter, LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -66,9 +67,14 @@ interface LeaveYear {
 
 export default function LeaveYearsPage() {
   const { t } = useLanguage();
-  const { company } = useAuth();
+  const { company, isAdmin, hasRole } = useAuth();
   const queryClient = useQueryClient();
-  const { selectedCompanyId, setSelectedCompanyId, isAdminOrHR } = useLeaveCompanyFilter();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: company?.id || "" },
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   
   const effectiveCompanyId = selectedCompanyId || company?.id;
 

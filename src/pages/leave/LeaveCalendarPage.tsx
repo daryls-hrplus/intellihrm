@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,13 +55,23 @@ interface Department {
 export default function LeaveCalendarPage() {
   const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
   
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [tabState, setTabState] = useTabState({
+    defaultState: { 
+      selectedCompanyId: company?.id || "",
+      selectedDepartment: "all",
+      currentMonthISO: new Date().toISOString(),
+    },
+  });
+  const { selectedCompanyId, selectedDepartment, currentMonthISO } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSelectedDepartment = (v: string) => setTabState({ selectedDepartment: v });
+  const currentMonth = new Date(currentMonthISO);
+  const setCurrentMonth = (d: Date) => setTabState({ currentMonthISO: d.toISOString() });
+  
   const [leaveEvents, setLeaveEvents] = useState<LeaveEvent[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch departments

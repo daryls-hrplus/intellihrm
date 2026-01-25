@@ -4,7 +4,8 @@ import { usePageAudit } from "@/hooks/usePageAudit";
 import { useLeaveManagement, LeaveAccrualRule } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 import { LeaveAccrualRulesAIUpload } from "@/components/leave/LeaveAccrualRulesAIUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
@@ -62,7 +63,11 @@ export default function LeaveAccrualRulesPage() {
   const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole('hr_manager');
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: company?.id || "" },
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   const { leaveTypes, accrualRules, loadingAccrualRules, createAccrualRule, updateAccrualRule, deleteAccrualRule } = useLeaveManagement(selectedCompanyId);
   const [isOpen, setIsOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<LeaveAccrualRule | null>(null);

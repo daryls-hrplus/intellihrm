@@ -3,7 +3,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,10 +73,18 @@ const COUNTRIES = [
 export default function LeaveHolidaysPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const [tabState, setTabState] = useTabState({
+    defaultState: { 
+      selectedCompanyId: company?.id || "",
+      activeTab: "country",
+      countryFilter: "all",
+    },
+  });
+  const { selectedCompanyId, activeTab, countryFilter } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+  const setCountryFilter = (v: string) => setTabState({ countryFilter: v });
   const { holidays, countryHolidays, loadingHolidays, loadingCountryHolidays, createHoliday, createCountryHoliday } = useLeaveManagement(selectedCompanyId);
-  const [activeTab, setActiveTab] = useState("country");
-  const [countryFilter, setCountryFilter] = useState<string>("all");
   
   // Country holiday form
   const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(false);
