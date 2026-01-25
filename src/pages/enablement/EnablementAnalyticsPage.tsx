@@ -1,20 +1,28 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { NavLink } from "react-router-dom";
+import { BarChart3, LayoutDashboard } from "lucide-react";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEnablementContentStatus, useEnablementReleases, useEnablementVideos, useEnablementDAPGuides } from "@/hooks/useEnablementData";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 export default function EnablementAnalyticsPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { navigateToList } = useWorkspaceNavigation();
   const [companyId, setCompanyId] = useState<string>("");
+
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "overview" },
+    syncToUrl: ["activeTab"],
+  });
 
   const { contentItems } = useEnablementContentStatus();
   const { releases } = useEnablementReleases();
@@ -40,25 +48,29 @@ export default function EnablementAnalyticsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <NavLink to="/enablement">
-              <ArrowLeft className="h-4 w-4" />
-            </NavLink>
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <BarChart3 className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Content Analytics</h1>
-              <p className="text-muted-foreground">Track content creation metrics and team performance</p>
-            </div>
+      <div className="container mx-auto py-6 space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Enablement", href: "/enablement" },
+            { label: "Content Analytics" },
+          ]}
+        />
+
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <BarChart3 className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Content Analytics</h1>
+            <p className="text-muted-foreground">Track content creation metrics and team performance</p>
           </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-4">
+        <Tabs 
+          value={tabState.activeTab} 
+          onValueChange={(tab) => setTabState({ activeTab: tab })} 
+          className="space-y-4"
+        >
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>

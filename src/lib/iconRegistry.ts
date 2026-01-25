@@ -268,6 +268,19 @@ export const iconRegistry: Record<string, LucideIcon> = {
   Clipboard,
   Laptop,
   Wrench,
+  // Enablement icons
+  Rocket,
+  Map,
+  Kanban,
+  FolderTree,
+  CalendarClock,
+  MousePointer,
+  PanelLeft,
+  PanelRight,
+  FileSearch,
+  Route,
+  BookText,
+  Layers,
 };
 
 /**

@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Settings, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NavLink } from "react-router-dom";
-import { ArrowLeft, Settings, Save } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -16,21 +16,21 @@ export default function EnablementSettingsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <NavLink to="/enablement">
-              <ArrowLeft className="h-4 w-4" />
-            </NavLink>
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-500/10">
-              <Settings className="h-5 w-5 text-slate-500" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">Enablement Settings</h1>
-              <p className="text-muted-foreground">Configure enablement module preferences</p>
-            </div>
+      <div className="container mx-auto py-6 space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Enablement", href: "/enablement" },
+            { label: "Settings" },
+          ]}
+        />
+
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-500/10">
+            <Settings className="h-5 w-5 text-slate-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Enablement Settings</h1>
+            <p className="text-muted-foreground">Configure enablement module preferences</p>
           </div>
         </div>
 
