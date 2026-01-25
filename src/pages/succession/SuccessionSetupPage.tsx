@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings2, Users, Gauge, ListChecks, Grid3X3, Calendar } from 'lucide-react';
+import { Settings2, Users, Gauge, ListChecks, Grid3X3, Calendar, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTabState } from '@/hooks/useTabState';
@@ -14,6 +14,8 @@ import { ReadinessRatingBandsConfig } from '@/components/succession/config/Readi
 import { AssessorTypesConfig } from '@/components/succession/config/AssessorTypesConfig';
 import { AvailabilityReasonsConfig } from '@/components/succession/config/AvailabilityReasonsConfig';
 import { NineBoxConfigPanel } from '@/components/succession/NineBoxConfigPanel';
+import { ReadinessIndicatorsConfig } from '@/components/succession/config/ReadinessIndicatorsConfig';
+import { ReadinessFormBuilder } from '@/components/succession/config/ReadinessFormBuilder';
 
 interface Company {
   id: string;
@@ -57,8 +59,10 @@ export default function SuccessionSetupPage() {
   const tabs = [
     { id: "assessor-types", label: "Assessor Types", icon: Users },
     { id: "readiness-bands", label: "Readiness Bands", icon: Gauge },
+    { id: "readiness-indicators", label: "Indicators", icon: ListChecks },
+    { id: "readiness-forms", label: "Forms", icon: FileText },
     { id: "availability-reasons", label: "Availability Reasons", icon: Calendar },
-    { id: "nine-box", label: "9-Box Configuration", icon: Grid3X3 },
+    { id: "nine-box", label: "9-Box Config", icon: Grid3X3 },
   ];
 
   return (
@@ -97,7 +101,7 @@ export default function SuccessionSetupPage() {
             onValueChange={(v) => setTabState({ activeTab: v })}
             className="space-y-4"
           >
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-6">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -139,6 +143,40 @@ export default function SuccessionSetupPage() {
                 </CardHeader>
                 <CardContent>
                   <ReadinessRatingBandsConfig companyId={selectedCompany} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="readiness-indicators">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ListChecks className="h-5 w-5" />
+                    Readiness Indicators
+                  </CardTitle>
+                  <CardDescription>
+                    Configure assessment questions with weights for each assessor type
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ReadinessIndicatorsConfig companyId={selectedCompany} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="readiness-forms">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Readiness Forms
+                  </CardTitle>
+                  <CardDescription>
+                    Create and manage assessment forms for different staff types
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ReadinessFormBuilder companyId={selectedCompany} />
                 </CardContent>
               </Card>
             </TabsContent>
