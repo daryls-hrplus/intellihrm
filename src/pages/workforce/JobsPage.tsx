@@ -65,7 +65,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
-import { NavLink } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
 import { format } from "date-fns";
 import { getTodayString } from "@/utils/dateUtils";
 // JobCompetenciesManager removed - consolidated into JobCapabilityRequirementsManager
@@ -183,19 +184,37 @@ const emptyForm = {
 
 export default function JobsPage() {
   const { t } = useLanguage();
+  const { navigateToList } = useWorkspaceNavigation();
+  
+  // Tab-scoped state persistence for filters and UI state
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchTerm: "",
+      selectedCompanyId: "",
+      expandedJobId: null as string | null,
+      activePageTab: "jobs" as "jobs" | "level-expectations",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { searchTerm, selectedCompanyId, expandedJobId, activePageTab } = tabState;
+  
+  // Helper setters for tab state
+  const setSearchTerm = (value: string) => setTabState({ searchTerm: value });
+  const setSelectedCompanyId = (value: string) => setTabState({ selectedCompanyId: value });
+  const setExpandedJobId = (value: string | null) => setTabState({ expandedJobId: value });
+  const setActivePageTab = (value: "jobs" | "level-expectations") => setTabState({ activePageTab: value });
+  
   const [jobs, setJobs] = useState<Job[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [jobFamilies, setJobFamilies] = useState<JobFamily[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [formData, setFormData] = useState(emptyForm);
-  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
   
   // Copy job state
   const [copyFormData, setCopyFormData] = useState({
@@ -213,9 +232,6 @@ export default function JobsPage() {
   
   // AI generation state
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-  
-  // Page-level tab state
-  const [activePageTab, setActivePageTab] = useState<"jobs" | "level-expectations">("jobs");
 
   const { logAction } = useAuditLog();
   
@@ -953,9 +969,18 @@ export default function JobsPage() {
     <AppLayout>
       <div className="space-y-8">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <NavLink to="/workforce" className="hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-auto p-0 hover:bg-transparent hover:text-foreground"
+            onClick={() => navigateToList({
+              route: "/workforce",
+              title: t("workforce.title"),
+              moduleCode: "workforce",
+            })}
+          >
             Workforce
-          </NavLink>
+          </Button>
           <ChevronLeft className="h-4 w-4 rotate-180" />
           <span className="text-foreground">Jobs</span>
         </div>
