@@ -47,9 +47,18 @@ export function CycleOverviewTab({ cycle, onUpdate }: CycleOverviewTabProps) {
       return;
     }
 
+    // Get current user for audit trail
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { data: cycleData, error } = await supabase
       .from("review_cycles")
-      .update({ status: "active", is_template: false })
+      .update({ 
+        status: "active", 
+        is_template: false,
+        activated_at: new Date().toISOString(),
+        activated_by: user?.id || null,
+        is_locked: true
+      })
       .eq("id", cycle.id)
       .select("company_id")
       .single();
@@ -78,7 +87,10 @@ export function CycleOverviewTab({ cycle, onUpdate }: CycleOverviewTabProps) {
   const handleCloseCycle = async () => {
     const { error } = await supabase
       .from("review_cycles")
-      .update({ status: "completed" })
+      .update({ 
+        status: "completed",
+        closed_at: new Date().toISOString()
+      })
       .eq("id", cycle.id);
 
     if (error) {

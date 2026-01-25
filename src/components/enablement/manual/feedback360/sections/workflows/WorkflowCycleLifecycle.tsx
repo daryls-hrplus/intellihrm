@@ -231,16 +231,16 @@ export function WorkflowCycleLifecycle() {
           title="Cycle Database Fields" 
         />
 
-        <FutureCallout title="Planned Lifecycle Enhancements">
-          <p className="mb-2">The following lifecycle tracking fields are planned for future implementation:</p>
+        <TipCallout title="Enhanced Lifecycle Tracking">
+          <p className="mb-2">The following lifecycle tracking fields are now available in the database:</p>
           <ul className="list-disc list-inside space-y-1">
             <li><code className="text-xs bg-muted px-1 rounded">activated_at</code> - Timestamp when cycle was launched</li>
             <li><code className="text-xs bg-muted px-1 rounded">activated_by</code> - User who launched the cycle</li>
             <li><code className="text-xs bg-muted px-1 rounded">closed_at</code> - Timestamp when collection was closed</li>
             <li><code className="text-xs bg-muted px-1 rounded">is_locked</code> - Prevent accidental modifications</li>
           </ul>
-          <p className="mt-2 text-xs">These fields will provide enhanced audit trail and lifecycle tracking.</p>
-        </FutureCallout>
+          <p className="mt-2 text-xs">These fields provide enhanced audit trail and lifecycle tracking.</p>
+        </TipCallout>
 
         <WarningCallout title="Irreversible Transitions">
           Status transitions are forward-only. Once a cycle moves from Draft to Active,

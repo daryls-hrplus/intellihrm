@@ -156,6 +156,11 @@ const STEPS: Step[] = [
 
 const TROUBLESHOOTING: TroubleshootingItem[] = [
   {
+    issue: 'Automated reminders not being sent',
+    cause: 'Reminder rules may not be configured, or the cron job may not be running',
+    solution: 'Check that reminder rules exist with event types 360_FEEDBACK_DUE or 360_SELF_REVIEW_DUE. Verify cron job schedule for process-reminders. Check edge function logs.'
+  },
+  {
     issue: 'Manual reminder button is disabled',
     cause: 'Rater may have already reached max reminder count, or cycle is not Active',
     solution: 'Check reminder_count for the rater. Verify cycle status is Active. For urgent cases, consider direct email outreach.'
@@ -170,11 +175,6 @@ const TROUBLESHOOTING: TroubleshootingItem[] = [
     cause: 'Email domain reputation or content flagging',
     solution: 'Work with IT to verify email domain settings. Review email content for spam trigger words. Consider sender reputation improvement.'
   },
-  {
-    issue: 'No automated reminders being sent',
-    cause: 'Automated reminder processing is not yet implemented',
-    solution: 'This is expected behavior. Use manual reminders via the Response Monitoring dashboard. See "Future Enhancement" section below.'
-  }
 ];
 
 export function WorkflowReminderManagement() {
@@ -249,17 +249,15 @@ export function WorkflowReminderManagement() {
           title="Reminder Configuration Fields" 
         />
 
-        <FutureCallout title="Automated Reminders (Planned Enhancement)">
-          <p className="mb-2">
-            The <code className="text-xs bg-muted px-1 rounded">reminder_days_before</code> field and 
-            <code className="text-xs bg-muted px-1 rounded">reminder_event_types</code> (360_FEEDBACK_DUE, 360_SELF_REVIEW_DUE) 
-            exist in the database but automated processing is not yet active.
+        <TipCallout title="Automated Reminders Now Available">
+          <p>
+            The system now supports automated reminders for 360 feedback deadlines. Configure the 
+            <code className="text-xs bg-muted px-1 rounded mx-1">reminder_days_before</code> array 
+            during cycle setup, and reminders will be automatically sent at those intervals before the due date.
+            Event types: <code className="text-xs bg-muted px-1 rounded mx-1">360_FEEDBACK_DUE</code> and 
+            <code className="text-xs bg-muted px-1 rounded mx-1">360_SELF_REVIEW_DUE</code>.
           </p>
-          <p className="mb-2">
-            When implemented, the system will automatically send reminders at the configured intervals before deadlines.
-            Until then, use the manual reminder workflow described above.
-          </p>
-        </FutureCallout>
+        </TipCallout>
 
         <WarningCallout title="Respect Opt-Out Preferences">
           Some jurisdictions require respecting email opt-out preferences. Always honor reminder_opt_out

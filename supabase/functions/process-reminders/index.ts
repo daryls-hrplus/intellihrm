@@ -959,6 +959,89 @@ serve(async (req) => {
           break;
         }
 
+        // ========================
+        // 360 FEEDBACK EVENTS
+        // ========================
+        case '360_FEEDBACK_DUE': {
+          // Query feedback_360_requests with upcoming due dates for non-self raters
+          const { data: feedbackRequests } = await supabase
+            .from('feedback_360_requests')
+            .select(`
+              id,
+              due_date,
+              status,
+              rater_category_id,
+              subject_employee_id,
+              rater_id,
+              feedback_360_cycles!inner(id, name, company_id, status),
+              subject:subject_employee_id(id, full_name),
+              rater:rater_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
+            `)
+            .eq('status', 'pending')
+            .eq('due_date', targetDateStr)
+            .eq('feedback_360_cycles.status', 'active');
+
+          // Get rater categories to filter out self-reviews
+          const { data: raterCategories } = await supabase
+            .from('rater_categories')
+            .select('id, name')
+            .ilike('name', '%self%');
+          
+          const selfCategoryIds = new Set((raterCategories || []).map((c: any) => c.id));
+          
+          records = (feedbackRequests || [])
+            .filter((r: any) => !selfCategoryIds.has(r.rater_category_id)) // Exclude self-reviews
+            .filter((r: any) => r.rater?.company_id === rule.company_id)
+            .map((r: any) => ({
+              id: r.id,
+              employee: r.rater,
+              eventDate: r.due_date,
+              itemName: `360 Feedback for ${r.subject?.full_name || 'Employee'}`,
+              sourceTable: 'feedback_360_requests'
+            }));
+          break;
+        }
+
+        case '360_SELF_REVIEW_DUE': {
+          // Query feedback_360_requests with upcoming due dates for self-reviews only
+          const { data: selfReviewRequests } = await supabase
+            .from('feedback_360_requests')
+            .select(`
+              id,
+              due_date,
+              status,
+              rater_category_id,
+              subject_employee_id,
+              rater_id,
+              feedback_360_cycles!inner(id, name, company_id, status),
+              subject:subject_employee_id(id, full_name),
+              rater:rater_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
+            `)
+            .eq('status', 'pending')
+            .eq('due_date', targetDateStr)
+            .eq('feedback_360_cycles.status', 'active');
+
+          // Get self rater categories
+          const { data: selfCategories } = await supabase
+            .from('rater_categories')
+            .select('id, name')
+            .ilike('name', '%self%');
+          
+          const selfCatIds = new Set((selfCategories || []).map((c: any) => c.id));
+          
+          records = (selfReviewRequests || [])
+            .filter((r: any) => selfCatIds.has(r.rater_category_id)) // Only self-reviews
+            .filter((r: any) => r.rater?.company_id === rule.company_id)
+            .map((r: any) => ({
+              id: r.id,
+              employee: r.rater,
+              eventDate: r.due_date,
+              itemName: `360 Self-Assessment for ${r.subject?.full_name || 'yourself'}`,
+              sourceTable: 'feedback_360_requests'
+            }));
+          break;
+        }
+
         default:
           console.log(`Unhandled event type: ${rule.event_type?.code}`);
       }
