@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,7 +16,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { format, startOfWeek, endOfWeek, parseISO } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Send, Clock, CheckCircle, FileText, Loader2 } from "lucide-react";
+import { Send, Clock, CheckCircle, FileText, Loader2, ClipboardCheck } from "lucide-react";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface TimesheetSubmission {
   id: string;
@@ -55,8 +56,14 @@ export default function TimesheetApprovalsPage() {
   const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const { startWorkflow } = useWorkflow();
+  
+  // Tab-scoped state for active tab persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "my-submissions" },
+  });
+  const { activeTab } = tabState;
 
   const [mySubmissions, setMySubmissions] = useState<TimesheetSubmission[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState<TimesheetSubmission[]>([]);
@@ -231,7 +238,7 @@ export default function TimesheetApprovalsPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="my-submissions">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="my-submissions">{t("timeAttendance.timesheets.mySubmissions")}</TabsTrigger>
             <TabsTrigger value="pending-review">
@@ -299,7 +306,20 @@ export default function TimesheetApprovalsPage() {
                       <TableCell>{s.submitted_at ? format(parseISO(s.submitted_at), "MMM d, HH:mm") : "-"}</TableCell>
                       <TableCell className="space-x-2">
                         <Button variant="ghost" size="sm" onClick={() => handleViewEntries(s)}>{t("common.view")}</Button>
-                        {s.workflow_instance_id && <Button variant="outline" size="sm" onClick={() => navigate("/workflow/approvals")}>{t("timeAttendance.timesheets.review")}</Button>}
+                        {s.workflow_instance_id && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => navigateToList({
+                              route: "/workflow/approvals",
+                              title: "Workflow Approvals",
+                              moduleCode: "workflow",
+                              icon: ClipboardCheck,
+                            })}
+                          >
+                            {t("timeAttendance.timesheets.review")}
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
