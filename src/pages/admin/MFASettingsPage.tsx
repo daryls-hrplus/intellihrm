@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Loader2, Shield, Users, ShieldCheck, ShieldOff, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 interface MFASettings {
   id?: string;
@@ -45,14 +46,23 @@ export default function MFASettingsPage() {
   const [userStatuses, setUserStatuses] = useState<UserMFAStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId } = tabState;
 
   useEffect(() => {
     if (isAdmin) {
       fetchCompanies();
-    } else if (company?.id) {
-      setSelectedCompanyId(company.id);
+    } else if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
     }
   }, [isAdmin, company]);
 
@@ -72,7 +82,7 @@ export default function MFASettingsPage() {
     if (data) {
       setCompanies(data);
       if (data.length > 0 && !selectedCompanyId) {
-        setSelectedCompanyId(data[0].id);
+        setTabState({ selectedCompanyId: data[0].id });
       }
     }
   };
@@ -205,7 +215,7 @@ export default function MFASettingsPage() {
           {isAdmin && companies.length > 1 && (
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-muted-foreground" />
-              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Select company" />
                 </SelectTrigger>

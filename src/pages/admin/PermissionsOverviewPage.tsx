@@ -32,6 +32,7 @@ import { RolePermissionsMatrix } from "@/components/permissions/RolePermissionsM
 import { OrganizationalScopeMatrix } from "@/components/permissions/OrganizationalScopeMatrix";
 import { EssSensitiveDataTab } from "@/components/permissions/EssSensitiveDataTab";
 import { Link } from "react-router-dom";
+import { useTabState } from "@/hooks/useTabState";
 
 const breadcrumbItems = [
   { label: "Admin", href: "/admin" },
@@ -40,15 +41,24 @@ const breadcrumbItems = [
 
 export default function PermissionsOverviewPage() {
   usePageAudit("permissions_overview", "Admin");
-  const [activeTab, setActiveTab] = useState("users");
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
-  const { isLoading, users, roles, essModules, essFields, stats, accessibleCompanies } = usePermissionsOverview(selectedCompanyId);
+  
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "users",
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["activeTab"],
+  });
+
+  const { activeTab, selectedCompanyId } = tabState;
+  const { isLoading, users, roles, essModules, essFields, stats, accessibleCompanies } = usePermissionsOverview(selectedCompanyId || null);
 
   // Default to current company when accessible companies load
   useEffect(() => {
     if (accessibleCompanies.length > 0 && !selectedCompanyId) {
       const currentCompany = accessibleCompanies.find(c => c.isCurrentCompany);
-      setSelectedCompanyId(currentCompany?.id || accessibleCompanies[0].id);
+      setTabState({ selectedCompanyId: currentCompany?.id || accessibleCompanies[0].id });
     }
   }, [accessibleCompanies, selectedCompanyId]);
 
@@ -127,7 +137,7 @@ export default function PermissionsOverviewPage() {
             {/* Company Selector */}
             <Select 
               value={selectedCompanyId || ""} 
-              onValueChange={setSelectedCompanyId}
+              onValueChange={(v) => setTabState({ selectedCompanyId: v })}
             >
               <SelectTrigger className="w-[220px]">
                 <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -163,7 +173,7 @@ export default function PermissionsOverviewPage() {
             icon={Users}
             label={selectedCompanyId === "all" ? "All Company Users" : "Company Users"}
             value={stats.totalUsers}
-            onClick={() => setActiveTab("users")}
+            onClick={() => setTabState({ activeTab: "users" })}
             active={activeTab === "users"}
           />
           <StatCard
@@ -172,7 +182,7 @@ export default function PermissionsOverviewPage() {
             value={stats.adminUsers}
             warning={stats.adminUsers > stats.totalUsers * 0.1}
             warningText="High admin ratio"
-            onClick={() => setActiveTab("users")}
+            onClick={() => setTabState({ activeTab: "users" })}
           />
           <StatCard
             icon={Eye}
@@ -180,7 +190,7 @@ export default function PermissionsOverviewPage() {
             value={stats.fullPiiUsers}
             warning={stats.fullPiiUsers > 10}
             warningText="Review needed"
-            onClick={() => setActiveTab("ess")}
+            onClick={() => setTabState({ activeTab: "ess" })}
           />
           <StatCard
             icon={Clock}
@@ -194,18 +204,18 @@ export default function PermissionsOverviewPage() {
             value={stats.highRiskUsers}
             warning={stats.highRiskUsers > 0}
             warningText="Immediate review"
-            onClick={() => setActiveTab("users")}
+            onClick={() => setTabState({ activeTab: "users" })}
           />
           <StatCard
             icon={Settings}
             label="ESS Modules"
             value={stats.essConfigurations}
-            onClick={() => setActiveTab("ess")}
+            onClick={() => setTabState({ activeTab: "ess" })}
           />
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList className="grid w-full max-w-2xl grid-cols-4">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />

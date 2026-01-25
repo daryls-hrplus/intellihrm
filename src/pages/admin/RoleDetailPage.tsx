@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import { RoleContainerPermissions } from "@/components/roles/RoleContainerPermis
 import { RoleModulePermissions } from "@/components/roles/RoleModulePermissions";
 import { RolePiiAccess } from "@/components/roles/RolePiiAccess";
 import { RoleAuditLog } from "@/components/roles/RoleAuditLog";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
 import type { EnhancedRole, RoleType, TenantVisibility } from "@/types/roles";
 
 interface RoleFormData {
@@ -34,7 +36,7 @@ interface RoleFormData {
 export default function RoleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const { toast } = useToast();
   
   const duplicateFromId = searchParams.get("duplicate");
@@ -43,9 +45,17 @@ export default function RoleDetailPage() {
   
   const [loading, setLoading] = useState(!isNew || isDuplicate);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("identity");
   const [sourceRoleId, setSourceRoleId] = useState<string | null>(null);
   const [sourceRoleName, setSourceRoleName] = useState<string>("");
+
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "identity",
+    },
+  });
+
+  const { activeTab } = tabState;
   
   const [role, setRole] = useState<RoleFormData>({
     name: "",
@@ -226,7 +236,7 @@ export default function RoleDetailPage() {
           });
         }
         
-        navigate(`/admin/roles/${data.id}`);
+        navigateToList({ route: `/admin/roles/${data.id}`, title: data.name, moduleCode: "admin" });
       } else {
         const { error } = await supabase
           .from("roles")
@@ -294,7 +304,7 @@ export default function RoleDetailPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/admin/roles")}
+              onClick={() => navigateToList({ route: "/admin/roles", title: "Role Management", moduleCode: "admin" })}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -336,7 +346,7 @@ export default function RoleDetailPage() {
         )}
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList className="grid grid-cols-5 w-full max-w-2xl">
             <TabsTrigger value="identity" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
