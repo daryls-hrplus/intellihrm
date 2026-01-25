@@ -225,6 +225,15 @@ export const iconRegistry: Record<string, LucideIcon> = {
   TrendingDown,
   Route,
   AlertTriangle,
+  // Learning & Development icons
+  Video,
+  Presentation,
+  Library,
+  School,
+  PenTool: Pen,
+  NotebookPen,
+  Pen,
+  BookMarked,
 };
 
 /**
