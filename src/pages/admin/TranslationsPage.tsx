@@ -535,12 +535,12 @@ export default function TranslationsPage() {
             <Input
               placeholder="Search by key or text..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setTabState({ searchQuery: e.target.value, currentPage: 1 })}
               className="pl-10"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <Select value={filterCategory} onValueChange={(v) => setTabState({ filterCategory: v, currentPage: 1 })}>
               <SelectTrigger className="w-[140px]">
                 <Filter className="h-4 w-4 mr-2 shrink-0" />
                 <SelectValue placeholder="Category" />
@@ -554,7 +554,7 @@ export default function TranslationsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "complete" | "incomplete")}>
+            <Select value={filterStatus} onValueChange={(v) => setTabState({ filterStatus: v as "all" | "complete" | "incomplete", currentPage: 1 })}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -755,7 +755,7 @@ export default function TranslationsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => setTabState({ currentPage: Math.max(1, currentPage - 1) })}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
@@ -764,7 +764,7 @@ export default function TranslationsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setTabState({ currentPage: Math.min(totalPages, currentPage + 1) })}
                 disabled={currentPage === totalPages}
               >
                 Next
