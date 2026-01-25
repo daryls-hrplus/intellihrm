@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { format } from "date-fns";
 import { 
   Globe, 
   Plus, 
@@ -26,6 +25,7 @@ import {
   Moon
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 
 interface LaborRule {
   id: string;
@@ -80,7 +80,12 @@ export default function LaborCompliancePage() {
   const queryClient = useQueryClient();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingRule, setEditingRule] = useState<LaborRule | null>(null);
-  const [filterCountry, setFilterCountry] = useState("all");
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { filterCountry: "all" },
+  });
+  const { filterCountry } = tabState;
+  const setFilterCountry = (v: string) => setTabState({ filterCountry: v });
 
   const [formData, setFormData] = useState({
     country_code: "",

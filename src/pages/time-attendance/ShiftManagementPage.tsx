@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import type { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -113,9 +115,15 @@ interface ShiftAssignment {
 
 export default function ShiftManagementPage() {
   const { t } = useTranslation();
+  const { navigateToList } = useWorkspaceNavigation();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
   
   // Shifts
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -709,19 +717,26 @@ export default function ShiftManagementPage() {
         {/* Navigation Cards Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {navigationCards.map((card) => (
-            <Link key={card.href} to={card.href}>
-              <Card className="transition-all hover:shadow-md hover:border-primary/50 cursor-pointer h-full">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.color}`}>
-                    <card.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{card.title}</p>
-                    <p className="text-sm text-muted-foreground">{card.description}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            <Card 
+              key={card.href} 
+              className="transition-all hover:shadow-md hover:border-primary/50 cursor-pointer h-full"
+              onClick={() => navigateToList({
+                route: card.href,
+                title: card.title,
+                moduleCode: "time_attendance",
+                icon: card.icon,
+              })}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.color}`}>
+                  <card.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium">{card.title}</p>
+                  <p className="text-sm text-muted-foreground">{card.description}</p>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

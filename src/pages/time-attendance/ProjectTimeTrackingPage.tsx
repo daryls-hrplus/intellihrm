@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 import { 
   Briefcase, 
   Plus, 
@@ -86,9 +87,14 @@ interface TimeEntry {
 export default function ProjectTimeTrackingPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("timesheet");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "", activeTab: "timesheet" },
+  });
+  const { selectedCompany, activeTab } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
   
   // Clients
   const [clients, setClients] = useState<Client[]>([]);
