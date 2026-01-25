@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useTabState } from "@/hooks/useTabState";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,16 +119,23 @@ interface Company {
 export default function AdminPolicyDocumentsPage() {
   usePageAudit('policy_documents', 'Admin');
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [documents, setDocuments] = useState<PolicyDocument[]>([]);
   const [categories, setCategories] = useState<PolicyCategory[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [rules, setRules] = useState<PolicyRule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [companyFilter, setCompanyFilter] = useState<string>("all");
-  const [scopeFilter, setScopeFilter] = useState<string>("all");
+
+  // Tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchTerm: "",
+      categoryFilter: "all",
+      companyFilter: "all",
+      scopeFilter: "all",
+    },
+    syncToUrl: ["categoryFilter", "companyFilter"],
+  });
+  const { searchTerm, categoryFilter, companyFilter, scopeFilter } = tabState;
 
   // Dialog states
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -421,11 +429,11 @@ export default function AdminPolicyDocumentsPage() {
                     <Input
                       placeholder="Search documents..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => setTabState({ searchTerm: e.target.value })}
                       className="pl-10"
                     />
                   </div>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <Select value={categoryFilter} onValueChange={(v) => setTabState({ categoryFilter: v })}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
@@ -436,7 +444,7 @@ export default function AdminPolicyDocumentsPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                  <Select value={companyFilter} onValueChange={(v) => setTabState({ companyFilter: v })}>
                     <SelectTrigger className="w-[180px]">
                       <Building2 className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Company" />
@@ -448,7 +456,7 @@ export default function AdminPolicyDocumentsPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select value={scopeFilter} onValueChange={setScopeFilter}>
+                  <Select value={scopeFilter} onValueChange={(v) => setTabState({ scopeFilter: v })}>
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Scope" />
                     </SelectTrigger>

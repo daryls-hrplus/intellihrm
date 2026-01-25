@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { Badge } from "@/components/ui/badge";
@@ -201,7 +201,12 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalCompanies: 0, totalGroups: 0, admins: 0 });
   const [piiAlertStats, setPiiAlertStats] = useState<PiiAlertStats>({ total: 0, emailsSent: 0, last24Hours: 0, recentAlerts: [] });
   const [isLoading, setIsLoading] = useState(true);
-  const [isPiiAlertsOpen, setIsPiiAlertsOpen] = useState(false);
+  
+  // Tab state for collapsible panels
+  const [tabState, setTabState] = useTabState({
+    defaultState: { isPiiAlertsOpen: false },
+  });
+  const { isPiiAlertsOpen } = tabState;
 
   const adminSections = useMemo(() => 
     getAdminModuleSections(t, hasTabAccess, isHRPlusInternal),
@@ -310,7 +315,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* PII Alerts Widget */}
-        <Collapsible open={isPiiAlertsOpen} onOpenChange={setIsPiiAlertsOpen}>
+        <Collapsible open={isPiiAlertsOpen} onOpenChange={(open) => setTabState({ isPiiAlertsOpen: open })}>
           <Card className="animate-slide-up" style={{ animationDelay: "200ms" }}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -321,12 +326,12 @@ export default function AdminDashboardPage() {
                     <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isPiiAlertsOpen ? '' : '-rotate-90'}`} />
                   </button>
                 </CollapsibleTrigger>
-                <NavLink
-                  to="/admin/pii-access"
+                <a
+                  href="/admin/pii-access"
                   className="text-sm text-primary hover:underline flex items-center gap-1"
                 >
                   View all <ChevronRight className="h-4 w-4" />
-                </NavLink>
+                </a>
               </div>
               <CardDescription>
                 Monitor suspicious PII access patterns
