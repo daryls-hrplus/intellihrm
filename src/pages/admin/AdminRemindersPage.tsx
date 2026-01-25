@@ -9,12 +9,23 @@ import { EmployeeRemindersList } from '@/components/reminders/EmployeeRemindersL
 import { supabase } from '@/integrations/supabase/client';
 import { Bell, Settings, List, Loader2 } from 'lucide-react';
 import { usePageAudit } from '@/hooks/usePageAudit';
+import { useTabState } from '@/hooks/useTabState';
 
 export default function AdminRemindersPage() {
   usePageAudit('reminders', 'Admin');
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "all",
+      activeTab: "rules",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, activeTab } = tabState;
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -57,7 +68,7 @@ export default function AdminRemindersPage() {
             </h1>
             <p className="text-muted-foreground">Configure automatic reminders and manage employee notifications</p>
           </div>
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
             <SelectTrigger className="w-[220px]">
               <SelectValue placeholder="Select company" />
             </SelectTrigger>
@@ -70,7 +81,7 @@ export default function AdminRemindersPage() {
           </Select>
         </div>
 
-        <Tabs defaultValue="rules" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-6">
           <TabsList>
             <TabsTrigger value="rules" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />

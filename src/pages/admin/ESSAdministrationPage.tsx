@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePageAudit } from "@/hooks/usePageAudit";
-import { useSearchParams, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 import { ESSModuleEnablementTab } from "@/components/admin/ess/ESSModuleEnablementTab";
 import { ESSApprovalPoliciesTab } from "@/components/admin/ess/ESSApprovalPoliciesTab";
 import { ESSFieldPermissionsTab } from "@/components/admin/ess/ESSFieldPermissionsTab";
 import { ESSSetupWizard } from "@/components/admin/ess/ESSSetupWizard";
+import { useTabState } from "@/hooks/useTabState";
 import { 
   Users, 
   ShieldCheck, 
@@ -24,25 +25,28 @@ import {
 
 export default function ESSAdministrationPage() {
   usePageAudit('ess_administration', 'Admin');
-  const [searchParams, setSearchParams] = useSearchParams();
   const [showWizard, setShowWizard] = useState(false);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   
   const { companies: accessibleCompanies, isLoading: companiesLoading } = useUserAccessibleCompanies();
   
-  const currentTab = searchParams.get('tab') || 'modules';
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "modules",
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["activeTab"],
+  });
+
+  const { activeTab, selectedCompanyId } = tabState;
   
   // Default to current company on load
   useEffect(() => {
     if (accessibleCompanies.length > 0 && !selectedCompanyId) {
       const currentCompany = accessibleCompanies.find(c => c.isCurrentCompany);
-      setSelectedCompanyId(currentCompany?.id || accessibleCompanies[0].id);
+      setTabState({ selectedCompanyId: currentCompany?.id || accessibleCompanies[0].id });
     }
   }, [accessibleCompanies, selectedCompanyId]);
-  
-  const handleTabChange = (value: string) => {
-    setSearchParams({ tab: value });
-  };
 
   return (
     <AppLayout>
@@ -70,7 +74,7 @@ export default function ESSAdministrationPage() {
             {accessibleCompanies.length > 0 && (
               <Select 
                 value={selectedCompanyId || ""} 
-                onValueChange={setSelectedCompanyId}
+                onValueChange={(v) => setTabState({ selectedCompanyId: v })}
                 disabled={companiesLoading}
               >
                 <SelectTrigger className="w-[280px]">
@@ -98,13 +102,13 @@ export default function ESSAdministrationPage() {
           <AlertDescription>
             <strong>ESS Administration</strong> controls what employees can view and update about themselves in self-service.
             For module access approvals (when users request access to Leave, Workforce, etc.), see{" "}
-            <NavLink to="/admin/auto-approval" className="text-primary underline hover:no-underline">
+            <Link to="/admin/auto-approval" className="text-primary underline hover:no-underline">
               Access Request Auto-Approval
-            </NavLink>.
+            </Link>.
           </AlertDescription>
         </Alert>
         
-        <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-6">
           <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="modules" className="flex items-center gap-2">
               <Settings2 className="h-4 w-4" />
@@ -136,9 +140,9 @@ export default function ESSAdministrationPage() {
         <ESSSetupWizard 
           open={showWizard} 
           onOpenChange={setShowWizard}
-          selectedCompanyId={selectedCompanyId}
+          selectedCompanyId={selectedCompanyId || null}
           companies={accessibleCompanies}
-          onCompanyChange={setSelectedCompanyId}
+          onCompanyChange={(v) => setTabState({ selectedCompanyId: v })}
         />
       </div>
     </AppLayout>

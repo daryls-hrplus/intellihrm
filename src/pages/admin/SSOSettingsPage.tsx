@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 interface SSOProvider {
   id: string;
@@ -69,16 +70,25 @@ export default function SSOSettingsPage() {
   const [providers, setProviders] = useState<SSOProvider[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Partial<SSOProvider> | null>(null);
 
+  // Tab state for persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId } = tabState;
+
   useEffect(() => {
     if (isAdmin) {
       fetchCompanies();
-    } else if (company?.id) {
-      setSelectedCompanyId(company.id);
+    } else if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
     }
   }, [isAdmin, company]);
 
@@ -97,7 +107,7 @@ export default function SSOSettingsPage() {
     if (data) {
       setCompanies(data);
       if (data.length > 0 && !selectedCompanyId) {
-        setSelectedCompanyId(data[0].id);
+        setTabState({ selectedCompanyId: data[0].id });
       }
     }
   };
@@ -259,7 +269,7 @@ export default function SSOSettingsPage() {
             {isAdmin && companies.length > 1 && (
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
                   <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder="Select company" />
                   </SelectTrigger>
