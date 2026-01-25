@@ -649,43 +649,192 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
     ]
   },
   // ========================================================================
-  // PART 5: AI CAPABILITIES
+  // PART 5: AI & INTELLIGENCE FEATURES
+  // Industry-standard sequence: Overview → Processing → Analysis → Coaching → Integration → Governance
   // ========================================================================
   {
     id: 'part-5',
     sectionNumber: '5',
-    title: 'AI Capabilities',
-    description: 'AI-powered features for 360 feedback analysis and action recommendations',
+    title: 'AI & Intelligence Features',
+    description: 'Comprehensive AI-powered capabilities for 360 feedback: signal processing, theme generation, writing quality, bias detection, coaching prompts, and cross-module intelligence',
     contentLevel: 'concept',
-    estimatedReadTime: 20,
+    estimatedReadTime: 90,
     targetRoles: ['Admin', 'HR Partner', 'Manager'],
     subsections: [
+      // Group A: Foundation (5.1)
       {
         id: 'sec-5-1',
         sectionNumber: '5.1',
-        title: 'Sentiment Analysis',
-        description: 'AI analysis of open-text feedback for themes and sentiment',
+        title: 'AI Capabilities Overview',
+        description: 'Understanding AI scope, human-in-the-loop model, consent requirements, and ISO 42001 governance principles',
         contentLevel: 'concept',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'HR Partner']
+        targetRoles: ['Admin', 'HR Partner', 'Manager'],
+        industryContext: {
+          frequency: 'Reference document',
+          timing: 'Pre-implementation understanding',
+          benchmark: 'Human-in-the-loop AI with full explainability'
+        }
       },
+      // Group B: Core Processing (5.2-5.3)
       {
         id: 'sec-5-2',
         sectionNumber: '5.2',
-        title: 'Development Recommendations',
-        description: 'AI-generated development plans based on feedback patterns',
-        contentLevel: 'concept',
-        estimatedReadTime: 8,
-        targetRoles: ['HR Partner', 'Manager']
+        title: 'Signal Processing Engine',
+        description: 'How feedback responses are transformed into talent signals with confidence scoring and aggregation methods',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Per cycle completion',
+          timing: 'Automated post-collection',
+          benchmark: 'Signal extraction with confidence thresholds (>0.7 recommended)'
+        }
       },
       {
         id: 'sec-5-3',
         sectionNumber: '5.3',
-        title: 'Coaching Insights',
-        description: 'Manager coaching suggestions derived from 360 feedback',
+        title: 'Development Theme Generation',
+        description: 'AI-powered theme extraction from feedback patterns with confirmation workflows and signal linking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per cycle completion',
+          timing: 'Post signal processing',
+          benchmark: 'Manager/HR confirmation required before IDP linkage'
+        }
+      },
+      // Group C: Real-Time Analysis (5.4-5.6)
+      {
+        id: 'sec-5-4',
+        sectionNumber: '5.4',
+        title: 'Writing Quality Analysis',
+        description: 'Real-time feedback improvement: clarity, specificity, behavioral focus, and actionability scoring',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'During feedback submission',
+          timing: 'Real-time as raters type',
+          benchmark: 'Target 70+ quality score; suggestions improve by 15-25%'
+        }
+      },
+      {
+        id: 'sec-5-5',
+        sectionNumber: '5.5',
+        title: 'Bias Detection & Warnings',
+        description: 'EEOC-aligned bias detection: gender-coded language, age bias, vague language, and mitigation workflows',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'During feedback submission',
+          timing: 'Real-time inline warnings',
+          benchmark: 'Advisory not blocking; all incidents logged for pattern analysis'
+        }
+      },
+      {
+        id: 'sec-5-6',
+        sectionNumber: '5.6',
+        title: 'Sentiment Analysis',
+        description: 'NLP-powered sentiment detection, tone aggregation, and trend identification across feedback',
         contentLevel: 'concept',
-        estimatedReadTime: 4,
-        targetRoles: ['Manager']
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per response processing',
+          timing: 'Automated post-submission',
+          benchmark: 'Positive/Neutral/Negative/Mixed classification with confidence'
+        }
+      },
+      // Group D: Insight Generation (5.7-5.8)
+      {
+        id: 'sec-5-7',
+        sectionNumber: '5.7',
+        title: 'Blind Spot Identification',
+        description: 'Self vs. Others perception gap analysis, hidden strengths detection, and insight presentation',
+        contentLevel: 'concept',
+        estimatedReadTime: 6,
+        targetRoles: ['HR Partner', 'Manager'],
+        industryContext: {
+          frequency: 'Per cycle results',
+          timing: 'Results processing',
+          benchmark: 'Gap threshold of ±0.5 points signals blind spot'
+        }
+      },
+      {
+        id: 'sec-5-8',
+        sectionNumber: '5.8',
+        title: 'Coaching Prompts Generation',
+        description: 'AI-generated conversation starters for managers based on feedback themes and blind spots',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['HR Partner', 'Manager'],
+        industryContext: {
+          frequency: 'Per cycle results',
+          timing: 'Post results release',
+          benchmark: '4 prompt categories: strength, development, blind spot, exploration'
+        }
+      },
+      // Group E: Development Integration (5.9-5.10)
+      {
+        id: 'sec-5-9',
+        sectionNumber: '5.9',
+        title: 'IDP & Learning Integration',
+        description: 'Linking AI-generated themes to IDP goals, learning path recommendations, and course suggestions',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per theme confirmation',
+          timing: 'Post theme generation',
+          benchmark: 'Link types: derived, informed, validated'
+        }
+      },
+      {
+        id: 'sec-5-10',
+        sectionNumber: '5.10',
+        title: 'Remeasurement & Progress Tracking',
+        description: 'AI-recommended follow-up assessments, progress comparison, and development validation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: '6-12 months post-cycle',
+          timing: 'Scheduled follow-up',
+          benchmark: 'Pulse (5-7 questions) or full 360 remeasurement'
+        }
+      },
+      // Group F: Cross-Module Intelligence (5.11)
+      {
+        id: 'sec-5-11',
+        sectionNumber: '5.11',
+        title: 'Cross-Module AI Intelligence',
+        description: 'How 360 AI insights feed Appraisals, Succession, L&D, and Workforce Planning modules',
+        contentLevel: 'concept',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Continuous integration',
+          timing: 'Post cycle completion',
+          benchmark: 'Signal routing based on cycle purpose and consent'
+        }
+      },
+      // Group G: AI Governance (5.12)
+      {
+        id: 'sec-5-12',
+        sectionNumber: '5.12',
+        title: 'AI Explainability & Human Override',
+        description: 'ISO 42001 compliance, AI action audit logging, human override documentation, and confidence display',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Continuous monitoring',
+          timing: 'Throughout AI operations',
+          benchmark: 'All AI outputs logged with model version, confidence, and decision factors'
+        }
       }
     ]
   },
