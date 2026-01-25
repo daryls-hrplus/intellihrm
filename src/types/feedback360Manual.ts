@@ -91,9 +91,65 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: ManualSection[] = [
     title: 'Setup & Configuration Guide',
     description: 'Complete setup instructions for 360 feedback system components',
     contentLevel: 'procedure',
-    estimatedReadTime: 95,
+    estimatedReadTime: 120,
     targetRoles: ['Admin', 'Consultant'],
     subsections: [
+      {
+        id: 'sec-2-0a',
+        sectionNumber: '2.0a',
+        title: 'Approval Workflows',
+        description: '360-specific approval workflows for nominations, results release, and investigations',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'One-time setup, annual review',
+          timing: 'Pre-implementation',
+          benchmark: 'Core Framework shared configuration'
+        }
+      },
+      {
+        id: 'sec-2-0b',
+        sectionNumber: '2.0b',
+        title: 'Notifications',
+        description: 'Configure 360-specific notifications and reminder templates',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'One-time setup, annual review',
+          timing: 'Pre-implementation',
+          benchmark: 'Core Framework shared configuration'
+        }
+      },
+      {
+        id: 'sec-2-0c',
+        sectionNumber: '2.0c',
+        title: 'Competency Integration',
+        description: 'Link competency framework to 360 questions and behavioral anchors',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'One-time setup',
+          timing: 'Pre-implementation',
+          benchmark: 'Core Framework shared configuration'
+        }
+      },
+      {
+        id: 'sec-2-0d',
+        sectionNumber: '2.0d',
+        title: 'Performance Trends',
+        description: 'Configure 360 contribution to Performance Index and talent signals',
+        contentLevel: 'procedure',
+        estimatedReadTime: 5,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'One-time setup',
+          timing: 'Pre-implementation',
+          benchmark: 'Core Framework shared configuration'
+        }
+      },
       {
         id: 'sec-2-1',
         sectionNumber: '2.1',
