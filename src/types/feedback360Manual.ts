@@ -488,42 +488,163 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
   },
   // ========================================================================
   // PART 4: GOVERNANCE & COMPLIANCE
+  // Industry-standard sequence: Foundation → Consent → Data → Exceptions → Investigations → AI → Audit
   // ========================================================================
   {
     id: 'part-4',
     sectionNumber: '4',
     title: 'Governance & Compliance',
-    description: 'Security, privacy, and compliance requirements for 360 feedback',
+    description: 'Complete governance framework for 360 feedback: anonymity, consent, data policies, investigations, AI governance, and audit compliance',
     contentLevel: 'reference',
-    estimatedReadTime: 25,
+    estimatedReadTime: 100,
     targetRoles: ['Admin', 'HR Partner'],
     subsections: [
+      // Group A: Anonymity Foundation (4.1-4.2)
       {
         id: 'sec-4-1',
         sectionNumber: '4.1',
-        title: 'Anonymity Thresholds',
-        description: 'Configuring minimum rater counts and category-based anonymity',
-        contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['Admin']
+        title: 'Anonymity Architecture',
+        description: 'Understanding the multi-layer anonymity model, k-anonymity principles, and protection mechanisms',
+        contentLevel: 'concept',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Reference document',
+          timing: 'Pre-implementation understanding',
+          benchmark: 'K-anonymity model with category-based thresholds'
+        }
       },
       {
         id: 'sec-4-2',
         sectionNumber: '4.2',
-        title: 'Data Privacy & Retention',
-        description: 'GDPR compliance, data retention policies, and access controls',
-        contentLevel: 'reference',
+        title: 'Threshold Configuration',
+        description: 'Configuring minimum rater counts, bypass conditions, and visibility rules',
+        contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HR Partner']
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup, annual review',
+          timing: 'Pre-implementation',
+          benchmark: 'Minimum 3 raters per category for anonymity (industry standard)'
+        }
       },
+      // Group B: Consent Framework (4.3-4.4)
       {
         id: 'sec-4-3',
         sectionNumber: '4.3',
-        title: 'Audit Trail',
-        description: 'Tracking changes, access logs, and compliance reporting',
-        contentLevel: 'reference',
-        estimatedReadTime: 7,
-        targetRoles: ['Admin']
+        title: 'Consent Management Framework',
+        description: 'Understanding 6 consent types, GDPR requirements, versioning, and withdrawal rights',
+        contentLevel: 'concept',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Reference document',
+          timing: 'Pre-implementation',
+          benchmark: 'GDPR Article 7 compliant consent management'
+        }
+      },
+      {
+        id: 'sec-4-4',
+        sectionNumber: '4.4',
+        title: 'Consent Collection Workflows',
+        description: 'Implementing consent gates, processing withdrawals, and generating consent reports',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per cycle enrollment',
+          timing: 'Cycle launch',
+          benchmark: 'Required consents must be collected before feedback submission'
+        }
+      },
+      // Group C: Data Policies (4.5-4.6)
+      {
+        id: 'sec-4-5',
+        sectionNumber: '4.5',
+        title: 'Data Policy Configuration',
+        description: 'Configuring 6 policy types: retention, anonymization, AI usage, external access, signal aggregation, cross-module sharing',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup, annual review',
+          timing: 'Pre-implementation',
+          benchmark: 'Policy versioning for audit trail compliance'
+        }
+      },
+      {
+        id: 'sec-4-6',
+        sectionNumber: '4.6',
+        title: 'Data Retention & Anonymization',
+        description: 'Configuring retention periods (3-7 years), anonymization schedules, and regulatory compliance',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Annual review',
+          timing: 'Policy configuration',
+          benchmark: 'Caribbean/Africa: 3-7 years retention; GDPR: purpose-limited retention'
+        }
+      },
+      // Group D: Exception Handling (4.7)
+      {
+        id: 'sec-4-7',
+        sectionNumber: '4.7',
+        title: 'Exception Handling & Approvals',
+        description: 'Managing anonymity bypasses, deadline extensions, rater substitutions, and approval workflows',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Exception-based',
+          timing: 'During cycle operation',
+          benchmark: 'Multi-level approval with time-limited validity'
+        }
+      },
+      // Group E: Investigation Mode (4.8)
+      {
+        id: 'sec-4-8',
+        sectionNumber: '4.8',
+        title: 'Investigation Mode',
+        description: 'Controlled disclosure procedures, HR Director approval, legal considerations, and outcome documentation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Exception-based',
+          timing: 'Post-release as needed',
+          benchmark: 'HR Director approval mandatory; full audit trail required'
+        }
+      },
+      // Group F: AI Governance (4.9)
+      {
+        id: 'sec-4-9',
+        sectionNumber: '4.9',
+        title: 'AI Governance & Explainability',
+        description: 'ISO 42001 alignment, AI action logging, human overrides, confidence thresholds, and bias monitoring',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Continuous monitoring',
+          timing: 'Throughout system operation',
+          benchmark: 'ISO 42001 AI management system requirements'
+        }
+      },
+      // Group G: Audit & Compliance (4.10)
+      {
+        id: 'sec-4-10',
+        sectionNumber: '4.10',
+        title: 'Audit Logging & Compliance Reports',
+        description: 'Comprehensive audit trails, compliance report generation, and external audit response procedures',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Continuous + annual audit',
+          timing: 'Throughout system operation',
+          benchmark: 'Complete audit trail for all governance actions'
+        }
       }
     ]
   },
