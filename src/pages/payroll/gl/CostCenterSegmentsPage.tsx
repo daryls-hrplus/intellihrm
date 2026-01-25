@@ -16,7 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Edit, Trash2, ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+import { PayrollFilters } from '@/components/payroll/PayrollFilters';
+import { useTabState } from '@/hooks/useTabState';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PREDEFINED_SEGMENTS = [
   { code: 'COMPANY', name: 'Company', defaultLength: 4 },
@@ -59,7 +61,17 @@ interface SegmentValue {
 const CostCenterSegmentsPage = () => {
   const { t } = useTranslation();
   usePageAudit('cost_center_segments', 'Payroll');
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   const [segments, setSegments] = useState<Segment[]>([]);
   const [segmentValues, setSegmentValues] = useState<Record<string, SegmentValue[]>>({});
   const [loading, setLoading] = useState(true);

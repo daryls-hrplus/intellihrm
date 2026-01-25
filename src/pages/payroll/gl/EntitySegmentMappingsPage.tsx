@@ -15,7 +15,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+import { PayrollFilters } from '@/components/payroll/PayrollFilters';
+import { useTabState } from '@/hooks/useTabState';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ENTITY_TYPES = [
   { value: 'company', label: 'Company', table: 'companies', codeField: 'code', nameField: 'name', segmentCode: 'COMPANY' },
@@ -57,15 +59,28 @@ interface EntityOption {
 const EntitySegmentMappingsPage = () => {
   const { t } = useTranslation();
   usePageAudit('entity_segment_mappings', 'Payroll');
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      activeEntityType: "company",
+      searchQuery: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, activeEntityType, searchQuery } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setActiveEntityType = (v: string) => setTabState({ activeEntityType: v });
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
   const [segments, setSegments] = useState<Segment[]>([]);
   const [mappings, setMappings] = useState<EntityMapping[]>([]);
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMapping, setEditingMapping] = useState<EntityMapping | null>(null);
-  const [activeEntityType, setActiveEntityType] = useState('company');
-  const [searchQuery, setSearchQuery] = useState('');
+  // activeEntityType and searchQuery now from tabState
 
   const [formData, setFormData] = useState({
     segment_id: '',

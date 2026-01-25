@@ -16,7 +16,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Plus, Search, Edit, Trash2, ChevronDown, ChevronRight, Filter, Copy, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+import { PayrollFilters } from '@/components/payroll/PayrollFilters';
+import { useTabState } from '@/hooks/useTabState';
+import { useAuth } from '@/contexts/AuthContext';
 import { useGLOverrideRules, GLOverrideRule, GLOverrideCondition, CreateOverrideRuleInput } from '@/hooks/useGLOverrideRules';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -94,7 +96,19 @@ interface ConditionFormData {
 const GLOverrideRulesPage = () => {
   const { t } = useTranslation();
   usePageAudit('gl_override_rules', 'Payroll');
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      searchQuery: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, searchQuery } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
   const { isLoading, fetchOverrideRules, createOverrideRule, updateOverrideRule, deleteOverrideRule, toggleRuleActive } = useGLOverrideRules();
   
   const [rules, setRules] = useState<GLOverrideRule[]>([]);
@@ -103,7 +117,7 @@ const GLOverrideRulesPage = () => {
   const [payElements, setPayElements] = useState<PayElement[]>([]);
   const [segments, setSegments] = useState<CostCenterSegment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  // searchQuery is now from tabState
   const [expandedRules, setExpandedRules] = useState<string[]>([]);
   
   // Dialog state

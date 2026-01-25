@@ -16,7 +16,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Plus, Search, Edit, Trash2, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+import { PayrollFilters } from '@/components/payroll/PayrollFilters';
+import { useTabState } from '@/hooks/useTabState';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CostCenter {
   id: string;
@@ -50,12 +52,24 @@ interface ReallocationTarget {
 const CostReallocationsPage = () => {
   const { t } = useTranslation();
   usePageAudit('cost_reallocations', 'Payroll');
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      searchQuery: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, searchQuery } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
   const [reallocations, setReallocations] = useState<Reallocation[]>([]);
   const [targets, setTargets] = useState<Record<string, ReallocationTarget[]>>({});
   const [costCenters, setCostCenters] = useState<CostCenter[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  // searchQuery is now from tabState
   const [expandedRules, setExpandedRules] = useState<string[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [targetDialogOpen, setTargetDialogOpen] = useState(false);
