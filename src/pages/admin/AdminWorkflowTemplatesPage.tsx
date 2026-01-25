@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useTabState } from "@/hooks/useTabState";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -270,8 +271,13 @@ export default function AdminWorkflowTemplatesPage() {
     }
   };
 
-  const [activeMainTab, setActiveMainTab] = useState("template-library");
-  const [stepConfigTemplateId, setStepConfigTemplateId] = useState<string | null>(null);
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeMainTab: "template-library", stepConfigTemplateId: null as string | null },
+    syncToUrl: ["activeMainTab"],
+  });
+  const { activeMainTab, stepConfigTemplateId } = tabState;
+  const setActiveMainTab = (v: string) => setTabState({ activeMainTab: v });
+  const setStepConfigTemplateId = (v: string | null) => setTabState({ stepConfigTemplateId: v });
 
   // Navigate to Step Configuration with a specific template
   const handleNavigateToStepConfiguration = (templateId: string) => {

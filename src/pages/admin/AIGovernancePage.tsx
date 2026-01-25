@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTabState } from "@/hooks/useTabState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAIGovernance } from "@/hooks/useAIGovernance";
 import { AIHumanReviewQueue } from "@/components/ai/AIHumanReviewQueue";
@@ -51,6 +52,11 @@ export default function AIGovernancePage() {
     summary,
     isLoading 
   } = useAIGovernance();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "reviews" },
+    syncToUrl: ["activeTab"],
+  });
 
   // Generate risk distribution data
   const riskDistribution = [
@@ -243,7 +249,7 @@ export default function AIGovernancePage() {
         </div>
 
         {/* Main Tabs */}
-        <Tabs defaultValue="reviews" className="space-y-4">
+        <Tabs value={tabState.activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="reviews" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />

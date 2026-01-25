@@ -8,10 +8,12 @@ import { CoverageGapsTable } from "@/components/admin/audit/CoverageGapsTable";
 import { AuditHealthChart } from "@/components/admin/audit/AuditHealthChart";
 import { RefreshCw, Shield, ArrowLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { NavLink } from "react-router-dom";
+import { Button as NavigationButton } from "@/components/ui/button";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 export default function AuditCoveragePage() {
   usePageAudit('audit_coverage', 'Admin');
+  const { navigateToList } = useWorkspaceNavigation();
   
   const { metrics, volumeData, loading, error, refresh, lastRefresh } = useAuditCoverage();
 
@@ -21,9 +23,18 @@ export default function AuditCoveragePage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <NavLink to="/admin" className="text-muted-foreground hover:text-foreground">
+            <NavigationButton
+              variant="ghost"
+              size="icon"
+              onClick={() => navigateToList({
+                route: "/admin",
+                title: "Admin",
+                moduleCode: "admin",
+              })}
+              className="text-muted-foreground hover:text-foreground"
+            >
               <ArrowLeft className="h-5 w-5" />
-            </NavLink>
+            </NavigationButton>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Shield className="h-5 w-5 text-primary" />
             </div>

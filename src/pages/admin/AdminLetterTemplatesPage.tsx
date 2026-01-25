@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useTabState } from "@/hooks/useTabState";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,11 @@ export default function AdminLetterTemplatesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewLetter, setViewLetter] = useState<GeneratedLetter | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "templates" },
+    syncToUrl: ["activeTab"],
+  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -285,7 +291,7 @@ export default function AdminLetterTemplatesPage() {
           </Button>
         </div>
 
-        <Tabs defaultValue="templates">
+        <Tabs value={tabState.activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
