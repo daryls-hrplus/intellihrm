@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings2, Users, Gauge, ListChecks, Grid3X3, Calendar, FileText } from 'lucide-react';
+import { Settings2, Users, Gauge, ListChecks, Grid3X3, Calendar, FileText, LayoutGrid } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTabState } from '@/hooks/useTabState';
@@ -16,6 +16,7 @@ import { AvailabilityReasonsConfig } from '@/components/succession/config/Availa
 import { NineBoxConfigPanel } from '@/components/succession/NineBoxConfigPanel';
 import { ReadinessIndicatorsConfig } from '@/components/succession/config/ReadinessIndicatorsConfig';
 import { ReadinessFormBuilder } from '@/components/succession/config/ReadinessFormBuilder';
+import { NineBoxIndicatorLabelsConfig } from '@/components/succession/config/NineBoxIndicatorLabelsConfig';
 
 interface Company {
   id: string;
@@ -61,8 +62,9 @@ export default function SuccessionSetupPage() {
     { id: "readiness-bands", label: "Readiness Bands", icon: Gauge },
     { id: "readiness-indicators", label: "Indicators", icon: ListChecks },
     { id: "readiness-forms", label: "Forms", icon: FileText },
-    { id: "availability-reasons", label: "Availability Reasons", icon: Calendar },
+    { id: "availability-reasons", label: "Availability", icon: Calendar },
     { id: "nine-box", label: "9-Box Config", icon: Grid3X3 },
+    { id: "nine-box-labels", label: "9-Box Labels", icon: LayoutGrid },
   ];
 
   return (
@@ -101,7 +103,7 @@ export default function SuccessionSetupPage() {
             onValueChange={(v) => setTabState({ activeTab: v })}
             className="space-y-4"
           >
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="flex flex-wrap h-auto gap-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -200,6 +202,10 @@ export default function SuccessionSetupPage() {
 
             <TabsContent value="nine-box">
               <NineBoxConfigPanel companyId={selectedCompany} />
+            </TabsContent>
+
+            <TabsContent value="nine-box-labels">
+              <NineBoxIndicatorLabelsConfig companyId={selectedCompany} />
             </TabsContent>
           </Tabs>
         ) : (

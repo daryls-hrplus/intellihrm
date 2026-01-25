@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertTriangle, CheckCircle, Users, TrendingUp } from "lucide-react";
+import { AlertTriangle, CheckCircle, Users, TrendingUp, Shield, ShieldAlert, Target } from "lucide-react";
+import { RetentionRiskBadge, getRiskLevel } from "./RetentionRiskMatrix";
 
 interface BenchStrengthTabProps {
   companyId: string;
@@ -16,6 +17,8 @@ interface PositionCoverage {
   department_name: string;
   is_key_position: boolean;
   risk_level: string | null;
+  position_criticality: string | null;
+  replacement_difficulty: string | null;
   total_successors: number;
   ready_now: number;
   ready_1_2_years: number;
@@ -54,10 +57,12 @@ export function BenchStrengthTab({ companyId }: BenchStrengthTabProps) {
       .select('position_id, risk_level')
       .eq('company_id', companyId);
 
-    // Get succession plans with candidates
+    // Get succession plans with candidates and criticality
     const { data: plans } = await (supabase.from('succession_plans') as any)
       .select(`
         position_id,
+        position_criticality,
+        replacement_difficulty,
         candidates:succession_candidates(id, readiness)
       `)
       .eq('company_id', companyId)
@@ -89,6 +94,8 @@ export function BenchStrengthTab({ companyId }: BenchStrengthTabProps) {
         department_name: pos.department?.name || 'Unknown',
         is_key_position: !!keyPos,
         risk_level: keyPos?.risk_level || null,
+        position_criticality: plan?.position_criticality || null,
+        replacement_difficulty: plan?.replacement_difficulty || null,
         total_successors: candidates.length,
         ready_now,
         ready_1_2_years: ready_1_2,
@@ -134,11 +141,17 @@ export function BenchStrengthTab({ companyId }: BenchStrengthTabProps) {
 
   // Summary stats
   const keyPositions = coverage.filter(c => c.is_key_position);
+  const criticalPositions = coverage.filter(c => c.position_criticality === 'most_critical' || c.position_criticality === 'critical');
+  const highRiskPositions = coverage.filter(c => getRiskLevel(c.position_criticality, c.replacement_difficulty) === 'high');
   const stats = {
     totalPositions: coverage.length,
     keyPositions: keyPositions.length,
+    criticalPositions: criticalPositions.length,
+    highRiskPositions: highRiskPositions.length,
     wellCovered: coverage.filter(c => c.coverage_score >= 80).length,
     atRisk: coverage.filter(c => c.coverage_score < 20).length,
+    noSuccessors: coverage.filter(c => c.total_successors === 0).length,
+    singleSuccessor: coverage.filter(c => c.total_successors === 1).length,
     avgCoverage: coverage.length > 0 
       ? Math.round(coverage.reduce((sum, c) => sum + c.coverage_score, 0) / coverage.length)
       : 0,
@@ -152,7 +165,7 @@ export function BenchStrengthTab({ companyId }: BenchStrengthTabProps) {
   return (
     <div className="space-y-4">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -167,10 +180,32 @@ export function BenchStrengthTab({ companyId }: BenchStrengthTabProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-violet-500" />
+              <div>
+                <div className="text-2xl font-bold">{stats.criticalPositions}</div>
+                <div className="text-xs text-muted-foreground">Critical Positions</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-red-500" />
+              <div>
+                <div className="text-2xl font-bold">{stats.highRiskPositions}</div>
+                <div className="text-xs text-muted-foreground">High Risk</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-500" />
               <div>
-                <div className="text-2xl font-bold">{stats.keyPositions}</div>
-                <div className="text-xs text-muted-foreground">Key Positions</div>
+                <div className="text-2xl font-bold">{stats.noSuccessors}</div>
+                <div className="text-xs text-muted-foreground">No Successors</div>
               </div>
             </div>
           </CardContent>
@@ -245,7 +280,8 @@ export function BenchStrengthTab({ companyId }: BenchStrengthTabProps) {
               <TableRow>
                 <TableHead>Position</TableHead>
                 <TableHead>Department</TableHead>
-                <TableHead>Key?</TableHead>
+                <TableHead>Criticality</TableHead>
+                <TableHead>Retention Risk</TableHead>
                 <TableHead className="text-center">Ready Now</TableHead>
                 <TableHead className="text-center">1-2 Years</TableHead>
                 <TableHead className="text-center">3+ Years</TableHead>
@@ -258,9 +294,17 @@ export function BenchStrengthTab({ companyId }: BenchStrengthTabProps) {
                   <TableCell className="font-medium">{pos.position_title}</TableCell>
                   <TableCell className="text-muted-foreground">{pos.department_name}</TableCell>
                   <TableCell>
-                    {pos.is_key_position && (
-                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    {pos.position_criticality && (
+                      <Badge variant="outline" className="capitalize">
+                        {pos.position_criticality.replace('_', ' ')}
+                      </Badge>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <RetentionRiskBadge 
+                      criticality={pos.position_criticality} 
+                      difficulty={pos.replacement_difficulty} 
+                    />
                   </TableCell>
                   <TableCell className="text-center">
                     {pos.ready_now > 0 ? (

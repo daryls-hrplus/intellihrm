@@ -555,6 +555,7 @@ export const MssCompaRatioPage = lazy(() => import('@/pages/mss/MssCompaRatioPag
 export const MssEquityPage = lazy(() => import('@/pages/mss/MssEquityPage'));
 export const MssAnalyticsPage = lazy(() => import('@/pages/mss/MssAnalyticsPage'));
 export const MssSuccessionPage = lazy(() => import('@/pages/mss/MssSuccessionPage'));
+export const MssNominateTalentPoolPage = lazy(() => import('@/pages/mss/MssNominateTalentPoolPage'));
 export const MssTimeAttendancePage = lazy(() => import('@/pages/mss/MssTimeAttendancePage'));
 export const MssRemindersPage = lazy(() => import('@/pages/mss/MssRemindersPage'));
 

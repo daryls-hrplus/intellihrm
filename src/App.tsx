@@ -161,6 +161,7 @@ const App = () => (
             <Route path="/mss/analytics" element={<ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.MssAnalyticsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/mss/succession" element={<ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.MssSuccessionPage /></LazyPage></ProtectedRoute>} />
             <Route path="/mss/readiness-assessments" element={<ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.MssReadinessAssessmentPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/talent-nomination" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssNominateTalentPoolPage /></LazyPage></ProtectedRoute>} />
             <Route path="/mss/*" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.ManagerSelfServicePage /></LazyPage></ProtectedRoute>} />
 
             {/* Admin Routes */}
