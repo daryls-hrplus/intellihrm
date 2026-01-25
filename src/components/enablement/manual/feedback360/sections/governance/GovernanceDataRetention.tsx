@@ -1,7 +1,7 @@
-import { LearningObjectives } from '../../components/LearningObjectives';
-import { StepByStep, Step } from '../../components/StepByStep';
-import { ConfigurationExample, ExampleConfig } from '../../components/ConfigurationExample';
-import { TroubleshootingSection, TroubleshootingItem } from '../../components/TroubleshootingSection';
+import { LearningObjectives } from '../../../components/LearningObjectives';
+import { StepByStep, Step } from '../../../components/StepByStep';
+import { ConfigurationExample, ExampleConfig } from '../../../components/ConfigurationExample';
+import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
 import { Clock, AlertTriangle, Globe } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';

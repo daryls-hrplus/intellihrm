@@ -1,6 +1,6 @@
-import { LearningObjectives } from '../../components/LearningObjectives';
-import { StepByStep, Step } from '../../components/StepByStep';
-import { TroubleshootingSection, TroubleshootingItem } from '../../components/TroubleshootingSection';
+import { LearningObjectives } from '../../../components/LearningObjectives';
+import { StepByStep, Step } from '../../../components/StepByStep';
+import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
 import { FileText, ArrowRight, Download, Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

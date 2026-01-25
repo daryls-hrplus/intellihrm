@@ -1,6 +1,6 @@
-import { LearningObjectives } from '../../components/LearningObjectives';
-import { FieldReferenceTable, FieldDefinition } from '../../components/FieldReferenceTable';
-import { BusinessRules, BusinessRule } from '../../components/BusinessRules';
+import { LearningObjectives } from '../../../components/LearningObjectives';
+import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
+import { BusinessRules, BusinessRule } from '../../../components/BusinessRules';
 import { FileCheck, Shield, Check, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

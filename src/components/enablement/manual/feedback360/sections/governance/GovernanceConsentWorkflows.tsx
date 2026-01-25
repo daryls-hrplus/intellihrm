@@ -1,6 +1,6 @@
-import { LearningObjectives } from '../../components/LearningObjectives';
-import { StepByStep, Step } from '../../components/StepByStep';
-import { TroubleshootingSection, TroubleshootingItem } from '../../components/TroubleshootingSection';
+import { LearningObjectives } from '../../../components/LearningObjectives';
+import { StepByStep, Step } from '../../../components/StepByStep';
+import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
 import { ClipboardCheck, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
