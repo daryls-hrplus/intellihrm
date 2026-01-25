@@ -300,7 +300,7 @@ export default function Feedback360ManualPage() {
                             ) : (
                               <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                             )}
-                            <span className="flex-1 truncate">
+                            <span className="flex-1 text-left leading-tight">
                               {section.sectionNumber}. {section.title}
                             </span>
                             {section.subsections && section.subsections.length > 0 && (
@@ -328,7 +328,7 @@ export default function Feedback360ManualPage() {
                                   ) : (
                                     <Circle className="h-3 w-3 flex-shrink-0" />
                                   )}
-                                  <span className="truncate">{sub.sectionNumber} {sub.title}</span>
+                                  <span className="text-left leading-tight">{sub.sectionNumber} {sub.title}</span>
                                 </button>
                               ))}
                             </div>
