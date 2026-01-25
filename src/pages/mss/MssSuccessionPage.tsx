@@ -1,46 +1,21 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Users, Star, AlertTriangle, CheckCircle } from "lucide-react";
+import { useTeamSuccessionStatus } from "@/hooks/useSuccessionCandidates";
+import { TrendingUp, Users, Star, AlertTriangle, CheckCircle, Clock, Target } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MssSuccessionPage() {
   const { t } = useLanguage();
   const { profile } = useAuth();
 
-  // Fetch team members with succession data
-  const { data: teamMembers = [], isLoading } = useQuery({
-    queryKey: ["team-succession", profile?.id],
-    queryFn: async () => {
-      if (!profile?.id) return [];
-      const { data } = await (supabase as any)
-        .from("profiles")
-        .select(`
-          id, 
-          full_name, 
-          hire_date,
-          employee_positions!employee_positions_employee_id_fkey (
-            position:positions (
-              title,
-              job:jobs (
-                title
-              )
-            )
-          )
-        `)
-        .eq("manager_id", profile.id);
-      return data || [];
-    },
-    enabled: !!profile?.id,
-  });
-
-  // Placeholder for succession plans - simplified to avoid type issues
-  const successionPlans: any[] = [];
+  // Fetch team succession data using the new hook
+  const { teamMembers, successionPlans, isLoading } = useTeamSuccessionStatus(profile?.id);
 
   const getReadinessColor = (readiness: string) => {
     switch (readiness) {
@@ -145,7 +120,20 @@ export default function MssSuccessionPage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading...</div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-4 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-6 w-24" />
+                  </div>
+                ))}
+              </div>
             ) : teamMembers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 No direct reports found
@@ -157,23 +145,37 @@ export default function MssSuccessionPage() {
                   const position = member.employee_positions?.[0]?.position;
                   
                   return (
-                    <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border">
-                      <div className="flex-1">
-                        <p className="font-medium">{member.full_name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {position?.title || position?.job?.title || "No position assigned"}
-                        </p>
+                    <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={member.avatar_url} alt={member.full_name} />
+                          <AvatarFallback>
+                            {member.full_name?.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{member.full_name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {position?.title || position?.job?.title || "No position assigned"}
+                          </p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {memberPlans.length > 0 ? (
-                          memberPlans.map((plan: any, idx: number) => (
-                            <Badge 
-                              key={idx} 
-                              className={`${getReadinessColor(plan.readiness_level)} text-white`}
-                            >
-                              {getReadinessLabel(plan.readiness_level)}
-                            </Badge>
-                          ))
+                          <div className="flex flex-col items-end gap-1">
+                            {memberPlans.map((plan: any, idx: number) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground max-w-[150px] truncate">
+                                  {plan.succession_plan?.position?.title}
+                                </span>
+                                <Badge 
+                                  className={`${getReadinessColor(plan.readiness_level)} text-white`}
+                                >
+                                  {getReadinessLabel(plan.readiness_level)}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
                         ) : (
                           <Badge variant="outline" className="text-muted-foreground">
                             Not in succession plan
