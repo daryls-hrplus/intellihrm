@@ -17,12 +17,20 @@ import {
 import { Plus, Gift, Trophy, Send, Award, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function MyRecognitionPage() {
   const { t } = useLanguage();
   const { user, company } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("wall");
+
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "wall" },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab } = tabState;
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
   
   const { 
     myRecognitions, 

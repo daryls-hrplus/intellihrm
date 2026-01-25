@@ -36,6 +36,7 @@ import { useMy360FeedbackRequests, type My360Request } from "@/hooks/useMy360Fee
 import { useMyReview360Participations } from "@/hooks/useMyReview360Participations";
 import { Ess360FeedbackResponseDialog } from "@/components/ess/Ess360FeedbackResponseDialog";
 import { MyFeedbackSummary } from "@/components/performance/MyFeedbackSummary";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Feedback {
   id: string;
@@ -60,8 +61,15 @@ export default function MyFeedbackPage() {
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("continuous");
   const [selected360Request, setSelected360Request] = useState<My360Request | null>(null);
+
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "continuous" },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab } = tabState;
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
   const [formData, setFormData] = useState({
     to_user_id: "",
     feedback_type: "praise",
