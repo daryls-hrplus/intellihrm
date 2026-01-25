@@ -12,16 +12,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
-import { usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { FileText, Palette, Eye, Settings2, Upload, Save, Star, Trash2, Sparkles, MessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function PayslipTemplateConfigPage() {
   const { t } = useTranslation();
   usePageAudit('payslip_template_config', 'Payroll');
-  const { selectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
+  
+  const [tabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
   const { 
     isLoading, 
     fetchTemplates, 

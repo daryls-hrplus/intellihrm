@@ -14,7 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+import { PayrollFilters } from '@/components/payroll/PayrollFilters';
+import { useTabState } from '@/hooks/useTabState';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CostCenter {
   id: string;
@@ -53,13 +55,25 @@ interface SegmentValue {
 const CostCentersPage = () => {
   const { t } = useTranslation();
   usePageAudit('cost_centers', 'Payroll');
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      searchQuery: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, searchQuery } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
   const [costCenters, setCostCenters] = useState<CostCenter[]>([]);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [segmentValues, setSegmentValues] = useState<Record<string, SegmentValue[]>>({});
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  // searchQuery is now from tabState
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCC, setEditingCC] = useState<CostCenter | null>(null);
 
