@@ -1,6 +1,5 @@
 // Content Lifecycle Page - Admin dashboard for content lifecycle management
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, differenceInDays, isPast } from "date-fns";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -23,9 +22,14 @@ import {
 } from "lucide-react";
 import { ContentLifecycleService } from "@/services/kb/ContentLifecycleService";
 import { cn } from "@/lib/utils";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function ContentLifecyclePage() {
-  const [activeTab, setActiveTab] = useState("due-review");
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "due-review" },
+    syncToUrl: ["activeTab"],
+  });
 
   // Fetch lifecycle stats
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -165,7 +169,7 @@ export default function ContentLifecyclePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs value={tabState.activeTab} onValueChange={(tab) => setTabState({ activeTab: tab })}>
               <TabsList>
                 <TabsTrigger value="due-review">
                   Due for Review
