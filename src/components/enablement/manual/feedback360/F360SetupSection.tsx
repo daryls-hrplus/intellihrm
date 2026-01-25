@@ -1,14 +1,66 @@
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Settings, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { 
+  Settings, 
+  CheckCircle2, 
+  Users, 
+  FileText, 
+  Anchor, 
+  Sliders, 
+  FileBarChart, 
+  Eye, 
+  Library, 
+  Radio, 
+  UserPlus, 
+  Copy,
+  Target
+} from 'lucide-react';
+import {
+  F360Prerequisites,
+  F360RaterCategories,
+  F360QuestionBank,
+  F360BehavioralAnchors,
+  F360RatingScales,
+  F360ReportTemplates,
+  F360VisibilityRules,
+  F360FrameworkLibrary,
+  F360SignalDefinitions,
+  F360ExternalRaters,
+  F360CycleTemplates,
+} from './sections/setup';
 
 interface F360SetupSectionProps {
   selectedSectionId?: string;
 }
 
 export function F360SetupSection({ selectedSectionId }: F360SetupSectionProps) {
+  // Determine which accordion items should be open based on selectedSectionId
+  const getDefaultOpen = () => {
+    if (!selectedSectionId) return ['core'];
+    if (selectedSectionId.startsWith('sec-2-1') || 
+        selectedSectionId.startsWith('sec-2-2') || 
+        selectedSectionId.startsWith('sec-2-3') || 
+        selectedSectionId.startsWith('sec-2-4') || 
+        selectedSectionId.startsWith('sec-2-5')) {
+      return ['core'];
+    }
+    if (selectedSectionId.startsWith('sec-2-6') || 
+        selectedSectionId.startsWith('sec-2-7') || 
+        selectedSectionId.startsWith('sec-2-8')) {
+      return ['reporting'];
+    }
+    if (selectedSectionId.startsWith('sec-2-9') || 
+        selectedSectionId.startsWith('sec-2-10') || 
+        selectedSectionId.startsWith('sec-2-11')) {
+      return ['advanced'];
+    }
+    return ['core'];
+  };
+
   return (
     <div className="space-y-8">
+      {/* Section Header */}
       <div data-manual-anchor="part-2" id="part-2">
         <h2 className="text-2xl font-bold mb-4">2. Setup & Configuration Guide</h2>
         <p className="text-muted-foreground mb-6">
@@ -17,106 +69,128 @@ export function F360SetupSection({ selectedSectionId }: F360SetupSectionProps) {
         </p>
       </div>
 
-      {/* Prerequisites */}
-      <Card data-manual-anchor="sec-2-1" id="sec-2-1">
-        <CardHeader><CardTitle>2.1 Pre-requisites Checklist</CardTitle></CardHeader>
+      {/* Learning Objectives */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Chapter Learning Objectives
+          </CardTitle>
+        </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {['Workforce data loaded (employees, managers, departments)', 'Competency framework configured', 'Rating scales defined', 'User roles and permissions set', 'Email templates configured'].map((item) => (
-              <div key={item} className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span>{item}</span>
+          <ul className="text-sm space-y-1 text-muted-foreground">
+            <li>• Configure all components required to launch a 360 feedback cycle</li>
+            <li>• Understand database field mappings for each configuration entity</li>
+            <li>• Apply best practices for question design, anonymity, and reporting</li>
+            <li>• Troubleshoot common configuration issues</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      {/* Section Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Settings className="h-5 w-5" />
+            Chapter Contents (11 Sections)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[
+              { id: '2.1', title: 'Prerequisites', icon: CheckCircle2 },
+              { id: '2.2', title: 'Rater Categories', icon: Users },
+              { id: '2.3', title: 'Question Bank', icon: FileText },
+              { id: '2.4', title: 'Behavioral Anchors', icon: Anchor },
+              { id: '2.5', title: 'Rating Scales', icon: Sliders },
+              { id: '2.6', title: 'Report Templates', icon: FileBarChart },
+              { id: '2.7', title: 'Visibility Rules', icon: Eye },
+              { id: '2.8', title: 'Framework Library', icon: Library },
+              { id: '2.9', title: 'Signal Definitions', icon: Radio },
+              { id: '2.10', title: 'External Raters', icon: UserPlus },
+              { id: '2.11', title: 'Cycle Templates', icon: Copy },
+            ].map((section) => (
+              <div key={section.id} className="flex items-center gap-2 p-2 rounded-lg border text-sm">
+                <section.icon className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">{section.id}</span>
+                <span className="text-muted-foreground">{section.title}</span>
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Rater Categories */}
-      <Card data-manual-anchor="sec-2-2" id="sec-2-2">
-        <CardHeader><CardTitle>2.2 Rater Categories Configuration</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">Configure the rater types that will provide feedback in your 360 cycles.</p>
-          <div className="grid md:grid-cols-5 gap-3">
-            {['Manager', 'Peer', 'Direct Report', 'Self', 'External'].map((cat) => (
-              <div key={cat} className="p-3 rounded-lg border text-center">
-                <Badge variant="secondary">{cat}</Badge>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Question Bank */}
-      <Card data-manual-anchor="sec-2-3" id="sec-2-3">
-        <CardHeader><CardTitle>2.3 Question Bank Setup</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">Create questions linked to competencies with rater category assignments.</p>
-          <div className="p-4 bg-muted/50 rounded-lg">
-            <p className="text-sm"><strong>Best Practice:</strong> 15-40 questions per cycle, targeting 5-7 minute completion time.</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* BARS */}
-      <Card data-manual-anchor="sec-2-4" id="sec-2-4">
-        <CardHeader><CardTitle>2.4 Behavioral Anchors & BARS</CardTitle></CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Configure behavioral anchors for objective rating criteria using BARS methodology.</p>
-        </CardContent>
-      </Card>
-
-      {/* Rating Scales */}
-      <Card data-manual-anchor="sec-2-5" id="sec-2-5">
-        <CardHeader><CardTitle>2.5 Rating Scales Configuration</CardTitle></CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Set up 360-specific rating scales with labels and score mappings (typically 1-5 scale).</p>
-        </CardContent>
-      </Card>
-
-      {/* Report Templates */}
-      <Card data-manual-anchor="sec-2-6" id="sec-2-6">
-        <CardHeader><CardTitle>2.6 Report Templates Setup</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">Configure audience-specific report templates controlling content depth and visibility.</p>
-          <div className="grid md:grid-cols-4 gap-3">
-            {['Executive', 'Manager', 'Individual Contributor', 'HR'].map((audience) => (
-              <div key={audience} className="p-3 rounded-lg border text-center text-sm">{audience}</div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Visibility Rules */}
-      <Card data-manual-anchor="sec-2-7" id="sec-2-7">
-        <CardHeader><CardTitle>2.7 Anonymity & Visibility Rules</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
-              <div>
-                <h4 className="font-semibold">Critical Configuration</h4>
-                <p className="text-sm text-muted-foreground">Minimum 3 raters per category required for anonymity protection.</p>
-              </div>
+      {/* Accordion Sections */}
+      <Accordion type="multiple" defaultValue={getDefaultOpen()} className="space-y-4">
+        {/* Core Configuration */}
+        <AccordionItem value="core" className="border rounded-lg">
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3">
+              <Badge variant="outline">Sections 2.1 - 2.5</Badge>
+              <span className="font-semibold">Core Configuration</span>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-8">
+            <section id="sec-2-1" data-manual-anchor="sec-2-1" className="scroll-mt-32">
+              <F360Prerequisites />
+            </section>
+            <section id="sec-2-2" data-manual-anchor="sec-2-2" className="scroll-mt-32">
+              <F360RaterCategories />
+            </section>
+            <section id="sec-2-3" data-manual-anchor="sec-2-3" className="scroll-mt-32">
+              <F360QuestionBank />
+            </section>
+            <section id="sec-2-4" data-manual-anchor="sec-2-4" className="scroll-mt-32">
+              <F360BehavioralAnchors />
+            </section>
+            <section id="sec-2-5" data-manual-anchor="sec-2-5" className="scroll-mt-32">
+              <F360RatingScales />
+            </section>
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* Remaining sections */}
-      {[
-        { id: 'sec-2-8', num: '2.8', title: 'Framework Library Configuration' },
-        { id: 'sec-2-9', num: '2.9', title: 'Signal Definitions Setup' },
-        { id: 'sec-2-10', num: '2.10', title: 'External Rater Configuration' },
-        { id: 'sec-2-11', num: '2.11', title: 'Cycle Templates & Cloning' },
-      ].map((section) => (
-        <Card key={section.id} data-manual-anchor={section.id} id={section.id}>
-          <CardHeader><CardTitle>{section.num} {section.title}</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Configuration details for {section.title.toLowerCase()}.</p>
-          </CardContent>
-        </Card>
-      ))}
+        {/* Reporting & Visibility */}
+        <AccordionItem value="reporting" className="border rounded-lg">
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3">
+              <Badge variant="outline">Sections 2.6 - 2.8</Badge>
+              <span className="font-semibold">Reporting & Visibility</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-8">
+            <section id="sec-2-6" data-manual-anchor="sec-2-6" className="scroll-mt-32">
+              <F360ReportTemplates />
+            </section>
+            <section id="sec-2-7" data-manual-anchor="sec-2-7" className="scroll-mt-32">
+              <F360VisibilityRules />
+            </section>
+            <section id="sec-2-8" data-manual-anchor="sec-2-8" className="scroll-mt-32">
+              <F360FrameworkLibrary />
+            </section>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Advanced Configuration */}
+        <AccordionItem value="advanced" className="border rounded-lg">
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3">
+              <Badge variant="outline">Sections 2.9 - 2.11</Badge>
+              <span className="font-semibold">Advanced Configuration</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-8">
+            <section id="sec-2-9" data-manual-anchor="sec-2-9" className="scroll-mt-32">
+              <F360SignalDefinitions />
+            </section>
+            <section id="sec-2-10" data-manual-anchor="sec-2-10" className="scroll-mt-32">
+              <F360ExternalRaters />
+            </section>
+            <section id="sec-2-11" data-manual-anchor="sec-2-11" className="scroll-mt-32">
+              <F360CycleTemplates />
+            </section>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }
