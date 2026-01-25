@@ -26,6 +26,7 @@ import {
   BarChart3,
   Award,
   Settings,
+  Settings2,
   Scale,
   Users,
   GitBranch,
@@ -71,7 +72,8 @@ export default function PerformanceDashboardPage() {
     successionAnalytics: { title: "Succession Analytics", description: "Insights on talent pipeline health", href: "/succession/analytics", icon: BarChart3, color: "bg-gray-500/10 text-gray-600", tabCode: "succession_analytics" },
     // Analytics & Configuration
     intelligenceHub: { title: "Performance Intelligence Hub", description: "Unified analytics, insights, and AI predictions", href: "/performance/intelligence-hub", icon: Brain, color: "bg-gradient-to-br from-primary/10 to-purple-500/10 text-primary", tabCode: "analytics" },
-    setup: { title: t('performance.modules.setup', 'Setup'), description: t('performance.modules.setupDesc', 'Configure performance settings'), href: "/performance/setup", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "setup" },
+    setup: { title: "Performance Setup", description: "Configure appraisals, rating scales, and goal templates", href: "/performance/setup", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "setup" },
+    successionSetup: { title: "Succession Setup", description: "Configure readiness assessments and rating bands", href: "/succession/setup", icon: Settings2, color: "bg-muted text-muted-foreground", tabCode: "succession_setup" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -100,6 +102,7 @@ export default function PerformanceDashboardPage() {
         allModules.keyPositions,
         allModules.flightRisk,
         allModules.benchStrength,
+        allModules.successionSetup,
       ]),
     },
     {
@@ -107,7 +110,7 @@ export default function PerformanceDashboardPage() {
       items: filterByAccess([allModules.intelligenceHub, allModules.successionAnalytics]),
     },
     {
-      titleKey: "Talent Setup",
+      titleKey: "Performance Setup",
       items: filterByAccess([allModules.setup]),
     },
   ];
