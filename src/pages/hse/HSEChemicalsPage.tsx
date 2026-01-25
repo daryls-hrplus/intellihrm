@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,16 +14,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -35,14 +31,29 @@ import {
   AlertTriangle,
   CheckCircle
 } from "lucide-react";
-import { useState } from "react";
 
 export default function HSEChemicalsPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("chemicals");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+      searchQuery: "",
+      activeTab: "chemicals",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId, searchQuery, activeTab } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
 
   const { data: chemicals, isLoading: chemicalsLoading } = useQuery({
     queryKey: ["hse-chemicals", selectedCompanyId],
@@ -78,17 +89,6 @@ export default function HSEChemicalsPage() {
     chem.chemical_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     chem.cas_number?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const getHazardBadge = (level: string | null) => {
-    if (!level) return <Badge variant="secondary">-</Badge>;
-    const colors: Record<string, string> = {
-      low: "bg-emerald-500/10 text-emerald-600",
-      medium: "bg-amber-500/10 text-amber-600",
-      high: "bg-orange-500/10 text-orange-600",
-      extreme: "bg-destructive/10 text-destructive",
-    };
-    return <Badge className={colors[level] || "bg-muted text-muted-foreground"}>{level}</Badge>;
-  };
 
   const stats = [
     { 
@@ -144,12 +144,12 @@ export default function HSEChemicalsPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id, selectedDepartmentId: "all" })} 
             />
             <DepartmentFilter
               companyId={selectedCompanyId}
               selectedDepartmentId={selectedDepartmentId}
-              onDepartmentChange={setSelectedDepartmentId}
+              onDepartmentChange={(id) => setTabState({ selectedDepartmentId: id })}
             />
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function HSEChemicalsPage() {
           })}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="chemicals">{t("hseModule.chemicals.tabs.chemicals")}</TabsTrigger>
@@ -195,7 +195,7 @@ export default function HSEChemicalsPage() {
                 <Input
                   placeholder={t("hseModule.chemicals.searchChemicals")}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setTabState({ searchQuery: e.target.value })}
                   className="pl-9"
                 />
               </div>

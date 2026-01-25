@@ -1,8 +1,11 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,8 +25,25 @@ const COLORS = ["#10b981", "#f59e0b", "#ef4444", "#6366f1", "#8b5cf6", "#ec4899"
 
 export default function HSEAnalyticsPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+      activeTab: "overview",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId, activeTab } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
 
   const { data: incidents, isLoading: incidentsLoading } = useQuery({
     queryKey: ["hse-analytics-incidents", selectedCompanyId],
@@ -159,8 +179,15 @@ export default function HSEAnalyticsPage() {
             <p className="text-muted-foreground">{t("hseModule.analytics.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
-            <LeaveCompanyFilter selectedCompanyId={selectedCompanyId} onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} />
-            <DepartmentFilter companyId={selectedCompanyId} selectedDepartmentId={selectedDepartmentId} onDepartmentChange={setSelectedDepartmentId} />
+            <LeaveCompanyFilter 
+              selectedCompanyId={selectedCompanyId} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id, selectedDepartmentId: "all" })} 
+            />
+            <DepartmentFilter 
+              companyId={selectedCompanyId} 
+              selectedDepartmentId={selectedDepartmentId} 
+              onDepartmentChange={(id) => setTabState({ selectedDepartmentId: id })} 
+            />
           </div>
         </div>
 
@@ -184,7 +211,7 @@ export default function HSEAnalyticsPage() {
           })}
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">{t("hseModule.analytics.tabs.overview")}</TabsTrigger>
             <TabsTrigger value="incidents">{t("hseModule.analytics.tabs.incidents")}</TabsTrigger>
@@ -386,7 +413,7 @@ export default function HSEAnalyticsPage() {
                   {isLoading ? <Skeleton className="h-[250px] w-full" /> : (
                     <ResponsiveContainer width="100%" height={250}>
                       <PieChart>
-                        <Pie data={observationData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} dataKey="value" label>
+                        <Pie data={observationData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
                           <Cell fill="#10b981" />
                           <Cell fill="#ef4444" />
                         </Pie>
@@ -400,16 +427,24 @@ export default function HSEAnalyticsPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">{t("hseModule.analytics.safetyRatio")}</CardTitle>
+                  <CardTitle className="text-base">{t("hseModule.analytics.observationSummary")}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center justify-center h-[250px]">
-                  {isLoading ? <Skeleton className="h-32 w-32 rounded-full" /> : (
-                    <div className="text-center">
-                      <div className="text-6xl font-bold text-emerald-600">
-                        {observations?.length ? Math.round((safeObservations / observations.length) * 100) : 0}%
+                  {isLoading ? <Skeleton className="h-32 w-full" /> : (
+                    <div className="text-center space-y-4">
+                      <div className="flex justify-center gap-8">
+                        <div>
+                          <div className="text-4xl font-bold text-emerald-600">{safeObservations}</div>
+                          <p className="text-muted-foreground">{t("hseModule.analytics.safeObservations")}</p>
+                        </div>
+                        <div>
+                          <div className="text-4xl font-bold text-destructive">{atRiskObservations}</div>
+                          <p className="text-muted-foreground">{t("hseModule.analytics.atRiskObservations")}</p>
+                        </div>
                       </div>
-                      <p className="text-muted-foreground mt-2">{t("hseModule.analytics.safeBehaviors")}</p>
-                      <p className="text-sm text-muted-foreground">{safeObservations} / {observations?.length || 0} {t("hseModule.analytics.observations")}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("hseModule.analytics.totalObservations")}: {observations?.length || 0}
+                      </p>
                     </div>
                   )}
                 </CardContent>
@@ -418,11 +453,11 @@ export default function HSEAnalyticsPage() {
           </TabsContent>
 
           <TabsContent value="ai-banded">
-            <AIModuleReportBuilder moduleName="hse" reportType="banded" companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} />
+            <AIModuleReportBuilder moduleName="hse" reportType="banded" companyId={selectedCompanyId} />
           </TabsContent>
 
           <TabsContent value="ai-bi">
-            <AIModuleReportBuilder moduleName="hse" reportType="bi" companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} />
+            <AIModuleReportBuilder moduleName="hse" reportType="bi" companyId={selectedCompanyId} />
           </TabsContent>
         </Tabs>
       </div>
