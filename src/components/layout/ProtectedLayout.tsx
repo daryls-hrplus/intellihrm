@@ -9,6 +9,7 @@ import { RealtimeNotifications } from "./RealtimeNotifications";
 import { SessionRecoveryManager } from "./SessionRecoveryManager";
 import { TabProvider } from "@/contexts/TabContext";
 import { useTabKeyboardShortcuts } from "@/hooks/useTabKeyboardShortcuts";
+import { useTabDatabaseSync } from "@/hooks/useTabDatabaseSync";
 import { TabCloseConfirmDialog } from "@/components/dialogs/TabCloseConfirmDialog";
 import {
   TourProvider,
@@ -18,6 +19,11 @@ import {
   FirstTimeUserDetector,
 } from "@/components/tours";
 import { HelpButton } from "@/components/help";
+
+function TabDatabaseSyncHandler() {
+  useTabDatabaseSync();
+  return null;
+}
 
 function TabKeyboardHandler({ children }: { children: React.ReactNode }) {
   const { pendingCloseTab, confirmClose, cancelClose } = useTabKeyboardShortcuts();

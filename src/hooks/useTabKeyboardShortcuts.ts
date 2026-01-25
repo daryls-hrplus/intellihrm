@@ -3,30 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { useTabContext, WorkspaceTab } from "@/contexts/TabContext";
 
 interface UseTabKeyboardShortcutsReturn {
-  /**
-   * Tab pending close confirmation (for dialog integration)
-   */
   pendingCloseTab: WorkspaceTab | null;
-  /**
-   * Confirm close of pending tab
-   */
   confirmClose: () => void;
-  /**
-   * Cancel close of pending tab
-   */
   cancelClose: () => void;
 }
 
 export function useTabKeyboardShortcuts(): UseTabKeyboardShortcutsReturn {
-  const { tabs, activeTabId, closeTab, focusTab } = useTabContext();
+  const { tabs, activeTabId, closeTab, focusTab, reopenLastClosedTab } = useTabContext();
   const navigate = useNavigate();
   
-  // State for dialog-based close flow
   const [pendingCloseTab, setPendingCloseTab] = useState<WorkspaceTab | null>(null);
 
   const executeCloseTab = useCallback((tabId: string) => {
     closeTab(tabId);
-    // Navigate to next tab
     const remainingTabs = tabs.filter(t => t.id !== tabId);
     if (remainingTabs.length > 0) {
       const sortedByActive = [...remainingTabs].sort(
@@ -52,18 +41,23 @@ export function useTabKeyboardShortcuts(): UseTabKeyboardShortcutsReturn {
     const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
     const modKey = isMac ? e.metaKey : e.ctrlKey;
 
-    // Ctrl/Cmd + W - Close current tab (with unsaved changes check)
+    // Ctrl/Cmd + W - Close current tab
     if (modKey && e.key === "w") {
       e.preventDefault();
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab && !activeTab.isPinned) {
         if (activeTab.hasUnsavedChanges) {
-          // Set pending tab for dialog confirmation
           setPendingCloseTab(activeTab);
         } else {
           executeCloseTab(activeTabId!);
         }
       }
+    }
+
+    // Ctrl/Cmd + Shift + T - Reopen last closed tab
+    if (modKey && e.shiftKey && e.key.toLowerCase() === "t") {
+      e.preventDefault();
+      reopenLastClosedTab();
     }
 
     // Ctrl/Cmd + Tab - Cycle to next tab
@@ -96,7 +90,7 @@ export function useTabKeyboardShortcuts(): UseTabKeyboardShortcutsReturn {
         navigate(targetTab.route);
       }
     }
-  }, [tabs, activeTabId, executeCloseTab, focusTab, navigate]);
+  }, [tabs, activeTabId, executeCloseTab, focusTab, navigate, reopenLastClosedTab]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
