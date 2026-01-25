@@ -8,11 +8,17 @@ import { TourListManager } from "@/components/enablement/tours/TourListManager";
 import { TourStepsEditor } from "@/components/enablement/tours/TourStepsEditor";
 import { TourAnalyticsDashboard } from "@/components/enablement/tours/TourAnalyticsDashboard";
 import { TooltipsManager } from "@/components/enablement/tours/TooltipsManager";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function ToursManagementPage() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("tours");
   const [selectedTourId, setSelectedTourId] = useState<string | null>(null);
+  
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "tours" },
+    syncToUrl: ["activeTab"],
+  });
 
   return (
     <AppLayout>
@@ -36,7 +42,7 @@ export default function ToursManagementPage() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={tabState.activeTab} onValueChange={(tab) => setTabState({ activeTab: tab })} className="space-y-6">
           <TabsList>
             <TabsTrigger value="tours" className="gap-2">
               <Map className="h-4 w-4" />
@@ -60,7 +66,7 @@ export default function ToursManagementPage() {
             <TourListManager
               onSelectTour={(tourId) => {
                 setSelectedTourId(tourId);
-                setActiveTab("steps");
+                setTabState({ activeTab: "steps" });
               }}
             />
           </TabsContent>
@@ -71,7 +77,7 @@ export default function ToursManagementPage() {
                 tourId={selectedTourId}
                 onBack={() => {
                   setSelectedTourId(null);
-                  setActiveTab("tours");
+                  setTabState({ activeTab: "tours" });
                 }}
               />
             )}

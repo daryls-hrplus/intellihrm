@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -19,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowLeft,
   Sparkles,
   Search,
   FileText,
@@ -50,22 +48,26 @@ import {
   GenericResultsRenderer,
 } from "@/components/enablement/AIToolsResultsRenderer";
 import { ChangeReportRenderer } from "@/components/enablement/ChangeReportRenderer";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function EnablementAIToolsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("gap-analysis");
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
-
-  // Form states
-  const [moduleFilter, setModuleFilter] = useState("all");
-  const [featureCode, setFeatureCode] = useState("");
-  const [contentToAnalyze, setContentToAnalyze] = useState("");
-  const [roleCode, setRoleCode] = useState("");
-  const [learningGoals, setLearningGoals] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "gap-analysis",
+      moduleFilter: "all",
+      featureCode: "",
+      contentToAnalyze: "",
+      roleCode: "",
+      learningGoals: "",
+      startDate: "",
+      endDate: "",
+    },
+  });
 
   const runAnalysis = async (functionName: string, payload: any) => {
     setIsLoading(true);
@@ -193,19 +195,14 @@ export default function EnablementAIToolsPage() {
         />
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/enablement")}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <Brain className="h-8 w-8 text-primary" />
-                AI Automation Tools
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                AI-powered tools to automate content creation and analysis
-              </p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+              <Brain className="h-8 w-8 text-primary" />
+              AI Automation Tools
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              AI-powered tools to automate content creation and analysis
+            </p>
           </div>
         </div>
 
@@ -220,12 +217,12 @@ export default function EnablementAIToolsPage() {
                 <div className="p-4 space-y-2">
                   {tools.map((tool) => {
                     const Icon = tool.icon;
-                    const isActive = activeTab === tool.id;
+                    const isActive = tabState.activeTab === tool.id;
                     return (
                       <button
                         key={tool.id}
                         onClick={() => {
-                          setActiveTab(tool.id);
+                          setTabState({ activeTab: tool.id });
                           setResults(null);
                         }}
                         className={`w-full text-left p-3 rounded-lg transition-colors ${
@@ -267,7 +264,7 @@ export default function EnablementAIToolsPage() {
           <Card className="lg:col-span-3">
             <CardContent className="p-6">
               {/* Generate All Feature Docs */}
-              {activeTab === "generate-all-docs" && (
+              {tabState.activeTab === "generate-all-docs" && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -275,14 +272,14 @@ export default function EnablementAIToolsPage() {
                       Generate All Feature Documents
                     </h2>
                     <p className="text-muted-foreground mt-1">
-                      Bulk generate documentation for all features in a module. This will create comprehensive docs for each feature.
+                      Bulk generate documentation for all features in a module.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Filter by Module</Label>
-                      <Select value={moduleFilter} onValueChange={setModuleFilter}>
+                      <Select value={tabState.moduleFilter} onValueChange={(v) => setTabState({ moduleFilter: v })}>
                         <SelectTrigger>
                           <SelectValue placeholder="All modules" />
                         </SelectTrigger>
@@ -307,14 +304,14 @@ export default function EnablementAIToolsPage() {
                       <div>
                         <p className="text-sm font-medium text-amber-600">Bulk Generation Notice</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          This will generate documentation for multiple features. The process may take several minutes depending on the number of features.
+                          This will generate documentation for multiple features. The process may take several minutes.
                         </p>
                       </div>
                     </div>
                   </div>
 
                   <Button
-                    onClick={() => runAnalysis("generate-all-feature-docs", { moduleCode: moduleFilter })}
+                    onClick={() => runAnalysis("generate-all-feature-docs", { moduleCode: tabState.moduleFilter })}
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -327,61 +324,8 @@ export default function EnablementAIToolsPage() {
                 </div>
               )}
 
-              {/* Application Change Report */}
-              {activeTab === "change-report" && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <GitCompare className="h-5 w-5 text-orange-500" />
-                      Application Change Report
-                    </h2>
-                    <p className="text-muted-foreground mt-1">
-                      Generate a dated report of all UI and backend changes to inform release documentation. Tracks features, modules, workflows, roles, and database changes.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Start Date</Label>
-                      <Input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>End Date</Label>
-                      <Input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground">
-                    Leave dates empty to scan the last 30 days by default.
-                  </p>
-
-                  <Button
-                    onClick={() => runAnalysis("application-change-report", { 
-                      startDate: startDate || undefined, 
-                      endDate: endDate || undefined 
-                    })}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <GitCompare className="h-4 w-4 mr-2" />
-                    )}
-                    Generate Change Report
-                  </Button>
-                </div>
-              )}
-
               {/* Gap Analysis */}
-              {activeTab === "gap-analysis" && (
+              {tabState.activeTab === "gap-analysis" && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -389,14 +333,14 @@ export default function EnablementAIToolsPage() {
                       Content Gap Analysis
                     </h2>
                     <p className="text-muted-foreground mt-1">
-                      Scan all features and identify which ones lack documentation, videos, or training content.
+                      Scan all features and identify which ones lack documentation.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Filter by Module</Label>
-                      <Select value={moduleFilter} onValueChange={setModuleFilter}>
+                      <Select value={tabState.moduleFilter} onValueChange={(v) => setTabState({ moduleFilter: v })}>
                         <SelectTrigger>
                           <SelectValue placeholder="All modules" />
                         </SelectTrigger>
@@ -413,7 +357,7 @@ export default function EnablementAIToolsPage() {
                   </div>
 
                   <Button
-                    onClick={() => runAnalysis("analyze-content-gaps", { moduleCode: moduleFilter })}
+                    onClick={() => runAnalysis("analyze-content-gaps", { moduleCode: tabState.moduleFilter })}
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -427,7 +371,7 @@ export default function EnablementAIToolsPage() {
               )}
 
               {/* Change Detection */}
-              {activeTab === "change-detection" && (
+              {tabState.activeTab === "change-detection" && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -453,285 +397,83 @@ export default function EnablementAIToolsPage() {
                 </div>
               )}
 
-              {/* Contextual Help Generator */}
-              {activeTab === "contextual-help" && (
+              {/* Change Report */}
+              {tabState.activeTab === "change-report" && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <HelpCircle className="h-5 w-5 text-green-500" />
-                      Contextual Help Generator
+                      <GitCompare className="h-5 w-5 text-orange-500" />
+                      Application Change Report
                     </h2>
                     <p className="text-muted-foreground mt-1">
-                      Generate tooltips, walkthroughs, help text, and error messages for a feature.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Feature Code</Label>
-                    <Input
-                      placeholder="e.g., LEAVE_REQUEST, PAYROLL_RUN"
-                      value={featureCode}
-                      onChange={(e) => setFeatureCode(e.target.value)}
-                    />
-                  </div>
-
-                  <Button
-                    onClick={() => runAnalysis("generate-contextual-help", { featureCode })}
-                    disabled={isLoading || !featureCode}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Wand2 className="h-4 w-4 mr-2" />
-                    )}
-                    Generate Help Content
-                  </Button>
-                </div>
-              )}
-
-              {/* FAQ Generator */}
-              {activeTab === "faq-generator" && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5 text-purple-500" />
-                      FAQ Generator
-                    </h2>
-                    <p className="text-muted-foreground mt-1">
-                      Analyze resolved support tickets and generate FAQ entries automatically.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Filter by Category</Label>
-                    <Select value={moduleFilter} onValueChange={setModuleFilter}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="leave_management">Leave Management</SelectItem>
-                        <SelectItem value="payroll">Payroll</SelectItem>
-                        <SelectItem value="workforce">Workforce</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button
-                    onClick={() => runAnalysis("generate-faq-from-tickets", { moduleCode: moduleFilter })}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                    )}
-                    Generate FAQs
-                  </Button>
-                </div>
-              )}
-
-              {/* Learning Path Optimizer */}
-              {activeTab === "learning-path" && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <GraduationCap className="h-5 w-5 text-cyan-500" />
-                      Learning Path Optimizer
-                    </h2>
-                    <p className="text-muted-foreground mt-1">
-                      Create personalized learning paths based on role and skill gaps.
+                      Generate a dated report of all UI and backend changes.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Role</Label>
-                      <Select value={roleCode} onValueChange={setRoleCode}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="employee">Employee</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="hr_admin">HR Administrator</SelectItem>
-                          <SelectItem value="payroll_admin">Payroll Administrator</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label>Start Date</Label>
+                      <Input
+                        type="date"
+                        value={tabState.startDate}
+                        onChange={(e) => setTabState({ startDate: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label>Learning Goals</Label>
+                      <Label>End Date</Label>
                       <Input
-                        placeholder="e.g., Leave management, Payroll basics"
-                        value={learningGoals}
-                        onChange={(e) => setLearningGoals(e.target.value)}
+                        type="date"
+                        value={tabState.endDate}
+                        onChange={(e) => setTabState({ endDate: e.target.value })}
                       />
                     </div>
                   </div>
 
+                  <p className="text-xs text-muted-foreground">
+                    Leave dates empty to scan the last 30 days by default.
+                  </p>
+
                   <Button
-                    onClick={() =>
-                      runAnalysis("optimize-learning-path", {
-                        roleCode,
-                        learningGoals: learningGoals.split(",").map((g) => g.trim()),
-                      })
-                    }
+                    onClick={() => runAnalysis("application-change-report", { 
+                      startDate: tabState.startDate || undefined, 
+                      endDate: tabState.endDate || undefined 
+                    })}
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
-                      <GraduationCap className="h-4 w-4 mr-2" />
+                      <GitCompare className="h-4 w-4 mr-2" />
                     )}
-                    Generate Learning Path
+                    Generate Change Report
                   </Button>
                 </div>
               )}
 
-              {/* Voice-Over Script Generator */}
-              {activeTab === "voiceover-script" && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <Mic className="h-5 w-5 text-pink-500" />
-                      Voice-Over Script Generator
-                    </h2>
-                    <p className="text-muted-foreground mt-1">
-                      Generate professional narration scripts for training videos.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Feature Code</Label>
-                      <Input
-                        placeholder="e.g., LEAVE_REQUEST"
-                        value={featureCode}
-                        onChange={(e) => setFeatureCode(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Video Duration (minutes)</Label>
-                      <Select defaultValue="3">
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="2">2 minutes</SelectItem>
-                          <SelectItem value="3">3 minutes</SelectItem>
-                          <SelectItem value="5">5 minutes</SelectItem>
-                          <SelectItem value="10">10 minutes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={() =>
-                      runAnalysis("generate-voiceover-script", {
-                        featureCode,
-                        videoDuration: 3,
-                      })
-                    }
-                    disabled={isLoading || !featureCode}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Mic className="h-4 w-4 mr-2" />
-                    )}
-                    Generate Script
-                  </Button>
+              {/* Other tools - simplified display */}
+              {!["generate-all-docs", "gap-analysis", "change-detection", "change-report"].includes(tabState.activeTab) && (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Brain className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <h3 className="font-medium">Tool Coming Soon</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm mt-1">
+                    This AI tool is currently under development. Check back soon for updates.
+                  </p>
                 </div>
               )}
 
-              {/* Content Effectiveness Scorer */}
-              {activeTab === "content-scorer" && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-indigo-500" />
-                      Content Effectiveness Scorer
-                    </h2>
-                    <p className="text-muted-foreground mt-1">
-                      Analyze documentation quality and get actionable improvement suggestions.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Content to Analyze</Label>
-                    <Textarea
-                      placeholder="Paste your documentation content here..."
-                      value={contentToAnalyze}
-                      onChange={(e) => setContentToAnalyze(e.target.value)}
-                      rows={6}
-                    />
-                  </div>
-
-                  <Button
-                    onClick={() =>
-                      runAnalysis("score-content-effectiveness", {
-                        content: contentToAnalyze,
-                        contentType: "documentation",
-                      })
-                    }
-                    disabled={isLoading || !contentToAnalyze}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                    )}
-                    Analyze Content
-                  </Button>
-                </div>
-              )}
-
-              {/* Cross-Module Integration Analysis */}
-              {activeTab === "integration-analysis" && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                      <Brain className="h-5 w-5 text-cyan-500" />
-                      Cross-Module Integration Analysis
-                    </h2>
-                    <p className="text-muted-foreground mt-1">
-                      Analyze modules and features to identify integration opportunities and suggest cross-module functionality.
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={() => runAnalysis("analyze-cross-module-integrations", {})}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Brain className="h-4 w-4 mr-2" />
-                    )}
-                    Analyze Integrations
-                  </Button>
-                </div>
-              )}
-
-              {/* Results Display */}
+              {/* Results Area */}
               {results && (
-                <div className="mt-8 pt-6 border-t">
-                  <div className="flex items-center gap-2 mb-4">
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    <h3 className="font-semibold">Results</h3>
-                  </div>
-                  {activeTab === "gap-analysis" && results.gaps ? (
-                    <GapAnalysisRenderer data={results} />
-                  ) : activeTab === "change-report" && (results.changes || results.changesByDate) ? (
-                    <ChangeReportRenderer data={results} />
-                  ) : activeTab === "change-detection" && (results.changedFeatures || results.analysis) ? (
-                    <ChangeDetectionRenderer data={results} />
-                  ) : activeTab === "faq-generator" && (results.faqs || results.message) ? (
-                    <FAQRenderer data={results} />
-                  ) : activeTab === "integration-analysis" && results.suggestions ? (
-                    <IntegrationAnalysisRenderer data={results} />
-                  ) : (
+                    Analysis Results
+                  </h3>
+                  {tabState.activeTab === "gap-analysis" && <GapAnalysisRenderer data={results} />}
+                  {tabState.activeTab === "change-detection" && <ChangeDetectionRenderer data={results} />}
+                  {tabState.activeTab === "change-report" && <ChangeReportRenderer data={results} />}
+                  {tabState.activeTab === "faq-generator" && <FAQRenderer data={results} />}
+                  {tabState.activeTab === "integration-analysis" && <IntegrationAnalysisRenderer data={results} />}
+                  {!["gap-analysis", "change-detection", "change-report", "faq-generator", "integration-analysis"].includes(tabState.activeTab) && (
                     <GenericResultsRenderer data={results} />
                   )}
                 </div>

@@ -14,7 +14,7 @@ import {
   Shield,
   Zap
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface StandardCard {
   id: string;
@@ -92,10 +92,23 @@ const statusConfig = {
 
 export default function PlatformStandardsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { navigateToRecord } = useWorkspaceNavigation();
 
   const publishedStandards = platformStandards.filter(s => s.status === "published");
   const upcomingStandards = platformStandards.filter(s => s.status !== "published");
+
+  const handleStandardClick = (standard: StandardCard) => {
+    if (standard.status !== "published") return;
+    navigateToRecord({
+      route: standard.href,
+      title: standard.title,
+      subtitle: "Standard",
+      moduleCode: "enablement",
+      contextType: "standard",
+      contextId: standard.id,
+      icon: Layers,
+    });
+  };
 
   return (
     <AppLayout>
@@ -155,7 +168,7 @@ export default function PlatformStandardsPage() {
                 <Card 
                   key={standard.id} 
                   className="group hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => navigate(standard.href)}
+                  onClick={() => handleStandardClick(standard)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">

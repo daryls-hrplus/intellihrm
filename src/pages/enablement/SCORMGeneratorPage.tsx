@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
-import { NavLink } from "react-router-dom";
-import { ArrowLeft, Package, FileText, Play, Download, Settings } from "lucide-react";
+import { Package, FileText, Play, Download, Settings } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -10,32 +9,39 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function SCORMGeneratorPage() {
-  const [packageName, setPackageName] = useState("");
-  const [scormVersion, setScormVersion] = useState("1.2");
+  // Tab state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "create",
+      packageName: "",
+      scormVersion: "1.2",
+    },
+  });
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <NavLink to="/enablement">
-              <ArrowLeft className="h-4 w-4" />
-            </NavLink>
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10">
-              <Package className="h-5 w-5 text-indigo-500" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">SCORM-Lite Generator</h1>
-              <p className="text-muted-foreground">Create lightweight SCORM packages for LMS deployment</p>
-            </div>
+      <div className="container mx-auto py-6 space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Enablement", href: "/enablement" },
+            { label: "SCORM Generator" },
+          ]}
+        />
+
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10">
+            <Package className="h-5 w-5 text-indigo-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">SCORM-Lite Generator</h1>
+            <p className="text-muted-foreground">Create lightweight SCORM packages for LMS deployment</p>
           </div>
         </div>
 
-        <Tabs defaultValue="create" className="space-y-4">
+        <Tabs value={tabState.activeTab} onValueChange={(tab) => setTabState({ activeTab: tab })} className="space-y-4">
           <TabsList>
             <TabsTrigger value="create">Create Package</TabsTrigger>
             <TabsTrigger value="packages">My Packages</TabsTrigger>
@@ -58,13 +64,13 @@ export default function SCORMGeneratorPage() {
                     <Input
                       id="packageName"
                       placeholder="e.g., Leave Request Training"
-                      value={packageName}
-                      onChange={(e) => setPackageName(e.target.value)}
+                      value={tabState.packageName}
+                      onChange={(e) => setTabState({ packageName: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="scormVersion">SCORM Version</Label>
-                    <Select value={scormVersion} onValueChange={setScormVersion}>
+                    <Select value={tabState.scormVersion} onValueChange={(v) => setTabState({ scormVersion: v })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
