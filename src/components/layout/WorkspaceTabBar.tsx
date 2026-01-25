@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Home, ChevronLeft, ChevronRight } from "lucide-react";
-import { DndContext, closestCenter, DragEndEvent, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, horizontalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import { useTabContext, DASHBOARD_TAB_ID, WorkspaceTab } from "@/contexts/TabContext";
@@ -65,8 +65,8 @@ export function WorkspaceTabBar() {
     }
   };
 
-  const handleDragStart = (event: { active: { id: string } }) => {
-    setActiveId(event.active.id as string);
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
