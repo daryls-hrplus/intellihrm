@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NavigationPath } from '../../../NavigationPath';
-import { TipCallout, WarningCallout } from '../../../components/Callout';
+import { TipCallout, WarningCallout, FutureCallout } from '../../../components/Callout';
 import { WorkflowDiagram } from '../../../components/WorkflowDiagram';
 import { StepByStep, Step } from '../../../components/StepByStep';
 import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
@@ -10,11 +10,11 @@ import { LearningObjectives } from '../../../../workforce-manual/sections/lifecy
 import { Bell, Clock, Mail, Settings } from 'lucide-react';
 
 const LEARNING_OBJECTIVES = [
-  'Configure automated reminder schedules for 360 feedback cycles',
-  'Understand reminder triggers and timing logic',
-  'Send manual bulk reminders when needed',
-  'Track reminder delivery and effectiveness',
-  'Manage reminder fatigue and recipient preferences'
+  'Understand the reminder configuration fields available in the database',
+  'Send manual reminders through the monitoring dashboard',
+  'Track reminder counts and delivery status',
+  'Manage reminder fatigue and recipient preferences',
+  'Know the roadmap for automated reminder processing'
 ];
 
 const REMINDER_DIAGRAM = `
@@ -24,34 +24,32 @@ flowchart TD
         B --> C[Default: 7, 3, 1 days]
     end
     
-    subgraph Schedule["Scheduled Reminders"]
-        C --> D[Deadline - 7 days]
-        D --> E{Pending Requests?}
-        E -->|Yes| F[Queue Reminder Job]
-        E -->|No| G[Skip - All Complete]
-        
-        F --> H[Send Reminder Emails]
-        H --> I[Update last_reminder_sent]
-        I --> J[Increment reminder_count]
+    subgraph Current["Current: Manual Reminders"]
+        C --> D[HR Monitors Dashboard]
+        D --> E[Identify Pending Raters]
+        E --> F[Select Raters]
+        F --> G[Click Send Reminder]
+        G --> H[Email Sent via Edge Function]
     end
     
-    subgraph Manual["Manual Reminders"]
-        K[HR Selects Raters] --> L[Click Send Reminder]
-        L --> M{Within Limit?}
-        M -->|Yes| N[Send Reminder]
-        M -->|No| O[Show Warning: Max Reached]
-        N --> I
+    subgraph Future["Future: Automated Reminders"]
+        C -.->|Planned| I[Scheduled Job Checks Dates]
+        I -.-> J{Today = Deadline - N days?}
+        J -.->|Yes| K[Auto-Queue Reminders]
+        J -.->|No| L[Skip]
     end
     
-    subgraph Tracking["Tracking & Analytics"]
-        J --> P[Reminder Log]
-        P --> Q[Open Rate Tracking]
-        Q --> R[Conversion Analysis]
+    subgraph Tracking["Tracking"]
+        H --> M[Update last_reminder_sent]
+        M --> N[Increment reminder_count]
     end
     
     style A fill:#3b82f6,stroke:#2563eb,color:#fff
     style H fill:#10b981,stroke:#059669,color:#fff
-    style O fill:#f59e0b,stroke:#d97706
+    style I fill:#f1f5f9,stroke:#64748b,stroke-dasharray: 5 5
+    style J fill:#f1f5f9,stroke:#64748b,stroke-dasharray: 5 5
+    style K fill:#f1f5f9,stroke:#64748b,stroke-dasharray: 5 5
+    style L fill:#f1f5f9,stroke:#64748b,stroke-dasharray: 5 5
 `;
 
 const REMINDER_TYPES = [
@@ -108,79 +106,64 @@ const FIELDS: FieldDefinition[] = [
 
 const STEPS: Step[] = [
   {
-    title: 'Configure Automated Reminders',
-    description: 'Set up the reminder schedule during cycle creation.',
+    title: 'Configure Reminder Days (Optional)',
+    description: 'Set the reminder_days_before array during cycle creation for future automated processing.',
     substeps: [
       'Open cycle configuration (Draft status)',
       'Navigate to "Notifications" section',
       'Set reminder_days_before values (default: 7, 3, 1)',
-      'Optionally customize reminder email template',
-      'Enable or disable each reminder type',
+      'Note: These values are stored for future automation',
       'Save configuration'
     ],
-    expectedResult: 'Automated reminders will trigger at specified intervals before deadline'
+    expectedResult: 'Reminder schedule configured in database for future use'
   },
   {
-    title: 'Monitor Scheduled Reminders',
-    description: 'Verify automated reminders are being sent.',
+    title: 'Monitor Response Progress',
+    description: 'Use the Response Monitoring dashboard to identify raters who need reminders.',
     substeps: [
-      'Navigate to cycle → "Notifications" tab',
-      'View scheduled reminder jobs',
-      'Check execution history for past reminders',
-      'Review delivery status (sent, failed, bounced)',
-      'Verify open rates if tracking enabled'
+      'Navigate to cycle → "Response Monitoring" tab',
+      'Filter to show pending or in-progress requests',
+      'Sort by days remaining to deadline',
+      'Identify raters who have not responded',
+      'Check how many reminders each rater has already received'
     ],
-    expectedResult: 'Visibility into automated reminder performance'
+    expectedResult: 'Clear visibility of who needs a reminder'
   },
   {
     title: 'Send Manual Reminders',
-    description: 'Supplement automated reminders with targeted follow-ups.',
+    description: 'Use the monitoring dashboard to send targeted reminder emails.',
     substeps: [
-      'Go to Response Monitoring dashboard',
-      'Filter to show pending or in-progress requests',
       'Select specific raters using checkboxes',
       'Click "Send Reminder" button',
-      'Optionally add custom message',
+      'System calls send-360-activation-notifications edge function',
+      'Optionally add custom message context',
       'Confirm send'
     ],
-    expectedResult: 'Selected raters receive reminder, counts updated'
+    expectedResult: 'Selected raters receive reminder email, counts updated'
   },
   {
-    title: 'Handle Reminder Limits',
-    description: 'Manage situations where max reminders is reached.',
+    title: 'Track Reminder History',
+    description: 'Review reminder counts to avoid over-messaging.',
     substeps: [
-      'System prevents sending when reminder_count >= max_reminders',
-      'Review raters at reminder limit',
-      'Consider escalation to participant\'s manager',
-      'If justified, admin can increase max_reminders setting',
-      'Document exception in audit trail'
+      'View reminder_count column in rater list',
+      'Respect max reminder limits (recommended: 5 per rater)',
+      'Consider escalation for persistent non-responders',
+      'Document any exceptions in notes'
     ],
-    expectedResult: 'Appropriate handling without harassment'
-  },
-  {
-    title: 'Analyze Reminder Effectiveness',
-    description: 'Use data to optimize future reminder strategies.',
-    substeps: [
-      'Review completion rates before/after each reminder wave',
-      'Calculate conversion rate (reminders → submissions)',
-      'Identify optimal reminder timing',
-      'Note any patterns (day of week, time of day)',
-      'Apply learnings to future cycle configuration'
-    ],
-    expectedResult: 'Data-driven insights for reminder optimization'
+    expectedResult: 'Balanced reminder frequency without harassment'
   }
 ];
 
 const TROUBLESHOOTING: TroubleshootingItem[] = [
   {
-    issue: 'Automated reminders not being sent',
-    cause: 'Scheduled job may have failed, or reminder_days_before not configured',
-    solution: 'Check notification job logs. Verify reminder configuration in cycle settings. Ensure cycle is in Active or In Progress status.'
+    issue: 'Manual reminder button is disabled',
+    cause: 'Rater may have already reached max reminder count, or cycle is not Active',
+    solution: 'Check reminder_count for the rater. Verify cycle status is Active. For urgent cases, consider direct email outreach.'
   },
   {
-    issue: 'Raters complaining about too many reminders',
-    cause: 'May be receiving both automated and manual reminders',
-    solution: 'Check reminder_count for affected raters. Coordinate manual reminders with automated schedule. Consider reducing automated frequency.'
+    issue: 'Raters complaining about reminder emails',
+    cause: 'May be receiving multiple manual reminders in short succession',
+    solution: 'Check reminder_count and last_reminder_sent timestamps. Establish minimum days between reminders (recommended: 2-3 days).'
   },
   {
     issue: 'Reminder emails going to spam',
@@ -188,9 +171,9 @@ const TROUBLESHOOTING: TroubleshootingItem[] = [
     solution: 'Work with IT to verify email domain settings. Review email content for spam trigger words. Consider sender reputation improvement.'
   },
   {
-    issue: 'Cannot send reminder - "Opted out" message',
-    cause: 'Rater has exercised opt-out preference',
-    solution: 'Respect opt-out preference. If critical, escalate through manager or HR Partner for personal outreach instead.'
+    issue: 'No automated reminders being sent',
+    cause: 'Automated reminder processing is not yet implemented',
+    solution: 'This is expected behavior. Use manual reminders via the Response Monitoring dashboard. See "Future Enhancement" section below.'
   }
 ];
 
@@ -259,12 +242,24 @@ export function WorkflowReminderManagement() {
           reminders. Focus on quality and timing rather than quantity.
         </TipCallout>
 
-        <StepByStep steps={STEPS} title="Reminder Management Procedures" />
+        <StepByStep steps={STEPS} title="Manual Reminder Procedures" />
 
         <FieldReferenceTable 
           fields={FIELDS} 
           title="Reminder Configuration Fields" 
         />
+
+        <FutureCallout title="Automated Reminders (Planned Enhancement)">
+          <p className="mb-2">
+            The <code className="text-xs bg-muted px-1 rounded">reminder_days_before</code> field and 
+            <code className="text-xs bg-muted px-1 rounded">reminder_event_types</code> (360_FEEDBACK_DUE, 360_SELF_REVIEW_DUE) 
+            exist in the database but automated processing is not yet active.
+          </p>
+          <p className="mb-2">
+            When implemented, the system will automatically send reminders at the configured intervals before deadlines.
+            Until then, use the manual reminder workflow described above.
+          </p>
+        </FutureCallout>
 
         <WarningCallout title="Respect Opt-Out Preferences">
           Some jurisdictions require respecting email opt-out preferences. Always honor reminder_opt_out
