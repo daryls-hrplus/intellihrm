@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTabState } from "@/hooks/useTabState";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -88,11 +89,21 @@ export default function AdminHelpdeskPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [primaryTab, setPrimaryTab] = useState<PrimaryTabType>("operations");
+  
+  // Use tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      primaryTab: "operations" as PrimaryTabType,
+      filter: "all",
+      companyFilter: "all",
+    },
+    syncToUrl: ["primaryTab", "filter", "companyFilter"],
+  });
+  const { primaryTab, filter, companyFilter } = tabState;
+  
+  // Local UI state (not persisted)
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [commentText, setCommentText] = useState("");
-  const [filter, setFilter] = useState<string>("all");
-  const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [archiveTicketId, setArchiveTicketId] = useState<string | null>(null);
@@ -452,7 +463,7 @@ export default function AdminHelpdeskPage() {
 
         {/* Primary Tabs - Section Selection */}
         <div className="space-y-4">
-          <Tabs value={primaryTab} onValueChange={(v) => setPrimaryTab(v as PrimaryTabType)}>
+          <Tabs value={primaryTab} onValueChange={(v) => setTabState({ primaryTab: v as PrimaryTabType })}>
             <TabsList className="bg-muted/50 p-1.5 h-auto">
               <TabsTrigger 
                 value="operations" 
@@ -628,7 +639,7 @@ export default function AdminHelpdeskPage() {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <CardTitle>Support Tickets ({filteredTickets.length})</CardTitle>
               <div className="flex gap-2">
-                <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                <Select value={companyFilter} onValueChange={(v) => setTabState({ companyFilter: v })}>
                   <SelectTrigger className="w-[200px]">
                     <Building2 className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="All Companies" />
@@ -640,7 +651,7 @@ export default function AdminHelpdeskPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={filter} onValueChange={setFilter}>
+                <Select value={filter} onValueChange={(v) => setTabState({ filter: v })}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Filter" />
                   </SelectTrigger>

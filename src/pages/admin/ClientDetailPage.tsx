@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, NavLink } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +48,7 @@ const STATUS_CONFIG: Record<DemoRegistrationStatus, { label: string; color: stri
 
 export default function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { navigateToList, navigateToRecord } = useWorkspaceNavigation();
   const { getRegistrationById, updateRegistration, startProvisioning } = useClientProvisioning();
   
   const [registration, setRegistration] = useState<DemoRegistration | null>(null);
@@ -101,7 +103,15 @@ export default function ClientDetailPage() {
   const handleStartProvisioning = async () => {
     if (!registration) return;
     await startProvisioning(registration.id);
-    navigate(`/admin/clients/${registration.id}/provision`);
+    navigateToRecord({
+      route: `/admin/clients/${registration.id}/provision`,
+      title: `Provision: ${registration.company_name}`,
+      subtitle: "Client Provisioning",
+      moduleCode: "admin",
+      contextType: "provisioning",
+      contextId: registration.id,
+      icon: Rocket,
+    });
   };
 
   if (isLoading) {
@@ -123,11 +133,14 @@ export default function ClientDetailPage() {
           <p className="text-muted-foreground mb-4">
             The registration you're looking for doesn't exist or you don't have access.
           </p>
-          <Button asChild>
-            <NavLink to="/admin/clients">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Registry
-            </NavLink>
+          <Button onClick={() => navigateToList({
+            route: "/admin/clients",
+            title: "Client Registry",
+            moduleCode: "admin",
+            icon: Building2,
+          })}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Registry
           </Button>
         </div>
       </AppLayout>
@@ -143,10 +156,13 @@ export default function ClientDetailPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <NavLink to="/admin/clients">
-                <ArrowLeft className="h-4 w-4" />
-              </NavLink>
+            <Button variant="ghost" size="icon" onClick={() => navigateToList({
+              route: "/admin/clients",
+              title: "Client Registry",
+              moduleCode: "admin",
+              icon: Building2,
+            })}>
+              <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
@@ -180,11 +196,17 @@ export default function ClientDetailPage() {
               </Button>
             )}
             {registration.status === "converting" && (
-              <Button asChild>
-                <NavLink to={`/admin/clients/${registration.id}/provision`}>
-                  <PlayCircle className="mr-2 h-4 w-4" />
-                  Continue Provisioning
-                </NavLink>
+              <Button onClick={() => navigateToRecord({
+                route: `/admin/clients/${registration.id}/provision`,
+                title: `Provision: ${registration.company_name}`,
+                subtitle: "Client Provisioning",
+                moduleCode: "admin",
+                contextType: "provisioning",
+                contextId: registration.id,
+                icon: PlayCircle,
+              })}>
+                <PlayCircle className="mr-2 h-4 w-4" />
+                Continue Provisioning
               </Button>
             )}
           </div>

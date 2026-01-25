@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,7 +41,7 @@ import { formatDateForDisplay } from '@/utils/dateUtils';
 
 export default function AdminOnboardingDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const { t } = useTranslation();
   const { fetchTasks, updateTask, updateInstance, getOnboardingProgress } = useOnboarding();
 
@@ -201,7 +202,11 @@ export default function AdminOnboardingDetailPage() {
         <Breadcrumbs items={breadcrumbItems} />
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/workforce/onboarding')}>
+          <Button variant="ghost" size="icon" onClick={() => navigateToList({
+            route: "/workforce/onboarding",
+            title: "Employee Onboarding",
+            moduleCode: "workforce",
+          })}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
