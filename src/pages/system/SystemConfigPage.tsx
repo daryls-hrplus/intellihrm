@@ -4,8 +4,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Cog, LayoutDashboard, Globe, Palette, Flag } from "lucide-react";
 import { DashboardConfigurationPanel } from "@/components/admin/DashboardConfigurationPanel";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function SystemConfigPage() {
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "dashboard" },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab } = tabState;
+
   return (
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
@@ -20,7 +27,7 @@ export default function SystemConfigPage() {
           </div>
         </div>
         
-        <Tabs defaultValue="dashboard" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList>
             <TabsTrigger value="dashboard" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />

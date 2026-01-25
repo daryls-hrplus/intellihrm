@@ -38,16 +38,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CheckCircle, XCircle, Clock, FileText, ArrowLeft, Download, CalendarIcon, X, Search, History } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Clock, FileText, Download, CalendarIcon, X, Search, History } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { RequestHistoryTimeline } from "@/components/admin/RequestHistoryTimeline";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 const MENU_MODULES = [
   { code: "dashboard", name: "Dashboard" },
@@ -81,20 +81,30 @@ export default function AdminAccessRequestsPage() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [selectedRequest, setSelectedRequest] = useState<AccessRequest | null>(null);
   const [reviewNotes, setReviewNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchAction, setBatchAction] = useState<"approved" | "rejected" | null>(null);
   const [batchNotes, setBatchNotes] = useState("");
-  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
-  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
-  const [searchQuery, setSearchQuery] = useState("");
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      statusFilter: "pending",
+      searchQuery: "",
+      dateFrom: "",
+      dateTo: "",
+    },
+    syncToUrl: ["statusFilter"],
+  });
+  const { statusFilter, searchQuery, dateFrom, dateTo } = tabState;
+
+  const dateFromParsed = dateFrom ? new Date(dateFrom) : undefined;
+  const dateToParsed = dateTo ? new Date(dateTo) : undefined;
 
   useEffect(() => {
     fetchRequests();
-  }, [statusFilter, dateFrom, dateTo, searchQuery]);
+  }, [statusFilter, dateFromParsed, dateToParsed, searchQuery]);
 
   const fetchRequests = async () => {
     setIsLoading(true);
@@ -112,13 +122,13 @@ export default function AdminAccessRequestsPage() {
         query = query.ilike("user_email", `%${searchQuery.trim()}%`);
       }
 
-      if (dateFrom) {
-        query = query.gte("created_at", dateFrom.toISOString());
+      if (dateFromParsed) {
+        query = query.gte("created_at", dateFromParsed.toISOString());
       }
 
-      if (dateTo) {
+      if (dateToParsed) {
         // Add one day to include the entire end date
-        const endDate = new Date(dateTo);
+        const endDate = new Date(dateToParsed);
         endDate.setDate(endDate.getDate() + 1);
         query = query.lt("created_at", endDate.toISOString());
       }
@@ -425,15 +435,11 @@ export default function AdminAccessRequestsPage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <NavLink
-              to="/admin"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </NavLink>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <FileText className="h-8 w-8 text-primary" />
+              <h1 className="text-2xl font-bold tracking-tight">
                 Access Requests
               </h1>
               <p className="text-muted-foreground">
@@ -465,7 +471,7 @@ export default function AdminAccessRequestsPage() {
                   <Input
                     placeholder="Search by email..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => setTabState({ searchQuery: e.target.value })}
                     className="pl-8 w-[200px] h-9"
                   />
                 </div>
@@ -476,66 +482,39 @@ export default function AdminAccessRequestsPage() {
                       size="sm"
                       className={cn(
                         "w-[140px] justify-start text-left font-normal",
-                        !dateFrom && "text-muted-foreground"
+                        !dateFromParsed && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From date"}
+                      {dateFromParsed ? format(dateFromParsed, "MMM d, yyyy") : "From date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={dateFrom}
-                      onSelect={setDateFrom}
+                      selected={dateFromParsed}
+                      onSelect={(d) => setTabState({ dateFrom: d?.toISOString() || "" })}
                       initialFocus
                       className="p-3 pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={cn(
-                        "w-[140px] justify-start text-left font-normal",
-                        !dateTo && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateTo ? format(dateTo, "MMM d, yyyy") : "To date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dateTo}
-                      onSelect={setDateTo}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                {(dateFrom || dateTo) && (
+                {(dateFromParsed || dateToParsed) && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      setDateFrom(undefined);
-                      setDateTo(undefined);
-                    }}
+                    onClick={() => setTabState({ dateFrom: "", dateTo: "" })}
                   >
                     <X className="h-4 w-4 mr-1" />
                     Clear dates
                   </Button>
                 )}
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Filter status" />
+                <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
+                  <SelectTrigger className="w-[130px] h-9">
+                    <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>

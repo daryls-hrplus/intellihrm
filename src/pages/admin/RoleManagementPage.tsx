@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +5,7 @@ import { RolesListTab } from "@/components/roles/RolesListTab";
 import { PermissionTemplatesTab } from "@/components/roles/PermissionTemplatesTab";
 import { AccessPoliciesTab } from "@/components/roles/AccessPoliciesTab";
 import { Shield, FileText, Settings } from "lucide-react";
+import { useTabState } from "@/hooks/useTabState";
 
 const breadcrumbItems = [
   { label: "Admin", href: "/admin" },
@@ -13,7 +13,11 @@ const breadcrumbItems = [
 ];
 
 export default function RoleManagementPage() {
-  const [activeTab, setActiveTab] = useState("roles");
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "roles" },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab } = tabState;
 
   return (
     <AppLayout>
@@ -27,7 +31,7 @@ export default function RoleManagementPage() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 lg:w-[500px]">
             <TabsTrigger value="roles" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
