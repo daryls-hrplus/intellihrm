@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -105,7 +106,19 @@ export default function AppraisalsPage() {
   const { t } = useLanguage();
   const { navigateToSetup, navigateToList, navigateToRecord } = useWorkspaceNavigation();
   const { user, company, isAdmin, isHRManager } = useAuth();
-  const [activeTab, setActiveTab] = useState("cycles");
+  // Tab-scoped persistent state
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      activeTab: "cycles",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, activeTab } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+  
   const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
   const [managerCycles, setManagerCycles] = useState<AppraisalCycle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,7 +142,6 @@ export default function AppraisalsPage() {
 
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
 
   // HR-focused data hooks
   const { sessions: calibrationSessions, isLoading: calibrationLoading } = useCalibrationSessions({

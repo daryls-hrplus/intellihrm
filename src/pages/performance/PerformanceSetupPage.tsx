@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useTabState } from "@/hooks/useTabState";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,8 +94,16 @@ export default function PerformanceSetupPage() {
   const urlTab = searchParams.get('tab') || 'foundation';
   const urlSub = searchParams.get('sub');
   
+  // Tab-scoped persistent state for company selection
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+    syncToUrl: ["selectedCompany"],
+  });
+  
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
+  
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [primaryTab, setPrimaryTab] = useState(urlTab);
   const [secondaryTab, setSecondaryTab] = useState(urlSub || 'rating-scales');
   
@@ -168,7 +177,10 @@ export default function PerformanceSetupPage() {
       const { data, error } = await supabase.rpc('get_user_accessible_companies', { p_user_id: user.id });
       if (error) throw error;
       setCompanies(data || []);
-      if (data && data.length > 0) setSelectedCompany(data[0].id);
+      // Only set initial company if no existing tab state
+      if (data && data.length > 0 && !selectedCompany) {
+        setSelectedCompany(data[0].id);
+      }
     } catch (error) {
       console.error("Error fetching companies:", error);
       toast.error("Failed to load companies");

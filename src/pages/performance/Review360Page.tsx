@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useTabState } from "@/hooks/useTabState";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -134,7 +135,21 @@ export default function Review360Page() {
     return "my-reviews";
   };
   
-  const [activeTab, setActiveTab] = useState(getDefaultTab());
+  // Tab-scoped persistent state
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      activeTab: getDefaultTab(),
+      showAnalytics: false,
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, activeTab, showAnalytics } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+  const setShowAnalytics = (v: boolean) => setTabState({ showAnalytics: v });
+  
   const [cycles, setCycles] = useState<ReviewCycle[]>([]);
   const [managerCycles, setManagerCycles] = useState<ReviewCycle[]>([]);
   const [pendingReviews, setPendingReviews] = useState<PendingReview[]>([]);
@@ -154,12 +169,10 @@ export default function Review360Page() {
   
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
-  const [showAnalytics, setShowAnalytics] = useState(false);
 
-  // Set correct default tab when roles load
+  // Set correct default tab when roles load (only if no existing tab state)
   useEffect(() => {
-    if (isAdmin || isHRManager) {
+    if ((isAdmin || isHRManager) && !activeTab) {
       setActiveTab("central-cycles");
     }
   }, [isAdmin, isHRManager]);
