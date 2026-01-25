@@ -311,16 +311,30 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
     id: 'part-3',
     sectionNumber: '3',
     title: 'Cycle Management Workflows',
-    description: 'Day-to-day operations for managing 360 feedback cycles',
+    description: 'Complete operational guide for managing 360 feedback cycles from creation to results release',
     contentLevel: 'procedure',
-    estimatedReadTime: 60,
+    estimatedReadTime: 140,
     targetRoles: ['Admin', 'HR Partner'],
     subsections: [
       {
         id: 'sec-3-1',
         sectionNumber: '3.1',
+        title: 'Cycle Lifecycle Management',
+        description: 'Understanding cycle status progression, triggers, permissions, and rollback scenarios',
+        contentLevel: 'concept',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per cycle',
+          timing: 'Throughout cycle duration',
+          benchmark: 'Draft → Active → In Progress → Completed → Closed lifecycle'
+        }
+      },
+      {
+        id: 'sec-3-2',
+        sectionNumber: '3.2',
         title: 'Creating a New Cycle',
-        description: 'Step-by-step guide to creating and configuring a 360 feedback cycle',
+        description: 'Step-by-step guide to creating and configuring a 360 feedback cycle with timeline and options',
         contentLevel: 'procedure',
         estimatedReadTime: 12,
         targetRoles: ['Admin', 'HR Partner'],
@@ -331,10 +345,10 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
         }
       },
       {
-        id: 'sec-3-2',
-        sectionNumber: '3.2',
+        id: 'sec-3-3',
+        sectionNumber: '3.3',
         title: 'Participant Enrollment',
-        description: 'Managing target employees, exclusions, and eligibility rules',
+        description: 'Managing target employees, bulk enrollment, eligibility rules, and exclusions',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'HR Partner'],
@@ -345,59 +359,129 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
         }
       },
       {
-        id: 'sec-3-3',
-        sectionNumber: '3.3',
-        title: 'Nomination Workflows',
-        description: 'Self-nomination, manager approval, and HR validation processes',
+        id: 'sec-3-4',
+        sectionNumber: '3.4',
+        title: 'Peer Nomination Workflows',
+        description: 'Self-nomination, manager approval, min/max thresholds, and nomination deadline management',
         contentLevel: 'procedure',
         estimatedReadTime: 12,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
           frequency: 'Per cycle',
-          timing: 'Nomination phase',
-          benchmark: 'Manager approval required for peer/external nominations'
-        }
-      },
-      {
-        id: 'sec-3-4',
-        sectionNumber: '3.4',
-        title: 'Feedback Collection',
-        description: 'Managing the feedback submission window, reminders, and extensions',
-        contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HR Partner'],
-        industryContext: {
-          frequency: 'During feedback window',
-          timing: '3-4 weeks duration',
-          benchmark: '80%+ completion rate target'
+          timing: 'Nomination phase (2-3 weeks)',
+          benchmark: 'Manager approval required; 3-5 peer minimum recommended'
         }
       },
       {
         id: 'sec-3-5',
         sectionNumber: '3.5',
-        title: 'Results Processing',
-        description: 'Score calculation, aggregation, and report generation',
+        title: 'Rater Assignment & Requests',
+        description: 'Managing feedback requests, mandatory vs optional raters, and decline handling',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['Admin'],
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Post feedback window',
-          timing: 'Within 48 hours of close',
-          benchmark: 'Automated calculation with manual review option'
+          frequency: 'Per cycle',
+          timing: 'Post nomination approval',
+          benchmark: 'System-generated requests with HR override capability'
         }
       },
       {
         id: 'sec-3-6',
         sectionNumber: '3.6',
-        title: 'Release Management',
-        description: 'Controlled release to employees, managers, and HR stakeholders',
+        title: 'External Rater Invitations',
+        description: 'Customer and vendor feedback flows, consent management, and secure access tokens',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'As needed',
+          timing: 'During nomination phase',
+          benchmark: 'Token-based access with 30-day expiration'
+        }
+      },
+      {
+        id: 'sec-3-7',
+        sectionNumber: '3.7',
+        title: 'Feedback Collection Window',
+        description: 'Managing response submission, save-as-draft, deadline extensions, and question navigation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'During feedback window',
+          timing: '3-4 weeks duration',
+          benchmark: '80%+ completion rate target; 5-7 minute completion time'
+        }
+      },
+      {
+        id: 'sec-3-8',
+        sectionNumber: '3.8',
+        title: 'Response Monitoring',
+        description: 'Real-time completion tracking, dashboard metrics, and bulk selection for follow-up',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Daily during collection',
+          timing: 'Throughout feedback window',
+          benchmark: 'Monitor completion by rater category; target 85%+ response rate'
+        }
+      },
+      {
+        id: 'sec-3-9',
+        sectionNumber: '3.9',
+        title: 'Reminder Management',
+        description: 'Automated reminder schedules, manual bulk reminders, and tracking reminder effectiveness',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
+          frequency: 'Per cycle',
+          timing: 'During feedback window',
+          benchmark: 'Default: 7, 3, 1 days before deadline; 15-20% response lift per reminder'
+        }
+      },
+      {
+        id: 'sec-3-10',
+        sectionNumber: '3.10',
+        title: 'Results Processing',
+        description: 'Score aggregation, anonymity threshold enforcement, category-based calculations, and signal processing',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Post feedback window',
+          timing: 'Within 48 hours of close',
+          benchmark: 'Automated calculation with manual review option; minimum 3 raters for anonymity'
+        }
+      },
+      {
+        id: 'sec-3-11',
+        sectionNumber: '3.11',
+        title: 'Results Release Management',
+        description: 'Staged release workflows, preview dialogs, notification triggers, and audit logging',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
           frequency: 'Post processing',
           timing: 'Configurable release schedule',
-          benchmark: 'Staged release: Manager → HR → Employee'
+          benchmark: 'Staged release: HR Review → Manager → Employee'
+        }
+      },
+      {
+        id: 'sec-3-12',
+        sectionNumber: '3.12',
+        title: 'Investigation Mode',
+        description: 'Controlled disclosure of anonymous feedback, HR approval workflow, and outcome recording',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Exception-based',
+          timing: 'Post-release as needed',
+          benchmark: 'HR Director approval required; full audit trail mandatory'
         }
       }
     ]
