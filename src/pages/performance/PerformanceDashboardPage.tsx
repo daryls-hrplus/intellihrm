@@ -96,13 +96,13 @@ export default function PerformanceDashboardPage() {
     {
       titleKey: "Succession Planning",
       items: filterByAccess([
-        allModules.nineBox,
-        allModules.talentPools,
-        allModules.successionPlans,
-        allModules.keyPositions,
-        allModules.flightRisk,
-        allModules.benchStrength,
-        allModules.successionSetup,
+        allModules.keyPositions,      // 1. Define critical roles
+        allModules.nineBox,           // 2. Assess talent potential
+        allModules.talentPools,       // 3. Group high-potentials
+        allModules.successionPlans,   // 4. Create succession plans
+        allModules.benchStrength,     // 5. Analyze coverage depth
+        allModules.flightRisk,        // 6. Identify retention risks
+        allModules.successionSetup,   // 7. Configuration
       ]),
     },
     {
