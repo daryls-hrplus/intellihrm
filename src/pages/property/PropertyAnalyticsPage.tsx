@@ -1,16 +1,37 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { usePropertyManagement } from "@/hooks/usePropertyManagement";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PropertyAnalytics } from "@/components/property/PropertyAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/hooks/useLanguage";
-import { BarChart3, ChevronRight } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
+import { BarChart3 } from "lucide-react";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 
 export default function PropertyAnalyticsPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      activeTab: "charts",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, activeTab } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
+
   const {
     items,
     assignments,
@@ -19,16 +40,15 @@ export default function PropertyAnalyticsPage() {
     categories,
   } = usePropertyManagement(selectedCompanyId);
 
+  const breadcrumbItems = [
+    { label: t("companyProperty.title"), href: "/property" },
+    { label: t("companyProperty.tabs.analytics") },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <NavLink to="/property" className="hover:text-foreground">
-            {t("companyProperty.title")}
-          </NavLink>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground">{t("companyProperty.tabs.analytics")}</span>
-        </div>
+        <Breadcrumbs items={breadcrumbItems} />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -46,11 +66,15 @@ export default function PropertyAnalyticsPage() {
           </div>
           <LeaveCompanyFilter 
             selectedCompanyId={selectedCompanyId} 
-            onCompanyChange={setSelectedCompanyId} 
+            onCompanyChange={(id) => setTabState({ selectedCompanyId: id })} 
           />
         </div>
 
-        <Tabs defaultValue="charts" className="space-y-4">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={(v) => setTabState({ activeTab: v })} 
+          className="space-y-4"
+        >
           <TabsList>
             <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
             <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>

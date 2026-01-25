@@ -1,24 +1,42 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
 import PropertyCategoriesTab from "@/components/property/PropertyCategoriesTab";
 import { useLanguage } from "@/hooks/useLanguage";
-import { FolderOpen, ChevronRight } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { FolderOpen } from "lucide-react";
 
 export default function PropertyCategoriesPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
+
+  const breadcrumbItems = [
+    { label: t("companyProperty.title"), href: "/property" },
+    { label: t("companyProperty.tabs.categories") },
+  ];
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <NavLink to="/property" className="hover:text-foreground">
-            {t("companyProperty.title")}
-          </NavLink>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground">{t("companyProperty.tabs.categories")}</span>
-        </div>
+        <Breadcrumbs items={breadcrumbItems} />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -36,7 +54,7 @@ export default function PropertyCategoriesPage() {
           </div>
           <LeaveCompanyFilter 
             selectedCompanyId={selectedCompanyId} 
-            onCompanyChange={setSelectedCompanyId} 
+            onCompanyChange={(id) => setTabState({ selectedCompanyId: id })} 
           />
         </div>
 

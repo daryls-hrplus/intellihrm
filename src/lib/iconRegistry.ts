@@ -72,6 +72,8 @@ import {
   FlaskConical, UsersRound,
   // Employee Relations icons
   Gavel, DoorOpen,
+  // Company Property icons
+  Package, Clipboard,
   type LucideIcon,
 } from "lucide-react";
 
@@ -259,6 +261,11 @@ export const iconRegistry: Record<string, LucideIcon> = {
   // Employee Relations icons
   Gavel,
   DoorOpen,
+  // Company Property icons
+  Package,
+  Clipboard,
+  Laptop,
+  Wrench,
 };
 
 /**
