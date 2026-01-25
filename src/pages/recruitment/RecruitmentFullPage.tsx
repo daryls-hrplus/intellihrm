@@ -51,11 +51,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function RecruitmentFullPage() {
   const { t } = useLanguage();
-  const [companyId, setCompanyId] = useState<string>("");
-  const [searchTerm, setSearchTerm] = useState("");
+  
+  // Tab-persisted state for company, search, and active tab
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+      activeTab: "requisitions",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+  
+  const { selectedCompanyId, searchTerm, activeTab } = tabState;
   const [isRequisitionDialogOpen, setIsRequisitionDialogOpen] = useState(false);
   const [isJobBoardDialogOpen, setIsJobBoardDialogOpen] = useState(false);
   const [isCandidateDialogOpen, setIsCandidateDialogOpen] = useState(false);
@@ -75,7 +86,7 @@ export default function RecruitmentFullPage() {
     createCandidate,
     postJobToBoard,
     updateApplication,
-  } = useRecruitment(companyId || undefined);
+  } = useRecruitment(selectedCompanyId || undefined);
 
   // Fetch companies
   const { data: companies = [] } = useQuery({
@@ -89,14 +100,14 @@ export default function RecruitmentFullPage() {
 
   // Fetch departments for selected company
   const { data: departments = [] } = useQuery({
-    queryKey: ["departments", companyId],
+    queryKey: ["departments", selectedCompanyId],
     queryFn: async () => {
-      if (!companyId) return [];
-      const query = supabase.from("departments").select("id, name").eq("company_id", companyId).eq("is_active", true) as any;
+      if (!selectedCompanyId) return [];
+      const query = supabase.from("departments").select("id, name").eq("company_id", selectedCompanyId).eq("is_active", true) as any;
       const { data } = await query;
       return data || [];
     },
-    enabled: !!companyId,
+    enabled: !!selectedCompanyId,
   });
 
   // Form states
@@ -134,10 +145,10 @@ export default function RecruitmentFullPage() {
   });
 
   const handleCreateRequisition = async () => {
-    if (!companyId) return;
+    if (!selectedCompanyId) return;
     
     await createRequisition.mutateAsync({
-      company_id: companyId,
+      company_id: selectedCompanyId,
       title: requisitionForm.title,
       department_id: requisitionForm.department_id || null,
       location: requisitionForm.location || null,
@@ -169,10 +180,10 @@ export default function RecruitmentFullPage() {
   };
 
   const handleCreateJobBoard = async () => {
-    if (!companyId) return;
+    if (!selectedCompanyId) return;
 
     await createJobBoardConfig.mutateAsync({
-      company_id: companyId,
+      company_id: selectedCompanyId,
       name: jobBoardForm.name,
       code: jobBoardForm.code,
       api_endpoint: jobBoardForm.api_endpoint,
@@ -191,10 +202,10 @@ export default function RecruitmentFullPage() {
   };
 
   const handleCreateCandidate = async () => {
-    if (!companyId) return;
+    if (!selectedCompanyId) return;
 
     await createCandidate.mutateAsync({
-      company_id: companyId,
+      company_id: selectedCompanyId,
       first_name: candidateForm.first_name,
       last_name: candidateForm.last_name,
       email: candidateForm.email,
@@ -307,7 +318,7 @@ export default function RecruitmentFullPage() {
         {/* Company Filter */}
         <div className="flex items-center gap-4">
           <div className="w-64">
-            <Select value={companyId} onValueChange={setCompanyId}>
+            <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
               <SelectTrigger>
                 <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
@@ -326,7 +337,7 @@ export default function RecruitmentFullPage() {
               <Input
                 placeholder={t("recruitment.actions.searchRequisitions")}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setTabState({ searchTerm: e.target.value })}
                 className="pl-10"
               />
             </div>
@@ -380,7 +391,7 @@ export default function RecruitmentFullPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="requisitions" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="requisitions">
               <Briefcase className="mr-2 h-4 w-4" />
@@ -437,7 +448,7 @@ export default function RecruitmentFullPage() {
             <div className="flex justify-end">
               <Dialog open={isRequisitionDialogOpen} onOpenChange={setIsRequisitionDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button disabled={!companyId}>
+                  <Button disabled={!selectedCompanyId}>
                     <Plus className="mr-2 h-4 w-4" />
                     {t("recruitment.actions.newRequisition")}
                   </Button>
@@ -616,7 +627,7 @@ export default function RecruitmentFullPage() {
                   <Briefcase className="h-12 w-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium">No job requisitions</h3>
                   <p className="text-sm text-muted-foreground">
-                    {companyId ? "Create your first job requisition" : "Select a company to view requisitions"}
+                    {selectedCompanyId ? "Create your first job requisition" : "Select a company to view requisitions"}
                   </p>
                 </CardContent>
               </Card>
@@ -730,7 +741,7 @@ export default function RecruitmentFullPage() {
             <div className="flex justify-end">
               <Dialog open={isCandidateDialogOpen} onOpenChange={setIsCandidateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button disabled={!companyId}>
+                  <Button disabled={!selectedCompanyId}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Candidate
                   </Button>
@@ -965,42 +976,42 @@ export default function RecruitmentFullPage() {
 
           {/* Pipeline Tab */}
           <TabsContent value="pipeline" className="space-y-4">
-            <CandidatePipelineTab companyId={companyId} />
+            <CandidatePipelineTab companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Scorecards Tab */}
           <TabsContent value="scorecards" className="space-y-4">
-            <InterviewScorecardsTab companyId={companyId} />
+            <InterviewScorecardsTab companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Offers Tab */}
           <TabsContent value="offers" className="space-y-4">
-            <OfferManagementTab companyId={companyId} />
+            <OfferManagementTab companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Referrals Tab */}
           <TabsContent value="referrals" className="space-y-4">
-            <ReferralProgramTab companyId={companyId} />
+            <ReferralProgramTab companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Assessments Tab */}
           <TabsContent value="assessments" className="space-y-4">
-            <AssessmentsTab companyId={companyId} />
+            <AssessmentsTab companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Panels Tab */}
           <TabsContent value="panels" className="space-y-4">
-            <InterviewPanelsTab companyId={companyId} />
+            <InterviewPanelsTab companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Email Templates Tab */}
           <TabsContent value="emails" className="space-y-4">
-            <EmailTemplatesTab companyId={companyId} />
+            <EmailTemplatesTab companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Source Effectiveness Tab */}
           <TabsContent value="sources" className="space-y-4">
-            <SourceEffectivenessTab companyId={companyId} />
+            <SourceEffectivenessTab companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Job Boards Tab */}
@@ -1008,7 +1019,7 @@ export default function RecruitmentFullPage() {
             <div className="flex justify-end">
               <Dialog open={isJobBoardDialogOpen} onOpenChange={setIsJobBoardDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button disabled={!companyId}>
+                  <Button disabled={!selectedCompanyId}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Job Board
                   </Button>

@@ -68,6 +68,8 @@ import {
   // Admin & Security icons
   ShieldAlert, Fingerprint, KeyRound, Cog, Webhook,
   ArrowUpCircle, Tags, ScrollText, FileWarning, ClipboardPen,
+  // Recruitment icons
+  FlaskConical, UsersRound,
   type LucideIcon,
 } from "lucide-react";
 
@@ -249,6 +251,9 @@ export const iconRegistry: Record<string, LucideIcon> = {
   FileWarning,
   ClipboardPen,
   GitBranch,
+  // Recruitment icons
+  FlaskConical,
+  UsersRound,
 };
 
 /**
