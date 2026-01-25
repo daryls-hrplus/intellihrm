@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useTabState } from "@/hooks/useTabState";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -60,7 +61,12 @@ export default function StatutoryTaxReliefPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<TaxReliefRule | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCountry: "all" },
+  });
+  const { selectedCountry } = tabState;
+  const setSelectedCountry = (v: string) => setTabState({ selectedCountry: v });
   
   const [formData, setFormData] = useState({
     country: "",

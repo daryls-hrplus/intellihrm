@@ -14,8 +14,10 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+import { PayrollFilters } from '@/components/payroll/PayrollFilters';
 import { getTodayString } from '@/utils/dateUtils';
+import { useTabState } from '@/hooks/useTabState';
+import { useAuth } from '@/contexts/AuthContext';
 
 type AccountType = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
 
@@ -36,10 +38,21 @@ interface GLAccount {
 const GLAccountsPage = () => {
   const { t } = useTranslation();
   usePageAudit('gl_accounts', 'Payroll');
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      searchQuery: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId, searchQuery } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
+  
   const [accounts, setAccounts] = useState<GLAccount[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<GLAccount | null>(null);
   const [formData, setFormData] = useState({

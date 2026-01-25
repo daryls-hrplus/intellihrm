@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTabState } from "@/hooks/useTabState";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
@@ -64,8 +65,17 @@ export default function StatutoryDeductionTypesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<StatutoryDeductionType | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [countryFilter, setCountryFilter] = useState<string>("all");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchTerm: "",
+      countryFilter: "all",
+    },
+  });
+  const { searchTerm, countryFilter } = tabState;
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
+  const setCountryFilter = (v: string) => setTabState({ countryFilter: v });
+  
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [selectedStatutory, setSelectedStatutory] = useState<StatutoryDeductionType | null>(null);
   const [comprehensiveDocOpen, setComprehensiveDocOpen] = useState(false);

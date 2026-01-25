@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTabState } from "@/hooks/useTabState";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -82,7 +83,14 @@ export default function CountryPayrollYearSetupPage() {
   const { t } = useTranslation();
   const [countries, setCountries] = useState<CountryFiscalYear[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchTerm: "",
+    },
+  });
+  const { searchTerm } = tabState;
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<CountryFiscalYear | null>(null);

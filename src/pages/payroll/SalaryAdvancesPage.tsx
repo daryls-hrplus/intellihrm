@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,8 +42,19 @@ interface Company {
 export default function SalaryAdvancesPage() {
   usePageAudit('salary_advances', 'Payroll');
   const { t } = useTranslation();
+  const { company } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompany: company?.id || "",
+      activeTab: "pending",
+    },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany, activeTab } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
   const [loading, setLoading] = useState(true);
   
   const {
@@ -384,7 +397,7 @@ export default function SalaryAdvancesPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="pending" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="pending" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />

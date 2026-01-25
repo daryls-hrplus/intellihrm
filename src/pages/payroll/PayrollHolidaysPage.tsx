@@ -3,11 +3,12 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useTabState } from "@/hooks/useTabState";
 import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -75,10 +76,21 @@ export default function PayrollHolidaysPage() {
   usePageAudit('payroll_holidays', 'Payroll');
   
   const { company } = useAuth();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      activeTab: "country",
+      countryFilter: "all",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId, activeTab, countryFilter } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+  const setCountryFilter = (v: string) => setTabState({ countryFilter: v });
+  
   const { holidays, countryHolidays, loadingHolidays, loadingCountryHolidays, createHoliday, createCountryHoliday } = useLeaveManagement(selectedCompanyId);
-  const [activeTab, setActiveTab] = useState("country");
-  const [countryFilter, setCountryFilter] = useState<string>("all");
   
   // Country holiday form
   const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(false);
