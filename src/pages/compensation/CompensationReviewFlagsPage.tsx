@@ -1,17 +1,39 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { CompensationCompanyFilter, useCompensationCompanyFilter } from "@/components/compensation/CompensationCompanyFilter";
+import { CompensationCompanyFilter } from "@/components/compensation/CompensationCompanyFilter";
 import { CompensationReviewFlagsList } from "@/components/compensation/CompensationReviewFlagsList";
 import { useCompensationReviewFlags } from "@/hooks/useCompensationReviewFlags";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Flag, ArrowLeft, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Flag, ArrowLeft, RefreshCw, DollarSign } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 export default function CompensationReviewFlagsPage() {
-  const { selectedCompanyId, setSelectedCompanyId } = useCompensationCompanyFilter();
-  const [activeTab, setActiveTab] = useState("pending");
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  const { navigateToList } = useWorkspaceNavigation();
+
+  // Use tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: isAdminOrHR ? "all" : (company?.id || ""),
+      activeTab: "pending",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, activeTab } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+
+  // Initialize with user's company if needed
+  useEffect(() => {
+    if (company?.id && !isAdminOrHR && !selectedCompanyId) {
+      setSelectedCompanyId(company.id);
+    }
+  }, [company?.id, isAdminOrHR, selectedCompanyId]);
 
   const { flags, loading, fetchFlags, approveFlag, rejectFlag, markProcessed } =
     useCompensationReviewFlags({
@@ -27,11 +49,18 @@ export default function CompensationReviewFlagsPage() {
         {/* Header */}
         <div className="animate-fade-in">
           <div className="flex items-center gap-2 mb-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/compensation">
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
-              </Link>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigateToList({
+                route: "/compensation",
+                title: "Compensation",
+                moduleCode: "compensation",
+                icon: DollarSign,
+              })}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
             </Button>
           </div>
           <div className="flex items-center justify-between">
@@ -81,7 +110,7 @@ export default function CompensationReviewFlagsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
               <TabsList className="mb-4">
                 <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="approved">Approved</TabsTrigger>

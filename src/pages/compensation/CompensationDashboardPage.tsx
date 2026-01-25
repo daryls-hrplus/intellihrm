@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
-import { CompensationCompanyFilter, useCompensationCompanyFilter } from "@/components/compensation/CompensationCompanyFilter";
+import { CompensationCompanyFilter } from "@/components/compensation/CompensationCompanyFilter";
 import { useCompensationStats } from "@/hooks/useCompensationStats";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import {
   DollarSign,
   Wallet,
@@ -40,9 +42,33 @@ import {
 
 export default function CompensationDashboardPage() {
   const { t } = useTranslation();
-  const { selectedCompanyId, setSelectedCompanyId } = useCompensationCompanyFilter();
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
   const { hasTabAccess } = useGranularPermissions();
-  const [asOfDate, setAsOfDate] = useState<Date>(new Date());
+
+  // Use tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: isAdminOrHR ? "all" : (company?.id || ""),
+      asOfDateISO: new Date().toISOString(),
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId } = tabState;
+  const asOfDate = new Date(tabState.asOfDateISO);
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setAsOfDate = (date: Date | undefined) => {
+    if (date) setTabState({ asOfDateISO: date.toISOString() });
+  };
+
+  // Initialize with user's company if needed
+  useEffect(() => {
+    if (company?.id && !isAdminOrHR && !selectedCompanyId) {
+      setSelectedCompanyId(company.id);
+    }
+  }, [company?.id, isAdminOrHR, selectedCompanyId]);
+
   const stats = useCompensationStats(selectedCompanyId, asOfDate);
 
   const allModules = {

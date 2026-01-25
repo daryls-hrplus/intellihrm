@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,13 +11,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Gem, Plus, TrendingUp, Users, DollarSign, FileText, ChevronRight, Building2 } from "lucide-react";
+import { Gem, Plus, TrendingUp, Users, FileText, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function EquityManagementPage() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("plans");
-  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+
+  // Use tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      companyFilter: isAdminOrHR ? "all" : (company?.id || ""),
+      activeTab: "plans",
+    },
+    syncToUrl: ["companyFilter"],
+  });
+
+  const { companyFilter, activeTab } = tabState;
+
+  // Initialize with user's company if needed
+  useEffect(() => {
+    if (company?.id && !isAdminOrHR && !companyFilter) {
+      setTabState({ companyFilter: company.id });
+    }
+  }, [company?.id, isAdminOrHR, companyFilter]);
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-filter"],
@@ -89,15 +109,15 @@ export default function EquityManagementPage() {
   const totalSharesGranted = grants.reduce((sum: number, g: any) => sum + (g.shares_granted || 0), 0);
   const totalSharesVested = grants.reduce((sum: number, g: any) => sum + (g.shares_vested || 0), 0);
 
+  const breadcrumbItems = [
+    { label: t("compensation.title"), href: "/compensation" },
+    { label: t("compensation.equity.title") },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">{t("compensation.equity.title")}</span>
-        </nav>
+        <Breadcrumbs items={breadcrumbItems} />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -110,15 +130,15 @@ export default function EquityManagementPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+            <Select value={companyFilter} onValueChange={(v) => setTabState({ companyFilter: v })}>
               <SelectTrigger className="w-[200px]">
                 <Building2 className="mr-2 h-4 w-4" />
                 <SelectValue placeholder={t("common.all")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("common.all")}</SelectItem>
-                {companies.map((company: any) => (
-                  <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                {companies.map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -185,7 +205,7 @@ export default function EquityManagementPage() {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="plans">{t("compensation.equity.equityPlans")}</TabsTrigger>
             <TabsTrigger value="grants">{t("compensation.equity.grants")}</TabsTrigger>

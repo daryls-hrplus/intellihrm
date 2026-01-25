@@ -1,23 +1,44 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, DollarSign, TrendingUp, Users, Award, Target, ChevronRight, Building2 } from "lucide-react";
+import { BarChart3, DollarSign, TrendingUp, Users, Award, Target, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useTranslation } from "react-i18next";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
 export default function CompensationAnalyticsPage() {
   const { t } = useTranslation();
-  const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
-  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+
+  // Use tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      companyFilter: isAdminOrHR ? "all" : (company?.id || ""),
+      yearFilter: new Date().getFullYear().toString(),
+      activeTab: "charts",
+    },
+    syncToUrl: ["companyFilter"],
+  });
+
+  const { companyFilter, yearFilter, activeTab } = tabState;
+
+  // Initialize with user's company if needed
+  useEffect(() => {
+    if (company?.id && !isAdminOrHR && !companyFilter) {
+      setTabState({ companyFilter: company.id });
+    }
+  }, [company?.id, isAdminOrHR, companyFilter]);
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-filter"],
@@ -88,14 +109,15 @@ export default function CompensationAnalyticsPage() {
   const avgCompaRatio = compaRatios.length > 0 ? compaRatios.reduce((sum: number, c: any) => sum + (c.compa_ratio || 0), 0) / compaRatios.length : 0;
   const isLoading = historyLoading || bonusLoading || compaLoading;
 
+  const breadcrumbItems = [
+    { label: t("compensation.title"), href: "/compensation" },
+    { label: t("compensation.analytics.title") },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">{t("compensation.analytics.title")}</span>
-        </nav>
+        <Breadcrumbs items={breadcrumbItems} />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -106,14 +128,14 @@ export default function CompensationAnalyticsPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Select value={companyFilter} onValueChange={setCompanyFilter}>
+            <Select value={companyFilter} onValueChange={(v) => setTabState({ companyFilter: v })}>
               <SelectTrigger className="w-[200px]"><Building2 className="mr-2 h-4 w-4" /><SelectValue placeholder={t("common.all")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("common.all")}</SelectItem>
-                {companies.map((company: any) => <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>)}
+                {companies.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={yearFilter} onValueChange={setYearFilter}>
+            <Select value={yearFilter} onValueChange={(v) => setTabState({ yearFilter: v })}>
               <SelectTrigger className="w-[120px]"><SelectValue placeholder="Year" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="2025">2025</SelectItem>
@@ -131,7 +153,7 @@ export default function CompensationAnalyticsPage() {
           <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="rounded-lg bg-amber-500/10 p-3"><Users className="h-5 w-5 text-amber-600" /></div><div><p className="text-sm text-muted-foreground">{t("compensation.analytics.salaryChanges")}</p>{isLoading ? <Skeleton className="h-8 w-24" /> : <p className="text-2xl font-bold">{history.length}</p>}</div></div></CardContent></Card>
         </div>
 
-        <Tabs defaultValue="charts" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList>
             <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
             <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
