@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -37,9 +38,18 @@ export default function HRMilestonesPage() {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("upcoming");
-  const [selectedCompany, setSelectedCompany] = useState<string>("all");
   const [employeeCompanyMap, setEmployeeCompanyMap] = useState<Map<string, string>>(new Map());
+
+  // Tab-scoped state for filters (persists across tab switches)
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "upcoming",
+      selectedCompany: "all",
+    },
+    syncToUrl: ["selectedCompany"],
+  });
+
+  const { activeTab, selectedCompany } = tabState;
 
   useEffect(() => {
     loadCompanies();
@@ -180,7 +190,7 @@ export default function HRMilestonesPage() {
             <h1 className="text-3xl font-bold">{t("hrHub.milestones")}</h1>
             <p className="text-muted-foreground">{t("hrHub.milestonesSubtitle")}</p>
           </div>
-          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+          <Select value={selectedCompany} onValueChange={(v) => setTabState({ selectedCompany: v })}>
             <SelectTrigger className="w-[200px]">
               <Building2 className="h-4 w-4 mr-2" />
               <SelectValue placeholder="All Companies" />
@@ -278,7 +288,7 @@ export default function HRMilestonesPage() {
 
         <Card>
           <CardHeader>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
               <TabsList>
                 <TabsTrigger value="upcoming">{t("hrHub.upcoming")}</TabsTrigger>
                 <TabsTrigger value="birthdays">{t("hrHub.birthdays")}</TabsTrigger>

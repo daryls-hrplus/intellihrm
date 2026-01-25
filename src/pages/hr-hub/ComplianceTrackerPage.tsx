@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useTabState } from "@/hooks/useTabState";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,9 +55,18 @@ export default function ComplianceTrackerPage() {
   const queryClient = useQueryClient();
   const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
-  const [selectedCompany, setSelectedCompany] = useState<string>(company?.id || "");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
+
+  // Tab-scoped state for filters (persists across tab switches)
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompany: company?.id || "",
+      activeTab: "all",
+    },
+    syncToUrl: ["selectedCompany"],
+  });
+
+  const { selectedCompany, activeTab } = tabState;
 
   const [formData, setFormData] = useState({
     title: "",
@@ -200,7 +210,7 @@ export default function ComplianceTrackerPage() {
             {isAdminOrHR && companies.length > 0 && (
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <Select value={selectedCompany} onValueChange={(v) => setTabState({ selectedCompany: v })}>
                   <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder="Select company" />
                   </SelectTrigger>
@@ -312,7 +322,7 @@ export default function ComplianceTrackerPage() {
           <TabsContent value="requirements">
             <Card>
               <CardHeader>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
                   <TabsList>
                     <TabsTrigger value="all">{t("common.all")} ({stats.total})</TabsTrigger>
                     <TabsTrigger value="overdue">{t("hrHub.overdue")} ({stats.overdue})</TabsTrigger>
