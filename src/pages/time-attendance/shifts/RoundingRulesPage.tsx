@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Timer, Plus, Edit, Trash2 } from "lucide-react";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -45,8 +46,13 @@ interface RoundingRule {
 export default function RoundingRulesPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [rules, setRules] = useState<RoundingRule[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -92,7 +98,7 @@ export default function RoundingRulesPage() {
       return;
     }
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
     setLoading(false);
