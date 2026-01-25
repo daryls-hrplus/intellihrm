@@ -1,257 +1,164 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NavigationPath } from '../../../NavigationPath';
-import { TipCallout, WarningCallout } from '../../../components/Callout';
+import { TipCallout, WarningCallout, FutureCallout } from '../../../components/Callout';
 import { WorkflowDiagram } from '../../../components/WorkflowDiagram';
-import { StepByStep, Step } from '../../../components/StepByStep';
 import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
-import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
 import { LearningObjectives } from '../../../../workforce-manual/sections/lifecycle-workflows/LearningObjectives';
-import { RotateCcw, Clock, User, Settings } from 'lucide-react';
+import { RefreshCcw, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 const LEARNING_OBJECTIVES = [
-  'Understand the complete 360 feedback cycle lifecycle from draft to closure',
-  'Identify triggers that advance cycles between status states',
-  'Configure appropriate permissions for each lifecycle stage',
-  'Handle rollback scenarios and deadline extensions appropriately',
-  'Monitor cycle health through status-based dashboards'
+  'Understand the complete 360 feedback cycle lifecycle',
+  'Know the current 3-status model and transition rules',
+  'Recognize key timestamps and their significance',
+  'Plan cycle phases with realistic timelines',
+  'Distinguish between current capabilities and planned enhancements'
 ];
 
+/**
+ * IMPORTANT: This reflects the ACTUAL database implementation
+ * Database currently supports 3 status values: draft, active, completed
+ */
 const LIFECYCLE_DIAGRAM = `
 flowchart TD
-    subgraph Creation["Cycle Creation"]
-        A[Draft] -->|"HR launches cycle"| B[Active]
+    subgraph Current["Current Implementation"]
+        A[Draft] -->|Launch Cycle| B[Active]
+        B -->|Close Collection| C[Completed]
     end
     
-    subgraph Collection["Feedback Collection"]
-        B -->|"First response submitted"| C[In Progress]
-        C -->|"Collecting feedback"| C
+    subgraph DraftPhase["Draft Phase"]
+        A --> D1[Configure Settings]
+        A --> D2[Assign Participants]
+        A --> D3[Set Questionnaire]
+        A --> D4[Define Timelines]
     end
     
-    subgraph Processing["Results Processing"]
-        C -->|"Deadline reached OR all complete"| D[Completed]
-        D -->|"Results processed"| E[Ready for Release]
+    subgraph ActivePhase["Active Phase"]
+        B --> E1[Collect Nominations]
+        B --> E2[Approve Raters]
+        B --> E3[Collect Feedback]
+        B --> E4[Monitor Progress]
+        B --> E5[Send Reminders]
     end
     
-    subgraph Closure["Cycle Closure"]
-        E -->|"Results released"| F[Released]
-        F -->|"HR closes cycle"| G[Closed]
+    subgraph CompletedPhase["Completed Phase"]
+        C --> F1[Process Results]
+        C --> F2[Generate Reports]
+        C --> F3[Release Results]
+        C --> F4[Track Engagement]
     end
     
-    subgraph Exceptions["Exception Handling"]
-        B -->|"Same-day cancel"| H[Cancelled]
-        C -->|"Extension granted"| C
-        D -->|"Reopen for late submissions"| C
-    end
-    
-    style A fill:#f1f5f9,stroke:#64748b
-    style B fill:#dbeafe,stroke:#3b82f6
-    style C fill:#fef3c7,stroke:#f59e0b
-    style D fill:#d1fae5,stroke:#10b981
-    style E fill:#e0e7ff,stroke:#6366f1
-    style F fill:#cffafe,stroke:#06b6d4
-    style G fill:#e2e8f0,stroke:#475569
-    style H fill:#fee2e2,stroke:#ef4444
+    style A fill:#64748b,stroke:#475569,color:#fff
+    style B fill:#3b82f6,stroke:#2563eb,color:#fff
+    style C fill:#10b981,stroke:#059669,color:#fff
 `;
 
+/**
+ * These are the ACTUAL statuses supported in the database
+ */
 const STATUS_DEFINITIONS = [
-  {
-    status: 'Draft',
-    description: 'Cycle is being configured. Participants and settings can be modified freely.',
-    permissions: 'HR Admin, HR Partner',
-    allowedActions: 'Edit settings, add/remove participants, configure questions, launch',
-    color: 'secondary'
+  { 
+    status: 'draft', 
+    displayName: 'Draft',
+    description: 'Cycle is being configured. All settings, participants, and questionnaires can be modified.',
+    allowedActions: ['Edit settings', 'Add/remove participants', 'Configure questionnaire', 'Launch cycle'],
+    nextStatus: 'active',
+    color: 'bg-slate-100 text-slate-800'
   },
-  {
-    status: 'Active',
-    description: 'Cycle is launched. Nominations are open (if enabled). Awaiting first response.',
-    permissions: 'HR Admin, HR Partner',
-    allowedActions: 'Monitor nominations, send reminders, extend deadlines',
-    color: 'default'
+  { 
+    status: 'active', 
+    displayName: 'Active',
+    description: 'Cycle is live. Nominations, rater assignments, and feedback collection are in progress.',
+    allowedActions: ['Monitor progress', 'Send reminders', 'Manage rater assignments', 'Close collection'],
+    nextStatus: 'completed',
+    color: 'bg-blue-100 text-blue-800'
   },
-  {
-    status: 'In Progress',
-    description: 'Feedback collection is underway. At least one response has been submitted.',
-    permissions: 'HR Admin, HR Partner',
-    allowedActions: 'Monitor completion, send reminders, manage external raters',
-    color: 'default'
-  },
-  {
-    status: 'Completed',
-    description: 'Feedback window has closed. Responses are locked for processing.',
-    permissions: 'HR Admin',
-    allowedActions: 'Process results, review aggregated data, generate reports',
-    color: 'default'
-  },
-  {
-    status: 'Ready for Release',
-    description: 'Results have been processed and are awaiting approval for release.',
-    permissions: 'HR Admin, HR Director',
-    allowedActions: 'Preview reports, approve release, configure visibility',
-    color: 'default'
-  },
-  {
-    status: 'Released',
-    description: 'Results have been shared with participants per visibility rules.',
-    permissions: 'HR Admin, HR Director',
-    allowedActions: 'Monitor report access, handle investigations, close cycle',
-    color: 'default'
-  },
-  {
-    status: 'Closed',
-    description: 'Cycle is archived. No further actions allowed. Data retained per policy.',
-    permissions: 'Read-only for authorized users',
-    allowedActions: 'View historical data, run trend analysis',
-    color: 'outline'
-  },
-  {
-    status: 'Cancelled',
-    description: 'Cycle was terminated before completion. All data discarded.',
-    permissions: 'HR Admin only',
-    allowedActions: 'None - terminal state',
-    color: 'destructive'
+  { 
+    status: 'completed', 
+    displayName: 'Completed',
+    description: 'Feedback collection is closed. Results are being processed and can be released to participants.',
+    allowedActions: ['Process results', 'Generate reports', 'Release results', 'View analytics'],
+    nextStatus: null,
+    color: 'bg-green-100 text-green-800'
   }
 ];
 
+/**
+ * Fields that ACTUALLY exist in the database
+ * Based on review_cycles and feedback_360_cycles tables
+ */
 const FIELDS: FieldDefinition[] = [
   {
     name: 'status',
     required: true,
     type: 'enum',
-    description: 'Current lifecycle state of the cycle',
+    description: 'Current lifecycle status of the cycle',
     defaultValue: 'draft',
-    validation: 'Valid transitions only (see diagram)'
+    validation: 'draft | active | completed'
   },
   {
-    name: 'activated_at',
-    required: false,
-    type: 'timestamp',
-    description: 'When the cycle was launched (Draft → Active)',
-    defaultValue: 'null',
-    validation: 'Set automatically on launch'
+    name: 'start_date',
+    required: true,
+    type: 'date',
+    description: 'When the cycle becomes active for feedback collection',
+    defaultValue: '—',
+    validation: 'Must be current or future date'
   },
   {
-    name: 'activated_by',
-    required: false,
-    type: 'uuid',
-    description: 'User who launched the cycle',
-    defaultValue: 'null',
-    validation: 'References profiles.id'
+    name: 'end_date',
+    required: true,
+    type: 'date',
+    description: 'Deadline for all feedback submissions',
+    defaultValue: '—',
+    validation: 'Must be after start_date'
   },
   {
-    name: 'completed_at',
+    name: 'nomination_end_date',
     required: false,
-    type: 'timestamp',
-    description: 'When all feedback collection ended',
-    defaultValue: 'null',
-    validation: 'Set when status → Completed'
+    type: 'date',
+    description: 'Deadline for peer nominations (if enabled)',
+    defaultValue: '—',
+    validation: 'Between start_date and end_date'
   },
   {
     name: 'results_released_at',
     required: false,
     type: 'timestamp',
     description: 'When results were made available to participants',
-    defaultValue: 'null',
-    validation: 'Set on release action'
+    defaultValue: '—',
+    validation: 'Set when HR releases results'
   },
   {
     name: 'results_released_by',
     required: false,
     type: 'uuid',
-    description: 'User who released the results',
-    defaultValue: 'null',
+    description: 'User who triggered the results release',
+    defaultValue: '—',
     validation: 'References profiles.id'
   },
   {
-    name: 'is_locked',
-    required: true,
-    type: 'boolean',
-    description: 'Whether cycle configuration is frozen',
-    defaultValue: 'false',
-    validation: 'true when status is not Draft'
-  },
-  {
-    name: 'closed_at',
+    name: 'visibility_rules',
     required: false,
+    type: 'jsonb',
+    description: 'Configuration for what each role can see in results',
+    defaultValue: 'Standard configuration',
+    validation: 'Valid visibility schema'
+  },
+  {
+    name: 'created_at',
+    required: true,
     type: 'timestamp',
-    description: 'When the cycle was archived',
-    defaultValue: 'null',
-    validation: 'Set when status → Closed'
-  }
-];
-
-const STEPS: Step[] = [
-  {
-    title: 'Understand Status Triggers',
-    description: 'Each status transition is triggered by specific actions or system events.',
-    substeps: [
-      'Draft → Active: HR Admin clicks "Launch Cycle" button',
-      'Active → In Progress: System detects first response submission',
-      'In Progress → Completed: End date reached OR all mandatory responses submitted',
-      'Completed → Ready for Release: Results processing job completes',
-      'Ready for Release → Released: HR approves and triggers release',
-      'Released → Closed: HR Admin clicks "Close Cycle" after retention period'
-    ],
-    expectedResult: 'Cycle progresses automatically with manual intervention only at key decision points'
+    description: 'When the cycle was first created',
+    defaultValue: 'now()',
+    validation: 'Auto-generated'
   },
   {
-    title: 'Monitor Cycle Health',
-    description: 'Use the dashboard to track cycle status and identify issues early.',
-    substeps: [
-      'Navigate to Performance → 360 Feedback → Cycles',
-      'Filter by Active or In Progress status',
-      'Review completion percentage and days remaining',
-      'Identify participants with pending responses',
-      'Check for nomination approval backlogs'
-    ],
-    expectedResult: 'Dashboard shows real-time cycle health with actionable alerts'
-  },
-  {
-    title: 'Handle Deadline Extensions',
-    description: 'Extend feedback windows when business needs require flexibility.',
-    substeps: [
-      'Open the cycle details page',
-      'Click "Extend Deadline" in the actions menu',
-      'Set new end date (must be future)',
-      'Optionally add reason for extension',
-      'Confirm - participants are notified automatically'
-    ],
-    expectedResult: 'End date updated, cycle remains In Progress, reminder schedule adjusted'
-  },
-  {
-    title: 'Process Rollback Requests',
-    description: 'Handle requests to revert status or reopen feedback collection.',
-    substeps: [
-      'Review rollback request justification',
-      'Check data integrity implications',
-      'For Completed → In Progress: Click "Reopen for Late Submissions"',
-      'Set new deadline for late submissions',
-      'Document reason in audit trail'
-    ],
-    expectedResult: 'Cycle status reverted with full audit trail of the change'
-  }
-];
-
-const TROUBLESHOOTING: TroubleshootingItem[] = [
-  {
-    issue: 'Cycle stuck in Active status with no submissions',
-    cause: 'Rater assignments may not have been created, or notification delivery failed',
-    solution: 'Check feedback_360_requests table for pending requests. Verify notification logs. Resend invitations if needed.'
-  },
-  {
-    issue: 'Cannot extend deadline after cycle completed',
-    cause: 'Status has progressed beyond In Progress',
-    solution: 'Use "Reopen for Late Submissions" to revert to In Progress first, then extend deadline.'
-  },
-  {
-    issue: 'Results not appearing after deadline',
-    cause: 'Results processing job may have failed or is still running',
-    solution: 'Check signal_processing_status field. If "pending", wait for job completion. If "failed", contact support.'
-  },
-  {
-    issue: 'Cycle accidentally launched with incomplete configuration',
-    cause: 'Launch action was taken before all settings were verified',
-    solution: 'If within same day and no responses submitted, cycle can be cancelled. Otherwise, proceed and communicate adjustments.'
+    name: 'updated_at',
+    required: true,
+    type: 'timestamp',
+    description: 'Last modification timestamp',
+    defaultValue: 'now()',
+    validation: 'Auto-updated on changes'
   }
 ];
 
@@ -265,72 +172,123 @@ export function WorkflowCycleLifecycle() {
           <Badge variant="secondary">HR Admin</Badge>
         </div>
         <CardTitle className="flex items-center gap-2">
-          <RotateCcw className="h-5 w-5 text-primary" />
+          <RefreshCcw className="h-5 w-5 text-primary" />
           Cycle Lifecycle Management
         </CardTitle>
         <CardDescription>
-          Understanding status progression, triggers, and exception handling for 360 feedback cycles
+          Understanding status transitions, key timestamps, and lifecycle phases
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        <NavigationPath path={['Performance', '360 Feedback', 'Cycles', 'Manage']} />
+        <NavigationPath path={['Performance', '360 Feedback', 'Cycles']} />
         
         <LearningObjectives items={LEARNING_OBJECTIVES} />
 
         <WorkflowDiagram
           title="360 Feedback Cycle Lifecycle"
-          description="Complete status progression from creation to closure, including exception handling paths"
+          description="Current implementation: 3-status model (Draft → Active → Completed)"
           diagram={LIFECYCLE_DIAGRAM}
         />
 
         {/* Status Definitions */}
         <div className="space-y-4">
-          <h4 className="font-semibold text-lg flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            Status Definitions
-          </h4>
-          <div className="grid gap-3">
-            {STATUS_DEFINITIONS.map((status) => (
-              <div key={status.status} className="border rounded-lg p-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant={status.color as 'default' | 'secondary' | 'destructive' | 'outline'}>
-                    {status.status}
-                  </Badge>
+          <h4 className="font-semibold text-lg">Cycle Status Definitions</h4>
+          <div className="space-y-3">
+            {STATUS_DEFINITIONS.map((def) => (
+              <div key={def.status} className="border rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-3">
+                  <Badge className={def.color}>{def.displayName}</Badge>
+                  <span className="font-mono text-xs text-muted-foreground">status = '{def.status}'</span>
                 </div>
-                <p className="text-sm text-muted-foreground">{status.description}</p>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Permissions:</span>
-                    <span className="text-muted-foreground ml-2">{status.permissions}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Allowed Actions:</span>
-                    <span className="text-muted-foreground ml-2">{status.allowedActions}</span>
-                  </div>
+                <p className="text-sm text-muted-foreground">{def.description}</p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {def.allowedActions.map((action) => (
+                    <Badge key={action} variant="outline" className="text-xs">
+                      {action}
+                    </Badge>
+                  ))}
                 </div>
+                {def.nextStatus && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    <span className="font-medium">Next status:</span> {def.nextStatus}
+                  </p>
+                )}
               </div>
             ))}
           </div>
         </div>
 
-        <TipCallout title="Automatic Status Progression">
-          The system automatically advances status based on events (first submission, deadline reached).
-          Manual intervention is only required at decision points: launching, releasing results, and closing.
+        <TipCallout title="Status Transition Best Practices">
+          <ul className="list-disc list-inside space-y-1 mt-2">
+            <li>Review all participant assignments before launching (Draft → Active)</li>
+            <li>Ensure adequate response rates before closing collection (Active → Completed)</li>
+            <li>Allow 2-3 days buffer after deadline before processing results</li>
+          </ul>
         </TipCallout>
-
-        <StepByStep steps={STEPS} title="Operational Procedures" />
 
         <FieldReferenceTable 
           fields={FIELDS} 
-          title="Database Fields (feedback_360_cycles table)" 
+          title="Cycle Database Fields" 
         />
 
-        <WarningCallout title="Cancellation is Permanent">
-          Cancelling a cycle discards all collected responses and cannot be undone. Only cancel if the
-          cycle was created in error and no valuable feedback has been submitted.
+        <FutureCallout title="Planned Lifecycle Enhancements">
+          <p className="mb-2">The following lifecycle tracking fields are planned for future implementation:</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li><code className="text-xs bg-muted px-1 rounded">activated_at</code> - Timestamp when cycle was launched</li>
+            <li><code className="text-xs bg-muted px-1 rounded">activated_by</code> - User who launched the cycle</li>
+            <li><code className="text-xs bg-muted px-1 rounded">closed_at</code> - Timestamp when collection was closed</li>
+            <li><code className="text-xs bg-muted px-1 rounded">is_locked</code> - Prevent accidental modifications</li>
+          </ul>
+          <p className="mt-2 text-xs">These fields will provide enhanced audit trail and lifecycle tracking.</p>
+        </FutureCallout>
+
+        <WarningCallout title="Irreversible Transitions">
+          Status transitions are forward-only. Once a cycle moves from Draft to Active,
+          it cannot return to Draft. Plan your configuration thoroughly before launching.
         </WarningCallout>
 
-        <TroubleshootingSection items={TROUBLESHOOTING} />
+        {/* Timeline Planning Guide */}
+        <div className="space-y-4">
+          <h4 className="font-semibold text-lg">Recommended Timeline Planning</h4>
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="text-left p-3 font-medium">Phase</th>
+                  <th className="text-left p-3 font-medium">Typical Duration</th>
+                  <th className="text-left p-3 font-medium">Key Activities</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t">
+                  <td className="p-3 font-medium">Draft</td>
+                  <td className="p-3">1-2 weeks</td>
+                  <td className="p-3">Configure settings, finalize participants, test questionnaire</td>
+                </tr>
+                <tr className="border-t bg-muted/30">
+                  <td className="p-3 font-medium">Active - Nominations</td>
+                  <td className="p-3">1-2 weeks</td>
+                  <td className="p-3">Participants nominate peers, managers approve</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="p-3 font-medium">Active - Collection</td>
+                  <td className="p-3">2-4 weeks</td>
+                  <td className="p-3">Raters provide feedback, HR monitors progress</td>
+                </tr>
+                <tr className="border-t bg-muted/30">
+                  <td className="p-3 font-medium">Completed - Processing</td>
+                  <td className="p-3">3-5 days</td>
+                  <td className="p-3">Generate reports, HR review, prepare for release</td>
+                </tr>
+                <tr className="border-t">
+                  <td className="p-3 font-medium">Completed - Release</td>
+                  <td className="p-3">Ongoing</td>
+                  <td className="p-3">Staged release, support conversations, track engagement</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

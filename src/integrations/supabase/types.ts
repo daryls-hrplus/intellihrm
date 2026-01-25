@@ -26364,11 +26364,14 @@ export type Database = {
       }
       feedback_360_cycles: {
         Row: {
+          activated_at: string | null
+          activated_by: string | null
           ai_tone_setting: string | null
           allow_peer_nomination: boolean | null
           anonymity_threshold: number | null
           appraisal_cycle_id: string | null
           cloned_from_id: string | null
+          closed_at: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -26383,6 +26386,7 @@ export type Database = {
           hide_rating_points: boolean | null
           id: string
           include_in_analytics: boolean | null
+          is_locked: boolean | null
           is_standalone: boolean
           is_template: boolean | null
           manager_approval_required: boolean | null
@@ -26408,11 +26412,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
           ai_tone_setting?: string | null
           allow_peer_nomination?: boolean | null
           anonymity_threshold?: number | null
           appraisal_cycle_id?: string | null
           cloned_from_id?: string | null
+          closed_at?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -26427,6 +26434,7 @@ export type Database = {
           hide_rating_points?: boolean | null
           id?: string
           include_in_analytics?: boolean | null
+          is_locked?: boolean | null
           is_standalone?: boolean
           is_template?: boolean | null
           manager_approval_required?: boolean | null
@@ -26452,11 +26460,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          activated_at?: string | null
+          activated_by?: string | null
           ai_tone_setting?: string | null
           allow_peer_nomination?: boolean | null
           anonymity_threshold?: number | null
           appraisal_cycle_id?: string | null
           cloned_from_id?: string | null
+          closed_at?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -26471,6 +26482,7 @@ export type Database = {
           hide_rating_points?: boolean | null
           id?: string
           include_in_analytics?: boolean | null
+          is_locked?: boolean | null
           is_standalone?: boolean
           is_template?: boolean | null
           manager_approval_required?: boolean | null
@@ -26496,6 +26508,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "feedback_360_cycles_activated_by_fkey"
+            columns: ["activated_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_360_cycles_activated_by_fkey"
+            columns: ["activated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "feedback_360_cycles_appraisal_cycle_id_fkey"
             columns: ["appraisal_cycle_id"]
@@ -26726,6 +26752,7 @@ export type Database = {
           access_token_expires_at: string | null
           consent_given: boolean | null
           consent_given_at: string | null
+          consent_ip_address: unknown
           created_at: string
           cycle_id: string
           decline_reason: string | null
@@ -26754,6 +26781,7 @@ export type Database = {
           access_token_expires_at?: string | null
           consent_given?: boolean | null
           consent_given_at?: string | null
+          consent_ip_address?: unknown
           created_at?: string
           cycle_id: string
           decline_reason?: string | null
@@ -26782,6 +26810,7 @@ export type Database = {
           access_token_expires_at?: string | null
           consent_given?: boolean | null
           consent_given_at?: string | null
+          consent_ip_address?: unknown
           created_at?: string
           cycle_id?: string
           decline_reason?: string | null
@@ -62090,8 +62119,11 @@ export type Database = {
       }
       review_cycles: {
         Row: {
+          activated_at: string | null
+          activated_by: string | null
           allow_peer_nomination: boolean | null
           cloned_from_id: string | null
+          closed_at: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -62106,6 +62138,7 @@ export type Database = {
           include_manager_review: boolean | null
           include_peer_review: boolean | null
           include_self_review: boolean | null
+          is_locked: boolean | null
           is_manager_cycle: boolean | null
           is_template: boolean | null
           manager_approval_required: boolean | null
@@ -62127,8 +62160,11 @@ export type Database = {
           visibility_rules: Json | null
         }
         Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
           allow_peer_nomination?: boolean | null
           cloned_from_id?: string | null
+          closed_at?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -62143,6 +62179,7 @@ export type Database = {
           include_manager_review?: boolean | null
           include_peer_review?: boolean | null
           include_self_review?: boolean | null
+          is_locked?: boolean | null
           is_manager_cycle?: boolean | null
           is_template?: boolean | null
           manager_approval_required?: boolean | null
@@ -62164,8 +62201,11 @@ export type Database = {
           visibility_rules?: Json | null
         }
         Update: {
+          activated_at?: string | null
+          activated_by?: string | null
           allow_peer_nomination?: boolean | null
           cloned_from_id?: string | null
+          closed_at?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -62180,6 +62220,7 @@ export type Database = {
           include_manager_review?: boolean | null
           include_peer_review?: boolean | null
           include_self_review?: boolean | null
+          is_locked?: boolean | null
           is_manager_cycle?: boolean | null
           is_template?: boolean | null
           manager_approval_required?: boolean | null
@@ -62201,6 +62242,20 @@ export type Database = {
           visibility_rules?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "review_cycles_activated_by_fkey"
+            columns: ["activated_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "review_cycles_activated_by_fkey"
+            columns: ["activated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "review_cycles_cloned_from_id_fkey"
             columns: ["cloned_from_id"]

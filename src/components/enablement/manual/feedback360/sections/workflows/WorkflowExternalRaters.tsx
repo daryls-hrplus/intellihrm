@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NavigationPath } from '../../../NavigationPath';
-import { TipCallout, WarningCallout } from '../../../components/Callout';
+import { TipCallout, WarningCallout, FutureCallout } from '../../../components/Callout';
 import { WorkflowDiagram } from '../../../components/WorkflowDiagram';
 import { StepByStep, Step } from '../../../components/StepByStep';
 import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
@@ -120,14 +120,15 @@ const EXTERNAL_FIELDS: FieldDefinition[] = [
     defaultValue: '—',
     validation: 'Set when consent_given becomes true'
   },
-  {
-    name: 'consent_ip_address',
-    required: false,
-    type: 'inet',
-    description: 'IP address at time of consent (for audit)',
-    defaultValue: '—',
-    validation: 'Captured automatically'
-  },
+  // Note: consent_ip_address is documented but not yet implemented in database
+  // {
+  //   name: 'consent_ip_address',
+  //   required: false,
+  //   type: 'inet',
+  //   description: 'IP address at time of consent (for audit)',
+  //   defaultValue: '—',
+  //   validation: 'Captured automatically'
+  // },
   {
     name: 'invitation_sent_at',
     required: true,
@@ -297,7 +298,7 @@ export function WorkflowExternalRaters() {
             <div className="border rounded-lg p-4 space-y-2">
               <h5 className="font-medium">Consent Recording</h5>
               <p className="text-sm text-muted-foreground">
-                GDPR-compliant consent capture with timestamp, IP address, and terms version.
+                GDPR-compliant consent capture with timestamp and terms version.
                 No feedback can be submitted without explicit consent.
               </p>
             </div>
@@ -322,6 +323,11 @@ export function WorkflowExternalRaters() {
           fields={EXTERNAL_FIELDS} 
           title="External Rater Fields (feedback_360_requests table)" 
         />
+
+        <FutureCallout title="IP Address Tracking (Planned)">
+          For enhanced GDPR audit trails, a future update will add <code className="text-xs bg-muted px-1 rounded">consent_ip_address</code> to 
+          capture the IP address when external raters give consent.
+        </FutureCallout>
 
         <WarningCallout title="Data Privacy Compliance">
           External rater data is subject to GDPR and other privacy regulations. Ensure your consent
