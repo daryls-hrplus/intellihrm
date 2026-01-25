@@ -29,6 +29,7 @@ const WorkforceManualPage = lazy(() => import('@/pages/enablement/WorkforceManua
 const HRHubManualPage = lazy(() => import('@/pages/enablement/HRHubManualPage'));
 const BenefitsManualPage = lazy(() => import('@/pages/enablement/BenefitsManualPage'));
 const TimeAttendanceManualPage = lazy(() => import('@/pages/enablement/TimeAttendanceManualPage'));
+const Feedback360ManualPage = lazy(() => import('@/pages/enablement/Feedback360ManualPage'));
 const ManualsIndexPage = lazy(() => import('@/pages/enablement/ManualsIndexPage'));
 const ClientProvisioningGuidePage = lazy(() => import('@/pages/enablement/ClientProvisioningGuidePage'));
 const ClientProvisioningTestingPage = lazy(() => import('@/pages/enablement/ClientProvisioningTestingPage'));
@@ -83,6 +84,7 @@ export function EnablementRoutes() {
       <Route path="/enablement/manuals/hr-hub" element={<EnablementRoute><HRHubManualPage /></EnablementRoute>} />
       <Route path="/enablement/manuals/benefits" element={<EnablementRoute><BenefitsManualPage /></EnablementRoute>} />
       <Route path="/enablement/manuals/time-attendance" element={<EnablementRoute><TimeAttendanceManualPage /></EnablementRoute>} />
+      <Route path="/enablement/manuals/feedback-360" element={<EnablementRoute><Feedback360ManualPage /></EnablementRoute>} />
       <Route path="/enablement/client-provisioning" element={<EnablementRoute><ClientProvisioningGuidePage /></EnablementRoute>} />
       <Route path="/enablement/client-provisioning/testing" element={<EnablementRoute><ClientProvisioningTestingPage /></EnablementRoute>} />
       <Route path="/enablement/manual-publishing" element={<EnablementRoute><ManualPublishingPage /></EnablementRoute>} />
