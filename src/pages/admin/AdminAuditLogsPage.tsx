@@ -526,17 +526,6 @@ export default function AdminAuditLogsPage() {
         break;
     }
   };
-      case 'last30':
-        setDateFrom(subDays(today, 30));
-        setDateTo(today);
-        break;
-      case 'thisMonth':
-        setDateFrom(startOfMonth(today));
-        setDateTo(today);
-        break;
-    }
-    setPage(0);
-  };
 
   const exportToCSV = async () => {
     setIsExporting(true);
@@ -631,8 +620,8 @@ export default function AdminAuditLogsPage() {
           action: actionFilter,
           entity: entityFilter,
           user: userFilter,
-          dateFrom: dateFrom?.toISOString(),
-          dateTo: dateTo?.toISOString(),
+          dateFrom: dateFrom || null,
+          dateTo: dateTo || null,
           search: searchQuery,
         },
       });
@@ -690,8 +679,8 @@ export default function AdminAuditLogsPage() {
 
         {/* Activity Trend Chart */}
         <AuditLogTrendChart 
-          dateFrom={dateFrom} 
-          dateTo={dateTo}
+          dateFrom={dateFrom ? new Date(dateFrom) : undefined} 
+          dateTo={dateTo ? new Date(dateTo) : undefined}
           actionFilter={actionFilter}
           entityFilter={entityFilter}
         />
@@ -790,8 +779,7 @@ export default function AdminAuditLogsPage() {
                     placeholder="Search by entity name, type, or ID..."
                     value={searchQuery}
                     onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setPage(0);
+                      setTabState({ searchQuery: e.target.value, page: 0 });
                     }}
                     className="pl-9"
                   />
@@ -844,16 +832,15 @@ export default function AdminAuditLogsPage() {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+                      {dateFrom ? format(new Date(dateFrom), "MMM d, yyyy") : "From"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={dateFrom}
+                      selected={dateFrom ? new Date(dateFrom) : undefined}
                       onSelect={(date) => {
-                        setDateFrom(date);
-                        setPage(0);
+                        setTabState({ dateFrom: date?.toISOString() || "", page: 0 });
                       }}
                       initialFocus
                       className={cn("p-3 pointer-events-auto")}
@@ -872,16 +859,15 @@ export default function AdminAuditLogsPage() {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+                      {dateTo ? format(new Date(dateTo), "MMM d, yyyy") : "To"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={dateTo}
+                      selected={dateTo ? new Date(dateTo) : undefined}
                       onSelect={(date) => {
-                        setDateTo(date);
-                        setPage(0);
+                        setTabState({ dateTo: date?.toISOString() || "", page: 0 });
                       }}
                       initialFocus
                       className={cn("p-3 pointer-events-auto")}
@@ -899,15 +885,15 @@ export default function AdminAuditLogsPage() {
                 <Select
                   value={moduleFilter}
                   onValueChange={(value) => {
-                    setModuleFilter(value);
                     // Reset entity filter if it doesn't belong to the new module
                     if (value !== 'all' && entityFilter !== 'all') {
                       const entityModule = getModuleFromEntityType(entityFilter);
                       if (entityModule !== value) {
-                        setEntityFilter('all');
+                        setTabState({ moduleFilter: value, entityFilter: 'all', page: 0 });
+                        return;
                       }
                     }
-                    setPage(0);
+                    setTabState({ moduleFilter: value, page: 0 });
                   }}
                 >
                   <SelectTrigger className="w-full md:w-[160px]">
@@ -928,8 +914,7 @@ export default function AdminAuditLogsPage() {
                 <Select
                   value={entityFilter}
                   onValueChange={(value) => {
-                    setEntityFilter(value);
-                    setPage(0);
+                    setTabState({ entityFilter: value, page: 0 });
                   }}
                 >
                   <SelectTrigger className="w-full md:w-[160px]">
@@ -957,8 +942,7 @@ export default function AdminAuditLogsPage() {
                 <Select
                   value={actionFilter}
                   onValueChange={(value) => {
-                    setActionFilter(value as AuditAction | "all");
-                    setPage(0);
+                    setTabState({ actionFilter: value as AuditAction | "all", page: 0 });
                   }}
                 >
                   <SelectTrigger className="w-full md:w-[140px]">
@@ -981,8 +965,7 @@ export default function AdminAuditLogsPage() {
                 <Select
                   value={riskFilter}
                   onValueChange={(value) => {
-                    setRiskFilter(value);
-                    setPage(0);
+                    setTabState({ riskFilter: value, page: 0 });
                   }}
                 >
                   <SelectTrigger className="w-full md:w-[140px]">
@@ -1008,8 +991,7 @@ export default function AdminAuditLogsPage() {
                 <Select
                   value={userFilter}
                   onValueChange={(value) => {
-                    setUserFilter(value);
-                    setPage(0);
+                    setTabState({ userFilter: value, page: 0 });
                   }}
                 >
                   <SelectTrigger className="w-full md:w-[180px]">
@@ -1139,7 +1121,7 @@ export default function AdminAuditLogsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(p => Math.max(0, p - 1))}
+                    onClick={() => setTabState({ page: Math.max(0, page - 1) })}
                     disabled={page === 0}
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -1150,7 +1132,7 @@ export default function AdminAuditLogsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                    onClick={() => setTabState({ page: Math.min(totalPages - 1, page + 1) })}
                     disabled={page >= totalPages - 1}
                   >
                     <ChevronRight className="h-4 w-4" />
