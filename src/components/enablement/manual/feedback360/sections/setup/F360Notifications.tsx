@@ -469,7 +469,7 @@ export function F360Notifications() {
                 <li>• Enable daily digest for managers during active cycles</li>
                 <li>• Include team completion rates in digest</li>
                 <li>• Provide "nudge" button for one-click reminders</li>
-                <li>• Escalate to skip-level if < 50% completion at 3 days</li>
+                <li>• Escalate to skip-level if &lt;50% completion at 3 days</li>
               </ul>
             </div>
           </div>
