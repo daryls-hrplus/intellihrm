@@ -74,6 +74,7 @@ import { UserQuickView } from "@/components/admin/users/UserQuickView";
 import { UserTablePagination } from "@/components/admin/users/UserTablePagination";
 import { UserFilterPills } from "@/components/admin/users/UserFilterPills";
 import { UserEmptyState } from "@/components/admin/users/UserEmptyState";
+import { useTabState } from "@/hooks/useTabState";
 
 type AppRole = string;
 type SortField = "name" | "company" | "lastLogin" | "created";
@@ -142,22 +143,25 @@ export default function AdminUsersPage() {
   const [sections, setSections] = useState<Section[]>([]);
   const [roleDefinitions, setRoleDefinitions] = useState<RoleDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   
-  // Filters
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [filterRole, setFilterRole] = useState<string>("all");
-  const [filterCompany, setFilterCompany] = useState<string>("all");
+  // Tab state for filters, sorting, pagination
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: "",
+      filterStatus: "all",
+      filterRole: "all",
+      filterCompany: "all",
+      sortField: "name" as SortField,
+      sortDirection: "asc" as SortDirection,
+      currentPage: 1,
+      pageSize: 25,
+    },
+    syncToUrl: ["filterStatus", "filterRole", "filterCompany"],
+  });
   
-  // Sorting
-  const [sortField, setSortField] = useState<SortField>("name");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const { searchQuery, filterStatus, filterRole, filterCompany, sortField, sortDirection, currentPage, pageSize } = tabState;
   
   // Selection for bulk operations
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
@@ -221,14 +225,14 @@ export default function AdminUsersPage() {
         setSelectedUsers(new Set());
         setShowQuickView(false);
         if (document.activeElement === searchInputRef.current) {
-          setSearchQuery("");
+          setTabState({ searchQuery: "" });
           searchInputRef.current?.blur();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [setTabState]);
 
   useEffect(() => {
     fetchData();
@@ -243,7 +247,7 @@ export default function AdminUsersPage() {
 
   // Reset to page 1 when filters change
   useEffect(() => {
-    setCurrentPage(1);
+    setTabState({ currentPage: 1 });
   }, [searchQuery, filterStatus, filterRole, filterCompany]);
 
   // Filter departments when company changes
@@ -700,26 +704,27 @@ export default function AdminUsersPage() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setTabState({ sortDirection: sortDirection === "asc" ? "desc" : "asc" });
     } else {
-      setSortField(field);
-      setSortDirection("asc");
+      setTabState({ sortField: field, sortDirection: "asc" });
     }
   };
 
   const handleStatClick = (filter: string, value: string) => {
     if (filter === "status") {
-      setFilterStatus(value);
+      setTabState({ filterStatus: value });
     } else if (filter === "role") {
-      setFilterRole(value);
+      setTabState({ filterRole: value });
     }
   };
 
   const clearAllFilters = () => {
-    setFilterStatus("all");
-    setFilterRole("all");
-    setFilterCompany("all");
-    setSearchQuery("");
+    setTabState({
+      filterStatus: "all",
+      filterRole: "all",
+      filterCompany: "all",
+      searchQuery: "",
+    });
   };
 
   const handleRowClick = (user: UserWithRoles) => {
@@ -955,7 +960,7 @@ export default function AdminUsersPage() {
               type="text"
               placeholder="Search users..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setTabState({ searchQuery: e.target.value })}
               className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-12 text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
             <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">/</kbd>
@@ -963,7 +968,7 @@ export default function AdminUsersPage() {
           
           <div className="flex flex-wrap items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <Select value={filterStatus} onValueChange={(v) => setTabState({ filterStatus: v })}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -974,7 +979,7 @@ export default function AdminUsersPage() {
               </SelectContent>
             </Select>
             
-            <Select value={filterRole} onValueChange={setFilterRole}>
+            <Select value={filterRole} onValueChange={(v) => setTabState({ filterRole: v })}>
               <SelectTrigger className="w-36">
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
@@ -986,7 +991,7 @@ export default function AdminUsersPage() {
               </SelectContent>
             </Select>
             
-            <Select value={filterCompany} onValueChange={setFilterCompany}>
+            <Select value={filterCompany} onValueChange={(v) => setTabState({ filterCompany: v })}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Company" />
               </SelectTrigger>
@@ -1021,9 +1026,9 @@ export default function AdminUsersPage() {
           filterCompany={filterCompany}
           roleDefinitions={roleDefinitions}
           companies={companies}
-          onClearStatus={() => setFilterStatus("all")}
-          onClearRole={() => setFilterRole("all")}
-          onClearCompany={() => setFilterCompany("all")}
+          onClearStatus={() => setTabState({ filterStatus: "all" })}
+          onClearRole={() => setTabState({ filterRole: "all" })}
+          onClearCompany={() => setTabState({ filterCompany: "all" })}
           onClearAll={clearAllFilters}
         />
 
@@ -1280,10 +1285,9 @@ export default function AdminUsersPage() {
                 currentPage={currentPage}
                 pageSize={pageSize}
                 totalItems={filteredAndSortedUsers.length}
-                onPageChange={setCurrentPage}
+                onPageChange={(page) => setTabState({ currentPage: page })}
                 onPageSizeChange={(size) => {
-                  setPageSize(size);
-                  setCurrentPage(1);
+                  setTabState({ pageSize: size, currentPage: 1 });
                 }}
               />
             </>

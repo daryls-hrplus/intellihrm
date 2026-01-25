@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +37,8 @@ import { supportedLanguages } from "@/i18n";
 import { getLanguagesForCountry } from "@/lib/countryLanguageMapping";
 import { useCurrencies, type Currency } from "@/hooks/useCurrencies";
 import { useIndustries } from "@/hooks/useIndustries";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface Company {
   id: string;
@@ -121,7 +122,7 @@ const emptyFormData: CompanyFormData = {
 // Industries are now fetched from the database via useIndustries hook
 
 export default function AdminCompaniesPage() {
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const { currencies } = useCurrencies();
   const { parentIndustries, childrenByParent } = useIndustries();
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -129,7 +130,6 @@ export default function AdminCompaniesPage() {
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [statutoryCountries, setStatutoryCountries] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [formData, setFormData] = useState<CompanyFormData>(emptyFormData);
@@ -147,6 +147,12 @@ export default function AdminCompaniesPage() {
   const { toast } = useToast();
   const { logView } = useAuditLog();
   const hasLoggedView = useRef(false);
+
+  // Tab state for search
+  const [tabState, setTabState] = useTabState({
+    defaultState: { searchQuery: "" },
+  });
+  const { searchQuery } = tabState;
 
   // Fetch default currency for a country from country_fiscal_years
   const fetchCurrencyForCountry = async (countryName: string): Promise<string | null> => {
@@ -631,7 +637,7 @@ export default function AdminCompaniesPage() {
             type="text"
             placeholder="Search companies..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => setTabState({ searchQuery: e.target.value })}
             className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -720,7 +726,11 @@ export default function AdminCompaniesPage() {
                           </button>
                           <button
                             onClick={() => {
-                              navigate(`/workforce/org-structure?company=${company.id}`);
+                              navigateToList({
+                                route: `/workforce/org-structure?company=${company.id}`,
+                                title: "Org Structure",
+                                moduleCode: "workforce",
+                              });
                               setOpenDropdown(null);
                             }}
                             className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
