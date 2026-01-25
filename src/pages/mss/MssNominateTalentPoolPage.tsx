@@ -71,8 +71,8 @@ export default function MssNominateTalentPoolPage() {
     setLoading(true);
     
     // Load team members (direct reports)
-    const { data: reports } = await supabase
-      .from('profiles')
+    const { data: reports } = await (supabase
+      .from('profiles') as any)
       .select(`
         id,
         full_name,
@@ -85,20 +85,22 @@ export default function MssNominateTalentPoolPage() {
       .eq('is_active', true);
 
     // Load talent pools
-    const { data: pools } = await supabase
-      .from('talent_pools')
+    const { data: pools } = await (supabase
+      .from('talent_pools') as any)
       .select('id, name, description')
       .eq('is_active', true)
       .order('name');
 
     // Check existing nominations
-    const memberIds = reports?.map((r: any) => r.id) || [];
+    const memberIds = (reports || []).map((r: any) => r.id);
     const { data: nominations } = await (supabase
       .from('talent_pool_members') as any)
       .select('employee_id, status')
       .in('employee_id', memberIds);
 
-    const nominationMap = new Map(nominations?.map(n => [n.employee_id, n.status]));
+    const nominationMap = new Map<string, string>(
+      (nominations || []).map((n: any) => [n.employee_id, n.status as string])
+    );
 
     const members: TeamMember[] = (reports || []).map((r: any) => ({
       id: r.id,
@@ -108,7 +110,7 @@ export default function MssNominateTalentPoolPage() {
       position_title: r.position?.title,
       department_name: r.department?.name,
       is_nominated: nominationMap.has(r.id),
-      nomination_status: nominationMap.get(r.id),
+      nomination_status: nominationMap.get(r.id) || undefined,
     }));
 
     setTeamMembers(members);
