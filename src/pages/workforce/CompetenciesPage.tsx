@@ -44,8 +44,8 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronRight, Layers, ChevronLeft, AlertTriangle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
-import { NavLink } from "react-router-dom";
 import { getTodayString } from "@/utils/dateUtils";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface Company {
   id: string;
@@ -107,6 +107,7 @@ const emptyLevelForm = {
 
 export default function CompetenciesPage() {
   const { t } = useLanguage();
+  const { navigateToList } = useWorkspaceNavigation();
   const [competencies, setCompetencies] = useState<Competency[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -424,9 +425,18 @@ export default function CompetenciesPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <NavLink to="/workforce" className="hover:text-foreground">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-auto p-0 hover:bg-transparent hover:text-foreground"
+            onClick={() => navigateToList({
+              route: "/workforce",
+              title: t("workforce.title"),
+              moduleCode: "workforce",
+            })}
+          >
             {t("workforce.title")}
-          </NavLink>
+          </Button>
           <ChevronLeft className="h-4 w-4 rotate-180" />
           <span className="text-foreground">{t("workforce.competencies.title")}</span>
         </div>
@@ -438,12 +448,18 @@ export default function CompetenciesPage() {
           <AlertDescription className="text-amber-700">
             Competency management has moved to the unified{" "}
             <strong>Capability Platform</strong> which supports both Skills and Competencies with enhanced proficiency tracking.
-            <NavLink 
-              to="/workforce/capability-registry" 
-              className="inline-flex items-center gap-1 ml-2 text-amber-800 font-medium underline hover:text-amber-900"
+            <Button 
+              variant="link"
+              size="sm"
+              className="inline-flex items-center gap-1 ml-2 text-amber-800 font-medium underline hover:text-amber-900 h-auto p-0"
+              onClick={() => navigateToList({
+                route: "/workforce/capability-registry",
+                title: "Capability Framework",
+                moduleCode: "workforce",
+              })}
             >
               Go to Capability Platform <ArrowRight className="h-3 w-3" />
-            </NavLink>
+            </Button>
           </AlertDescription>
         </Alert>
 

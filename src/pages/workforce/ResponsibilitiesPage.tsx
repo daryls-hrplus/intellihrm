@@ -68,7 +68,7 @@ import {
   Upload,
   MoreHorizontal,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { getTodayString } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 import { ResponsibilityCategoryBadge, getCategoryOptions, ResponsibilityCategory } from "@/components/workforce/ResponsibilityCategoryBadge";
@@ -138,6 +138,7 @@ interface Job {
 }
 
 export default function ResponsibilitiesPage() {
+  const { navigateToList } = useWorkspaceNavigation();
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [jobFamilies, setJobFamilies] = useState<JobFamily[]>([]);
@@ -554,9 +555,18 @@ export default function ResponsibilitiesPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <NavLink to="/workforce" className="hover:text-foreground">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="h-auto p-0 hover:bg-transparent hover:text-foreground"
+            onClick={() => navigateToList({
+              route: "/workforce",
+              title: t("navigation.workforce"),
+              moduleCode: "workforce",
+            })}
+          >
             {t("navigation.workforce")}
-          </NavLink>
+          </Button>
           <ChevronLeft className="h-4 w-4 rotate-180" />
           <span className="text-foreground">{t("workforce.responsibilities.breadcrumb")}</span>
         </div>

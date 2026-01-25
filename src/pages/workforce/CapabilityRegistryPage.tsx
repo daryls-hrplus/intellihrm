@@ -63,7 +63,7 @@ import {
   Clock,
   AlertTriangle,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyValuesTab } from "@/components/capabilities/CompanyValuesTab";
 import { toast } from "sonner";
@@ -99,6 +99,7 @@ interface Company {
 
 export default function CapabilityRegistryPage() {
   const { user } = useAuth();
+  const { navigateToList } = useWorkspaceNavigation();
   const {
     capabilities,
     loading,
@@ -351,9 +352,18 @@ export default function CapabilityRegistryPage() {
       <div className="space-y-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <NavLink to="/workforce" className="hover:text-foreground">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="h-auto p-0 hover:bg-transparent hover:text-foreground"
+            onClick={() => navigateToList({
+              route: "/workforce",
+              title: "Workforce",
+              moduleCode: "workforce",
+            })}
+          >
             Workforce
-          </NavLink>
+          </Button>
           <ChevronLeft className="h-4 w-4 rotate-180" />
           <span className="text-foreground">Capability Framework</span>
         </div>
