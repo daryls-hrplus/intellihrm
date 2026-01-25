@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
-import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers } from "lucide-react";
+import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers, Settings2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTabState } from "@/hooks/useTabState";
 
@@ -110,6 +110,7 @@ export default function SuccessionDashboardPage() {
     flightRisk: { title: t("succession.tabs.flightRisk"), description: t("succession.flightRisk.description"), href: "/succession/flight-risk", icon: TrendingDown, color: "bg-destructive/10 text-destructive", tabCode: "flight-risk" },
     benchStrength: { title: t("succession.tabs.benchStrength"), description: t("succession.benchStrength.description"), href: "/succession/bench-strength", icon: Layers, color: "bg-primary/10 text-primary", tabCode: "bench-strength" },
     analytics: { title: t("succession.tabs.analytics"), description: t("succession.analytics.description"), href: "/succession/analytics", icon: BarChart3, color: "bg-info/10 text-info", tabCode: "analytics" },
+    setup: { title: "Succession Setup", description: "Configure readiness assessments, rating bands, and assessor workflows", href: "/succession/setup", icon: Settings2, color: "bg-muted text-muted-foreground", tabCode: "setup" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -131,6 +132,10 @@ export default function SuccessionDashboardPage() {
     {
       titleKey: "Risk & Analytics",
       items: filterByAccess([allModules.flightRisk, allModules.benchStrength, allModules.analytics]),
+    },
+    {
+      titleKey: "Configuration",
+      items: filterByAccess([allModules.setup]),
     },
   ];
 
