@@ -30,6 +30,8 @@ import {
   Building2
 } from "lucide-react";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
 
 type ScheduleType = 'daily_accrual' | 'monthly_accrual' | 'year_end_rollover' | 'new_employee_entitlement';
 
@@ -74,7 +76,12 @@ const SCHEDULE_TYPES: { value: ScheduleType; label: string; description: string 
 
 export default function LeaveScheduleConfigPage() {
   const queryClient = useQueryClient();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const { company } = useAuth();
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: company?.id || "" },
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<ScheduleConfig | null>(null);
   const [formData, setFormData] = useState<{

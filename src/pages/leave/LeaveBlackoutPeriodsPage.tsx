@@ -18,12 +18,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function LeaveBlackoutPeriodsPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
-  const [selectedCompanyId, setSelectedCompanyId] = useState(company?.id || "");
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+  const [tabState, setTabState] = useTabState({
+    defaultState: { 
+      selectedCompanyId: company?.id || "",
+      selectedDepartmentId: "",
+    },
+  });
+  const { selectedCompanyId, selectedDepartmentId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v, selectedDepartmentId: "" });
+  const setSelectedDepartmentId = (v: string) => setTabState({ selectedDepartmentId: v });
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-list"],

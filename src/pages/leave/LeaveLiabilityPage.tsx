@@ -22,15 +22,22 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart as RechartsPie, Pie, Cell
 } from "recharts";
+import { useTabState } from "@/hooks/useTabState";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
 export default function LeaveLiabilityPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
-  const { liabilitySnapshots, isLoading, generateSnapshot } = useLeaveLiability(company?.id);
-  
-  const [snapshotDate, setSnapshotDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [tabState, setTabState] = useTabState({
+    defaultState: { 
+      selectedCompanyId: company?.id || "",
+      snapshotDate: format(new Date(), "yyyy-MM-dd"),
+    },
+  });
+  const { selectedCompanyId, snapshotDate } = tabState;
+  const setSnapshotDate = (v: string) => setTabState({ snapshotDate: v });
+  const { liabilitySnapshots, isLoading, generateSnapshot } = useLeaveLiability(selectedCompanyId || company?.id);
   const [notes, setNotes] = useState("");
 
   // Get latest snapshot for each leave type

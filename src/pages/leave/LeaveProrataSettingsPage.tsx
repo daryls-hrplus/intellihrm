@@ -17,11 +17,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function LeaveProrataSettingsPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
-  const [selectedCompanyId, setSelectedCompanyId] = useState(company?.id || "");
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: company?.id || "" },
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-list"],

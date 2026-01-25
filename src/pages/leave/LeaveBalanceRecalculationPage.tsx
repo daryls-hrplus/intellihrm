@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 import { supabase } from "@/integrations/supabase/client";
 import { getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
@@ -64,9 +65,13 @@ interface RecalculationHistory {
 
 export default function LeaveBalanceRecalculationPage() {
   const { t } = useLanguage();
-  const { isAdmin, hasRole } = useAuth();
+  const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: company?.id || "" },
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   const { recalculateLeaveBalance } = useLeaveManagement(selectedCompanyId);
   
   const [employees, setEmployees] = useState<Employee[]>([]);

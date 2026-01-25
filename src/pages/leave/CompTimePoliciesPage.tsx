@@ -37,11 +37,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { format } from "date-fns";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function CompTimePoliciesPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: company?.id || "" },
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   const { policies, loadingPolicies, createPolicy, updatePolicy } = useCompensatoryTime(selectedCompanyId);
 
   const breadcrumbItems = [
