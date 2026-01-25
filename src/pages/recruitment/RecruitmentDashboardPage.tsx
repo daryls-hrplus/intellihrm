@@ -6,9 +6,10 @@ import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfMonth, startOfDay, endOfDay } from "date-fns";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { useTabState } from "@/hooks/useTabState";
 import {
   UserPlus,
   Briefcase,
@@ -29,8 +30,16 @@ import {
 export default function RecruitmentDashboardPage() {
   const { t } = useLanguage();
   const { hasTabAccess } = useGranularPermissions();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId } = tabState;
 
   const allModules = {
     requisitions: { title: t("recruitment.tabs.requisitions"), description: t("recruitment.modules.management.description"), href: "/recruitment/requisitions", icon: Briefcase, color: "bg-primary/10 text-primary", tabCode: "requisitions" },
@@ -150,12 +159,12 @@ export default function RecruitmentDashboardPage() {
             <div className="flex items-center gap-2">
               <LeaveCompanyFilter 
                 selectedCompanyId={selectedCompanyId} 
-                onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+                onCompanyChange={(id) => setTabState({ selectedCompanyId: id, selectedDepartmentId: "all" })} 
               />
               <DepartmentFilter
                 companyId={selectedCompanyId}
                 selectedDepartmentId={selectedDepartmentId}
-                onDepartmentChange={setSelectedDepartmentId}
+                onDepartmentChange={(id) => setTabState({ selectedDepartmentId: id })}
               />
               <ModuleBIButton module="recruitment" />
               <ModuleReportsButton module="recruitment" />

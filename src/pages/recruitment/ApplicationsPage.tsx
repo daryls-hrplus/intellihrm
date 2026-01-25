@@ -1,23 +1,30 @@
-import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FileText, Search, ChevronRight } from "lucide-react";
+import { FileText, Search } from "lucide-react";
 import { useRecruitment } from "@/hooks/useRecruitment";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function ApplicationsPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [stageFilter, setStageFilter] = useState<string>("all");
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+      stageFilter: "all",
+    },
+    syncToUrl: ["selectedCompanyId", "stageFilter"],
+  });
+
+  const { selectedCompanyId, searchTerm, stageFilter } = tabState;
 
   const { applications, applicationsLoading, updateApplication } = useRecruitment(selectedCompanyId || undefined);
 
@@ -73,7 +80,7 @@ export default function ApplicationsPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={setSelectedCompanyId} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id })} 
             />
           </div>
         </div>
@@ -84,11 +91,11 @@ export default function ApplicationsPage() {
             <Input
               placeholder="Search applications..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setTabState({ searchTerm: e.target.value })}
               className="pl-10"
             />
           </div>
-          <Select value={stageFilter} onValueChange={setStageFilter}>
+          <Select value={stageFilter} onValueChange={(v) => setTabState({ stageFilter: v })}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by stage" />
             </SelectTrigger>

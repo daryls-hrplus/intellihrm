@@ -12,12 +12,21 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Settings, Plus } from "lucide-react";
 import { useRecruitment } from "@/hooks/useRecruitment";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function JobBoardsPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const [isJobBoardDialogOpen, setIsJobBoardDialogOpen] = useState(false);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId } = tabState;
 
   const { jobBoardConfigs, createJobBoardConfig } = useRecruitment(selectedCompanyId || undefined);
 
@@ -74,7 +83,7 @@ export default function JobBoardsPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={setSelectedCompanyId} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id })} 
             />
             <Dialog open={isJobBoardDialogOpen} onOpenChange={setIsJobBoardDialogOpen}>
               <DialogTrigger asChild>
