@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import {
   Target,
   Users,
@@ -34,7 +34,7 @@ import { UpcomingRemindersWidget } from "@/components/performance/widgets/Upcomi
 export default function TalentUnifiedDashboardPage() {
   const { t } = useLanguage();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
 
   // Fetch Performance Data
   const { data: performanceData, isLoading: perfLoading } = useQuery({
@@ -209,6 +209,10 @@ export default function TalentUnifiedDashboardPage() {
     return "bg-red-500";
   };
 
+  const handleNavigate = (route: string, title: string) => {
+    navigateToList({ route, title, moduleCode: route.split('/')[1] || "performance" });
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -230,7 +234,7 @@ export default function TalentUnifiedDashboardPage() {
             </div>
             <div className="flex items-center gap-2">
               <ISO42001ComplianceCard />
-              <Button onClick={() => navigate("/performance")} variant="outline">
+              <Button onClick={() => handleNavigate("/performance", "Performance")} variant="outline">
                 Module View <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -288,7 +292,7 @@ export default function TalentUnifiedDashboardPage() {
         {/* Module Summary Cards */}
         <div className="grid gap-4 md:grid-cols-3">
           {/* Performance Summary */}
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/performance")}>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleNavigate("/performance", "Performance")}>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -335,7 +339,7 @@ export default function TalentUnifiedDashboardPage() {
           </Card>
 
           {/* Succession Summary */}
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/succession")}>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleNavigate("/succession", "Succession")}>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -382,7 +386,7 @@ export default function TalentUnifiedDashboardPage() {
           </Card>
 
           {/* Learning Summary */}
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/training")}>
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleNavigate("/training", "Training")}>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -408,19 +412,19 @@ export default function TalentUnifiedDashboardPage() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="flex items-center gap-1">
                       <TrendingUp className="h-3 w-3 text-primary" />
-                      <span>{learningData?.activeEnrollments || 0} in progress</span>
+                      <span>{learningData?.activeEnrollments || 0} enrollments</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <CheckCircle className="h-3 w-3 text-emerald-500" />
                       <span>{learningData?.completedCourses || 0} completed</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Award className="h-3 w-3 text-amber-500" />
-                      <span>{learningData?.certifications || 0} certifications</span>
-                    </div>
-                    <div className="flex items-center gap-1">
                       <GraduationCap className="h-3 w-3 text-cyan-600" />
                       <span>{learningData?.totalCourses || 0} courses</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Award className="h-3 w-3 text-amber-500" />
+                      <span>{learningData?.certifications || 0} certificates</span>
                     </div>
                   </div>
                 </div>
@@ -429,145 +433,137 @@ export default function TalentUnifiedDashboardPage() {
           </Card>
         </div>
 
-        {/* Upcoming Reminders & AI Insights Grid */}
-        <div className="grid gap-4 lg:grid-cols-3">
-          {/* Upcoming Reminders Widget */}
-          <UpcomingRemindersWidget className="lg:col-span-1" />
-
-          {/* AI Insights */}
-          <Card className="lg:col-span-2">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-amber-500" />
-              <CardTitle>AI-Powered Insights</CardTitle>
-            </div>
-            <CardDescription>
-              Cross-module analysis and recommendations
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map(i => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
+        {/* AI Insights */}
+        {insights.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">AI-Generated Insights</CardTitle>
               </div>
-            ) : insights.length > 0 ? (
-              <div className="grid gap-3 md:grid-cols-2">
+              <CardDescription>
+                Prioritized recommendations based on your talent data
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
                 {insights.map((insight, index) => {
                   const Icon = insight.icon;
                   return (
-                    <div
-                      key={index}
-                      className={`p-4 rounded-lg border ${
-                        insight.type === 'warning' ? 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800' :
-                        insight.type === 'alert' ? 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800' :
-                        insight.type === 'success' ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800' :
-                        'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Icon className={`h-5 w-5 mt-0.5 ${
-                          insight.type === 'warning' ? 'text-amber-600' :
-                          insight.type === 'alert' ? 'text-red-600' :
-                          insight.type === 'success' ? 'text-emerald-600' :
-                          'text-blue-600'
-                        }`} />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{insight.title}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{insight.description}</p>
-                          <Button
-                            variant="link"
-                            size="sm"
-                            className="p-0 h-auto mt-2 text-xs"
-                            onClick={() => navigate(insight.action)}
-                          >
-                            {insight.actionLabel} <ArrowRight className="ml-1 h-3 w-3" />
-                          </Button>
+                    <Card key={index} className="border-l-4 border-l-primary">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg ${
+                            insight.type === 'warning' ? 'bg-amber-500/10' :
+                            insight.type === 'alert' ? 'bg-red-500/10' :
+                            insight.type === 'success' ? 'bg-emerald-500/10' :
+                            'bg-blue-500/10'
+                          }`}>
+                            <Icon className={`h-4 w-4 ${
+                              insight.type === 'warning' ? 'text-amber-600' :
+                              insight.type === 'alert' ? 'text-red-600' :
+                              insight.type === 'success' ? 'text-emerald-600' :
+                              'text-blue-600'
+                            }`} />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">{insight.title}</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {insight.description}
+                            </p>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="px-0 mt-2"
+                              onClick={() => handleNavigate(insight.action, insight.actionLabel)}
+                            >
+                              {insight.actionLabel} <ArrowRight className="ml-1 h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No actionable insights at this time. Great job!</p>
-              </div>
-            )}
-          </CardContent>
+            </CardContent>
           </Card>
-        </div>
+        )}
 
-        {/* Quick Navigation Tabs */}
-        <Tabs defaultValue="performance" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="succession">Succession</TabsTrigger>
-            <TabsTrigger value="learning">Learning</TabsTrigger>
-          </TabsList>
-          <TabsContent value="performance" className="mt-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { label: "Appraisals", href: "/performance/appraisals", icon: Target },
-                { label: "Goals", href: "/performance/goals", icon: CheckCircle },
-                { label: "Continuous Feedback", href: "/performance/feedback", icon: TrendingUp },
-                { label: "Recognition", href: "/performance/recognition", icon: Award },
-              ].map(item => (
-                <Button
-                  key={item.label}
-                  variant="outline"
-                  className="justify-start h-auto py-3"
-                  onClick={() => navigate(item.href)}
-                >
-                  <item.icon className="h-4 w-4 mr-2" />
-                  {item.label}
-                </Button>
-              ))}
+        {/* Upcoming Reminders */}
+        <UpcomingRemindersWidget />
+
+        {/* Cross-Module Activity */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <GitBranch className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Cross-Module Activity</CardTitle>
+              </div>
             </div>
-          </TabsContent>
-          <TabsContent value="succession" className="mt-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { label: "9-Box Assessment", href: "/succession/nine-box", icon: BarChart3 },
-                { label: "Talent Pools", href: "/succession/talent-pools", icon: Users },
-                { label: "Succession Plans", href: "/succession/plans", icon: GitBranch },
-                { label: "Key Positions", href: "/succession/key-positions", icon: UserCheck },
-              ].map(item => (
-                <Button
-                  key={item.label}
-                  variant="outline"
-                  className="justify-start h-auto py-3"
-                  onClick={() => navigate(item.href)}
-                >
-                  <item.icon className="h-4 w-4 mr-2" />
-                  {item.label}
-                </Button>
-              ))}
-            </div>
-          </TabsContent>
-          <TabsContent value="learning" className="mt-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { label: "Course Catalog", href: "/training/catalog", icon: GraduationCap },
-                { label: "Learning Paths", href: "/training/learning-paths", icon: TrendingUp },
-                { label: "Career Paths", href: "/training/career-paths", icon: GitBranch },
-                { label: "Mentorship", href: "/training/mentorship", icon: Users },
-              ].map(item => (
-                <Button
-                  key={item.label}
-                  variant="outline"
-                  className="justify-start h-auto py-3"
-                  onClick={() => navigate(item.href)}
-                >
-                  <item.icon className="h-4 w-4 mr-2" />
-                  {item.label}
-                </Button>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+            <CardDescription>
+              How performance, succession, and learning connect
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="flow">
+              <TabsList className="mb-4">
+                <TabsTrigger value="flow">Integration Flow</TabsTrigger>
+                <TabsTrigger value="triggers">Active Triggers</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="flow">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="p-4 border rounded-lg text-center">
+                    <Target className="h-8 w-8 mx-auto text-primary mb-2" />
+                    <h4 className="font-medium">Performance</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Goals & reviews drive compensation and development
+                    </p>
+                    <ArrowRight className="h-4 w-4 mx-auto mt-2 text-muted-foreground" />
+                  </div>
+                  <div className="p-4 border rounded-lg text-center">
+                    <GitBranch className="h-8 w-8 mx-auto text-purple-600 mb-2" />
+                    <h4 className="font-medium">Succession</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      9-Box placement informs talent pipelines
+                    </p>
+                    <ArrowRight className="h-4 w-4 mx-auto mt-2 text-muted-foreground" />
+                  </div>
+                  <div className="p-4 border rounded-lg text-center">
+                    <GraduationCap className="h-8 w-8 mx-auto text-cyan-600 mb-2" />
+                    <h4 className="font-medium">Learning</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Skill gaps trigger training recommendations
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="triggers">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700">Active</Badge>
+                    <span className="text-sm">High performance → Merit increase eligibility</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700">Active</Badge>
+                    <span className="text-sm">Competency gap → Training request generation</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700">Active</Badge>
+                    <span className="text-sm">Low performance → PIP recommendation</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <Badge variant="outline" className="bg-amber-500/10 text-amber-700">Pending</Badge>
+                    <span className="text-sm">9-Box movement → Development plan update</span>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );

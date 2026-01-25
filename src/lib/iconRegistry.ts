@@ -61,6 +61,8 @@ import {
   Link2, Settings2, Archive, CreditCard, Landmark, HandCoins,
   // Benefits icons
   Gift, Stethoscope, Scale,
+  // Performance icons
+  ClipboardCheck, MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -213,6 +215,9 @@ export const iconRegistry: Record<string, LucideIcon> = {
   Gift,
   Stethoscope,
   Scale,
+  // Performance icons
+  ClipboardCheck,
+  MessageCircle,
 };
 
 /**

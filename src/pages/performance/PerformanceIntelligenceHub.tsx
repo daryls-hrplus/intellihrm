@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
-import { AppraisalCycleFilter, useAppraisalCycleFilter } from "@/components/filters/AppraisalCycleFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { AppraisalCycleFilter } from "@/components/filters/AppraisalCycleFilter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NavLink } from "react-router-dom";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useTabState } from "@/hooks/useTabState";
 import { 
-  ChevronLeft, 
   Brain,
   BarChart3,
   TrendingUp,
@@ -25,7 +25,6 @@ import {
   Grid3X3,
   Star,
   AlertTriangle,
-  Briefcase,
   FileText,
   Layers
 } from "lucide-react";
@@ -86,10 +85,27 @@ const sections: SectionConfig[] = [
 
 export default function PerformanceIntelligenceHub() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
-  const { selectedCycleId, setSelectedCycleId, cycleId } = useAppraisalCycleFilter();
-  const [activeSection, setActiveSection] = useState<Section>('operations');
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "all",
+      selectedDepartmentId: "all",
+      selectedCycleId: "",
+      activeSection: "operations" as Section,
+    },
+    syncToUrl: ["selectedCompanyId", "activeSection"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId, selectedCycleId, activeSection } = tabState;
+  
+  const setSelectedCompanyId = (v: string) => setTabState({ 
+    selectedCompanyId: v, 
+    selectedDepartmentId: "all",
+    selectedCycleId: ""
+  });
+  const setSelectedDepartmentId = (v: string) => setTabState({ selectedDepartmentId: v });
+  const setSelectedCycleId = (v: string) => setTabState({ selectedCycleId: v });
+  const setActiveSection = (v: Section) => setTabState({ activeSection: v });
 
   const companyId = selectedCompanyId !== "all" ? selectedCompanyId : undefined;
   const departmentId = selectedDepartmentId !== "all" ? selectedDepartmentId : undefined;
@@ -99,16 +115,15 @@ export default function PerformanceIntelligenceHub() {
       <div className="space-y-6">
         <div className="animate-fade-in">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <NavLink to="/performance" className="hover:text-foreground transition-colors">
-              {t('performance.title')}
-            </NavLink>
-            <ChevronLeft className="h-4 w-4 rotate-180" />
-            <span className="text-foreground">Performance Intelligence Hub</span>
-          </div>
+          <Breadcrumbs 
+            items={[
+              { label: t('performance.title'), href: "/performance" },
+              { label: "Performance Intelligence Hub" },
+            ]}
+          />
           
           {/* Header */}
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 mt-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20">
                 <Brain className="h-5 w-5 text-primary" />
@@ -125,7 +140,7 @@ export default function PerformanceIntelligenceHub() {
             <div className="flex items-center gap-2">
               <LeaveCompanyFilter
                 selectedCompanyId={selectedCompanyId}
-                onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }}
+                onCompanyChange={setSelectedCompanyId}
               />
               {(activeSection === 'operations' || activeSection === 'workforce') && (
                 <DepartmentFilter
@@ -186,11 +201,11 @@ export default function PerformanceIntelligenceHub() {
         )}
         
         {activeSection === 'appraisals' && (
-          <AppraisalsSection companyId={companyId} cycleId={cycleId} />
+          <AppraisalsSection companyId={companyId} cycleId={selectedCycleId} />
         )}
 
         {activeSection === 'integrations' && (
-          <IntegrationAnalytics companyId={companyId} cycleId={cycleId} />
+          <IntegrationAnalytics companyId={companyId} cycleId={selectedCycleId} />
         )}
         
         {activeSection === 'predictive' && (

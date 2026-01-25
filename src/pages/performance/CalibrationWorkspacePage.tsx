@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCalibrationWorkspace } from "@/hooks/useCalibrationWorkspace";
 import { useCalibrationAdjustments } from "@/hooks/useCalibrationAdjustments";
@@ -14,20 +14,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Loader2, Brain, Shield, GitCompare } from "lucide-react";
+import { ArrowLeft, Loader2, Brain, Shield, GitCompare, Scale } from "lucide-react";
 import { CalibrationEmployee } from "@/types/calibration";
 import { toast } from "sonner";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function CalibrationWorkspacePage() {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const { profile, company } = useAuth();
   const companyId = profile?.company_id || company?.id || "";
 
   const [selectedEmployee, setSelectedEmployee] = React.useState<CalibrationEmployee | null>(null);
   const [selectedForComparison, setSelectedForComparison] = React.useState<string[]>([]);
-  const [showAIPanel, setShowAIPanel] = React.useState(true);
-  const [rightPanelTab, setRightPanelTab] = React.useState<"ai" | "governance" | "compare">("ai");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      showAIPanel: true,
+      rightPanelTab: "ai" as "ai" | "governance" | "compare",
+    },
+  });
+  
+  const { showAIPanel, rightPanelTab } = tabState;
+  const setShowAIPanel = (v: boolean) => setTabState({ showAIPanel: v });
+  const setRightPanelTab = (v: "ai" | "governance" | "compare") => setTabState({ rightPanelTab: v });
 
   const {
     session,
@@ -76,6 +87,15 @@ export default function CalibrationWorkspacePage() {
     }
   };
 
+  const handleBack = () => {
+    navigateToList({
+      route: "/performance/calibration",
+      title: "Calibration",
+      moduleCode: "performance",
+      icon: Scale,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -90,7 +110,7 @@ export default function CalibrationWorkspacePage() {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-destructive mb-4">{error || "Session not found"}</p>
-            <Button onClick={() => navigate("/performance/calibration")}>
+            <Button onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Sessions
             </Button>
@@ -107,7 +127,7 @@ export default function CalibrationWorkspacePage() {
         session={session}
         hasPendingChanges={hasPendingChanges}
         adjustmentStats={adjustmentStats}
-        onBack={() => navigate("/performance/calibration")}
+        onBack={handleBack}
         onSave={handleSaveChanges}
         onDiscard={discardChanges}
         onRunAnalysis={handleRunAnalysis}

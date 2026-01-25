@@ -12,7 +12,7 @@ import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModule
 import { YearOverYearTrends } from "@/components/appraisals/analytics/YearOverYearTrends";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useTabState } from "@/hooks/useTabState";
 import {
   Target,
   ClipboardCheck,
@@ -41,7 +41,13 @@ export default function PerformanceDashboardPage() {
   const { t } = useLanguage();
   const { user, company } = useAuth();
   const { hasTabAccess } = useGranularPermissions();
-  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { analyticsOpen: false },
+  });
+  
+  const { analyticsOpen } = tabState;
+  const setAnalyticsOpen = (v: boolean) => setTabState({ analyticsOpen: v });
 
   const allModules = {
     // Performance Reviews
