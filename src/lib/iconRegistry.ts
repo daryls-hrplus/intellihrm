@@ -62,7 +62,7 @@ import {
   // Benefits icons
   Gift, Stethoscope, Scale,
   // Performance icons
-  ClipboardCheck, MessageCircle,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
