@@ -118,6 +118,7 @@ export const ModuleDocumentationPage = lazy(() => import('@/pages/enablement/Mod
 export const LnDQuickStartPage = lazy(() => import('@/pages/enablement/LnDQuickStartPage'));
 export const PlatformStandardsPage = lazy(() => import('@/pages/enablement/PlatformStandardsPage'));
 export const WorkspaceNavigationStandardPage = lazy(() => import('@/pages/enablement/WorkspaceNavigationStandardPage'));
+export const Feedback360ManualPage = lazy(() => import('@/pages/enablement/Feedback360ManualPage'));
 
 // Marketing pages
 export const LandingPage = lazy(() => import('@/pages/marketing/LandingPage'));

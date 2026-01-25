@@ -13,6 +13,7 @@ import {
   FileText,
   ChevronRight,
   Clock,
+  Radar,
 } from "lucide-react";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
@@ -93,6 +94,17 @@ const manuals = [
     sections: 65,
     href: "/enablement/manuals/time-attendance",
     version: "2.4",
+  },
+  {
+    id: "feedback-360",
+    title: "360 Feedback Guide",
+    description: "Multi-rater feedback system including cycles, anonymity, rater management, AI insights, and development themes",
+    icon: Radar,
+    color: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+    badgeColor: "bg-cyan-500/10 text-cyan-700 border-cyan-500/30",
+    sections: 55,
+    href: "/enablement/manuals/feedback-360",
+    version: "1.0",
   },
 ];
 
