@@ -8,8 +8,9 @@ import { NineBoxAssessmentDialog } from "@/components/succession/NineBoxAssessme
 import { useSuccession, NineBoxAssessment } from "@/hooks/useSuccession";
 import { supabase } from "@/integrations/supabase/client";
 import { Grid3X3, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -20,7 +21,13 @@ interface Company {
 export default function NineBoxPage() {
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
   const [showAssessmentDialog, setShowAssessmentDialog] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<NineBoxAssessment | null>(null);
   const [nineBoxAssessments, setNineBoxAssessments] = useState<NineBoxAssessment[]>([]);
@@ -50,7 +57,9 @@ export default function NineBoxPage() {
     
     if (data && data.length > 0) {
       setCompanies(data);
-      setSelectedCompanyId(data[0].id);
+      if (!selectedCompanyId) {
+        setTabState({ selectedCompanyId: data[0].id });
+      }
     }
   };
 
@@ -95,7 +104,7 @@ export default function NineBoxPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>

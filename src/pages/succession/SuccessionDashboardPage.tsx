@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import { TrendingUp, Grid3X3, Users, Target, AlertTriangle, BarChart3, BookOpen, Route, UserCheck, TrendingDown, Layers } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -21,7 +22,13 @@ export default function SuccessionDashboardPage() {
   const { t } = useLanguage();
   const { hasTabAccess } = useGranularPermissions();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
   
   const [nineBoxAssessments, setNineBoxAssessments] = useState<NineBoxAssessment[]>([]);
   const [talentPools, setTalentPools] = useState<any[]>([]);
@@ -54,7 +61,9 @@ export default function SuccessionDashboardPage() {
     
     if (data && data.length > 0) {
       setCompanies(data);
-      setSelectedCompanyId(data[0].id);
+      if (!selectedCompanyId) {
+        setTabState({ selectedCompanyId: data[0].id });
+      }
     }
   };
 
@@ -158,7 +167,7 @@ export default function SuccessionDashboardPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>

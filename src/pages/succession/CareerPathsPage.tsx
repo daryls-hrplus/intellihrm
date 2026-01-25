@@ -7,6 +7,7 @@ import { CareerPathsTab } from "@/components/succession/CareerPathsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { Route } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -17,7 +18,13 @@ interface Company {
 export default function CareerPathsPage() {
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
 
   useEffect(() => {
     loadCompanies();
@@ -32,7 +39,9 @@ export default function CareerPathsPage() {
     
     if (data && data.length > 0) {
       setCompanies(data);
-      setSelectedCompanyId(data[0].id);
+      if (!selectedCompanyId) {
+        setTabState({ selectedCompanyId: data[0].id });
+      }
     }
   };
 
@@ -61,7 +70,7 @@ export default function CareerPathsPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>
