@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { Network, Building2, ArrowLeft, Plus, Edit2, Trash2, ChevronDown, ChevronRight, FolderTree, Loader2 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,6 +76,7 @@ const defaultFormData: FormData = {
 };
 
 export default function DivisionsPage() {
+  const { navigateToList } = useWorkspaceNavigation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [divisions, setDivisions] = useState<Division[]>([]);
@@ -301,12 +302,18 @@ export default function DivisionsPage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <NavLink
-              to="/workforce"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted"
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigateToList({
+                route: "/workforce",
+                title: "Workforce",
+                moduleCode: "workforce",
+              })}
+              className="flex h-10 w-10 items-center justify-center rounded-lg"
             >
               <ArrowLeft className="h-5 w-5" />
-            </NavLink>
+            </Button>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
                 <Network className="h-5 w-5 text-violet-500" />

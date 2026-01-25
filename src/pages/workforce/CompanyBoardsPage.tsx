@@ -44,9 +44,9 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Landmark, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
-import { NavLink } from "react-router-dom";
 import { getTodayString } from "@/utils/dateUtils";
 import { BoardMembersDialog } from "@/components/workforce/BoardMembersDialog";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface Company {
   id: string;
@@ -108,6 +108,7 @@ const emptyForm = {
 
 export default function CompanyBoardsPage() {
   const { t } = useLanguage();
+  const { navigateToList } = useWorkspaceNavigation();
   const [boards, setBoards] = useState<CompanyBoard[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -350,10 +351,19 @@ export default function CompanyBoardsPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <NavLink to="/workforce" className="hover:text-foreground flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="h-auto p-0 hover:bg-transparent hover:text-foreground flex items-center gap-1"
+            onClick={() => navigateToList({
+              route: "/workforce",
+              title: "Workforce",
+              moduleCode: "workforce",
+            })}
+          >
             <ChevronLeft className="h-4 w-4" />
             Workforce
-          </NavLink>
+          </Button>
           <span>/</span>
           <span className="text-foreground">Company Boards</span>
         </div>
