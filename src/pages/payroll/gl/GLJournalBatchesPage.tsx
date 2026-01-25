@@ -12,8 +12,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Search, ChevronDown, ChevronRight, Download, FileText, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PayrollFilters, usePayrollFilters } from '@/components/payroll/PayrollFilters';
+import { PayrollFilters } from '@/components/payroll/PayrollFilters';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import { useTabState } from '@/hooks/useTabState';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface JournalBatch {
   id: string;
@@ -70,14 +72,26 @@ interface CostCenter {
 const GLJournalBatchesPage = () => {
   const { t } = useTranslation();
   usePageAudit('gl_journal_batches', 'Payroll');
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      searchQuery: "",
+      expandedBatches: [] as string[],
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId, searchQuery, expandedBatches } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
+  const setExpandedBatches = (v: string[]) => setTabState({ expandedBatches: v });
+  
   const [batches, setBatches] = useState<JournalBatch[]>([]);
   const [entries, setEntries] = useState<Record<string, JournalEntry[]>>({});
   const [glAccounts, setGLAccounts] = useState<GLAccount[]>([]);
   const [costCenters, setCostCenters] = useState<CostCenter[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [expandedBatches, setExpandedBatches] = useState<string[]>([]);
 
   useEffect(() => {
     if (selectedCompanyId) {
@@ -134,9 +148,10 @@ const GLJournalBatchesPage = () => {
     if (!expandedBatches.includes(batchId)) {
       await loadEntries(batchId);
     }
-    setExpandedBatches(prev =>
-      prev.includes(batchId) ? prev.filter(b => b !== batchId) : [...prev, batchId]
-    );
+    const newExpanded = expandedBatches.includes(batchId) 
+      ? expandedBatches.filter(b => b !== batchId) 
+      : [...expandedBatches, batchId];
+    setExpandedBatches(newExpanded);
   };
 
   const getAccountName = (id: string) => {

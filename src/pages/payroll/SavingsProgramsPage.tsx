@@ -14,6 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { SavingsProgramsList } from "@/components/payroll/savings/SavingsProgramsList";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Company {
   id: string;
@@ -22,9 +24,20 @@ interface Company {
 
 export default function SavingsProgramsPage() {
   usePageAudit('savings_programs', 'Payroll');
+  const { company } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [isLoadingCompanies, setIsLoadingCompanies] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      activeTab: "programs",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId, activeTab } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -99,7 +112,7 @@ export default function SavingsProgramsPage() {
 
         {/* Main Content */}
         {selectedCompanyId ? (
-          <Tabs defaultValue="programs" className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList>
               <TabsTrigger value="programs" className="gap-2">
                 <Settings className="h-4 w-4" />

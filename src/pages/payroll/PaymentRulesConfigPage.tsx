@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTabState } from "@/hooks/useTabState";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -89,6 +90,15 @@ const DEFAULT_TIER: Partial<OvertimeRateTier> = {
 
 export default function PaymentRulesConfigPage() {
   usePageAudit('payment_rules_config', 'Payroll');
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "rules",
+    },
+  });
+  const { activeTab } = tabState;
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+  
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [rules, setRules] = useState<PayrollRule[]>([]);
   const [tiers, setTiers] = useState<OvertimeRateTier[]>([]);
@@ -333,7 +343,7 @@ export default function PaymentRulesConfigPage() {
           </div>
         </div>
 
-      <Tabs defaultValue="rules" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="rules" className="gap-2">
             <Settings2 className="h-4 w-4" />

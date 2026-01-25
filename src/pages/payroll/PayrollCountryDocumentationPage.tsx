@@ -21,8 +21,10 @@ import {
   AlertCircle,
   Info
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { Wallet } from "lucide-react";
 
 // Country name mapping
 const COUNTRY_NAMES: Record<string, string> = {
@@ -71,9 +73,17 @@ const COUNTRY_REGIONS: Record<string, string> = {
 export default function PayrollCountryDocumentationPage() {
   usePageAudit('payroll_country_documentation', 'Payroll');
   
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState<string>("all");
+  const { navigateToList } = useWorkspaceNavigation();
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchTerm: "",
+      selectedRegion: "all",
+    },
+  });
+  const { searchTerm, selectedRegion } = tabState;
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
+  const setSelectedRegion = (v: string) => setTabState({ selectedRegion: v });
 
   // Fetch statutory deduction types
   const { data: statutoryTypes } = useQuery({
@@ -219,7 +229,12 @@ export default function PayrollCountryDocumentationPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/payroll")}>
+        <Button variant="ghost" size="icon" onClick={() => navigateToList({
+          route: "/payroll",
+          title: "Payroll",
+          moduleCode: "payroll",
+          icon: Wallet,
+        })}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>

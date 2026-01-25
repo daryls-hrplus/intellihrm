@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -50,12 +52,22 @@ export default function TaxAllowancesPage() {
   usePageAudit('tax_allowances', 'Payroll');
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { company } = useAuth();
   const [allowances, setAllowances] = useState<TaxAllowance[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
-  const [searchTerm, setSearchTerm] = useState("");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompany: company?.id || "",
+      searchTerm: "",
+    },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany, searchTerm } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
