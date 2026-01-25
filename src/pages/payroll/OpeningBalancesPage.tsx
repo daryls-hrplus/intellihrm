@@ -19,10 +19,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Upload, Pencil, Trash2, FileSpreadsheet, AlertCircle, Building2, History, Globe, Users } from "lucide-react";
 import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { useNavigate } from "react-router-dom";
 import { useCountryStatutories, usePayGroups } from "@/hooks/useCountryStatutories";
 import { DynamicStatutoryFields } from "@/components/payroll/DynamicStatutoryFields";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Company {
   id: string;
@@ -88,15 +89,35 @@ const taxYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
 const OpeningBalancesPage: React.FC = () => {
   usePageAudit('opening_balances', 'Payroll');
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { company } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentYear = new Date().getFullYear();
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      selectedPayGroupId: "",
+      selectedTaxYear: currentYear,
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, selectedPayGroupId, selectedTaxYear } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v, selectedPayGroupId: "" });
+  const setSelectedPayGroupId = (v: string) => setTabState({ selectedPayGroupId: v });
+  const setSelectedTaxYear = (v: number) => setTabState({ selectedTaxYear: v });
+  
+  // Sync company from auth if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id]);
   
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [selectedPayGroupId, setSelectedPayGroupId] = useState<string>("");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [openingBalances, setOpeningBalances] = useState<OpeningBalance[]>([]);
-  const [selectedTaxYear, setSelectedTaxYear] = useState<number>(currentYear);
   const [isLoading, setIsLoading] = useState(false);
   
   // Country-specific statutory hook
@@ -727,9 +748,11 @@ const OpeningBalancesPage: React.FC = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/payroll/historical-import')}>
-              <History className="w-4 h-4 mr-2" />
-              Full Payroll Import
+            <Button variant="outline" asChild>
+              <a href="/payroll/historical-import">
+                <History className="w-4 h-4 mr-2" />
+                Full Payroll Import
+              </a>
             </Button>
             <Button variant="outline" onClick={() => setShowImport(true)} disabled={!selectedCompanyId || !selectedPayGroupId}>
               <Upload className="w-4 h-4 mr-2" />

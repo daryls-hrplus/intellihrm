@@ -56,6 +56,9 @@ import {
   // Leave Management icons
   Banknote, Baby, ShieldCheck, Ban, Percent, BarChart3, Calculator,
   CheckCircle,
+  // Payroll icons
+  Receipt, Coins, PiggyBank, ArrowRightLeft, Sliders, Flag,
+  Link2, Settings2, Archive, CreditCard, Landmark, HandCoins,
   type LucideIcon,
 } from "lucide-react";
 
@@ -190,6 +193,20 @@ export const iconRegistry: Record<string, LucideIcon> = {
   CalendarCheck,
   RotateCcw,
   PartyPopper,
+  // Payroll icons
+  Receipt,
+  Coins,
+  PiggyBank,
+  ArrowRightLeft,
+  Sliders,
+  Flag,
+  Link2,
+  Settings2,
+  Archive,
+  CreditCard,
+  Landmark,
+  HandCoins,
+  FileSpreadsheet,
 };
 
 /**

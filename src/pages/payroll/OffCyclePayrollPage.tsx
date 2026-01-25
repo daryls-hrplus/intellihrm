@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { PayrollFilters } from "@/components/payroll/PayrollFilters";
 import { checkPayrollExecutionLock, showPayrollLockMessage } from "@/hooks/usePayrollExecutionLock";
 import { useGLCalculation } from "@/hooks/useGLCalculation";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Employee {
   id: string;
@@ -81,15 +82,35 @@ interface OffCycleRun {
 export default function OffCyclePayrollPage() {
   usePageAudit('off_cycle_payroll', 'Payroll');
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
+  const { user, company } = useAuth();
   const { checkGLConfigured, checkGLCalculated, calculateGL } = useGLCalculation();
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      selectedPayGroupId: "all",
+      searchTerm: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, selectedPayGroupId, searchTerm } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v, selectedPayGroupId: "all" });
+  const setSelectedPayGroupId = (v: string) => setTabState({ selectedPayGroupId: v });
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
+  
+  // Sync company from auth if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id]);
   
   const [isLoading, setIsLoading] = useState(false);
   const [offCycleRuns, setOffCycleRuns] = useState<OffCycleRun[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(new Set());
-  const [searchTerm, setSearchTerm] = useState("");
   const [paidRuns, setPaidRuns] = useState<PayrollRun[]>([]);
   const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([]);
   const [payGroupGLConfigured, setPayGroupGLConfigured] = useState(false);
