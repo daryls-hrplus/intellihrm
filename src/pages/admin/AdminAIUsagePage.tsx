@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Bot, Users, TrendingUp, Activity, Settings, Search, Edit2, DollarSign, Calendar, Volume2, VolumeX, Key } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 interface AIBudgetTier {
   id: string;
@@ -89,11 +90,19 @@ export default function AdminAIUsagePage() {
   usePageAudit('ai_usage', 'Admin');
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState<string>("all");
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchTerm: "",
+      selectedCompany: "all",
+      selectedDepartment: "all",
+      selectedYear: new Date().getFullYear(),
+      selectedMonth: new Date().getMonth() + 1,
+    },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { searchTerm, selectedCompany, selectedDepartment, selectedYear, selectedMonth } = tabState;
+
   const [editTierDialogOpen, setEditTierDialogOpen] = useState(false);
   const [selectedTier, setSelectedTier] = useState<AIBudgetTier | null>(null);
   const [editTierBudget, setEditTierBudget] = useState("");
@@ -317,8 +326,7 @@ export default function AdminAIUsagePage() {
   };
 
   const handleCompanyChange = (value: string) => {
-    setSelectedCompany(value);
-    setSelectedDepartment("all");
+    setTabState({ selectedCompany: value, selectedDepartment: "all" });
   };
 
   const openEditTier = (tier: AIBudgetTier) => {
@@ -407,7 +415,7 @@ export default function AdminAIUsagePage() {
             
             <div className="flex flex-col gap-1">
               <Label className="text-xs text-muted-foreground">{t("common.department")}</Label>
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+              <Select value={selectedDepartment} onValueChange={(v) => setTabState({ selectedDepartment: v })}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={t("common.allDepartments")} />
                 </SelectTrigger>
@@ -434,7 +442,7 @@ export default function AdminAIUsagePage() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Label>{t("admin.modules.aiUsage.year")}:</Label>
-                <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                <Select value={selectedYear.toString()} onValueChange={(v) => setTabState({ selectedYear: parseInt(v) })}>
                   <SelectTrigger className="w-[100px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -445,7 +453,7 @@ export default function AdminAIUsagePage() {
               </div>
               <div className="flex items-center gap-2">
                 <Label>{t("admin.modules.aiUsage.month")}:</Label>
-                <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
+                <Select value={selectedMonth.toString()} onValueChange={(v) => setTabState({ selectedMonth: parseInt(v) })}>
                   <SelectTrigger className="w-[140px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -523,7 +531,7 @@ export default function AdminAIUsagePage() {
                     <Input
                       placeholder={t("common.search")}
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => setTabState({ searchTerm: e.target.value })}
                       className="pl-8"
                     />
                   </div>

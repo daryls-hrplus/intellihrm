@@ -42,6 +42,9 @@ import {
   FileText,
   Heart
 } from 'lucide-react';
+import { useTabState } from '@/hooks/useTabState';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 
 interface ModuleDataCount {
   module: string;
@@ -153,9 +156,17 @@ const MODULE_TABLE_CONFIG: { module: string; icon: React.ElementType; tables: { 
 
 export default function DataManagementPage() {
   const { isPopulating, isPurging, isLoadingStats, populateData, purgeData, getPurgeStatistics } = useDataManagement();
-  
-  const [selectedDataSet, setSelectedDataSet] = useState<DataSet>('standard');
-  const [selectedPurgeLevel, setSelectedPurgeLevel] = useState<PurgeLevel>('transactions_only');
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "populate",
+      selectedDataSet: "standard" as DataSet,
+      selectedPurgeLevel: "transactions_only" as PurgeLevel,
+    },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab, selectedDataSet, selectedPurgeLevel } = tabState;
+
   const [confirmationText, setConfirmationText] = useState('');
   const [purgeStats, setPurgeStats] = useState<TableStatistics[]>([]);
   const [populationResult, setPopulationResult] = useState<PopulationResult | null>(null);
@@ -243,27 +254,32 @@ export default function DataManagementPage() {
   const totalProtected = purgeStats.reduce((sum, s) => sum + s.protected_records, 0);
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Data Management</h1>
-        <p className="text-muted-foreground">Populate demo data or purge transactional records</p>
-      </div>
+    <AppLayout>
+      <div className="container mx-auto py-6 space-y-6">
+        <Breadcrumbs items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Data Management" },
+        ]} />
+        <div>
+          <h1 className="text-2xl font-bold">Data Management</h1>
+          <p className="text-muted-foreground">Populate demo data or purge transactional records</p>
+        </div>
 
-      <Tabs defaultValue="populate" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="populate" className="gap-2">
-            <Database className="h-4 w-4" />
-            Populate Data
-          </TabsTrigger>
-          <TabsTrigger value="purge" className="gap-2">
-            <Trash2 className="h-4 w-4" />
-            Purge Data
-          </TabsTrigger>
-          <TabsTrigger value="verify" className="gap-2" onClick={() => !moduleDataCounts.length && fetchVerificationReport()}>
-            <FileBarChart className="h-4 w-4" />
-            Verification Report
-          </TabsTrigger>
-        </TabsList>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="populate" className="gap-2">
+              <Database className="h-4 w-4" />
+              Populate Data
+            </TabsTrigger>
+            <TabsTrigger value="purge" className="gap-2">
+              <Trash2 className="h-4 w-4" />
+              Purge Data
+            </TabsTrigger>
+            <TabsTrigger value="verify" className="gap-2" onClick={() => !moduleDataCounts.length && fetchVerificationReport()}>
+              <FileBarChart className="h-4 w-4" />
+              Verification Report
+            </TabsTrigger>
+          </TabsList>
 
         <TabsContent value="populate" className="space-y-4">
           <Card>
@@ -276,7 +292,7 @@ export default function DataManagementPage() {
             <CardContent className="space-y-6">
               <RadioGroup 
                 value={selectedDataSet} 
-                onValueChange={(v) => setSelectedDataSet(v as DataSet)}
+                onValueChange={(v) => setTabState({ selectedDataSet: v as DataSet })}
                 className="space-y-3"
               >
                 {Object.entries(DATA_SET_DESCRIPTIONS).map(([key, desc]) => (
@@ -362,7 +378,7 @@ export default function DataManagementPage() {
               <RadioGroup 
                 value={selectedPurgeLevel} 
                 onValueChange={(v) => {
-                  setSelectedPurgeLevel(v as PurgeLevel);
+                  setTabState({ selectedPurgeLevel: v as PurgeLevel });
                   setPurgeStats([]);
                 }}
                 className="space-y-3"
@@ -621,6 +637,7 @@ export default function DataManagementPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
