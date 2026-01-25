@@ -6,21 +6,43 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePayroll } from "@/hooks/usePayroll";
-import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { PayrollFilters } from "@/components/payroll/PayrollFilters";
 import { FileSpreadsheet, TrendingUp, DollarSign, Users, Calendar, Download, Sparkles, LayoutGrid } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { useTranslation } from "react-i18next";
 import { AIReportBuilder } from "@/components/payroll/AIReportBuilder";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function PayrollReportsPage() {
   const { t } = useTranslation();
   usePageAudit('payroll_reports', 'Payroll');
   
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  const { company } = useAuth();
   const { fetchPayrollAnalytics, isLoading } = usePayroll();
   
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      selectedYear: new Date().getFullYear(),
+      activeTab: "trends",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, selectedYear, activeTab } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSelectedYear = (v: number) => setTabState({ selectedYear: v });
+  
+  // Sync company from auth if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id]);
+  
   const [analytics, setAnalytics] = useState<{
     totalPayrollRuns: number;
     totalGrossPay: number;
@@ -167,7 +189,7 @@ export default function PayrollReportsPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="trends">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="trends">{t("payroll.reports.payrollTrendsTab")}</TabsTrigger>
             <TabsTrigger value="breakdown">{t("payroll.reports.costBreakdownTab")}</TabsTrigger>

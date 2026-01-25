@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,14 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck, BookOpen, Globe, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck, BookOpen, Globe, Building2, Wallet } from "lucide-react";
 import { PayrollCalendarGenerator } from "@/components/payroll/PayrollCalendarGenerator";
 import { toast } from "sonner";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
-import { useNavigate } from "react-router-dom";
-import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { PayrollFilters } from "@/components/payroll/PayrollFilters";
 import { useTranslation } from "react-i18next";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PayGroupFormData {
   name: string;
@@ -39,9 +41,28 @@ export default function PayGroupsPage() {
   const { t } = useTranslation();
   usePageAudit('pay_groups', 'Payroll');
   
-  const navigate = useNavigate();
+  const { company } = useAuth();
+  const { navigateToList } = useWorkspaceNavigation();
   const queryClient = useQueryClient();
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  
+  // Sync company from auth if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id]);
+  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<PayGroupFormData>({
@@ -193,7 +214,16 @@ export default function PayGroupsPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/payroll")}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => navigateToList({
+            route: "/payroll",
+            title: "Payroll",
+            moduleCode: "payroll",
+            icon: Wallet,
+          })}
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>

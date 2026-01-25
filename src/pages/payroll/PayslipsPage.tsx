@@ -24,6 +24,8 @@ import html2canvas from "html2canvas";
 import { toast } from "sonner";
 import { usePageAudit } from "@/hooks/usePageAudit";
 
+import { useTabState } from "@/hooks/useTabState";
+
 export default function PayslipsPage() {
   const { t } = useTranslation();
   usePageAudit('payslips', 'Payroll');
@@ -32,10 +34,21 @@ export default function PayslipsPage() {
   const { fetchPayslips, isLoading } = usePayroll();
   const { fetchDefaultTemplate } = usePayslipTemplates();
   
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: "",
+      selectedYear: "all",
+      selectedPeriod: "all",
+    },
+  });
+  
+  const { searchQuery, selectedYear, selectedPeriod } = tabState;
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
+  const setSelectedYear = (v: string) => setTabState({ selectedYear: v });
+  const setSelectedPeriod = (v: string) => setTabState({ selectedPeriod: v });
+  
   const [payslips, setPayslips] = useState<Payslip[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [signDialogOpen, setSignDialogOpen] = useState(false);

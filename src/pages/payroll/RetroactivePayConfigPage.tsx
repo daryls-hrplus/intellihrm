@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,14 +21,17 @@ import {
   DollarSign,
   Percent,
   Gift,
-  Eye
+  Eye,
+  Wallet
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
-import { useNavigate } from "react-router-dom";
-import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { PayrollFilters } from "@/components/payroll/PayrollFilters";
 import { useRetroactivePay, RetroactivePayConfig, RetroactivePayConfigItem } from "@/hooks/useRetroactivePay";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ConfigFormData {
   config_name: string;
@@ -50,9 +53,30 @@ interface ItemFormData {
 export default function RetroactivePayConfigPage() {
   usePageAudit('retroactive_pay_config', 'Payroll');
   
-  const navigate = useNavigate();
+  const { company } = useAuth();
+  const { navigateToList } = useWorkspaceNavigation();
   const queryClient = useQueryClient();
-  const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      selectedConfigId: null as string | null,
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, selectedConfigId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v, selectedConfigId: null });
+  const setSelectedConfigId = (v: string | null) => setTabState({ selectedConfigId: v });
+  
+  // Sync company from auth if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id]);
+  
   const {
     isLoading: hookLoading,
     createConfig,
@@ -69,7 +93,6 @@ export default function RetroactivePayConfigPage() {
   const [isItemDialogOpen, setIsItemDialogOpen] = useState(false);
   const [editingConfigId, setEditingConfigId] = useState<string | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [selectedConfigId, setSelectedConfigId] = useState<string | null>(null);
 
   const [configFormData, setConfigFormData] = useState<ConfigFormData>({
     config_name: "",
@@ -355,7 +378,16 @@ export default function RetroactivePayConfigPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/payroll")}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => navigateToList({
+            route: "/payroll",
+            title: "Payroll",
+            moduleCode: "payroll",
+            icon: Wallet,
+          })}
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
@@ -586,14 +618,19 @@ export default function RetroactivePayConfigPage() {
                     <div className="flex items-center justify-end gap-2 pt-4 border-t">
                       <Button
                         variant="outline"
-                        onClick={() => generateMutation.mutate(selectedConfigId)}
+                        onClick={() => generateMutation.mutate(selectedConfigId!)}
                         disabled={generateMutation.isPending}
                       >
                         <Calculator className="h-4 w-4 mr-2" />
                         Generate Calculations
                       </Button>
                       <Button
-                        onClick={() => navigate(`/payroll/retroactive-pay/generate/${selectedConfigId}`)}
+                        onClick={() => navigateToList({
+                          route: `/payroll/retroactive-pay/generate/${selectedConfigId}`,
+                          title: "Retroactive Pay Calculations",
+                          moduleCode: "payroll",
+                          icon: Calculator,
+                        })}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Calculations
@@ -604,7 +641,12 @@ export default function RetroactivePayConfigPage() {
                   {selectedConfig?.status !== "draft" && (
                     <div className="flex items-center justify-end gap-2 pt-4 border-t">
                       <Button
-                        onClick={() => navigate(`/payroll/retroactive-pay/generate/${selectedConfigId}`)}
+                        onClick={() => navigateToList({
+                          route: `/payroll/retroactive-pay/generate/${selectedConfigId}`,
+                          title: "Retroactive Pay Calculations",
+                          moduleCode: "payroll",
+                          icon: Calculator,
+                        })}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Calculations

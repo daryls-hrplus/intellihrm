@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { usePayroll, PayrollRun, PayPeriod, EmployeePayroll } from "@/hooks/usePayroll";
 import { checkPayrollExecutionLock, showPayrollLockMessage } from "@/hooks/usePayrollExecutionLock";
 import { useGLCalculation } from "@/hooks/useGLCalculation";
-import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { PayrollFilters } from "@/components/payroll/PayrollFilters";
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
 import { BulkPayslipDistribution } from "@/components/payroll/BulkPayslipDistribution";
@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useTabState } from "@/hooks/useTabState";
 
 interface ExtendedPayrollRun extends PayrollRun {
   calculation_started_at?: string | null;
@@ -220,8 +221,30 @@ export default function PayrollProcessingPage() {
   const { t } = useTranslation();
   usePageAudit('payroll_processing', 'Payroll');
   
-  const { hasRole } = useAuth();
-  const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
+  const { hasRole, company } = useAuth();
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      selectedPayGroupId: "all",
+      expandedRunId: null as string | null,
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, selectedPayGroupId, expandedRunId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v, selectedPayGroupId: "all" });
+  const setSelectedPayGroupId = (v: string) => setTabState({ selectedPayGroupId: v });
+  const setExpandedRunId = (v: string | null) => setTabState({ expandedRunId: v });
+  
+  // Sync company from auth if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id]);
+  
   const {
     isLoading,
     fetchPayPeriods,
@@ -249,7 +272,6 @@ export default function PayrollProcessingPage() {
   const [payrollRuns, setPayrollRuns] = useState<ExtendedPayrollRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<ExtendedPayrollRun | null>(null);
   const [employeePayroll, setEmployeePayroll] = useState<EmployeePayroll[]>([]);
-  const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
   const [expandedEmployees, setExpandedEmployees] = useState<EmployeePayroll[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeePayroll | null>(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
