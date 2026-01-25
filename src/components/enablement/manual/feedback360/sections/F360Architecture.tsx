@@ -30,7 +30,7 @@ export function F360Architecture() {
       </h3>
       
       <p className="text-muted-foreground">
-        The 360 Feedback module is built on <strong>34+ database tables</strong> organized into 8 functional domains. 
+        The 360 Feedback module is built on <strong>45+ database tables</strong> organized into 10 functional domains. 
         This section covers the data model, entity relationships, integration flows, and AI services architecture.
       </p>
 
@@ -167,6 +167,30 @@ export function F360Architecture() {
                 <li><code>appraisal_participants</code></li>
                 <li><code>continuous_feedback</code></li>
                 <li><code>idp_recommendations</code></li>
+              </ul>
+            </div>
+            
+            {/* Notifications & Reminders */}
+            <div className="p-3 rounded-lg border bg-orange-500/5">
+              <h4 className="font-semibold text-sm text-orange-700 mb-2">Notifications & Reminders</h4>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                <li><code>reminder_event_types</code></li>
+                <li><code>reminder_rules</code></li>
+                <li><code>employee_reminders</code></li>
+                <li><code>reminder_delivery_log</code></li>
+                <li><code>employee_reminder_preferences</code></li>
+              </ul>
+            </div>
+            
+            {/* Workflows */}
+            <div className="p-3 rounded-lg border bg-teal-500/5">
+              <h4 className="font-semibold text-sm text-teal-700 mb-2">Workflows</h4>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                <li><code>workflow_templates</code></li>
+                <li><code>workflow_steps</code></li>
+                <li><code>workflow_instances</code></li>
+                <li><code>workflow_step_actions</code></li>
+                <li><code>workflow_audit_events</code></li>
               </ul>
             </div>
             
