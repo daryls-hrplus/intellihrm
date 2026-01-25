@@ -1,26 +1,43 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, Users, Calendar, CheckCircle, Clock } from "lucide-react";
-import { useState } from "react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function HSEToolboxTalksPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
-  const [searchTerm, setSearchTerm] = useState("");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+      searchTerm: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId, searchTerm } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
 
   const { data: meetings, isLoading: meetingsLoading } = useQuery({
     queryKey: ["hse-safety-meetings", selectedCompanyId],
@@ -73,8 +90,15 @@ export default function HSEToolboxTalksPage() {
             <p className="text-muted-foreground">{t("hseModule.toolboxTalks.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
-            <LeaveCompanyFilter selectedCompanyId={selectedCompanyId} onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} />
-            <DepartmentFilter companyId={selectedCompanyId} selectedDepartmentId={selectedDepartmentId} onDepartmentChange={setSelectedDepartmentId} />
+            <LeaveCompanyFilter 
+              selectedCompanyId={selectedCompanyId} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id, selectedDepartmentId: "all" })} 
+            />
+            <DepartmentFilter 
+              companyId={selectedCompanyId} 
+              selectedDepartmentId={selectedDepartmentId} 
+              onDepartmentChange={(id) => setTabState({ selectedDepartmentId: id })} 
+            />
             <Button><Plus className="h-4 w-4 mr-2" />{t("hseModule.toolboxTalks.scheduleMeeting")}</Button>
           </div>
         </div>
@@ -104,7 +128,12 @@ export default function HSEToolboxTalksPage() {
               <CardTitle>{t("hseModule.toolboxTalks.meetingsList")}</CardTitle>
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder={t("hseModule.toolboxTalks.searchMeetings")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
+                <Input 
+                  placeholder={t("hseModule.toolboxTalks.searchMeetings")} 
+                  value={searchTerm} 
+                  onChange={(e) => setTabState({ searchTerm: e.target.value })} 
+                  className="pl-9" 
+                />
               </div>
             </div>
           </CardHeader>
