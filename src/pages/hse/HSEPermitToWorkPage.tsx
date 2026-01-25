@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,12 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -37,15 +39,30 @@ import {
   CheckCircle,
   XCircle
 } from "lucide-react";
-import { useState } from "react";
 
 export default function HSEPermitToWorkPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("permits");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+      searchQuery: "",
+      statusFilter: "all",
+      activeTab: "permits",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId, searchQuery, statusFilter, activeTab } = tabState;
+
+  // Initialize company from auth context
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
 
   const { data: permitTypes, isLoading: typesLoading } = useQuery({
     queryKey: ["hse-permit-types", selectedCompanyId],
@@ -152,12 +169,12 @@ export default function HSEPermitToWorkPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id, selectedDepartmentId: "all" })} 
             />
             <DepartmentFilter
               companyId={selectedCompanyId}
               selectedDepartmentId={selectedDepartmentId}
-              onDepartmentChange={setSelectedDepartmentId}
+              onDepartmentChange={(id) => setTabState({ selectedDepartmentId: id })}
             />
           </div>
         </div>
@@ -184,7 +201,7 @@ export default function HSEPermitToWorkPage() {
           })}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="permits">{t("hseModule.permitToWork.tabs.permits")}</TabsTrigger>
@@ -203,11 +220,11 @@ export default function HSEPermitToWorkPage() {
                 <Input
                   placeholder={t("hseModule.permitToWork.searchPermits")}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setTabState({ searchQuery: e.target.value })}
                   className="pl-9"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>

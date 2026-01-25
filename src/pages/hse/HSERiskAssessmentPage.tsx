@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useHSE, HSERiskAssessment, HSEHazard } from "@/hooks/useHSE";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -30,19 +33,16 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/hooks/useLanguage";
 import {
   Shield,
   Plus,
   Search,
-  ChevronLeft,
   AlertTriangle,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
-import { NavLink } from "react-router-dom";
 
 const riskLevels = [
   { value: "low", label: "Low", color: "bg-success/10 text-success" },
@@ -70,13 +70,30 @@ const hazardTypes = [
 
 export default function HSERiskAssessmentPage() {
   const { t } = useLanguage();
-  const [companyId, setCompanyId] = useState<string>("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+      statusFilter: "all",
+      expandedId: null as string | null,
+    },
+    syncToUrl: ["selectedCompanyId", "statusFilter"],
+  });
+
+  const { selectedCompanyId, searchTerm, statusFilter, expandedId } = tabState;
+
+  // Initialize company from auth context
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [hazardDialogOpen, setHazardDialogOpen] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<HSERiskAssessment | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<HSERiskAssessment>>({});
   const [hazardFormData, setHazardFormData] = useState<Partial<HSEHazard>>({});
 
@@ -89,17 +106,17 @@ export default function HSERiskAssessmentPage() {
   });
 
   const { data: departments = [] } = useQuery({
-    queryKey: ["departments", companyId],
+    queryKey: ["departments", selectedCompanyId],
     queryFn: async () => {
-      if (!companyId) return [];
+      if (!selectedCompanyId) return [];
       const { data } = await supabase
         .from("departments")
         .select("id, name")
-        .eq("company_id", companyId)
+        .eq("company_id", selectedCompanyId)
         .eq("is_active", true);
       return data || [];
     },
-    enabled: !!companyId,
+    enabled: !!selectedCompanyId,
   });
 
   const {
@@ -109,7 +126,7 @@ export default function HSERiskAssessmentPage() {
     updateRiskAssessment,
     useHazards,
     createHazard,
-  } = useHSE(companyId || undefined);
+  } = useHSE(selectedCompanyId || undefined);
 
   const { data: hazards = [] } = useHazards(expandedId || undefined);
 
@@ -128,7 +145,7 @@ export default function HSERiskAssessmentPage() {
     } else {
       setSelectedAssessment(null);
       setFormData({
-        company_id: companyId,
+        company_id: selectedCompanyId,
         status: "draft",
         assessment_date: getTodayString(),
       });
@@ -176,10 +193,14 @@ export default function HSERiskAssessmentPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t("hseModule.title"), href: "/hse" },
+            { label: t("hseModule.riskAssessment.title") },
+          ]}
+        />
+
         <div className="flex items-center gap-4">
-          <NavLink to="/hse" className="text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-5 w-5" />
-          </NavLink>
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
             <Shield className="h-5 w-5 text-primary" />
           </div>
@@ -193,7 +214,7 @@ export default function HSERiskAssessmentPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-4">
-              <Select value={companyId} onValueChange={setCompanyId}>
+              <Select value={selectedCompanyId} onValueChange={(id) => setTabState({ selectedCompanyId: id })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
@@ -211,12 +232,12 @@ export default function HSERiskAssessmentPage() {
                 <Input
                   placeholder={t("hseModule.riskAssessment.searchAssessments")}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setTabState({ searchTerm: e.target.value })}
                   className="pl-9"
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>
@@ -230,7 +251,7 @@ export default function HSERiskAssessmentPage() {
                 </SelectContent>
               </Select>
 
-              <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
+              <Button onClick={() => handleOpenDialog()} disabled={!selectedCompanyId}>
                 <Plus className="mr-2 h-4 w-4" />
                 {t("hseModule.riskAssessment.newAssessment")}
               </Button>
@@ -276,7 +297,7 @@ export default function HSERiskAssessmentPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() =>
-                              setExpandedId(expandedId === assessment.id ? null : assessment.id)
+                              setTabState({ expandedId: expandedId === assessment.id ? null : assessment.id })
                             }
                           >
                             {expandedId === assessment.id ? (
@@ -434,11 +455,22 @@ export default function HSERiskAssessmentPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Location</Label>
-                  <Input
-                    value={formData.location || ""}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  />
+                  <Label>Overall Risk Level</Label>
+                  <Select
+                    value={formData.overall_risk_level || ""}
+                    onValueChange={(v) => setFormData({ ...formData, overall_risk_level: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select risk level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {riskLevels.map((r) => (
+                        <SelectItem key={r.value} value={r.value}>
+                          {r.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Assessment Date *</Label>
@@ -458,27 +490,9 @@ export default function HSERiskAssessmentPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Overall Risk Level</Label>
-                  <Select
-                    value={formData.overall_risk_level || ""}
-                    onValueChange={(v) => setFormData({ ...formData, overall_risk_level: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select risk level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {riskLevels.map((r) => (
-                        <SelectItem key={r.value} value={r.value}>
-                          {r.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
                   <Label>Status</Label>
                   <Select
-                    value={formData.status}
+                    value={formData.status || "draft"}
                     onValueChange={(v) => setFormData({ ...formData, status: v })}
                   >
                     <SelectTrigger>
@@ -501,34 +515,12 @@ export default function HSERiskAssessmentPage() {
                     rows={3}
                   />
                 </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Scope</Label>
-                  <Textarea
-                    value={formData.scope || ""}
-                    onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
-                    rows={2}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Recommendations</Label>
-                  <Textarea
-                    value={formData.recommendations || ""}
-                    onChange={(e) => setFormData({ ...formData, recommendations: e.target.value })}
-                    rows={2}
-                  />
-                </div>
               </div>
-
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={createRiskAssessment.isPending || updateRiskAssessment.isPending}
-                >
-                  {selectedAssessment ? "Update" : "Create"} Assessment
-                </Button>
+                <Button type="submit">{t("common.save")}</Button>
               </div>
             </form>
           </DialogContent>
@@ -536,9 +528,9 @@ export default function HSERiskAssessmentPage() {
 
         {/* Hazard Dialog */}
         <Dialog open={hazardDialogOpen} onOpenChange={setHazardDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Hazard</DialogTitle>
+              <DialogTitle>{t("hseModule.riskAssessment.hazards.addHazard")}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleAddHazard} className="space-y-4">
               <div className="space-y-2">
@@ -569,9 +561,9 @@ export default function HSERiskAssessmentPage() {
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Likelihood (1-5) *</Label>
+                  <Label>Likelihood (1-5)</Label>
                   <Input
                     type="number"
                     min={1}
@@ -580,14 +572,13 @@ export default function HSERiskAssessmentPage() {
                     onChange={(e) =>
                       setHazardFormData({
                         ...hazardFormData,
-                        likelihood: parseInt(e.target.value) || 1,
+                        likelihood: parseInt(e.target.value),
                       })
                     }
-                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Severity (1-5) *</Label>
+                  <Label>Severity (1-5)</Label>
                   <Input
                     type="number"
                     min={1}
@@ -596,10 +587,9 @@ export default function HSERiskAssessmentPage() {
                     onChange={(e) =>
                       setHazardFormData({
                         ...hazardFormData,
-                        severity: parseInt(e.target.value) || 1,
+                        severity: parseInt(e.target.value),
                       })
                     }
-                    required
                   />
                 </div>
               </div>
@@ -612,22 +602,11 @@ export default function HSERiskAssessmentPage() {
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Additional Controls Required</Label>
-                <Textarea
-                  value={hazardFormData.additional_controls || ""}
-                  onChange={(e) =>
-                    setHazardFormData({ ...hazardFormData, additional_controls: e.target.value })
-                  }
-                />
-              </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setHazardDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={createHazard.isPending}>
-                  Add Hazard
-                </Button>
+                <Button type="submit">{t("common.save")}</Button>
               </div>
             </form>
           </DialogContent>

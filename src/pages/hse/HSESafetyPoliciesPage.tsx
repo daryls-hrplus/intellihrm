@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useHSE, HSESafetyPolicy } from "@/hooks/useHSE";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,13 +39,11 @@ import {
   FileText,
   Plus,
   Search,
-  ChevronLeft,
   CheckCircle,
   Eye,
   Users,
 } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
-import { NavLink } from "react-router-dom";
 import { toast } from "sonner";
 
 const policyTypes = [
@@ -65,10 +65,26 @@ const statusOptions = [
 
 export default function HSESafetyPoliciesPage() {
   const { t } = useLanguage();
-  const { user } = useAuth();
-  const [companyId, setCompanyId] = useState<string>("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { user, company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+      statusFilter: "all",
+    },
+    syncToUrl: ["selectedCompanyId", "statusFilter"],
+  });
+
+  const { selectedCompanyId, searchTerm, statusFilter } = tabState;
+
+  // Initialize company from auth context
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedPolicy, setSelectedPolicy] = useState<HSESafetyPolicy | null>(null);
@@ -85,17 +101,16 @@ export default function HSESafetyPoliciesPage() {
   });
 
   const { data: employees = [] } = useQuery({
-    queryKey: ["employees", companyId],
+    queryKey: ["employees", selectedCompanyId],
     queryFn: async (): Promise<{ id: string; full_name: string }[]> => {
-      if (!companyId) return [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any).from("profiles").select("id, full_name").eq("company_id", companyId).eq("is_active", true);
+      if (!selectedCompanyId) return [];
+      const { data } = await (supabase as any).from("profiles").select("id, full_name").eq("company_id", selectedCompanyId).eq("is_active", true);
       return (data || []) as { id: string; full_name: string }[];
     },
-    enabled: !!companyId,
+    enabled: !!selectedCompanyId,
   });
 
-  const { safetyPolicies, policiesLoading, createSafetyPolicy } = useHSE(companyId || undefined);
+  const { safetyPolicies, policiesLoading, createSafetyPolicy } = useHSE(selectedCompanyId || undefined);
 
   const { data: acknowledgments = [] } = useQuery({
     queryKey: ["hse-policy-acknowledgments", selectedPolicy?.id],
@@ -143,7 +158,7 @@ export default function HSESafetyPoliciesPage() {
     } else {
       setSelectedPolicy(null);
       setFormData({
-        company_id: companyId,
+        company_id: selectedCompanyId,
         policy_type: "general",
         status: "draft",
         is_active: true,
@@ -184,10 +199,14 @@ export default function HSESafetyPoliciesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t("hseModule.title"), href: "/hse" },
+            { label: t("hseModule.policies.title") },
+          ]}
+        />
+
         <div className="flex items-center gap-4">
-          <NavLink to="/hse" className="text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-5 w-5" />
-          </NavLink>
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10">
             <FileText className="h-5 w-5 text-info" />
           </div>
@@ -238,7 +257,7 @@ export default function HSESafetyPoliciesPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-4">
-              <Select value={companyId} onValueChange={setCompanyId}>
+              <Select value={selectedCompanyId} onValueChange={(id) => setTabState({ selectedCompanyId: id })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
@@ -256,12 +275,12 @@ export default function HSESafetyPoliciesPage() {
                 <Input
                   placeholder={t("hseModule.policies.searchPolicies")}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setTabState({ searchTerm: e.target.value })}
                   className="pl-9"
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>
@@ -275,7 +294,7 @@ export default function HSESafetyPoliciesPage() {
                 </SelectContent>
               </Select>
 
-              <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
+              <Button onClick={() => handleOpenDialog()} disabled={!selectedCompanyId}>
                 <Plus className="mr-2 h-4 w-4" />
                 {t("hseModule.policies.addPolicy")}
               </Button>
@@ -462,40 +481,39 @@ export default function HSESafetyPoliciesPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex items-center gap-2 pt-6">
-                  <Switch
-                    checked={formData.acknowledgment_required || false}
-                    onCheckedChange={(v) =>
-                      setFormData({ ...formData, acknowledgment_required: v })
-                    }
-                  />
-                  <Label>Require Acknowledgment</Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.acknowledgment_required || false}
+                      onCheckedChange={(c) =>
+                        setFormData({ ...formData, acknowledgment_required: c })
+                      }
+                    />
+                    <Label>Require Acknowledgment</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.is_active ?? true}
+                      onCheckedChange={(c) => setFormData({ ...formData, is_active: c })}
+                    />
+                    <Label>Active</Label>
+                  </div>
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>Description</Label>
-                  <Textarea
-                    value={formData.description || ""}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={2}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Policy Content</Label>
+                  <Label>Content</Label>
                   <Textarea
                     value={formData.content || ""}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                     rows={6}
-                    placeholder="Enter the full policy content here..."
+                    placeholder="Enter policy content..."
                   />
                 </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={createSafetyPolicy.isPending}>
-                  {selectedPolicy ? "Update" : "Create"} Policy
-                </Button>
+                <Button type="submit">{t("common.save")}</Button>
               </div>
             </form>
           </DialogContent>
@@ -503,78 +521,50 @@ export default function HSESafetyPoliciesPage() {
 
         {/* View Policy Dialog */}
         <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{selectedPolicy?.title}</DialogTitle>
             </DialogHeader>
             {selectedPolicy && (
               <div className="space-y-4">
-                <div className="flex flex-wrap gap-2">
-                  <Badge>
-                    {policyTypes.find((t) => t.value === selectedPolicy.policy_type)?.label}
-                  </Badge>
-                  {getStatusBadge(selectedPolicy.status)}
-                  <Badge variant="outline">v{selectedPolicy.version}</Badge>
-                </div>
-
-                <div className="prose prose-sm max-w-none">
-                  <h4 className="font-semibold">Description</h4>
-                  <p className="text-muted-foreground">
-                    {selectedPolicy.description || "No description provided."}
-                  </p>
-
-                  {selectedPolicy.content && (
-                    <>
-                      <h4 className="font-semibold mt-4">Policy Content</h4>
-                      <div className="whitespace-pre-wrap rounded-md border p-4 bg-muted/30">
-                        {selectedPolicy.content}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid gap-4 grid-cols-2 md:grid-cols-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Effective Date:</span>{" "}
-                    {formatDateForDisplay(selectedPolicy.effective_date, "MMM d, yyyy")}
+                    <p className="text-muted-foreground">Code</p>
+                    <p className="font-medium">{selectedPolicy.code}</p>
                   </div>
-                  {selectedPolicy.review_date && (
-                    <div>
-                      <span className="text-muted-foreground">Review Date:</span>{" "}
-                      {formatDateForDisplay(selectedPolicy.review_date, "MMM d, yyyy")}
-                    </div>
-                  )}
-                  {selectedPolicy.owner && (
-                    <div>
-                      <span className="text-muted-foreground">Owner:</span>{" "}
-                      {selectedPolicy.owner.full_name}
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-muted-foreground">Version</p>
+                    <p className="font-medium">{selectedPolicy.version}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Type</p>
+                    <p className="font-medium">
+                      {policyTypes.find((t) => t.value === selectedPolicy.policy_type)?.label}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Status</p>
+                    {getStatusBadge(selectedPolicy.status)}
+                  </div>
                 </div>
-
+                <div className="prose max-w-none">
+                  <p className="whitespace-pre-wrap">{selectedPolicy.content || "No content available."}</p>
+                </div>
                 {selectedPolicy.acknowledgment_required && (
-                  <div className="border-t pt-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold">Acknowledgment Required</h4>
-                        <p className="text-sm text-muted-foreground">
-                          You must acknowledge that you have read and understood this policy.
-                        </p>
-                      </div>
-                      {hasAcknowledged(selectedPolicy.id) ? (
-                        <Badge className="bg-success/10 text-success">
-                          <CheckCircle className="mr-1 h-3 w-3" />
-                          Acknowledged
-                        </Badge>
-                      ) : (
-                        <Button
-                          onClick={() => acknowledgePolicy.mutate(selectedPolicy.id)}
-                          disabled={acknowledgePolicy.isPending}
-                        >
-                          Acknowledge Policy
-                        </Button>
-                      )}
-                    </div>
+                  <div className="pt-4 border-t">
+                    {hasAcknowledged(selectedPolicy.id) ? (
+                      <p className="text-success flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        You have acknowledged this policy
+                      </p>
+                    ) : (
+                      <Button
+                        onClick={() => acknowledgePolicy.mutate(selectedPolicy.id)}
+                        disabled={acknowledgePolicy.isPending}
+                      >
+                        Acknowledge Policy
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>

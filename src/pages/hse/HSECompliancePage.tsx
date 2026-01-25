@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useHSE, HSEComplianceRequirement } from "@/hooks/useHSE";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +39,6 @@ import {
   ClipboardCheck,
   Plus,
   Search,
-  ChevronLeft,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -44,7 +46,6 @@ import {
 } from "lucide-react";
 import { isPast, isBefore, addDays } from "date-fns";
 import { getTodayString, formatDateForDisplay, parseLocalDate } from "@/utils/dateUtils";
-import { NavLink } from "react-router-dom";
 import { toast } from "sonner";
 
 const requirementTypes = [
@@ -77,15 +78,30 @@ const auditTypes = [
 
 export default function HSECompliancePage() {
   const { t } = useLanguage();
-  const [companyId, setCompanyId] = useState<string>("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState("requirements");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+      statusFilter: "all",
+      activeTab: "requirements",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, searchTerm, statusFilter, activeTab } = tabState;
+
+  // Initialize company from auth context
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [auditDialogOpen, setAuditDialogOpen] = useState(false);
-  const [selectedRequirement, setSelectedRequirement] = useState<HSEComplianceRequirement | null>(
-    null
-  );
+  const [selectedRequirement, setSelectedRequirement] = useState<HSEComplianceRequirement | null>(null);
   const [formData, setFormData] = useState<Partial<HSEComplianceRequirement>>({});
   const [auditFormData, setAuditFormData] = useState<Record<string, unknown>>({});
 
@@ -100,33 +116,32 @@ export default function HSECompliancePage() {
   });
 
   const { data: employees = [] } = useQuery({
-    queryKey: ["employees", companyId],
+    queryKey: ["employees", selectedCompanyId],
     queryFn: async (): Promise<{ id: string; full_name: string }[]> => {
-      if (!companyId) return [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any).from("profiles").select("id, full_name").eq("company_id", companyId).eq("is_active", true);
+      if (!selectedCompanyId) return [];
+      const { data } = await (supabase as any).from("profiles").select("id, full_name").eq("company_id", selectedCompanyId).eq("is_active", true);
       return (data || []) as { id: string; full_name: string }[];
     },
-    enabled: !!companyId,
+    enabled: !!selectedCompanyId,
   });
 
   const { complianceRequirements, complianceLoading, createComplianceRequirement } = useHSE(
-    companyId || undefined
+    selectedCompanyId || undefined
   );
 
   const { data: audits = [], isLoading: auditsLoading } = useQuery({
-    queryKey: ["hse-compliance-audits", companyId],
+    queryKey: ["hse-compliance-audits", selectedCompanyId],
     queryFn: async () => {
-      if (!companyId) return [];
+      if (!selectedCompanyId) return [];
       const { data, error } = await supabase
         .from("hse_compliance_audits")
         .select("*, requirement:requirement_id(title)")
-        .eq("company_id", companyId)
+        .eq("company_id", selectedCompanyId)
         .order("audit_date", { ascending: false });
       if (error) throw error;
       return data;
     },
-    enabled: !!companyId,
+    enabled: !!selectedCompanyId,
   });
 
   const createAudit = useMutation({
@@ -162,7 +177,7 @@ export default function HSECompliancePage() {
     } else {
       setSelectedRequirement(null);
       setFormData({
-        company_id: companyId,
+        company_id: selectedCompanyId,
         requirement_type: "regulatory",
         status: "active",
         compliance_status: "compliant",
@@ -180,7 +195,7 @@ export default function HSECompliancePage() {
 
   const handleOpenAuditDialog = (requirement?: HSEComplianceRequirement) => {
     setAuditFormData({
-      company_id: companyId,
+      company_id: selectedCompanyId,
       requirement_id: requirement?.id,
       audit_date: getTodayString(),
       audit_type: "internal",
@@ -226,10 +241,14 @@ export default function HSECompliancePage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t("hseModule.title"), href: "/hse" },
+            { label: t("hseModule.compliance.title") },
+          ]}
+        />
+
         <div className="flex items-center gap-4">
-          <NavLink to="/hse" className="text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-5 w-5" />
-          </NavLink>
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
             <ClipboardCheck className="h-5 w-5 text-success" />
           </div>
@@ -291,7 +310,7 @@ export default function HSECompliancePage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-4">
-              <Select value={companyId} onValueChange={setCompanyId}>
+              <Select value={selectedCompanyId} onValueChange={(id) => setTabState({ selectedCompanyId: id })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
@@ -309,12 +328,12 @@ export default function HSECompliancePage() {
                 <Input
                   placeholder={t("common.search")}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setTabState({ searchTerm: e.target.value })}
                   className="pl-9"
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>
@@ -329,13 +348,13 @@ export default function HSECompliancePage() {
               </Select>
 
               {activeTab === "requirements" && (
-                <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
+                <Button onClick={() => handleOpenDialog()} disabled={!selectedCompanyId}>
                   <Plus className="mr-2 h-4 w-4" />
                   {t("hseModule.compliance.addRequirement")}
                 </Button>
               )}
               {activeTab === "audits" && (
-                <Button onClick={() => handleOpenAuditDialog()} disabled={!companyId}>
+                <Button onClick={() => handleOpenAuditDialog()} disabled={!selectedCompanyId}>
                   <Plus className="mr-2 h-4 w-4" />
                   {t("hseModule.compliance.addAudit")}
                 </Button>
@@ -345,7 +364,7 @@ export default function HSECompliancePage() {
         </Card>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="requirements">{t("hseModule.compliance.tabs.requirements")}</TabsTrigger>
             <TabsTrigger value="audits">{t("hseModule.compliance.tabs.audits")}</TabsTrigger>
@@ -396,7 +415,7 @@ export default function HSECompliancePage() {
                           <TableCell>
                             {req.expiry_date ? (
                               <span
-                              className={parseLocalDate(req.expiry_date) && isPast(parseLocalDate(req.expiry_date)!) ? "text-destructive" : ""}
+                                className={parseLocalDate(req.expiry_date) && isPast(parseLocalDate(req.expiry_date)!) ? "text-destructive" : ""}
                               >
                                 {formatDateForDisplay(req.expiry_date, "MMM d, yyyy")}
                               </span>
@@ -456,27 +475,26 @@ export default function HSECompliancePage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      audits.map((audit: Record<string, unknown>) => (
-                        <TableRow key={audit.id as string}>
+                      audits.map((audit: any) => (
+                        <TableRow key={audit.id}>
                           <TableCell className="font-medium">
-                            {(audit.requirement as { title: string })?.title}
+                            {audit.requirement?.title || "-"}
                           </TableCell>
                           <TableCell>
-                            {auditTypes.find((t) => t.value === audit.audit_type)?.label}
+                            {auditTypes.find((t) => t.value === audit.audit_type)?.label ||
+                              audit.audit_type}
                           </TableCell>
                           <TableCell>
-                            {formatDateForDisplay(audit.audit_date as string, "MMM d, yyyy")}
+                            {formatDateForDisplay(audit.audit_date, "MMM d, yyyy")}
                           </TableCell>
-                          <TableCell>{(audit.auditor_name as string) || "-"}</TableCell>
+                          <TableCell>{audit.auditor_name || "-"}</TableCell>
+                          <TableCell>{audit.rating || "-"}</TableCell>
                           <TableCell>
-                            {getComplianceBadge(audit.compliance_rating as string)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{audit.status as string}</Badge>
+                            <Badge variant="outline">{audit.status}</Badge>
                           </TableCell>
                           <TableCell>
-                            {audit.due_date
-                              ? formatDateForDisplay(audit.due_date as string, "MMM d, yyyy")
+                            {audit.corrective_action_due
+                              ? formatDateForDisplay(audit.corrective_action_due, "MMM d, yyyy")
                               : "-"}
                           </TableCell>
                         </TableRow>
@@ -491,10 +509,12 @@ export default function HSECompliancePage() {
 
         {/* Requirement Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {selectedRequirement ? "Edit Requirement" : "Add Compliance Requirement"}
+                {selectedRequirement
+                  ? t("hseModule.compliance.editRequirement")
+                  : t("hseModule.compliance.addRequirement")}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -541,29 +561,6 @@ export default function HSECompliancePage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Reference Number</Label>
-                  <Input
-                    value={formData.reference_number || ""}
-                    onChange={(e) => setFormData({ ...formData, reference_number: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Issue Date</Label>
-                  <Input
-                    type="date"
-                    value={formData.issue_date || ""}
-                    onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Expiry Date</Label>
-                  <Input
-                    type="date"
-                    value={formData.expiry_date || ""}
-                    onChange={(e) => setFormData({ ...formData, expiry_date: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label>Status</Label>
                   <Select
                     value={formData.status}
@@ -600,34 +597,11 @@ export default function HSECompliancePage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Responsible Person</Label>
-                  <Select
-                    value={formData.responsible_person_id || ""}
-                    onValueChange={(v) => setFormData({ ...formData, responsible_person_id: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select person" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {employees.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>
-                          {e.full_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Renewal Lead Days</Label>
+                  <Label>Expiry Date</Label>
                   <Input
-                    type="number"
-                    value={formData.renewal_lead_days || 30}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        renewal_lead_days: parseInt(e.target.value) || 30,
-                      })
-                    }
+                    type="date"
+                    value={formData.expiry_date || ""}
+                    onChange={(e) => setFormData({ ...formData, expiry_date: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -635,16 +609,15 @@ export default function HSECompliancePage() {
                   <Textarea
                     value={formData.description || ""}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
                   />
                 </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={createComplianceRequirement.isPending}>
-                  {selectedRequirement ? "Update" : "Create"} Requirement
-                </Button>
+                <Button type="submit">{t("common.save")}</Button>
               </div>
             </form>
           </DialogContent>
@@ -652,13 +625,13 @@ export default function HSECompliancePage() {
 
         {/* Audit Dialog */}
         <Dialog open={auditDialogOpen} onOpenChange={setAuditDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Audit Record</DialogTitle>
+              <DialogTitle>{t("hseModule.compliance.addAudit")}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleAuditSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Requirement *</Label>
+                <Label>Requirement</Label>
                 <Select
                   value={(auditFormData.requirement_id as string) || ""}
                   onValueChange={(v) => setAuditFormData({ ...auditFormData, requirement_id: v })}
@@ -675,11 +648,11 @@ export default function HSECompliancePage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Audit Type *</Label>
+                  <Label>Audit Type</Label>
                   <Select
-                    value={(auditFormData.audit_type as string) || ""}
+                    value={(auditFormData.audit_type as string) || "internal"}
                     onValueChange={(v) => setAuditFormData({ ...auditFormData, audit_type: v })}
                   >
                     <SelectTrigger>
@@ -695,12 +668,13 @@ export default function HSECompliancePage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Audit Date *</Label>
+                  <Label>Audit Date</Label>
                   <Input
                     type="date"
                     value={(auditFormData.audit_date as string) || ""}
-                    onChange={(e) => setAuditFormData({ ...auditFormData, audit_date: e.target.value })}
-                    required
+                    onChange={(e) =>
+                      setAuditFormData({ ...auditFormData, audit_date: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -708,58 +682,24 @@ export default function HSECompliancePage() {
                 <Label>Auditor Name</Label>
                 <Input
                   value={(auditFormData.auditor_name as string) || ""}
-                  onChange={(e) => setAuditFormData({ ...auditFormData, auditor_name: e.target.value })}
+                  onChange={(e) =>
+                    setAuditFormData({ ...auditFormData, auditor_name: e.target.value })
+                  }
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Compliance Rating</Label>
-                <Select
-                  value={(auditFormData.compliance_rating as string) || ""}
-                  onValueChange={(v) => setAuditFormData({ ...auditFormData, compliance_rating: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select rating" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {complianceStatusOptions.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Findings</Label>
                 <Textarea
                   value={(auditFormData.findings as string) || ""}
                   onChange={(e) => setAuditFormData({ ...auditFormData, findings: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Corrective Actions</Label>
-                <Textarea
-                  value={(auditFormData.corrective_actions as string) || ""}
-                  onChange={(e) =>
-                    setAuditFormData({ ...auditFormData, corrective_actions: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Due Date</Label>
-                <Input
-                  type="date"
-                  value={(auditFormData.due_date as string) || ""}
-                  onChange={(e) => setAuditFormData({ ...auditFormData, due_date: e.target.value })}
+                  rows={3}
                 />
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setAuditDialogOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
-                <Button type="submit" disabled={createAudit.isPending}>
-                  Create Audit
-                </Button>
+                <Button type="submit">{t("common.save")}</Button>
               </div>
             </form>
           </DialogContent>
