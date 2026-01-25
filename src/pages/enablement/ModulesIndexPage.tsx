@@ -19,8 +19,9 @@ import {
   ClipboardCheck,
   FolderTree,
 } from "lucide-react";
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
 
 interface ModuleInfo {
   id: string;
@@ -125,18 +126,20 @@ const MODULES: ModuleInfo[] = [
 ];
 
 export default function ModulesIndexPage() {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { navigateToRecord } = useWorkspaceNavigation();
+  const [tabState, setTabState] = useTabState({
+    defaultState: { searchQuery: "" },
+  });
 
   const filteredModules = useMemo(() => {
-    if (!searchQuery.trim()) return MODULES;
-    const query = searchQuery.toLowerCase();
+    if (!tabState.searchQuery.trim()) return MODULES;
+    const query = tabState.searchQuery.toLowerCase();
     return MODULES.filter(
       (m) =>
         m.title.toLowerCase().includes(query) ||
         m.description.toLowerCase().includes(query)
     );
-  }, [searchQuery]);
+  }, [tabState.searchQuery]);
 
   const modulesWithManuals = MODULES.filter((m) => m.manualSections).length;
   const modulesWithQuickStart = MODULES.filter((m) => m.hasQuickStart).length;
@@ -179,8 +182,8 @@ export default function ModulesIndexPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search modules..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={tabState.searchQuery}
+            onChange={(e) => setTabState({ searchQuery: e.target.value })}
             className="pl-10"
           />
         </div>
@@ -196,7 +199,14 @@ export default function ModulesIndexPage() {
               <Card
                 key={module.id}
                 className="relative transition-all hover:shadow-md hover:border-primary/30 cursor-pointer"
-                onClick={() => navigate(`/enablement/modules/${module.id}`)}
+                onClick={() => navigateToRecord({
+                  route: `/enablement/modules/${module.id}`,
+                  title: module.title,
+                  subtitle: 'Module Docs',
+                  moduleCode: 'enablement',
+                  contextType: 'module-docs',
+                  contextId: module.id,
+                })}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start gap-3">

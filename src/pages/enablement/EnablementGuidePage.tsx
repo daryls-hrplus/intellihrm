@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ import {
 
 export default function EnablementGuidePage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const printRef = useRef<HTMLDivElement>(null);
   const [isPrinting, setIsPrinting] = useState(false);
 
@@ -57,7 +57,11 @@ export default function EnablementGuidePage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/enablement")}>
+            <Button variant="ghost" size="icon" onClick={() => navigateToList({
+              route: '/enablement',
+              title: 'Enablement Hub',
+              moduleCode: 'enablement',
+            })}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -109,7 +113,7 @@ export default function EnablementGuidePage() {
             </Card>
 
             {/* Stage Checklists - Interactive checklist panel */}
-            <AllStagesChecklist onNavigate={(path) => navigate(path)} />
+            <AllStagesChecklist onNavigate={(path) => navigateToList({ route: path, title: 'Enablement', moduleCode: 'enablement' })} />
           </div>
 
           {/* Main Content */}
@@ -386,7 +390,11 @@ export default function EnablementGuidePage() {
                   ))}
                 </div>
 
-                <Button onClick={() => navigate("/enablement/ai-tools")} className="mt-4">
+                <Button onClick={() => navigateToList({
+                  route: '/enablement/ai-tools',
+                  title: 'AI Tools',
+                  moduleCode: 'enablement',
+                })} className="mt-4">
                   Open AI Tools
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>

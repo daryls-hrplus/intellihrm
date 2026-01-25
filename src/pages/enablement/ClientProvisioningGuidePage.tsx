@@ -3,7 +3,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { NavLink } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import {
   ArrowLeft,
   Network,
@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 
 export default function ClientProvisioningGuidePage() {
+  const { navigateToList } = useWorkspaceNavigation();
+  
   return (
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6 max-w-5xl">
@@ -31,10 +33,12 @@ export default function ClientProvisioningGuidePage() {
         />
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <NavLink to="/enablement">
-              <ArrowLeft className="h-4 w-4" />
-            </NavLink>
+          <Button variant="ghost" size="icon" onClick={() => navigateToList({
+            route: '/enablement',
+            title: 'Enablement Hub',
+            moduleCode: 'enablement',
+          })}>
+            <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
@@ -49,9 +53,13 @@ export default function ClientProvisioningGuidePage() {
 
         {/* Quick Access */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="hover:border-primary/50 transition-colors">
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigateToList({
+            route: '/admin/client-registry',
+            title: 'Client Registry',
+            moduleCode: 'admin',
+          })}>
             <CardContent className="p-4">
-              <NavLink to="/admin/client-registry" className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-purple-500/10">
                   <Users className="h-5 w-5 text-purple-500" />
                 </div>
@@ -60,12 +68,16 @@ export default function ClientProvisioningGuidePage() {
                   <p className="text-sm text-muted-foreground">Manage registrations</p>
                 </div>
                 <ExternalLink className="h-4 w-4 text-muted-foreground" />
-              </NavLink>
+              </div>
             </CardContent>
           </Card>
-          <Card className="hover:border-primary/50 transition-colors">
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigateToList({
+            route: '/enablement/client-provisioning/testing',
+            title: 'Testing Checklist',
+            moduleCode: 'enablement',
+          })}>
             <CardContent className="p-4">
-              <NavLink to="/enablement/client-provisioning/testing" className="flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-green-500/10">
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
                 </div>
@@ -74,7 +86,7 @@ export default function ClientProvisioningGuidePage() {
                   <p className="text-sm text-muted-foreground">Production readiness</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </NavLink>
+              </div>
             </CardContent>
           </Card>
           <Card className="hover:border-primary/50 transition-colors">
@@ -439,17 +451,21 @@ export default function ClientProvisioningGuidePage() {
 
         {/* Footer Navigation */}
         <div className="flex justify-between pt-4">
-          <Button variant="outline" asChild>
-            <NavLink to="/enablement">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Enablement
-            </NavLink>
+          <Button variant="outline" onClick={() => navigateToList({
+            route: '/enablement',
+            title: 'Enablement Hub',
+            moduleCode: 'enablement',
+          })}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Enablement
           </Button>
-          <Button asChild>
-            <NavLink to="/enablement/client-provisioning/testing">
-              Testing Checklist
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </NavLink>
+          <Button onClick={() => navigateToList({
+            route: '/enablement/client-provisioning/testing',
+            title: 'Testing Checklist',
+            moduleCode: 'enablement',
+          })}>
+            Testing Checklist
+            <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>

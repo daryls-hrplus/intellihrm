@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { 
   Heart, 
   BookOpen, 
@@ -57,7 +57,7 @@ const SUPPLEMENTARY_SECTIONS = [
 ];
 
 export default function BenefitsManualPage() {
-  const navigate = useNavigate();
+  const { navigateToList, navigateToRecord } = useWorkspaceNavigation();
   const [activeSection, setActiveSection] = useState('ben-part-1');
   const stats = getBenefitsManualStats();
 
@@ -94,7 +94,11 @@ export default function BenefitsManualPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/enablement/manuals")}>
+            <Button variant="ghost" size="icon" onClick={() => navigateToList({
+              route: '/enablement/manuals',
+              title: 'Administrator Manuals',
+              moduleCode: 'enablement',
+            })}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -174,7 +178,14 @@ export default function BenefitsManualPage() {
                   </div>
                   <button
                     className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
-                    onClick={() => navigate('/enablement/manuals/workforce')}
+                    onClick={() => navigateToRecord({
+                      route: '/enablement/manuals/workforce',
+                      title: 'Workforce Manual',
+                      subtitle: 'Manual',
+                      moduleCode: 'enablement',
+                      contextType: 'manual',
+                      contextId: 'workforce',
+                    })}
                   >
                     <Link2 className="h-4 w-4 text-blue-500" />
                     <span>Workforce Admin Manual</span>
