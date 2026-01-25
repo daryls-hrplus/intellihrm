@@ -282,6 +282,7 @@ export const TrainingMentorshipPage = lazy(() => import('@/pages/training/Traini
 
 // Succession pages
 export const SuccessionDashboardPage = lazy(() => import('@/pages/succession/SuccessionDashboardPage'));
+export const SuccessionSetupPage = lazy(() => import('@/pages/succession/SuccessionSetupPage'));
 export const NineBoxPage = lazy(() => import('@/pages/succession/NineBoxPage'));
 export const NineBoxConfigPage = lazy(() => import('@/pages/succession/NineBoxConfigPage'));
 export const TalentPoolsPage = lazy(() => import('@/pages/succession/TalentPoolsPage'));

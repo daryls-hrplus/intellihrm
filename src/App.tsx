@@ -423,6 +423,7 @@ const App = () => (
 
             {/* Succession Routes */}
             <Route path="/succession" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.SuccessionDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/setup" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.SuccessionSetupPage /></LazyPage></ProtectedRoute>} />
             <Route path="/succession/nine-box" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.NineBoxPage /></LazyPage></ProtectedRoute>} />
             <Route path="/succession/nine-box/config" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.NineBoxConfigPage /></LazyPage></ProtectedRoute>} />
             <Route path="/succession/talent-pools" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.TalentPoolsPage /></LazyPage></ProtectedRoute>} />
