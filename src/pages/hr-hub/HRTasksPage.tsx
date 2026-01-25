@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -78,9 +79,17 @@ export default function HRTasksPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("active");
-  const [selectedCompany, setSelectedCompany] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState("");
+  // Tab-scoped state for filters (persists across tab switches)
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      statusFilter: "active",
+      selectedCompany: "all",
+      searchTerm: "",
+    },
+    syncToUrl: ["selectedCompany"],
+  });
+
+  const { statusFilter, selectedCompany, searchTerm } = tabState;
   const [editingTask, setEditingTask] = useState<HRTask | null>(null);
   const [selectedTask, setSelectedTask] = useState<HRTask | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -283,8 +292,7 @@ export default function HRTasksPage() {
   const hasFilters = searchTerm || selectedCompany !== "all";
 
   const clearFilters = () => {
-    setSearchTerm("");
-    setSelectedCompany("all");
+    setTabState({ searchTerm: "", selectedCompany: "all" });
   };
 
   return (
@@ -307,7 +315,7 @@ export default function HRTasksPage() {
         {/* Stats Cards - Compact */}
         <div className="grid grid-cols-3 gap-3">
           <button
-            onClick={() => setStatusFilter("active")}
+            onClick={() => setTabState({ statusFilter: "active" })}
             className={`p-4 rounded-lg border text-left transition-all ${
               statusFilter === "active" ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:bg-muted/50"
             }`}
@@ -324,7 +332,7 @@ export default function HRTasksPage() {
           </button>
 
           <button
-            onClick={() => setStatusFilter("overdue")}
+            onClick={() => setTabState({ statusFilter: "overdue" })}
             className={`p-4 rounded-lg border text-left transition-all ${
               statusFilter === "overdue" ? "border-orange-500 bg-orange-500/5 ring-1 ring-orange-500" : "hover:bg-muted/50"
             }`}
@@ -341,7 +349,7 @@ export default function HRTasksPage() {
           </button>
 
           <button
-            onClick={() => setStatusFilter("completed")}
+            onClick={() => setTabState({ statusFilter: "completed" })}
             className={`p-4 rounded-lg border text-left transition-all ${
               statusFilter === "completed" ? "border-green-500 bg-green-500/5 ring-1 ring-green-500" : "hover:bg-muted/50"
             }`}
@@ -365,11 +373,11 @@ export default function HRTasksPage() {
             <Input
               placeholder="Search tasks..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setTabState({ searchTerm: e.target.value })}
               className="pl-9"
             />
           </div>
-          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+          <Select value={selectedCompany} onValueChange={(v) => setTabState({ selectedCompany: v })}>
             <SelectTrigger className="w-[180px]">
               <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
               <SelectValue placeholder="All Companies" />

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useTabState } from '@/hooks/useTabState';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,11 +24,20 @@ export default function HRRemindersPage() {
   const { t } = useLanguage();
   const { createRule, fetchEventTypes } = useReminders();
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('templates');
   const [highlightRuleId, setHighlightRuleId] = useState<string | null>(null);
   const rulesManagerRef = useRef<ReminderRulesManagerRef | null>(null);
+
+  // Tab-scoped state for filters (persists across tab switches)
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: 'all',
+      activeTab: 'templates',
+    },
+    syncToUrl: ['selectedCompanyId'],
+  });
+
+  const { selectedCompanyId, activeTab } = tabState;
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -40,7 +50,7 @@ export default function HRRemindersPage() {
       
       // Auto-select first company if available
       if (data && data.length > 0 && selectedCompanyId === 'all') {
-        setSelectedCompanyId(data[0].id);
+        setTabState({ selectedCompanyId: data[0].id });
       }
       
       setLoading(false);
@@ -97,7 +107,7 @@ export default function HRRemindersPage() {
   }, []);
 
   const handleUseTemplate = (template: any) => {
-    setActiveTab('rules');
+    setTabState({ activeTab: 'rules' });
     // Trigger the rules manager to open create dialog with this template after tab switch
     setTimeout(() => {
       rulesManagerRef.current?.openCreateDialogWithTemplate({
@@ -136,7 +146,7 @@ export default function HRRemindersPage() {
             </h1>
             <p className="text-muted-foreground">Manage notifications, reminders, and templates</p>
           </div>
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
             <SelectTrigger className="w-[220px]">
               <SelectValue placeholder={t('common.select')} />
             </SelectTrigger>
@@ -151,18 +161,18 @@ export default function HRRemindersPage() {
 
         {/* Welcome Banner */}
         <ReminderWelcomeBanner 
-          onGetStarted={() => setActiveTab('templates')}
-          onViewAI={() => setActiveTab('rules')}
+          onGetStarted={() => setTabState({ activeTab: 'templates' })}
+          onViewAI={() => setTabState({ activeTab: 'rules' })}
         />
 
         {/* AI Dashboard - Always Visible */}
         <ReminderAIDashboard 
           companyId={selectedCompanyId}
-          onNavigateToRules={() => setActiveTab('rules')}
-          onNavigateToReminders={() => setActiveTab('reminders')}
+          onNavigateToRules={() => setTabState({ activeTab: 'rules' })}
+          onNavigateToReminders={() => setTabState({ activeTab: 'reminders' })}
         />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-6">
           <TooltipProvider>
             <TabsList>
               <Tooltip>

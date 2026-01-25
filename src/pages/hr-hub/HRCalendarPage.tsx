@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -51,11 +52,21 @@ export default function HRCalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<string>("all");
+
+  // Tab-scoped state for filters (persists across tab switches)
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompany: "all",
+      currentMonthISO: new Date().toISOString(),
+    },
+    syncToUrl: ["selectedCompany"],
+  });
+
+  const selectedCompany = tabState.selectedCompany;
+  const currentMonth = new Date(tabState.currentMonthISO);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -203,7 +214,7 @@ export default function HRCalendarPage() {
               {format(currentMonth, "MMMM yyyy")}
             </CardTitle>
             <div className="flex gap-2 items-center">
-              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+              <Select value={selectedCompany} onValueChange={(v) => setTabState({ selectedCompany: v })}>
                 <SelectTrigger className="w-[180px]">
                   <Building2 className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="All Companies" />
@@ -215,10 +226,10 @@ export default function HRCalendarPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+              <Button variant="outline" size="icon" onClick={() => setTabState({ currentMonthISO: subMonths(currentMonth, 1).toISOString() })}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+              <Button variant="outline" size="icon" onClick={() => setTabState({ currentMonthISO: addMonths(currentMonth, 1).toISOString() })}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
