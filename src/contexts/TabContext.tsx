@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { LucideIcon } from "lucide-react";
+import { toast } from "sonner";
+import { getIconName, getIconByName } from "@/lib/iconRegistry";
 
 export interface WorkspaceTab {
   id: string;
@@ -7,6 +10,7 @@ export interface WorkspaceTab {
   title: string;
   subtitle?: string;
   icon?: LucideIcon;
+  iconName?: string; // Serializable icon name
   moduleCode: string;
   contextId?: string;
   contextType?: string;
@@ -28,6 +32,19 @@ export interface OpenTabConfig {
   contextType?: string;
   isPinned?: boolean;
   forceNew?: boolean;
+}
+
+interface SerializedTabForDB {
+  id: string;
+  route: string;
+  title: string;
+  subtitle?: string;
+  moduleCode: string;
+  contextId?: string;
+  contextType?: string;
+  isPinned: boolean;
+  iconName?: string;
+  state?: Record<string, unknown>;
 }
 
 interface TabContextValue {
@@ -52,12 +69,24 @@ interface TabContextValue {
   hasAnyUnsavedChanges: () => boolean;
   /** Get all tabs with unsaved changes */
   getTabsWithUnsavedChanges: () => WorkspaceTab[];
+  /** Reorder tabs (for drag-and-drop) */
+  reorderTabs: (newTabs: WorkspaceTab[]) => void;
+  /** Close the oldest non-pinned, non-active tab */
+  closeOldestTab: () => void;
+  /** Recently closed tabs for recovery */
+  recentlyClosed: SerializedTab[];
+  /** Reopen the last closed tab */
+  reopenLastClosedTab: () => void;
+  /** Restore tabs from database on login */
+  restoreTabsFromDB: (dbTabs: SerializedTabForDB[], activeId?: string) => void;
 }
 
 const TabContext = createContext<TabContextValue | null>(null);
 
 const DASHBOARD_TAB_ID = "dashboard";
 const STORAGE_KEY = "hrplus_workspace_tabs";
+const MAX_TABS = 15;
+const MAX_RECENT_CLOSED = 10;
 
 interface SerializedTab {
   id: string;
@@ -68,6 +97,7 @@ interface SerializedTab {
   contextId?: string;
   contextType?: string;
   isPinned: boolean;
+  iconName?: string;
   /** Persisted tab state - limited to 50KB per tab */
   state?: Record<string, unknown>;
   /** Flag to detect if tab had unsaved changes (for session recovery) */
@@ -105,6 +135,9 @@ function serializeTabs(tabs: WorkspaceTab[]): string {
       }
     }
 
+    // Serialize icon to name
+    const iconName = tab.iconName || (tab.icon ? getIconName(tab.icon) : undefined);
+
     return {
       id: tab.id,
       route: tab.route,
@@ -114,6 +147,7 @@ function serializeTabs(tabs: WorkspaceTab[]): string {
       contextId: tab.contextId,
       contextType: tab.contextType,
       isPinned: tab.isPinned,
+      iconName,
       state: stateToSave,
       hadUnsavedChanges: tab.hasUnsavedChanges,
     };
@@ -134,6 +168,8 @@ function deserializeTabs(json: string): WorkspaceTab[] {
       contextId: tab.contextId,
       contextType: tab.contextType,
       isPinned: tab.isPinned,
+      icon: tab.iconName ? getIconByName(tab.iconName) : undefined,
+      iconName: tab.iconName,
       state: tab.state, // Restore persisted state
       hasUnsavedChanges: false, // Always reset to false on restore
       openedAt: now,
@@ -169,6 +205,8 @@ export function TabProvider({ children }: TabProviderProps) {
     return storedActiveId || DASHBOARD_TAB_ID;
   });
 
+  const [recentlyClosed, setRecentlyClosed] = useState<SerializedTab[]>([]);
+
   // Persist tabs to session storage
   useEffect(() => {
     sessionStorage.setItem(STORAGE_KEY, serializeTabs(tabs));
@@ -185,6 +223,37 @@ export function TabProvider({ children }: TabProviderProps) {
   }, [tabs]);
 
   const openTab = useCallback((config: OpenTabConfig): string => {
+    // Check tab limit (excluding pinned tabs from count)
+    const unpinnedCount = tabs.filter(t => !t.isPinned).length;
+    
+    if (unpinnedCount >= MAX_TABS && !config.isPinned) {
+      // Check if we'd be focusing an existing tab
+      const existingContext = config.contextType && config.contextId
+        ? tabs.find(t => t.contextType === config.contextType && t.contextId === config.contextId)
+        : null;
+      const existingRoute = !config.contextId
+        ? tabs.find(t => t.route === config.route && !t.contextId)
+        : null;
+        
+      if (!existingContext && !existingRoute && !config.forceNew) {
+        toast.warning(`Maximum ${MAX_TABS} tabs reached`, {
+          description: "Please close some tabs before opening new ones.",
+          action: {
+            label: "Close oldest",
+            onClick: () => {
+              const oldest = tabs
+                .filter(t => !t.isPinned && t.id !== activeTabId)
+                .sort((a, b) => a.lastActiveAt.getTime() - b.lastActiveAt.getTime())[0];
+              if (oldest) {
+                setTabs(prev => prev.filter(t => t.id !== oldest.id));
+              }
+            },
+          },
+        });
+        return "";
+      }
+    }
+
     // Check for existing tab with same context (unless forceNew is true)
     if (!config.forceNew && config.contextType && config.contextId) {
       const existing = tabs.find(
@@ -211,12 +280,16 @@ export function TabProvider({ children }: TabProviderProps) {
       }
     }
 
+    // Serialize icon to name for persistence
+    const iconName = config.icon ? getIconName(config.icon) : undefined;
+
     const newTab: WorkspaceTab = {
       id: generateTabId(),
       route: config.route,
       title: config.title,
       subtitle: config.subtitle,
       icon: config.icon,
+      iconName,
       moduleCode: config.moduleCode,
       contextId: config.contextId,
       contextType: config.contextType,
@@ -229,11 +302,26 @@ export function TabProvider({ children }: TabProviderProps) {
     setTabs(prev => [...prev, newTab]);
     setActiveTabId(newTab.id);
     return newTab.id;
-  }, [tabs]);
+  }, [tabs, activeTabId]);
 
   const closeTab = useCallback((tabId: string) => {
     const tabToClose = tabs.find(t => t.id === tabId);
     if (!tabToClose || tabToClose.isPinned) return;
+
+    // Save to recently closed
+    const serialized: SerializedTab = {
+      id: tabToClose.id,
+      route: tabToClose.route,
+      title: tabToClose.title,
+      subtitle: tabToClose.subtitle,
+      moduleCode: tabToClose.moduleCode,
+      contextId: tabToClose.contextId,
+      contextType: tabToClose.contextType,
+      isPinned: tabToClose.isPinned,
+      iconName: tabToClose.iconName || (tabToClose.icon ? getIconName(tabToClose.icon) : undefined),
+      state: tabToClose.state,
+    };
+    setRecentlyClosed(prev => [serialized, ...prev.slice(0, MAX_RECENT_CLOSED - 1)]);
 
     const tabIndex = tabs.findIndex(t => t.id === tabId);
     const newTabs = tabs.filter(t => t.id !== tabId);
@@ -317,6 +405,91 @@ export function TabProvider({ children }: TabProviderProps) {
     return tabs.filter(t => t.hasUnsavedChanges);
   }, [tabs]);
 
+  // Reorder tabs (for drag-and-drop)
+  const reorderTabs = useCallback((newTabs: WorkspaceTab[]) => {
+    // Ensure dashboard stays first
+    const dashboard = newTabs.find(t => t.id === DASHBOARD_TAB_ID);
+    const others = newTabs.filter(t => t.id !== DASHBOARD_TAB_ID);
+    setTabs(dashboard ? [dashboard, ...others] : others);
+  }, []);
+
+  // Close the oldest non-pinned, non-active tab
+  const closeOldestTab = useCallback(() => {
+    const oldest = tabs
+      .filter(t => !t.isPinned && t.id !== activeTabId)
+      .sort((a, b) => a.lastActiveAt.getTime() - b.lastActiveAt.getTime())[0];
+    if (oldest) {
+      closeTab(oldest.id);
+    }
+  }, [tabs, activeTabId, closeTab]);
+
+  // Reopen the last closed tab
+  const reopenLastClosedTab = useCallback(() => {
+    if (recentlyClosed.length === 0) {
+      toast.info("No recently closed tabs to restore");
+      return;
+    }
+
+    const [lastClosed, ...rest] = recentlyClosed;
+    setRecentlyClosed(rest);
+
+    const newTab: WorkspaceTab = {
+      id: generateTabId(), // New ID to avoid conflicts
+      route: lastClosed.route,
+      title: lastClosed.title,
+      subtitle: lastClosed.subtitle,
+      moduleCode: lastClosed.moduleCode,
+      contextId: lastClosed.contextId,
+      contextType: lastClosed.contextType,
+      isPinned: false,
+      icon: lastClosed.iconName ? getIconByName(lastClosed.iconName) : undefined,
+      iconName: lastClosed.iconName,
+      state: lastClosed.state,
+      hasUnsavedChanges: false,
+      openedAt: new Date(),
+      lastActiveAt: new Date(),
+    };
+
+    setTabs(prev => [...prev, newTab]);
+    setActiveTabId(newTab.id);
+    
+    toast.success(`Restored "${lastClosed.title}"`);
+  }, [recentlyClosed]);
+
+  // Restore tabs from database on login
+  const restoreTabsFromDB = useCallback((dbTabs: SerializedTabForDB[], activeId?: string) => {
+    const now = new Date();
+    const restoredTabs: WorkspaceTab[] = dbTabs.map(tab => ({
+      id: tab.id,
+      route: tab.route,
+      title: tab.title,
+      subtitle: tab.subtitle,
+      moduleCode: tab.moduleCode,
+      contextId: tab.contextId,
+      contextType: tab.contextType,
+      isPinned: tab.isPinned,
+      icon: tab.iconName ? getIconByName(tab.iconName) : undefined,
+      iconName: tab.iconName,
+      state: tab.state,
+      hasUnsavedChanges: false,
+      openedAt: now,
+      lastActiveAt: now,
+    }));
+
+    // Ensure dashboard exists
+    const hasDashboard = restoredTabs.some(t => t.id === DASHBOARD_TAB_ID);
+    if (!hasDashboard) {
+      restoredTabs.unshift(createDashboardTab());
+    }
+
+    setTabs(restoredTabs);
+    if (activeId && restoredTabs.some(t => t.id === activeId)) {
+      setActiveTabId(activeId);
+    } else {
+      setActiveTabId(DASHBOARD_TAB_ID);
+    }
+  }, []);
+
   const value: TabContextValue = {
     tabs,
     activeTabId,
@@ -334,6 +507,11 @@ export function TabProvider({ children }: TabProviderProps) {
     updateTabState,
     hasAnyUnsavedChanges,
     getTabsWithUnsavedChanges,
+    reorderTabs,
+    closeOldestTab,
+    recentlyClosed,
+    reopenLastClosedTab,
+    restoreTabsFromDB,
   };
 
   return (

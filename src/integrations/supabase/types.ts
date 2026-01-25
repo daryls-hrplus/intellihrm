@@ -74840,6 +74840,30 @@ export type Database = {
           },
         ]
       }
+      workspace_tabs: {
+        Row: {
+          active_tab_id: string | null
+          id: string
+          tabs: Json
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active_tab_id?: string | null
+          id?: string
+          tabs?: Json
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active_tab_id?: string | null
+          id?: string
+          tabs?: Json
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       employee_fte_summary: {
