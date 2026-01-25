@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useTabState } from "@/hooks/useTabState";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -105,24 +106,42 @@ export default function GoalsPage() {
   const { t } = useLanguage();
   const { user, company, isAdmin, isHRManager } = useAuth();
   const { logView } = useAuditLog();
+  
+  // Tab-scoped persistent state
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      activeTab: "my-goals",
+      viewMode: "grid" as "grid" | "list",
+      showAnalytics: true,
+      statusFilter: "all",
+      levelFilter: "all",
+      typeFilter: "all",
+      searchQuery: "",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+  
+  const { selectedCompanyId, activeTab, viewMode, showAnalytics, statusFilter, levelFilter, typeFilter, searchQuery } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+  const setViewMode = (v: "grid" | "list") => setTabState({ viewMode: v });
+  const setShowAnalytics = (v: boolean) => setTabState({ showAnalytics: v });
+  const setStatusFilter = (v: string) => setTabState({ statusFilter: v });
+  const setLevelFilter = (v: string) => setTabState({ levelFilter: v });
+  const setTypeFilter = (v: string) => setTabState({ typeFilter: v });
+  const setSearchQuery = (v: string) => setTabState({ searchQuery: v });
+  
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [levelFilter, setLevelFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [activeTab, setActiveTab] = useState("my-goals");
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [directReports, setDirectReports] = useState<{ employee_id: string; employee_name: string; position_title: string }[]>([]);
   const [directReportGoals, setDirectReportGoals] = useState<Goal[]>([]);
   const [contactReportOpen, setContactReportOpen] = useState(false);
   const [selectedReportGoal, setSelectedReportGoal] = useState<Goal | null>(null);
-  const [showAnalytics, setShowAnalytics] = useState(true);
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
@@ -158,12 +177,12 @@ export default function GoalsPage() {
     fetchEmployees();
   }, [selectedCompanyId]);
 
-  // Update selectedCompanyId when company from auth changes
+  // Update selectedCompanyId when company from auth changes (only if no existing state)
   useEffect(() => {
-    if (company?.id) {
+    if (company?.id && !selectedCompanyId) {
       setSelectedCompanyId(company.id);
     }
-  }, [company?.id]);
+  }, [company?.id, selectedCompanyId]);
 
   // Fetch direct reports for manager
   useEffect(() => {
