@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CompensationCompanyFilter, useCompensationCompanyFilter } from "@/components/compensation/CompensationCompanyFilter";
+import { CompensationCompanyFilter } from "@/components/compensation/CompensationCompanyFilter";
 import { useMinimumWageCompliance, MinimumWageViolation } from "@/hooks/useMinimumWageCompliance";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { 
@@ -15,7 +15,6 @@ import {
   CheckCircle, 
   AlertTriangle, 
   Clock, 
-  DollarSign, 
   Search,
   Settings,
   RefreshCw,
@@ -42,17 +41,38 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function MinimumWageCompliancePage() {
-  const { selectedCompanyId, setSelectedCompanyId } = useCompensationCompanyFilter();
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+
+  // Use tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: isAdminOrHR ? "all" : (company?.id || ""),
+      searchTerm: "",
+      statusFilter: "all",
+      selectedViolationId: null as string | null,
+      resolutionNotes: "",
+      dialogAction: null as "resolve" | "exempt" | "false_positive" | null,
+      isRefreshing: false,
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, searchTerm, statusFilter, selectedViolationId, resolutionNotes, dialogAction, isRefreshing } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+
+  // Initialize with user's company if needed
+  useEffect(() => {
+    if (company?.id && !isAdminOrHR && !selectedCompanyId) {
+      setSelectedCompanyId(company.id);
+    }
+  }, [company?.id, isAdminOrHR, selectedCompanyId]);
+
   const { violations, stats, isLoading, updateViolationStatus, refreshData } = useMinimumWageCompliance(selectedCompanyId);
-  
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedViolation, setSelectedViolation] = useState<MinimumWageViolation | null>(null);
-  const [resolutionNotes, setResolutionNotes] = useState("");
-  const [dialogAction, setDialogAction] = useState<"resolve" | "exempt" | "false_positive" | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const filteredViolations = violations.filter(v => {
     const matchesSearch = 
@@ -64,10 +84,12 @@ export default function MinimumWageCompliancePage() {
     return matchesSearch && matchesStatus;
   });
 
+  const selectedViolation = violations.find(v => v.id === selectedViolationId);
+
   const handleRefresh = async () => {
-    setIsRefreshing(true);
+    setTabState({ isRefreshing: true });
     await refreshData();
-    setIsRefreshing(false);
+    setTabState({ isRefreshing: false });
   };
 
   const handleStatusChange = async (action: "resolve" | "exempt" | "false_positive") => {
@@ -80,15 +102,11 @@ export default function MinimumWageCompliancePage() {
     };
     
     await updateViolationStatus(selectedViolation.id, statusMap[action], resolutionNotes);
-    setSelectedViolation(null);
-    setResolutionNotes("");
-    setDialogAction(null);
+    setTabState({ selectedViolationId: null, resolutionNotes: "", dialogAction: null });
   };
 
   const openDialog = (violation: MinimumWageViolation, action: "resolve" | "exempt" | "false_positive") => {
-    setSelectedViolation(violation);
-    setDialogAction(action);
-    setResolutionNotes("");
+    setTabState({ selectedViolationId: violation.id, dialogAction: action, resolutionNotes: "" });
   };
 
   const getStatusBadge = (status: MinimumWageViolation["status"]) => {
@@ -289,11 +307,11 @@ export default function MinimumWageCompliancePage() {
                   <Input
                     placeholder="Search employees..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => setTabState({ searchTerm: e.target.value })}
                     className="pl-9 w-[250px]"
                   />
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                   <SelectTrigger className="w-[150px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
@@ -411,7 +429,7 @@ export default function MinimumWageCompliancePage() {
       </div>
 
       {/* Resolution Dialog */}
-      <Dialog open={dialogAction !== null} onOpenChange={() => setDialogAction(null)}>
+      <Dialog open={dialogAction !== null} onOpenChange={() => setTabState({ dialogAction: null })}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -420,24 +438,21 @@ export default function MinimumWageCompliancePage() {
               {dialogAction === "false_positive" && "Mark as False Positive"}
             </DialogTitle>
             <DialogDescription>
-              {dialogAction === "resolve" && "Confirm that this minimum wage violation has been addressed."}
-              {dialogAction === "exempt" && "Provide a reason for exempting this employee from minimum wage requirements."}
-              {dialogAction === "false_positive" && "Explain why this was incorrectly flagged as a violation."}
+              {dialogAction === "resolve" && "Confirm that the minimum wage violation has been resolved."}
+              {dialogAction === "exempt" && "Document the exemption reason for this violation."}
+              {dialogAction === "false_positive" && "Explain why this is not a real violation."}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Notes</label>
-              <Textarea
-                placeholder="Enter resolution notes..."
-                value={resolutionNotes}
-                onChange={(e) => setResolutionNotes(e.target.value)}
-                rows={4}
-              />
-            </div>
+          <div className="py-4">
+            <Textarea
+              placeholder="Enter notes..."
+              value={resolutionNotes}
+              onChange={(e) => setTabState({ resolutionNotes: e.target.value })}
+              rows={4}
+            />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogAction(null)}>
+            <Button variant="outline" onClick={() => setTabState({ dialogAction: null })}>
               Cancel
             </Button>
             <Button onClick={() => dialogAction && handleStatusChange(dialogAction)}>
