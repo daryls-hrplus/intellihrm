@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTabState } from "@/hooks/useTabState";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -92,7 +93,14 @@ const statusColors: Record<string, string> = {
 
 export default function MssAppraisalsPage() {
   const { user, company } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  
+  // Use tab state for tab persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "overview" },
+  });
+  const { activeTab } = tabState;
+  const setActiveTab = (tab: string) => setTabState({ activeTab: tab });
+  
   const [myTeamCycles, setMyTeamCycles] = useState<AppraisalCycle[]>([]);
   const [pendingEvaluations, setPendingEvaluations] = useState<EvaluationItem[]>([]);
   const [completedEvaluations, setCompletedEvaluations] = useState<EvaluationItem[]>([]);

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useTabState } from "@/hooks/useTabState";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,8 +79,15 @@ export default function MssTrainingPage() {
   const [teamEnrollments, setTeamEnrollments] = useState<TeamEnrollment[]>([]);
   const [trainingRequests, setTrainingRequests] = useState<TrainingRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
+  // Use tab state for tab and expanded state persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "overview",
+      expandedEmployeeIds: [] as string[],
+    },
+  });
+  const { activeTab, expandedEmployeeIds } = tabState;
+  const expandedEmployees = new Set(expandedEmployeeIds);
 
   useEffect(() => {
     if (user) {
@@ -143,13 +151,14 @@ export default function MssTrainingPage() {
   };
 
   const toggleEmployee = (employeeId: string) => {
-    const newExpanded = new Set(expandedEmployees);
-    if (newExpanded.has(employeeId)) {
-      newExpanded.delete(employeeId);
+    const currentExpanded = new Set(expandedEmployees);
+    let newExpandedIds: string[];
+    if (currentExpanded.has(employeeId)) {
+      newExpandedIds = expandedEmployeeIds.filter(id => id !== employeeId);
     } else {
-      newExpanded.add(employeeId);
+      newExpandedIds = [...expandedEmployeeIds, employeeId];
     }
-    setExpandedEmployees(newExpanded);
+    setTabState({ expandedEmployeeIds: newExpandedIds });
   };
 
   const inProgressEnrollments = teamEnrollments.filter(
@@ -322,7 +331,7 @@ export default function MssTrainingPage() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={(value) => setTabState({ activeTab: value })}>
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="by_employee">By Employee</TabsTrigger>

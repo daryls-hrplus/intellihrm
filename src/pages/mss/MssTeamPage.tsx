@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
 import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
@@ -27,6 +28,7 @@ import {
   Calendar,
   TrendingUp,
   MessageSquare,
+  User,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -43,12 +45,17 @@ interface DirectReport {
 
 export default function MssTeamPage() {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { user } = useAuth();
 
   const [directReports, setDirectReports] = useState<DirectReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // Use tab state for search persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { searchQuery: '' },
+  });
+  const { searchQuery } = tabState;
 
   const breadcrumbItems = [
     { label: t('mss.title'), href: '/mss' },
@@ -86,6 +93,23 @@ export default function MssTeamPage() {
       report.position_title?.toLowerCase().includes(query)
     );
   });
+
+  const handleViewTeamMember = (report: DirectReport, tab?: string, e?: React.MouseEvent) => {
+    const route = tab 
+      ? `/mss/team/${report.employee_id}?tab=${tab}`
+      : `/mss/team/${report.employee_id}`;
+    
+    navigateToRecord({
+      route,
+      title: report.employee_name,
+      subtitle: "Team Member",
+      moduleCode: "mss",
+      contextType: "team_member",
+      contextId: report.employee_id,
+      icon: User,
+      forceNew: e?.ctrlKey || e?.metaKey,
+    });
+  };
 
   return (
     <AppLayout>
@@ -157,7 +181,7 @@ export default function MssTeamPage() {
                 <Input
                   placeholder="Search by name, email, or position..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setTabState({ searchQuery: e.target.value })}
                   className="pl-9"
                 />
               </div>
@@ -225,7 +249,7 @@ export default function MssTeamPage() {
                           <div className="flex items-center gap-1">
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); navigate(`/mss/team/${report.employee_id}?tab=goals`); }}>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); handleViewTeamMember(report, 'goals', e); }}>
                                   <Target className="h-3.5 w-3.5 text-muted-foreground" />
                                 </Button>
                               </TooltipTrigger>
@@ -233,7 +257,7 @@ export default function MssTeamPage() {
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); navigate(`/mss/team/${report.employee_id}?tab=performance`); }}>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); handleViewTeamMember(report, 'performance', e); }}>
                                   <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                                 </Button>
                               </TooltipTrigger>
@@ -241,7 +265,7 @@ export default function MssTeamPage() {
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); navigate(`/mss/team/${report.employee_id}?tab=360-feedback`); }}>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); handleViewTeamMember(report, '360-feedback', e); }}>
                                   <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
                                 </Button>
                               </TooltipTrigger>
@@ -249,7 +273,7 @@ export default function MssTeamPage() {
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); navigate(`/mss/team/${report.employee_id}?tab=learning`); }}>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); handleViewTeamMember(report, 'learning', e); }}>
                                   <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
                                 </Button>
                               </TooltipTrigger>
@@ -262,7 +286,7 @@ export default function MssTeamPage() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => navigate(`/mss/team/${report.employee_id}`)}
+                          onClick={(e) => handleViewTeamMember(report, undefined, e)}
                         >
                           <ChevronRight className="h-4 w-4" />
                         </Button>
