@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
@@ -51,9 +52,21 @@ export default function LeaveAnalyticsPage() {
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("all");
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  
+  // Tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      selectedDepartmentId: "all",
+      selectedYear: new Date().getFullYear().toString(),
+    },
+    syncToUrl: ["selectedYear"],
+  });
+  const { selectedCompanyId, selectedDepartmentId, selectedYear } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSelectedDepartmentId = (v: string) => setTabState({ selectedDepartmentId: v });
+  const setSelectedYear = (v: string) => setTabState({ selectedYear: v });
+  
   const [isLoading, setIsLoading] = useState(true);
 
   // Analytics data

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +11,7 @@ import { BradfordFactorAnalysis } from "@/components/leave/compliance/BradfordFa
 import { LeavePolicyVersionHistory } from "@/components/leave/compliance/LeavePolicyVersionHistory";
 import { ComplianceAlerts } from "@/components/leave/compliance/ComplianceAlerts";
 import { FileCheck, Stethoscope, Calculator, History, Bell } from "lucide-react";
+import { useTabState } from "@/hooks/useTabState";
 
 const breadcrumbItems = [
   { label: "Leave Management", href: "/leave" },
@@ -20,7 +20,17 @@ const breadcrumbItems = [
 
 export default function LeaveCompliancePage() {
   const { company, isAdmin } = useAuth();
-  const [selectedCompanyId, setSelectedCompanyId] = useState(company?.id || "");
+  
+  // Tab state for filter and tab persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: company?.id || "",
+      activeTab: "alerts",
+    },
+  });
+  const { selectedCompanyId, activeTab } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-for-selector"],
@@ -57,7 +67,7 @@ export default function LeaveCompliancePage() {
         )}
       </div>
 
-      <Tabs defaultValue="alerts" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="alerts" className="flex items-center gap-2">
             <Bell className="h-4 w-4" />

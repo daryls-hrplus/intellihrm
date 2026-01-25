@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
@@ -11,6 +11,7 @@ import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { GroupedModuleCards, GroupedModuleItem, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { useTabState } from "@/hooks/useTabState";
 import {
   Select,
   SelectContent,
@@ -53,9 +54,14 @@ export default function LeaveDashboardPage() {
   const { hasTabAccess } = useGranularPermissions();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
   
-  // Company filter state - "all" means all companies
+  // Company filter state with tab persistence
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(isAdminOrHR ? "all" : (company?.id || ""));
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: isAdminOrHR ? "all" : (company?.id || "") },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   
   // Fetch companies for filter
   useEffect(() => {

@@ -2,7 +2,9 @@ import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement, LeaveRequest } from "@/hooks/useLeaveManagement";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useLeaveCompanyFilter, LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -82,7 +84,32 @@ const ITEMS_PER_PAGE = 20;
 
 export default function EmployeeLeaveRecordsPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  
+  // Tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: isAdminOrHR ? (company?.id || "") : (company?.id || ""),
+      searchTerm: "",
+      statusFilter: "all",
+      typeFilter: "all",
+      dateRangeFilter: "all",
+      sourceFilter: "all",
+      currentPage: 1,
+    },
+    syncToUrl: ["statusFilter", "typeFilter"],
+  });
+  
+  const { selectedCompanyId, searchTerm, statusFilter, typeFilter, dateRangeFilter, sourceFilter, currentPage } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v, currentPage: 1 });
+  const setStatusFilter = (v: string) => setTabState({ statusFilter: v, currentPage: 1 });
+  const setTypeFilter = (v: string) => setTabState({ typeFilter: v, currentPage: 1 });
+  const setDateRangeFilter = (v: string) => setTabState({ dateRangeFilter: v, currentPage: 1 });
+  const setSourceFilter = (v: string) => setTabState({ sourceFilter: v, currentPage: 1 });
+  const setCurrentPage = (v: number) => setTabState({ currentPage: v });
+
   const { 
     allLeaveRequests, 
     loadingAllRequests, 
@@ -93,18 +120,8 @@ export default function EmployeeLeaveRecordsPage() {
     deleteLeaveRequest,
   } = useLeaveManagement(selectedCompanyId);
 
-  // Filters
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [dateRangeFilter, setDateRangeFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
-
   // Selection for bulk actions
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
 
   // Dialog states
   const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
@@ -599,7 +616,7 @@ export default function EmployeeLeaveRecordsPage() {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
@@ -619,7 +636,7 @@ export default function EmployeeLeaveRecordsPage() {
               })}
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>

@@ -17,12 +17,20 @@ import { useLeaveEncashment, LeaveEncashmentRequest } from "@/hooks/useLeaveEnha
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function LeaveEncashmentPage() {
   const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole("hr_manager");
   const { encashmentRequests, isLoading, reviewEncashment } = useLeaveEncashment(company?.id);
+  
+  // Tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "pending" },
+  });
+  const { activeTab } = tabState;
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
   
   const [selectedRequest, setSelectedRequest] = useState<LeaveEncashmentRequest | null>(null);
   const [ratePerDay, setRatePerDay] = useState("");
@@ -133,7 +141,7 @@ export default function LeaveEncashmentPage() {
 
         <Card>
           <CardContent className="pt-6">
-            <Tabs defaultValue="pending">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsTrigger value="pending">
                   Pending

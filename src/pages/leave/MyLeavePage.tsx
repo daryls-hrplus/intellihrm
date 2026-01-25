@@ -11,7 +11,7 @@ import { ResumptionOfDutyForm } from "@/components/leave/ResumptionOfDutyForm";
 import { ResumptionOfDutyCard } from "@/components/leave/ResumptionOfDutyCard";
 import { Calendar, CalendarPlus, Clock, CheckCircle, XCircle, AlertCircle, FileCheck } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { NavLink } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import {
   Table,
   TableBody,
@@ -25,6 +25,7 @@ export default function MyLeavePage() {
   const { t } = useLanguage();
   const { leaveBalances, leaveRequests, loadingBalances, loadingRequests } = useLeaveManagement();
   const { pendingForEmployee, myRodsLoading } = useResumptionOfDuty();
+  const { navigateToList } = useWorkspaceNavigation();
   const [selectedRod, setSelectedRod] = useState<string | null>(null);
 
   const selectedRodData = pendingForEmployee.find(r => r.id === selectedRod);
@@ -67,12 +68,17 @@ export default function MyLeavePage() {
               <p className="text-muted-foreground">{t("leave.myLeave.subtitle")}</p>
             </div>
           </div>
-          <NavLink to="/leave/apply">
-            <Button>
-              <CalendarPlus className="mr-2 h-4 w-4" />
-              {t("leave.myLeave.applyForLeave")}
-            </Button>
-          </NavLink>
+          <Button
+            onClick={() => navigateToList({
+              route: "/leave/apply",
+              title: "Apply for Leave",
+              moduleCode: "leave",
+              icon: CalendarPlus,
+            })}
+          >
+            <CalendarPlus className="mr-2 h-4 w-4" />
+            {t("leave.myLeave.applyForLeave")}
+          </Button>
         </div>
 
         {/* Pending Resumption of Duty */}

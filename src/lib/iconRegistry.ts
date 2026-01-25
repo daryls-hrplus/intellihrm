@@ -53,6 +53,9 @@ import {
   CircleHelp, CircleAlert, CircleUser, CircleUserRound, BadgeCheck,
   BadgeX, BadgeAlert, BadgeHelp, BadgeInfo, BadgePlus, BadgeMinus,
   BadgePercent, BadgeDollarSign, ShieldQuestion,
+  // Leave Management icons
+  Banknote, Baby, ShieldCheck, Ban, Percent, BarChart3, Calculator,
+  CheckCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -174,6 +177,19 @@ export const iconRegistry: Record<string, LucideIcon> = {
   Plug,
   Sun,
   Moon,
+  // Leave Management icons
+  Banknote,
+  Baby,
+  ShieldCheck,
+  Ban,
+  Percent,
+  BarChart3,
+  Calculator,
+  CheckCircle,
+  CalendarPlus,
+  CalendarCheck,
+  RotateCcw,
+  PartyPopper,
 };
 
 /**

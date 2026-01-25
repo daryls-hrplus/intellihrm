@@ -1,8 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useLanguage } from "@/hooks/useLanguage";
-import { useLeaveCompanyFilter, LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
+import { supabase } from "@/integrations/supabase/client";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -99,10 +102,29 @@ interface BalanceWithEmployee {
 
 export default function EmployeeLeaveBalancesPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
   
-  // Leave year filter
-  const [selectedLeaveYearId, setSelectedLeaveYearId] = useState<string>("current");
+  // Tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: isAdminOrHR ? (company?.id || "") : (company?.id || ""),
+      selectedLeaveYearId: "current",
+      searchTerm: "",
+      typeFilter: "all",
+      balanceFilter: "all",
+      currentPage: 1,
+    },
+    syncToUrl: ["typeFilter", "balanceFilter"],
+  });
+  
+  const { selectedCompanyId, selectedLeaveYearId, searchTerm, typeFilter, balanceFilter, currentPage } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSelectedLeaveYearId = (v: string) => setTabState({ selectedLeaveYearId: v, currentPage: 1 });
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v, currentPage: 1 });
+  const setTypeFilter = (v: string) => setTabState({ typeFilter: v, currentPage: 1 });
+  const setBalanceFilter = (v: string) => setTabState({ balanceFilter: v, currentPage: 1 });
+  const setCurrentPage = (v: number) => setTabState({ currentPage: v });
   
   const { allLeaveBalances, loadingAllBalances, leaveTypes, leaveYears, loadingLeaveYears } = useLeaveManagement(
     selectedCompanyId,
@@ -112,16 +134,8 @@ export default function EmployeeLeaveBalancesPage() {
   // Get current leave year ID for "current" selection
   const currentLeaveYear = leaveYears.find(ly => ly.is_current);
 
-  // Filters
-  const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [balanceFilter, setBalanceFilter] = useState<string>("all");
-
   // Selection for bulk actions
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
 
   // Dialog states
   const [selectedBalance, setSelectedBalance] = useState<BalanceWithEmployee | null>(null);
@@ -563,7 +577,7 @@ export default function EmployeeLeaveBalancesPage() {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
@@ -583,7 +597,7 @@ export default function EmployeeLeaveBalancesPage() {
               })}
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                 />
               </PaginationItem>
