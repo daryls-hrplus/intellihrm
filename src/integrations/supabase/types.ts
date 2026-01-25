@@ -75734,9 +75734,20 @@ export type Database = {
         Args: { p_leave_request_id: string }
         Returns: undefined
       }
+      calculate_readiness_score: {
+        Args: { p_event_id: string }
+        Returns: {
+          overall_score: number
+          readiness_band: string
+        }[]
+      }
       calculate_responsibility_kra_rollup: {
         Args: { p_participant_id: string; p_responsibility_id: string }
         Returns: number
+      }
+      calculate_retention_risk_level: {
+        Args: { p_criticality: string; p_difficulty: string }
+        Returns: string
       }
       calculate_scenario_totals: {
         Args: { p_scenario_id: string }

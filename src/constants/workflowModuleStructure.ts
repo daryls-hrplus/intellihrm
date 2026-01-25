@@ -14,7 +14,9 @@ import {
   UserMinus,
   Clock,
   Briefcase,
-  Award
+  Award,
+  TrendingUp,
+  ClipboardCheck
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -187,6 +189,22 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         icon: Target,
         workflows: [
           { code: "goal_approval", name: "Goal Approval", transactionTypeCode: null }
+        ]
+      }
+    ]
+  },
+  {
+    id: "succession",
+    name: "Succession Planning",
+    icon: TrendingUp,
+    categories: [
+      {
+        id: "readiness_assessment",
+        name: "Readiness Assessment",
+        color: "violet",
+        icon: ClipboardCheck,
+        workflows: [
+          { code: "succession_readiness", name: "Readiness Assessment Approval", transactionTypeCode: "SUCC_READINESS_APPROVAL" }
         ]
       }
     ]
