@@ -67,7 +67,8 @@ import { HeadcountAnalytics } from "@/components/admin/HeadcountAnalytics";
 import { HeadcountForecast } from "@/components/admin/HeadcountForecast";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface Company {
   id: string;
@@ -110,6 +111,8 @@ export default function AdminOrgStructurePage() {
   const sharedScenarioToken = searchParams.get("scenario");
   const companyFromUrl = searchParams.get("company");
   const tabFromUrl = searchParams.get("tab");
+  
+  const { navigateToList } = useWorkspaceNavigation();
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
@@ -400,12 +403,18 @@ export default function AdminOrgStructurePage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <NavLink
-              to="/hr-hub"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border hover:bg-muted"
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigateToList({
+                route: "/hr-hub",
+                title: "HR Hub",
+                moduleCode: "hr-hub",
+              })}
+              className="flex h-10 w-10 items-center justify-center rounded-lg"
             >
               <ArrowLeft className="h-5 w-5" />
-            </NavLink>
+            </Button>
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 <FolderTree className="h-8 w-8 text-primary" />
