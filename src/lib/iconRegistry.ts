@@ -165,6 +165,15 @@ export const iconRegistry: Record<string, LucideIcon> = {
   Database,
   Server,
   Cloud,
+  // Time & Attendance icons (new additions - others already present above)
+  Repeat,
+  RefreshCw,
+  Ruler,
+  Sunrise,
+  Sunset,
+  Plug,
+  Sun,
+  Moon,
 };
 
 /**

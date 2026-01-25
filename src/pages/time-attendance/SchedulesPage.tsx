@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 import { 
   Calendar, 
   Plus,

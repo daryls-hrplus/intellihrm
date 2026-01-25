@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 import { 
   ClipboardList, 
   Calendar as CalendarIcon,
@@ -49,14 +50,26 @@ interface AttendanceRecord {
 export default function AttendanceRecordsPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date())
+  
+  // Tab-scoped state persistence for filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: { 
+      selectedCompany: "",
+      statusFilter: "all",
+      dateFrom: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
+      dateTo: format(endOfMonth(new Date()), 'yyyy-MM-dd'),
+    },
+    syncToUrl: ["statusFilter"],
   });
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const { selectedCompany, statusFilter, dateFrom, dateTo } = tabState;
+  
+  const dateRange = {
+    from: new Date(dateFrom),
+    to: new Date(dateTo),
+  };
+  
   const [stats, setStats] = useState({
     present: 0,
     absent: 0,
@@ -86,8 +99,8 @@ export default function AttendanceRecordsPage() {
       return;
     }
     setCompanies(data || []);
-    if (data && data.length > 0) {
-      setSelectedCompany(data[0].id);
+    if (data && data.length > 0 && !selectedCompany) {
+      setTabState({ selectedCompany: data[0].id });
     }
     setLoading(false);
   };
@@ -203,7 +216,7 @@ export default function AttendanceRecordsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <Select value={selectedCompany} onValueChange={(v) => setTabState({ selectedCompany: v })}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder={t("common.selectCompany")} />
               </SelectTrigger>
@@ -291,7 +304,7 @@ export default function AttendanceRecordsPage() {
                     <Calendar
                       mode="single"
                       selected={dateRange.from}
-                      onSelect={(date) => date && setDateRange({...dateRange, from: date})}
+                      onSelect={(date) => date && setTabState({ dateFrom: format(date, 'yyyy-MM-dd') })}
                     />
                   </PopoverContent>
                 </Popover>
@@ -309,14 +322,14 @@ export default function AttendanceRecordsPage() {
                     <Calendar
                       mode="single"
                       selected={dateRange.to}
-                      onSelect={(date) => date && setDateRange({...dateRange, to: date})}
+                      onSelect={(date) => date && setTabState({ dateTo: format(date, 'yyyy-MM-dd') })}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">{t("timeAttendance.records.status")}</label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue />
                   </SelectTrigger>

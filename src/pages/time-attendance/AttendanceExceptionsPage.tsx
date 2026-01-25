@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, parseISO } from "date-fns";
 import { AlertTriangle, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 interface AttendanceException {
   id: string;
@@ -45,6 +46,12 @@ export default function AttendanceExceptionsPage() {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedException, setSelectedException] = useState<AttendanceException | null>(null);
   const [reviewNotes, setReviewNotes] = useState("");
+  
+  // Tab-scoped state for active tab persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "pending" },
+  });
+  const { activeTab } = tabState;
 
   const exceptionTypes: Record<string, string> = {
     missing_clock_in: t("timeAttendance.exceptions.types.missingClockIn"),
@@ -119,7 +126,7 @@ export default function AttendanceExceptionsPage() {
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{t("timeAttendance.exceptions.autoResolved")}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-blue-600">{exceptions.filter(e => e.status === "auto_resolved").length}</div></CardContent></Card>
         </div>
 
-        <Tabs defaultValue="pending">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="pending">{t("timeAttendance.exceptions.pending")} ({pendingExceptions.length})</TabsTrigger>
             <TabsTrigger value="resolved">{t("timeAttendance.exceptions.resolved")} ({resolvedExceptions.length})</TabsTrigger>

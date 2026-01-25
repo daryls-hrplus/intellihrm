@@ -8,6 +8,7 @@ import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { GroupedModuleCards, GroupedModuleItem, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { useTabState } from "@/hooks/useTabState";
 import { 
   Clock, 
   Calendar, 
@@ -35,7 +36,14 @@ export default function TimeAttendanceDashboardPage() {
   const { t } = useTranslation();
   const { profile } = useAuth();
   const { hasTabAccess } = useGranularPermissions();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
+  
+  // Tab-scoped state persistence for company filter
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "all" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId } = tabState;
+  
   const [stats, setStats] = useState({
     presentToday: 0,
     absent: 0,
@@ -423,7 +431,7 @@ export default function TimeAttendanceDashboardPage() {
           <div className="flex items-center gap-3">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId}
-              onCompanyChange={setSelectedCompanyId}
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id })}
             />
             <ModuleBIButton module="time_attendance" />
             <ModuleReportsButton module="time_attendance" />
