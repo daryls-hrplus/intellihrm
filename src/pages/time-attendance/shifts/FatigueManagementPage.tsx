@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { FatigueManagementTab } from "@/components/time-attendance/shifts/FatigueManagementTab";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -17,8 +18,13 @@ interface Company {
 export default function FatigueManagementPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
 
   useEffect(() => {
     loadCompanies();
@@ -36,7 +42,7 @@ export default function FatigueManagementPage() {
       return;
     }
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
     setLoading(false);
