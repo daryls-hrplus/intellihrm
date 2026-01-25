@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
 import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
@@ -30,21 +31,27 @@ import {
 } from 'lucide-react';
 import { useOnboarding, OnboardingInstance } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { differenceInDays } from 'date-fns';
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function MssOnboardingPage() {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { user } = useAuth();
   const { fetchInstances, getOnboardingProgress } = useOnboarding();
 
   const [instances, setInstances] = useState<OnboardingInstance[]>([]);
   const [instanceProgress, setInstanceProgress] = useState<Record<string, { total: number; completed: number; percentage: number }>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // Use tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: '',
+      statusFilter: 'all',
+    },
+  });
+  const { searchQuery, statusFilter } = tabState;
 
   const breadcrumbItems = [
     { label: t('mss.title'), href: '/mss' },
@@ -88,12 +95,6 @@ export default function MssOnboardingPage() {
     }
   };
 
-  const getProgressColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 50) return 'bg-amber-500';
-    return 'bg-blue-500';
-  };
-
   const filteredInstances = instances.filter(instance => {
     const matchesSearch = !searchQuery || 
       (instance as any).profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -110,6 +111,20 @@ export default function MssOnboardingPage() {
       if (i.status !== 'in_progress' || !i.target_completion_date) return false;
       return differenceInDays(new Date(i.target_completion_date), new Date()) < 0;
     }).length,
+  };
+
+  const handleViewInstance = (instance: OnboardingInstance, e?: React.MouseEvent) => {
+    const employeeName = (instance as any).profiles?.full_name || 'Unknown';
+    navigateToRecord({
+      route: `/workforce/onboarding/${instance.id}`,
+      title: employeeName,
+      subtitle: "Onboarding",
+      moduleCode: "mss",
+      contextType: "onboarding_instance",
+      contextId: instance.id,
+      icon: Rocket,
+      forceNew: e?.ctrlKey || e?.metaKey,
+    });
   };
 
   return (
@@ -181,11 +196,11 @@ export default function MssOnboardingPage() {
                 <Input
                   placeholder="Search by name or template..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setTabState({ searchQuery: e.target.value })}
                   className="pl-9"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(value) => setTabState({ statusFilter: value })}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -274,7 +289,7 @@ export default function MssOnboardingPage() {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => navigate(`/workforce/onboarding/${instance.id}`)}
+                            onClick={(e) => handleViewInstance(instance, e)}
                           >
                             <ChevronRight className="h-4 w-4" />
                           </Button>

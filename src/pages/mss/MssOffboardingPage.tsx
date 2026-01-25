@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
 import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
@@ -30,20 +31,27 @@ import {
 } from 'lucide-react';
 import { useOffboarding, OffboardingInstance } from '@/hooks/useOffboarding';
 import { useAuth } from '@/contexts/AuthContext';
-import { format, differenceInDays } from 'date-fns';
+import { differenceInDays } from 'date-fns';
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function MssOffboardingPage() {
   const { t } = useLanguage();
-  const navigate = useNavigate();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { user } = useAuth();
   const { fetchInstances, getOffboardingProgress } = useOffboarding();
 
   const [instances, setInstances] = useState<OffboardingInstance[]>([]);
   const [instanceProgress, setInstanceProgress] = useState<Record<string, { total: number; completed: number; percentage: number }>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // Use tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: '',
+      statusFilter: 'all',
+    },
+  });
+  const { searchQuery, statusFilter } = tabState;
 
   const breadcrumbItems = [
     { label: t('mss.title'), href: '/mss' },
@@ -120,6 +128,20 @@ export default function MssOffboardingPage() {
     }).length,
   };
 
+  const handleViewInstance = (instance: OffboardingInstance, e?: React.MouseEvent) => {
+    const employeeName = (instance as any).profiles?.full_name || 'Unknown';
+    navigateToRecord({
+      route: `/workforce/offboarding/${instance.id}`,
+      title: employeeName,
+      subtitle: "Offboarding",
+      moduleCode: "mss",
+      contextType: "offboarding_instance",
+      contextId: instance.id,
+      icon: UserMinus,
+      forceNew: e?.ctrlKey || e?.metaKey,
+    });
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -192,11 +214,11 @@ export default function MssOffboardingPage() {
                 <Input
                   placeholder="Search by name..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setTabState({ searchQuery: e.target.value })}
                   className="pl-9"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(value) => setTabState({ statusFilter: value })}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -282,7 +304,7 @@ export default function MssOffboardingPage() {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => navigate(`/workforce/offboarding/${instance.id}`)}
+                            onClick={(e) => handleViewInstance(instance, e)}
                           >
                             <ChevronRight className="h-4 w-4" />
                           </Button>

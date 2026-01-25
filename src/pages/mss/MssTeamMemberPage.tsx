@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
@@ -21,6 +22,7 @@ import {
   BookOpen,
   TrendingUp,
   BarChart3,
+  Users,
 } from 'lucide-react';
 import { TeamMember360Summary } from '@/components/mss/TeamMember360Summary';
 import { useAuth } from '@/contexts/AuthContext';
@@ -63,7 +65,7 @@ interface Goal {
 export default function MssTeamMemberPage() {
   const { t } = useLanguage();
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const { user } = useAuth();
 
   const [member, setMember] = useState<TeamMemberDetails | null>(null);
@@ -193,6 +195,15 @@ export default function MssTeamMemberPage() {
     }
   };
 
+  const handleBackToTeam = () => {
+    navigateToList({
+      route: '/mss/team',
+      title: t('mss.dashboard.myTeam'),
+      moduleCode: 'mss',
+      icon: Users,
+    });
+  };
+
   const getStatusBadge = (status: string) => {
     const colors: Record<string, string> = {
       approved: 'bg-green-500/10 text-green-600 border-green-500/20',
@@ -232,7 +243,7 @@ export default function MssTeamMemberPage() {
       <AppLayout>
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold">Team member not found</h2>
-          <Button variant="link" onClick={() => navigate('/mss/team')}>
+          <Button variant="link" onClick={handleBackToTeam}>
             Back to My Team
           </Button>
         </div>
@@ -248,7 +259,7 @@ export default function MssTeamMemberPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/mss/team')}
+          onClick={handleBackToTeam}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

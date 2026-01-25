@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTabState } from "@/hooks/useTabState";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -56,7 +57,11 @@ export default function MssFeedbackPage() {
   const [sentFeedback, setSentFeedback] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("team");
+  // Use tab state for tab persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "team" },
+  });
+  const { activeTab } = tabState;
   const [formData, setFormData] = useState({
     to_user_id: "",
     feedback_type: "praise",
@@ -245,7 +250,7 @@ export default function MssFeedbackPage() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={(value) => setTabState({ activeTab: value })}>
             <TabsList>
               <TabsTrigger value="team">Team Received ({teamFeedback.length})</TabsTrigger>
               <TabsTrigger value="sent">You Sent ({sentFeedback.length})</TabsTrigger>

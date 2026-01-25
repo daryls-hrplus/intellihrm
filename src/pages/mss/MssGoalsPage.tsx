@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTabState } from "@/hooks/useTabState";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -116,7 +117,26 @@ const statusColors: Record<GoalStatus, string> = {
 
 
   const { user, company } = useAuth();
-  const [activeTab, setActiveTab] = useState("team-goals");
+
+  // Use tab state for filter persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "team-goals",
+      searchQuery: "",
+      selectedEmployee: "all",
+      selectedStatus: "all",
+      selectedPriority: "all",
+      showAnalytics: true,
+    },
+  });
+  const { activeTab, searchQuery, selectedEmployee, selectedStatus, selectedPriority, showAnalytics } = tabState;
+  const setActiveTab = (tab: string) => setTabState({ activeTab: tab });
+  const setSearchQuery = (query: string) => setTabState({ searchQuery: query });
+  const setSelectedEmployee = (emp: string) => setTabState({ selectedEmployee: emp });
+  const setSelectedStatus = (status: string) => setTabState({ selectedStatus: status });
+  const setSelectedPriority = (priority: string) => setTabState({ selectedPriority: priority });
+  const setShowAnalytics = (show: boolean) => setTabState({ showAnalytics: show });
+
   const [directReports, setDirectReports] = useState<DirectReport[]>([]);
   const [teamGoals, setTeamGoals] = useState<Goal[]>([]);
   const [completedGoals, setCompletedGoals] = useState<Goal[]>([]);
@@ -126,13 +146,6 @@ const statusColors: Record<GoalStatus, string> = {
   const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
-  const [showAnalytics, setShowAnalytics] = useState(true);
-
-  // Filter states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedEmployee, setSelectedEmployee] = useState("all");
-  const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedPriority, setSelectedPriority] = useState("all");
 
   // Reminder dialog
   const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
