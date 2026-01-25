@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, NavLink } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +56,7 @@ const TASK_STATUS_CONFIG: Record<ProvisioningTaskStatus, {
 
 export default function ClientProvisioningPage() {
   const { id } = useParams<{ id: string }>();
+  const { navigateToList, navigateToRecord } = useWorkspaceNavigation();
   const { getRegistrationById, updateRegistration } = useClientProvisioning();
   const { tasks, isLoading: tasksLoading, executeAutomatedTask, completeManualTask, skipTask, getProgress } = useProvisioningTasks(id);
   
@@ -133,11 +136,14 @@ export default function ClientProvisioningPage() {
         <div className="flex flex-col items-center justify-center h-96 text-center">
           <AlertCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
           <h2 className="text-xl font-semibold mb-2">Registration Not Found</h2>
-          <Button asChild>
-            <NavLink to="/admin/clients">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Registry
-            </NavLink>
+          <Button onClick={() => navigateToList({
+            route: "/admin/clients",
+            title: "Client Registry",
+            moduleCode: "admin",
+            icon: Building2,
+          })}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Registry
           </Button>
         </div>
       </AppLayout>
@@ -150,10 +156,16 @@ export default function ClientProvisioningPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <NavLink to={`/admin/clients/${id}`}>
-                <ArrowLeft className="h-4 w-4" />
-              </NavLink>
+            <Button variant="ghost" size="icon" onClick={() => navigateToRecord({
+              route: `/admin/clients/${id}`,
+              title: registration.company_name,
+              subtitle: "Client",
+              moduleCode: "admin",
+              contextType: "client",
+              contextId: id!,
+              icon: Building2,
+            })}>
+              <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
@@ -328,11 +340,17 @@ export default function ClientProvisioningPage() {
               </a>
             </Button>
             <br />
-            <Button variant="link" className="h-auto p-0" asChild>
-              <NavLink to="/admin/implementation-handbook">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Implementation Handbook
-              </NavLink>
+            <Button 
+              variant="link" 
+              className="h-auto p-0" 
+              onClick={() => navigateToList({
+                route: "/admin/implementation-handbook",
+                title: "Implementation Handbook",
+                moduleCode: "admin",
+              })}
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Implementation Handbook
             </Button>
           </CardContent>
         </Card>

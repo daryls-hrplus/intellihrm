@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTabState } from "@/hooks/useTabState";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +47,14 @@ type ArticleFormData = z.infer<typeof articleSchema>;
 export default function AdminKnowledgeBasePage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  
+  // Use tab state for tab persistence
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "articles" },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab } = tabState;
+  
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [articleDialogOpen, setArticleDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -243,7 +252,7 @@ export default function AdminKnowledgeBasePage() {
         <p className="text-muted-foreground">Manage help articles and categories</p>
       </div>
 
-      <Tabs defaultValue="articles" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
         <TabsList>
           <TabsTrigger value="articles" className="gap-2">
             <FileText className="h-4 w-4" />

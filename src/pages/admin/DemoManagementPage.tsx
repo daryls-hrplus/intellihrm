@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTabState } from "@/hooks/useTabState";
 import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -55,7 +56,11 @@ interface DemoChapter {
 
 export default function DemoManagementPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("experiences");
+  const [tabState, setTabState] = useTabState({
+    defaultState: { activeTab: "experiences" },
+    syncToUrl: ["activeTab"],
+  });
+  const { activeTab } = tabState;
   const [loading, setLoading] = useState(true);
   
   // Data states
@@ -228,7 +233,7 @@ export default function DemoManagementPage() {
   const openExperienceChapters = (exp: DemoExperience) => {
     setSelectedExperience(exp);
     fetchChapters(exp.id);
-    setActiveTab("chapters");
+    setTabState({ activeTab: "chapters" });
   };
 
   const getEmbedUrl = (url: string | null): string | null => {
@@ -288,7 +293,7 @@ export default function DemoManagementPage() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="experiences" className="flex items-center gap-2">
               <Layers className="h-4 w-4" />
@@ -427,7 +432,7 @@ export default function DemoManagementPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => setActiveTab("experiences")}>
+                    <Button variant="ghost" size="icon" onClick={() => setTabState({ activeTab: "experiences" })}>
                       <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div>
