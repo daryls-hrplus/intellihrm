@@ -63,6 +63,8 @@ import {
   Gift, Stethoscope, Scale,
   // Performance icons
   MessageCircle,
+  // Succession icons
+  Grid3X3, TrendingDown, Route, AlertTriangle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -218,6 +220,11 @@ export const iconRegistry: Record<string, LucideIcon> = {
   // Performance icons
   ClipboardCheck,
   MessageCircle,
+  // Succession icons
+  Grid3X3,
+  TrendingDown,
+  Route,
+  AlertTriangle,
 };
 
 /**

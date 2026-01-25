@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BarChart3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -20,7 +21,14 @@ interface Company {
 export default function SuccessionAnalyticsPage() {
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "", activeTab: "charts" },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+  
+  const { selectedCompanyId, activeTab } = tabState;
+  
   const [assessments, setAssessments] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [keyPositions, setKeyPositions] = useState<any[]>([]);
@@ -52,7 +60,9 @@ export default function SuccessionAnalyticsPage() {
     
     if (data && data.length > 0) {
       setCompanies(data);
-      setSelectedCompanyId(data[0].id);
+      if (!selectedCompanyId) {
+        setTabState({ selectedCompanyId: data[0].id });
+      }
     }
   };
 
@@ -94,7 +104,7 @@ export default function SuccessionAnalyticsPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+          <Select value={selectedCompanyId} onValueChange={(v) => setTabState({ selectedCompanyId: v })}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>
@@ -108,7 +118,7 @@ export default function SuccessionAnalyticsPage() {
           </Select>
         </div>
 
-        <Tabs defaultValue="charts" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })} className="space-y-4">
           <TabsList>
             <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
             <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
