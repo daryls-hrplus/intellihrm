@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -46,7 +46,7 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
 };
 
 export default function TimeAttendanceManualPage() {
-  const navigate = useNavigate();
+  const { navigateToList, navigateToRecord } = useWorkspaceNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('ta-part-1');
   const [expandedSections, setExpandedSections] = useState<string[]>(['ta-part-1']);
@@ -183,7 +183,11 @@ export default function TimeAttendanceManualPage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate('/enablement/manuals')}>
+              <Button variant="ghost" size="icon" onClick={() => navigateToList({
+                route: '/enablement/manuals',
+                title: 'Administrator Manuals',
+                moduleCode: 'enablement',
+              })}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-3">
@@ -310,7 +314,14 @@ export default function TimeAttendanceManualPage() {
                     </div>
                     <button
                       className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
-                      onClick={() => navigate('/enablement/manuals/workforce')}
+                      onClick={() => navigateToRecord({
+                        route: '/enablement/manuals/workforce',
+                        title: 'Workforce Manual',
+                        subtitle: 'Manual',
+                        moduleCode: 'enablement',
+                        contextType: 'manual',
+                        contextId: 'workforce',
+                      })}
                     >
                       <Link2 className="h-4 w-4 text-blue-500" />
                       <span>Workforce Manual</span>

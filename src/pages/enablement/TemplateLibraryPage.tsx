@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { TemplateLibrary } from "@/components/enablement/TemplateLibrary";
 import { DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/DocumentTemplateConfig";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { toast } from "sonner";
 
 export default function TemplateLibraryPage() {
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(DEFAULT_TEMPLATES[0]);
 
   const handleTemplateSelect = (template: DocumentTemplate) => {
@@ -34,7 +34,11 @@ export default function TemplateLibraryPage() {
               Manage document templates, reference documents, and AI instructions
             </p>
           </div>
-          <Button variant="outline" onClick={() => navigate("/enablement")}>
+          <Button variant="outline" onClick={() => navigateToList({
+            route: '/enablement',
+            title: 'Enablement Hub',
+            moduleCode: 'enablement',
+          })}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Hub
           </Button>
@@ -43,7 +47,11 @@ export default function TemplateLibraryPage() {
         <TemplateLibrary
           selectedTemplate={selectedTemplate}
           onTemplateSelect={handleTemplateSelect}
-          onClose={() => navigate("/enablement")}
+          onClose={() => navigateToList({
+            route: '/enablement',
+            title: 'Enablement Hub',
+            moduleCode: 'enablement',
+          })}
         />
       </div>
     </AppLayout>

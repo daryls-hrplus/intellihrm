@@ -1,7 +1,5 @@
 // Manual Publishing Page - Dashboard for publishing manuals to Help Center
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,15 +8,25 @@ import { Badge } from "@/components/ui/badge";
 import { ManualPublishCard } from "@/components/kb/ManualPublishCard";
 import { PublishWizard } from "@/components/kb/PublishWizard";
 import { useManualPublishing, MANUAL_CONFIGS } from "@/hooks/useManualPublishing";
-import { Upload, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
+import { Upload, CheckCircle2, Clock, AlertCircle, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ManualPublishingPage() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("all");
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [selectedManual, setSelectedManual] = useState<typeof MANUAL_CONFIGS[0] | null>(null);
+  const { navigateToRecord } = useWorkspaceNavigation();
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "all",
+      wizardOpen: false,
+      selectedManualId: null as string | null,
+    },
+  });
   const { publishedManuals, isLoading, getManualStatus } = useManualPublishing();
+  
+  const selectedManual = tabState.selectedManualId 
+    ? MANUAL_CONFIGS.find(m => m.id === tabState.selectedManualId) || null 
+    : null;
 
   // Calculate stats
   const stats = MANUAL_CONFIGS.reduce(
@@ -35,18 +43,17 @@ export default function ManualPublishingPage() {
   // Filter manuals by tab
   const filteredManuals = MANUAL_CONFIGS.filter(manual => {
     const status = getManualStatus(manual.id);
-    if (activeTab === "all") return true;
-    if (activeTab === "not-published") return !status.isPublished;
-    if (activeTab === "needs-sync") return status.isPublished && status.needsSync;
-    if (activeTab === "published") return status.isPublished && !status.needsSync;
+    if (tabState.activeTab === "all") return true;
+    if (tabState.activeTab === "not-published") return !status.isPublished;
+    if (tabState.activeTab === "needs-sync") return status.isPublished && status.needsSync;
+    if (tabState.activeTab === "published") return status.isPublished && !status.needsSync;
     return true;
   });
 
   const handlePublish = (manualId: string) => {
     const manual = MANUAL_CONFIGS.find(m => m.id === manualId);
     if (manual) {
-      setSelectedManual(manual);
-      setWizardOpen(true);
+      setTabState({ selectedManualId: manual.id, wizardOpen: true });
     }
   };
 
@@ -60,7 +67,17 @@ export default function ManualPublishingPage() {
 
   const handlePreview = (manualId: string) => {
     const config = MANUAL_CONFIGS.find(m => m.id === manualId);
-    if (config) navigate(config.href);
+    if (config) {
+      navigateToRecord({
+        route: config.href,
+        title: config.name,
+        subtitle: "Manual",
+        moduleCode: "enablement",
+        contextType: "manual",
+        contextId: config.id,
+        icon: BookOpen,
+      });
+    }
   };
 
   return (
@@ -142,7 +159,7 @@ export default function ManualPublishingPage() {
         </div>
 
         {/* Tabs and Manual List */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={tabState.activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <TabsList>
             <TabsTrigger value="all">
               All Manuals
@@ -170,7 +187,7 @@ export default function ManualPublishingPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value={activeTab} className="mt-6">
+          <TabsContent value={tabState.activeTab} className="mt-6">
             <div className="space-y-4">
               {filteredManuals.map(manual => (
                 <ManualPublishCard
@@ -198,16 +215,15 @@ export default function ManualPublishingPage() {
         {/* Publish Wizard */}
         {selectedManual && (
           <PublishWizard
-            open={wizardOpen}
-            onOpenChange={setWizardOpen}
+            open={tabState.wizardOpen}
+            onOpenChange={(open) => setTabState({ wizardOpen: open })}
             manualId={selectedManual.id}
             manualName={selectedManual.name}
             sourceVersion={selectedManual.version}
             currentPublishedVersion={getManualStatus(selectedManual.id).publishedVersion || undefined}
             sectionsCount={selectedManual.sectionsCount}
             onPublishComplete={() => {
-              setWizardOpen(false);
-              setSelectedManual(null);
+              setTabState({ wizardOpen: false, selectedManualId: null });
             }}
           />
         )}

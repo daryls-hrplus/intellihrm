@@ -23,8 +23,9 @@ import {
   Rocket,
   FileCheck,
 } from "lucide-react";
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { useTabState } from "@/hooks/useTabState";
 
 interface ChecklistItem {
   id: string;
@@ -181,19 +182,23 @@ const CHECKLIST_TYPES = [
 ];
 
 export default function ImplementationChecklistsPage() {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeType, setActiveType] = useState("all");
+  const { navigateToList } = useWorkspaceNavigation();
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchQuery: "",
+      activeType: "all",
+    },
+  });
 
   const filteredChecklists = useMemo(() => {
     let result = CHECKLISTS;
 
-    if (activeType !== "all") {
-      result = result.filter((c) => c.type === activeType);
+    if (tabState.activeType !== "all") {
+      result = result.filter((c) => c.type === tabState.activeType);
     }
 
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+    if (tabState.searchQuery.trim()) {
+      const query = tabState.searchQuery.toLowerCase();
       result = result.filter(
         (c) =>
           c.title.toLowerCase().includes(query) ||
@@ -203,7 +208,7 @@ export default function ImplementationChecklistsPage() {
     }
 
     return result;
-  }, [searchQuery, activeType]);
+  }, [tabState.searchQuery, tabState.activeType]);
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -252,12 +257,12 @@ export default function ImplementationChecklistsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search checklists..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={tabState.searchQuery}
+              onChange={(e) => setTabState({ searchQuery: e.target.value })}
               className="pl-10"
             />
           </div>
-          <Tabs value={activeType} onValueChange={setActiveType}>
+          <Tabs value={tabState.activeType} onValueChange={(v) => setTabState({ activeType: v })}>
             <TabsList>
               {CHECKLIST_TYPES.map((type) => (
                 <TabsTrigger key={type.value} value={type.value}>
@@ -295,10 +300,14 @@ export default function ImplementationChecklistsPage() {
                 : 0;
 
             return (
-              <Card
-                key={checklist.id}
-                className="relative transition-all hover:shadow-md hover:border-primary/30 cursor-pointer"
-                onClick={() => navigate(checklist.href)}
+                <Card
+                  key={checklist.id}
+                  className="relative transition-all hover:shadow-md hover:border-primary/30 cursor-pointer"
+                  onClick={() => navigateToList({
+                    route: checklist.href,
+                    title: checklist.title,
+                    moduleCode: 'enablement',
+                  })}
               >
                 <Badge
                   className={`absolute top-3 right-3 text-xs ${getTypeColor(checklist.type)}`}
