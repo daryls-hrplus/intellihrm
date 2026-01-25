@@ -59,6 +59,8 @@ import {
   // Payroll icons
   Receipt, Coins, PiggyBank, ArrowRightLeft, Sliders, Flag,
   Link2, Settings2, Archive, CreditCard, Landmark, HandCoins,
+  // Benefits icons
+  Gift, Stethoscope, Scale,
   type LucideIcon,
 } from "lucide-react";
 
@@ -207,6 +209,10 @@ export const iconRegistry: Record<string, LucideIcon> = {
   Landmark,
   HandCoins,
   FileSpreadsheet,
+  // Benefits icons
+  Gift,
+  Stethoscope,
+  Scale,
 };
 
 /**

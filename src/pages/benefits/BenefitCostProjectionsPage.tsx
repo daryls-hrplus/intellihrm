@@ -12,18 +12,30 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, Legend } from "recharts";
 import { Building2, Calculator, TrendingUp, DollarSign } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function BenefitCostProjectionsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("all");
-  const [projectionMonths, setProjectionMonths] = useState(12);
-  const [growthRate, setGrowthRate] = useState(5);
-  const [inflationRate, setInflationRate] = useState(3);
   const [currentCosts, setCurrentCosts] = useState<any>({});
   const [projections, setProjections] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompany: "all",
+      projectionMonths: 12,
+      growthRate: 5,
+      inflationRate: 3,
+    },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany, projectionMonths, growthRate, inflationRate } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
+  const setProjectionMonths = (v: number) => setTabState({ projectionMonths: v });
+  const setGrowthRate = (v: number) => setTabState({ growthRate: v });
+  const setInflationRate = (v: number) => setTabState({ inflationRate: v });
 
   useEffect(() => {
     fetchCompanies();

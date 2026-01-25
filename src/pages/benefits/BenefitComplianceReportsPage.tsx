@@ -13,14 +13,21 @@ import { toast } from "sonner";
 import { Building2, Download, FileText, Shield, AlertTriangle, CheckCircle } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { getTodayString } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function BenefitComplianceReportsPage() {
   const { t } = useTranslation();
   const { logExport } = useAuditLog();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [complianceData, setComplianceData] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
 
   useEffect(() => {
     fetchCompanies();
@@ -35,7 +42,7 @@ export default function BenefitComplianceReportsPage() {
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
   };

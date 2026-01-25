@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FileText } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 
 interface BenefitPlan {
   id: string;
@@ -75,8 +76,14 @@ export default function BenefitPlansPage() {
   const [categories, setCategories] = useState<BenefitCategory[]>([]);
   const [providers, setProviders] = useState<BenefitProvider[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompanyId: "" },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<BenefitPlan | null>(null);
   
@@ -116,7 +123,7 @@ export default function BenefitPlansPage() {
     const { data } = await supabase.from('companies').select('id, name').eq('is_active', true).order('name');
     if (data) {
       setCompanies(data);
-      if (data.length > 0) setSelectedCompanyId(data[0].id);
+      if (data.length > 0 && !selectedCompanyId) setSelectedCompanyId(data[0].id);
     }
   };
 

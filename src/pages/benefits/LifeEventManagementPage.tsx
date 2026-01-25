@@ -18,6 +18,7 @@ import { useAuditLog } from "@/hooks/useAuditLog";
 import { useTranslation } from "react-i18next";
 import { getTodayString, toDateString, parseLocalDate } from "@/utils/dateUtils";
 import { addDays } from "date-fns";
+import { useTabState } from "@/hooks/useTabState";
 
 const LIFE_EVENT_TYPES = [
   { value: "marriage", label: "Marriage" },
@@ -36,11 +37,18 @@ export default function LifeEventManagementPage() {
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [employees, setEmployees] = useState<any[]>([]);
   const [lifeEvents, setLifeEvents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
+  
   const [formData, setFormData] = useState({
     employee_id: "",
     event_type: "",
@@ -64,7 +72,7 @@ export default function LifeEventManagementPage() {
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
   };

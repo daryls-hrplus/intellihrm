@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Plus, Building2, Shield, Check, X } from "lucide-react";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 const AUDIT_TYPES = [
   { value: "dependent_verification", label: "Dependent Verification" },
@@ -31,11 +32,17 @@ export default function EligibilityAuditPage() {
   const { user } = useAuth();
   const { logAction } = useAuditLog();
   const [companies, setCompanies] = useState<any[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [employees, setEmployees] = useState<any[]>([]);
   const [audits, setAudits] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const [tabState, setTabState] = useTabState({
+    defaultState: { selectedCompany: "" },
+    syncToUrl: ["selectedCompany"],
+  });
+  const { selectedCompany } = tabState;
+  const setSelectedCompany = (v: string) => setTabState({ selectedCompany: v });
   const [formData, setFormData] = useState({
     employee_id: "",
     audit_type: "",
@@ -56,7 +63,7 @@ export default function EligibilityAuditPage() {
   const fetchCompanies = async () => {
     const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
     setCompanies(data || []);
-    if (data && data.length > 0) {
+    if (data && data.length > 0 && !selectedCompany) {
       setSelectedCompany(data[0].id);
     }
   };
