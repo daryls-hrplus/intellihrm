@@ -295,6 +295,9 @@ export const FlightRiskPage = lazy(() => import('@/pages/succession/FlightRiskPa
 export const BenchStrengthPage = lazy(() => import('@/pages/succession/BenchStrengthPage'));
 export const SuccessionAnalyticsPage = lazy(() => import('@/pages/succession/SuccessionAnalyticsPage'));
 
+// MSS Readiness Assessment page
+export const MssReadinessAssessmentPage = lazy(() => import('@/pages/mss/MssReadinessAssessmentPage'));
+
 // Recruitment pages
 export const RecruitmentDashboardPage = lazy(() => import('@/pages/recruitment/RecruitmentDashboardPage'));
 export const RecruitmentFullPage = lazy(() => import('@/pages/recruitment/RecruitmentFullPage'));

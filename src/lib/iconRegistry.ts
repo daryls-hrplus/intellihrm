@@ -64,7 +64,7 @@ import {
   // Performance icons
   MessageCircle,
   // Succession icons
-  Grid3X3, TrendingDown, Route, AlertTriangle, Gauge,
+  Grid3X3, TrendingDown, Route, AlertTriangle, Gauge, ListChecks,
   // Admin & Security icons
   ShieldAlert, Fingerprint, KeyRound, Cog, Webhook,
   ArrowUpCircle, Tags, ScrollText, FileWarning, ClipboardPen,
@@ -235,6 +235,7 @@ export const iconRegistry: Record<string, LucideIcon> = {
   Route,
   AlertTriangle,
   Gauge,
+  ListChecks,
   // Learning & Development icons
   Video,
   Presentation,

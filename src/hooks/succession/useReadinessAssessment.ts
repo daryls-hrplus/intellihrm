@@ -327,7 +327,7 @@ export function useReadinessAssessment(companyId?: string) {
     }
   };
 
-  // Create an assessment event (HR initiates)
+  // Create an assessment event (HR initiates) with workflow integration
   const createEvent = async (event: {
     candidate_id: string;
     form_id?: string;
@@ -349,6 +349,36 @@ export function useReadinessAssessment(companyId?: string) {
         .single();
 
       if (error) throw error;
+
+      // Check if workflow is enabled for succession readiness approval
+      const { data: transactionType } = await supabase
+        .from('lookup_values')
+        .select('id')
+        .eq('category', 'transaction_type')
+        .eq('code', 'SUCC_READINESS_APPROVAL')
+        .maybeSingle();
+
+      if (transactionType?.id) {
+        const { data: workflowSetting } = await supabase
+          .from('company_transaction_workflow_settings')
+          .select('workflow_enabled, workflow_template_id, auto_start_workflow')
+          .eq('company_id', companyId)
+          .eq('transaction_type_id', transactionType.id)
+          .maybeSingle();
+
+        if (workflowSetting?.workflow_enabled && workflowSetting?.auto_start_workflow) {
+          // Start workflow instance via edge function
+          await supabase.functions.invoke('start-workflow', {
+            body: {
+              template_id: workflowSetting.workflow_template_id,
+              reference_type: 'readiness_assessment_event',
+              reference_id: data.id,
+              company_id: companyId,
+            }
+          });
+        }
+      }
+
       toast.success('Assessment initiated');
       return data as ReadinessAssessmentEvent;
     } catch (error: any) {
