@@ -1,8 +1,8 @@
-import { LearningObjectives } from '../../components/LearningObjectives';
-import { StepByStep, Step } from '../../components/StepByStep';
-import { FieldReferenceTable, FieldDefinition } from '../../components/FieldReferenceTable';
-import { ConfigurationExample, ExampleConfig } from '../../components/ConfigurationExample';
-import { TroubleshootingSection, TroubleshootingItem } from '../../components/TroubleshootingSection';
+import { LearningObjectives } from '../../../components/LearningObjectives';
+import { StepByStep, Step } from '../../../components/StepByStep';
+import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
+import { ConfigurationExample, ExampleConfig } from '../../../components/ConfigurationExample';
+import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
 import { Settings, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 

@@ -1,8 +1,8 @@
-import { LearningObjectives } from '../../components/LearningObjectives';
-import { StepByStep, Step } from '../../components/StepByStep';
-import { FieldReferenceTable, FieldDefinition } from '../../components/FieldReferenceTable';
-import { BusinessRules, BusinessRule } from '../../components/BusinessRules';
-import { TroubleshootingSection, TroubleshootingItem } from '../../components/TroubleshootingSection';
+import { LearningObjectives } from '../../../components/LearningObjectives';
+import { StepByStep, Step } from '../../../components/StepByStep';
+import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
+import { BusinessRules, BusinessRule } from '../../../components/BusinessRules';
+import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
 import { ShieldAlert, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
