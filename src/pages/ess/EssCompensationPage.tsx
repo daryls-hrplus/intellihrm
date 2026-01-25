@@ -1,16 +1,17 @@
-import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { DollarSign, TrendingUp, Target, Gem, ChevronRight, History, Receipt, Globe } from "lucide-react";
+import { DollarSign, TrendingUp, Target, Gem, History, Receipt, Globe } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { NavLink } from "@/components/NavLink";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 export default function EssCompensationPage() {
   const { user } = useAuth();
+  const { navigateToList } = useWorkspaceNavigation();
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["my-profile-compensation", user?.id],
@@ -121,12 +122,12 @@ export default function EssCompensationPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/ess" className="hover:text-foreground transition-colors">Employee Self Service</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">My Compensation</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: "Employee Self-Service", href: "/ess" },
+            { label: "My Compensation" },
+          ]}
+        />
 
         <div>
           <h1 className="text-2xl font-bold tracking-tight">My Compensation</h1>
@@ -236,17 +237,22 @@ export default function EssCompensationPage() {
           {compensationLinks.map((link) => {
             const Icon = link.icon;
             return (
-              <NavLink
+              <div
                 key={link.href}
-                to={link.href}
-                className="group rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
+                onClick={() => navigateToList({
+                  route: link.href,
+                  title: link.title,
+                  moduleCode: "ess",
+                  icon: Icon,
+                })}
+                className="group cursor-pointer rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg"
               >
                 <div className={`mb-4 inline-flex rounded-lg p-3 ${link.color}`}>
                   <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="font-semibold group-hover:text-primary">{link.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{link.description}</p>
-              </NavLink>
+              </div>
             );
           })}
         </div>

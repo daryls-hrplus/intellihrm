@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bell, Mail, CheckCircle2, XCircle, ArrowLeft, GitBranch, Clock, MessageSquare, AlertTriangle } from "lucide-react";
+import { Bell, Mail, CheckCircle2, XCircle, ArrowLeft, GitBranch, Clock, MessageSquare, AlertTriangle, LayoutGrid } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface NotificationPreferences {
   id?: string;
@@ -61,7 +61,7 @@ const defaultPreferences: NotificationPreferences = {
 export default function NotificationPreferencesPage() {
   const { t } = useLanguage();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { navigateToList } = useWorkspaceNavigation();
   const [preferences, setPreferences] = useState<NotificationPreferences>(defaultPreferences);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -192,7 +192,12 @@ export default function NotificationPreferencesPage() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="icon" onClick={() => navigateToList({
+              route: "/ess",
+              title: t("navigation.ess", "Employee Self-Service"),
+              moduleCode: "ess",
+              icon: LayoutGrid,
+            })}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">

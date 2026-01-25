@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { History, ChevronRight, TrendingUp } from "lucide-react";
+import { History } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EssCompensationHistoryPage() {
@@ -42,14 +42,13 @@ export default function EssCompensationHistoryPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/ess" className="hover:text-foreground transition-colors">Employee Self Service</Link>
-          <ChevronRight className="h-4 w-4" />
-          <Link to="/ess/compensation" className="hover:text-foreground transition-colors">My Compensation</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">History</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: "Employee Self-Service", href: "/ess" },
+            { label: "My Compensation", href: "/ess/compensation" },
+            { label: "History" },
+          ]}
+        />
 
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">

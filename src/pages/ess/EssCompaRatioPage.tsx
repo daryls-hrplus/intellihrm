@@ -1,12 +1,12 @@
-import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Target, ChevronRight, TrendingUp, TrendingDown, Minus, DollarSign } from "lucide-react";
+import { Target, TrendingUp, TrendingDown, Minus, DollarSign } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -50,14 +50,13 @@ export default function EssCompaRatioPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/ess" className="hover:text-foreground transition-colors">Employee Self Service</Link>
-          <ChevronRight className="h-4 w-4" />
-          <Link to="/ess/compensation" className="hover:text-foreground transition-colors">My Compensation</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">Compa-Ratio</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: "Employee Self-Service", href: "/ess" },
+            { label: "My Compensation", href: "/ess/compensation" },
+            { label: "Compa-Ratio" },
+          ]}
+        />
 
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
