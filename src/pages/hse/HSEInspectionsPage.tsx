@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,9 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -32,19 +35,33 @@ import {
   Plus, 
   Search, 
   CheckCircle,
-  XCircle,
   Clock,
   AlertTriangle
 } from "lucide-react";
-import { useState } from "react";
 
 export default function HSEInspectionsPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("inspections");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+      searchQuery: "",
+      statusFilter: "all",
+      activeTab: "inspections",
+    },
+    syncToUrl: ["selectedCompanyId", "statusFilter", "activeTab"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId, searchQuery, statusFilter, activeTab } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
 
   const { data: templates, isLoading: templatesLoading } = useQuery({
     queryKey: ["hse-inspection-templates", selectedCompanyId],
@@ -157,12 +174,12 @@ export default function HSEInspectionsPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id, selectedDepartmentId: "all" })} 
             />
             <DepartmentFilter
               companyId={selectedCompanyId}
               selectedDepartmentId={selectedDepartmentId}
-              onDepartmentChange={setSelectedDepartmentId}
+              onDepartmentChange={(id) => setTabState({ selectedDepartmentId: id })}
             />
           </div>
         </div>
@@ -189,7 +206,7 @@ export default function HSEInspectionsPage() {
           })}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="inspections">{t("hseModule.inspections.tabs.findings")}</TabsTrigger>
@@ -209,11 +226,11 @@ export default function HSEInspectionsPage() {
                 <Input
                   placeholder={t("hseModule.inspections.searchFindings")}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setTabState({ searchQuery: e.target.value })}
                   className="pl-9"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>

@@ -1,12 +1,15 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useHSE } from "@/hooks/useHSE";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { differenceInDays } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { useLanguage } from "@/hooks/useLanguage";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
@@ -35,8 +38,25 @@ import {
 export default function HSEDashboardPage() {
   const { t } = useLanguage();
   const { hasTabAccess } = useGranularPermissions();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
+
   const { incidents, trainingRecords, complianceRequirements, incidentsLoading, recordsLoading, complianceLoading } = useHSE(selectedCompanyId || undefined);
 
   const isLoading = incidentsLoading || recordsLoading || complianceLoading;
@@ -136,12 +156,12 @@ export default function HSEDashboardPage() {
             <div className="flex items-center gap-2">
               <LeaveCompanyFilter 
                 selectedCompanyId={selectedCompanyId} 
-                onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+                onCompanyChange={(id) => setTabState({ selectedCompanyId: id, selectedDepartmentId: "all" })} 
               />
               <DepartmentFilter
                 companyId={selectedCompanyId}
                 selectedDepartmentId={selectedDepartmentId}
-                onDepartmentChange={setSelectedDepartmentId}
+                onDepartmentChange={(id) => setTabState({ selectedDepartmentId: id })}
               />
               <ModuleBIButton module="hse" />
               <ModuleReportsButton module="hse" />

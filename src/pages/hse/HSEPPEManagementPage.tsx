@@ -1,8 +1,8 @@
+import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -13,9 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
-import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -23,20 +25,32 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { 
   HardHat, 
   Plus, 
-  Search, 
   Package,
   Users,
   AlertTriangle,
-  CheckCircle
 } from "lucide-react";
-import { useState } from "react";
 
 export default function HSEPPEManagementPage() {
   const { t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("types");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "all",
+      activeTab: "types",
+    },
+    syncToUrl: ["selectedCompanyId", "activeTab"],
+  });
+
+  const { selectedCompanyId, selectedDepartmentId, activeTab } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
 
   const { data: ppeTypes, isLoading: typesLoading } = useQuery({
     queryKey: ["hse-ppe-types", selectedCompanyId],
@@ -141,12 +155,12 @@ export default function HSEPPEManagementPage() {
           <div className="flex items-center gap-2">
             <LeaveCompanyFilter 
               selectedCompanyId={selectedCompanyId} 
-              onCompanyChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }} 
+              onCompanyChange={(id) => setTabState({ selectedCompanyId: id, selectedDepartmentId: "all" })} 
             />
             <DepartmentFilter
               companyId={selectedCompanyId}
               selectedDepartmentId={selectedDepartmentId}
-              onDepartmentChange={setSelectedDepartmentId}
+              onDepartmentChange={(id) => setTabState({ selectedDepartmentId: id })}
             />
           </div>
         </div>
@@ -173,7 +187,7 @@ export default function HSEPPEManagementPage() {
           })}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(v) => setTabState({ activeTab: v })}>
           <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="types">{t("hseModule.ppeManagement.tabs.types")}</TabsTrigger>

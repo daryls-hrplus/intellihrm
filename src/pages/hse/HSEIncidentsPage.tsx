@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { usePageAudit } from "@/hooks/usePageAudit";
 import { useHSE, HSEIncident } from "@/hooks/useHSE";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTabState } from "@/hooks/useTabState";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -37,13 +40,11 @@ import {
   Plus,
   Search,
   FileText,
-  ChevronLeft,
   Calendar,
   Users,
   Activity,
 } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
-import { NavLink } from "react-router-dom";
 
 const incidentTypes = [
   { value: "injury", label: "Injury" },
@@ -78,10 +79,27 @@ const treatmentOptions = [
 export default function HSEIncidentsPage() {
   usePageAudit('hse_incidents', 'HSE');
   const { t } = useLanguage();
-  const [companyId, setCompanyId] = useState<string>("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const { company } = useAuth();
+
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      searchTerm: "",
+      statusFilter: "all",
+      typeFilter: "all",
+    },
+    syncToUrl: ["selectedCompanyId", "statusFilter"],
+  });
+
+  const { selectedCompanyId, searchTerm, statusFilter, typeFilter } = tabState;
+
+  // Initialize company from auth context if not set
+  useEffect(() => {
+    if (company?.id && !selectedCompanyId) {
+      setTabState({ selectedCompanyId: company.id });
+    }
+  }, [company?.id, selectedCompanyId, setTabState]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<HSEIncident | null>(null);
   const [formData, setFormData] = useState<Partial<HSEIncident>>({});
@@ -94,7 +112,7 @@ export default function HSEIncidentsPage() {
     },
   });
 
-  const { incidents, incidentsLoading, createIncident, updateIncident } = useHSE(companyId || undefined);
+  const { incidents, incidentsLoading, createIncident, updateIncident } = useHSE(selectedCompanyId || undefined);
 
   const filteredIncidents = incidents.filter((incident) => {
     const matchesSearch =
@@ -113,7 +131,7 @@ export default function HSEIncidentsPage() {
     } else {
       setSelectedIncident(null);
       setFormData({
-        company_id: companyId,
+        company_id: selectedCompanyId,
         incident_type: "near_miss",
         severity: "low",
         status: "reported",
@@ -153,10 +171,14 @@ export default function HSEIncidentsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t("hseModule.title"), href: "/hse" },
+            { label: t("hseModule.incidents.title") },
+          ]}
+        />
+
         <div className="flex items-center gap-4">
-          <NavLink to="/hse" className="text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-5 w-5" />
-          </NavLink>
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
             <AlertTriangle className="h-5 w-5 text-destructive" />
           </div>
@@ -218,7 +240,7 @@ export default function HSEIncidentsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-4">
-              <Select value={companyId} onValueChange={setCompanyId}>
+              <Select value={selectedCompanyId} onValueChange={(id) => setTabState({ selectedCompanyId: id })}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={t("hseModule.common.selectCompany")} />
                 </SelectTrigger>
@@ -236,12 +258,12 @@ export default function HSEIncidentsPage() {
                 <Input
                   placeholder={t("hseModule.incidents.searchIncidents")}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setTabState({ searchTerm: e.target.value })}
                   className="pl-9"
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(v) => setTabState({ statusFilter: v })}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder={t("common.status")} />
                 </SelectTrigger>
@@ -255,7 +277,7 @@ export default function HSEIncidentsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <Select value={typeFilter} onValueChange={(v) => setTabState({ typeFilter: v })}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder={t("common.type")} />
                 </SelectTrigger>
@@ -269,7 +291,7 @@ export default function HSEIncidentsPage() {
                 </SelectContent>
               </Select>
 
-              <Button onClick={() => handleOpenDialog()} disabled={!companyId}>
+              <Button onClick={() => handleOpenDialog()} disabled={!selectedCompanyId}>
                 <Plus className="mr-2 h-4 w-4" />
                 {t("hseModule.incidents.reportIncident")}
               </Button>
@@ -437,96 +459,13 @@ export default function HSEIncidentsPage() {
                     rows={3}
                   />
                 </div>
-
-                {formData.incident_type === "injury" && (
-                  <>
-                    <div className="space-y-2">
-                      <Label>Injury Type</Label>
-                      <Input
-                        value={formData.injury_type || ""}
-                        onChange={(e) => setFormData({ ...formData, injury_type: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Body Part Affected</Label>
-                      <Input
-                        value={formData.body_part_affected || ""}
-                        onChange={(e) =>
-                          setFormData({ ...formData, body_part_affected: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Treatment Required</Label>
-                      <Select
-                        value={formData.treatment_required || ""}
-                        onValueChange={(v) => setFormData({ ...formData, treatment_required: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select treatment" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {treatmentOptions.map((t) => (
-                            <SelectItem key={t.value} value={t.value}>
-                              {t.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Days Lost</Label>
-                      <Input
-                        type="number"
-                        value={formData.days_lost || 0}
-                        onChange={(e) =>
-                          setFormData({ ...formData, days_lost: parseInt(e.target.value) || 0 })
-                        }
-                      />
-                    </div>
-                  </>
-                )}
-
-                {selectedIncident && (
-                  <>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>Root Cause</Label>
-                      <Textarea
-                        value={formData.root_cause || ""}
-                        onChange={(e) => setFormData({ ...formData, root_cause: e.target.value })}
-                        rows={2}
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>Corrective Actions</Label>
-                      <Textarea
-                        value={formData.corrective_actions || ""}
-                        onChange={(e) =>
-                          setFormData({ ...formData, corrective_actions: e.target.value })
-                        }
-                        rows={2}
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>Preventive Measures</Label>
-                      <Textarea
-                        value={formData.preventive_measures || ""}
-                        onChange={(e) =>
-                          setFormData({ ...formData, preventive_measures: e.target.value })
-                        }
-                        rows={2}
-                      />
-                    </div>
-                  </>
-                )}
               </div>
-
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createIncident.isPending || updateIncident.isPending}>
-                  {selectedIncident ? "Update" : "Report"} Incident
+                <Button type="submit">
+                  {selectedIncident ? "Update" : "Create"}
                 </Button>
               </div>
             </form>
