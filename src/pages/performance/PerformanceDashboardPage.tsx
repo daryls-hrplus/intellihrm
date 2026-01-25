@@ -35,6 +35,8 @@ import {
   AlertCircle,
   Brain,
   PieChart,
+  Route,
+  BookOpen,
 } from "lucide-react";
 import { UpcomingRemindersWidget } from "@/components/performance/widgets/UpcomingRemindersWidget";
 
@@ -62,6 +64,10 @@ export default function PerformanceDashboardPage() {
     recognition: { title: t('performance.modules.recognitionAwards'), description: t('performance.modules.recognitionAwardsDesc'), href: "/performance/recognition", icon: Award, color: "bg-rose-500/10 text-rose-600", tabCode: "recognition" },
     // Performance Remediation
     pips: { title: t('performance.modules.improvementPlans'), description: t('performance.modules.improvementPlansDesc'), href: "/performance/pips", icon: AlertTriangle, color: "bg-amber-500/10 text-amber-600", tabCode: "pips" },
+    // Career Development (Workday model - Career lives under Talent)
+    careerPaths: { title: "Career Paths", description: "Define and explore career progression routes", href: "/succession/career-paths", icon: Route, color: "bg-teal-500/10 text-teal-600", tabCode: "career-paths" },
+    developmentPlans: { title: "Development Plans", description: "Individual Development Plans (IDPs)", href: "/succession/career-development", icon: BookOpen, color: "bg-emerald-500/10 text-emerald-600", tabCode: "career-development" },
+    mentorship: { title: "Mentorship", description: "Mentoring relationships and programs", href: "/succession/mentorship", icon: UserCheck, color: "bg-pink-500/10 text-pink-600", tabCode: "mentorship" },
     // Succession Planning modules
     nineBox: { title: "9-Box Assessment", description: "Talent potential and performance matrix", href: "/succession/nine-box", icon: PieChart, color: "bg-purple-500/10 text-purple-600", tabCode: "nine_box" },
     talentPools: { title: "Talent Pools", description: "Manage high-potential talent groups", href: "/succession/talent-pools", icon: Users, color: "bg-cyan-500/10 text-cyan-600", tabCode: "talent_pools" },
@@ -92,6 +98,14 @@ export default function PerformanceDashboardPage() {
     {
       titleKey: "Continuous Performance",
       items: filterByAccess([allModules.feedback, allModules.recognition, allModules.pips]),
+    },
+    {
+      titleKey: "Career Development",
+      items: filterByAccess([
+        allModules.careerPaths,
+        allModules.developmentPlans,
+        allModules.mentorship,
+      ]),
     },
     {
       titleKey: "Succession Planning",

@@ -34,7 +34,6 @@ import {
   BarChart3,
   Monitor,
   PenTool,
-  UserPlus,
   History,
 } from "lucide-react";
 
@@ -159,10 +158,6 @@ export default function TrainingDashboardPage() {
     lms: { title: t("training.modules.lms.title"), description: t("training.modules.lms.description"), href: "/admin/lms", icon: Settings, color: "bg-muted text-muted-foreground", tabCode: "lms" },
     // Interactive Training
     interactive: { title: t("training.modules.interactive.title", "Interactive Training"), description: t("training.modules.interactive.description", "Video-based training with quizzes and branching paths"), href: "/training/interactive", icon: GraduationCap, color: "bg-violet-500/10 text-violet-600", tabCode: "interactive" },
-    // Career & Growth modules (moved from Succession)
-    careerPaths: { title: t("training.modules.careerPaths.title", "Career Paths"), description: t("training.modules.careerPaths.description", "Define career progression routes"), href: "/training/career-paths", icon: Route, color: "bg-teal-500/10 text-teal-600", tabCode: "career-paths" },
-    developmentPlans: { title: t("training.modules.developmentPlans.title", "Development Plans"), description: t("training.modules.developmentPlans.description", "Manage Individual Development Plans (IDPs)"), href: "/succession/career-development", icon: Target, color: "bg-emerald-500/10 text-emerald-600", tabCode: "development-plans" },
-    mentorship: { title: t("training.modules.mentorship.title", "Mentorship"), description: t("training.modules.mentorship.description", "Mentoring relationships and programs"), href: "/training/mentorship", icon: UserPlus, color: "bg-pink-500/10 text-pink-600", tabCode: "mentorship" },
     // Training History
     history: { title: t("training.modules.history.title", "Training History"), description: t("training.modules.history.description", "View complete training records and certifications"), href: "/ess/training", icon: History, color: "bg-cyan-500/10 text-cyan-600", tabCode: "history" },
   };
@@ -175,15 +170,7 @@ export default function TrainingDashboardPage() {
       titleKey: "Learning & Development",
       items: filterByAccess([allModules.catalog, allModules.employeeLearning, allModules.employeeCertifications, allModules.learningPaths, allModules.interactive, allModules.history]),
     },
-    {
-      titleKey: "Career & Growth",
-      items: filterByAccess([allModules.careerPaths, allModules.developmentPlans, allModules.mentorship]),
-    },
-    // Deferred to future version - Content management available via Admin → LMS Management
-    // {
-    //   titleKey: "Course Development & Delivery",
-    //   items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions]),
-    // },
+    // Career & Growth moved to Performance & Talent module (Workday alignment)
     {
       titleKey: "Planning & Assessment",
       items: filterByAccess([allModules.needs, allModules.gapAnalysis, allModules.evaluations, allModules.recertification]),
