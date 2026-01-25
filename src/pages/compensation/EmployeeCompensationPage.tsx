@@ -43,6 +43,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -140,13 +141,28 @@ interface EmployeeCompensation {
 
 export default function EmployeeCompensationPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const { user, company } = useAuth();
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedDepartmentId: "",
+      selectedEmployeeId: "",
+      searchTerm: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, selectedDepartmentId, selectedEmployeeId, searchTerm } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v, selectedDepartmentId: "", selectedEmployeeId: "" });
+  const setSelectedDepartmentId = (v: string) => setTabState({ selectedDepartmentId: v, selectedEmployeeId: "" });
+  const setSelectedEmployeeId = (v: string) => setTabState({ selectedEmployeeId: v });
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
+  
   const { currencies } = useCompanyCurrencyList(selectedCompanyId || undefined);
 
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [departments, setDepartments] = useState<{id: string; name: string; code: string}[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [payElements, setPayElements] = useState<PayElement[]>([]);
@@ -154,7 +170,6 @@ export default function EmployeeCompensationPage() {
   const [employeePositions, setEmployeePositions] = useState<{position_id: string; is_primary: boolean; assignment_type: string; position: PositionWithCompensation}[]>([]);
   const [compensationItems, setCompensationItems] = useState<EmployeeCompensation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<EmployeeCompensation | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);

@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,15 +8,28 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Target, RefreshCw, Search, TrendingUp, TrendingDown, Minus, ChevronRight, Building2 } from "lucide-react";
+import { Target, RefreshCw, Search, TrendingUp, TrendingDown, Minus, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { useTabState } from "@/hooks/useTabState";
 
 export default function CompaRatioPage() {
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      searchTerm: "",
+      companyFilter: "all",
+    },
+    syncToUrl: ["companyFilter"],
+  });
+  
+  const { searchTerm, companyFilter } = tabState;
+  const setSearchTerm = (v: string) => setTabState({ searchTerm: v });
+  const setCompanyFilter = (v: string) => setTabState({ companyFilter: v });
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-filter"],
@@ -75,11 +86,12 @@ export default function CompaRatioPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/compensation" className="hover:text-foreground transition-colors">{t("compensation.title")}</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">{t("compensation.compaRatio.title")}</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: t("compensation.title"), href: "/compensation" },
+            { label: t("compensation.compaRatio.title") },
+          ]}
+        />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

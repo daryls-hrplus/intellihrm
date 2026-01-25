@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Gift, Plus, DollarSign, Award, Users, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -21,16 +22,30 @@ interface Company {
 
 export default function BonusManagementPage() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("plans");
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      activeTab: "plans",
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { activeTab, selectedCompanyId } = tabState;
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
 
   useEffect(() => {
     const fetchCompanies = async () => {
       const { data } = await supabase.from("companies").select("id, name").eq("is_active", true).order("name");
       if (data && data.length > 0) {
         setCompanies(data);
-        setSelectedCompanyId(data[0].id);
+        if (!selectedCompanyId) {
+          setSelectedCompanyId(data[0].id);
+        }
       }
     };
     fetchCompanies();

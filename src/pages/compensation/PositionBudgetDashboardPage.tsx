@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -29,6 +28,7 @@ import {
   Target,
   Layers,
 } from "lucide-react";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -36,8 +36,20 @@ interface Company {
 }
 
 export default function PositionBudgetDashboardPage() {
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+      selectedYear: new Date().getFullYear(),
+      activeTab: "plans",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId, selectedYear, activeTab } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  const setSelectedYear = (v: number) => setTabState({ selectedYear: v });
+  const setActiveTab = (v: string) => setTabState({ activeTab: v });
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-for-budget"],
@@ -319,8 +331,7 @@ export default function PositionBudgetDashboardPage() {
           </Link>
         </div>
 
-        {/* Main Content */}
-        <Tabs defaultValue="plans" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="plans">Budget Plans</TabsTrigger>
             <TabsTrigger value="variance">Variance Analysis</TabsTrigger>

@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getTodayString } from "@/utils/dateUtils";
+import { useTabState } from "@/hooks/useTabState";
 
 interface Company {
   id: string;
@@ -70,8 +71,19 @@ interface SpinalPoint {
 
 export default function SpinalPointsPage() {
   const { t } = useTranslation();
+  
+  // Tab state for persistent filters
+  const [tabState, setTabState] = useTabState({
+    defaultState: {
+      selectedCompanyId: "",
+    },
+    syncToUrl: ["selectedCompanyId"],
+  });
+  
+  const { selectedCompanyId } = tabState;
+  const setSelectedCompanyId = (v: string) => setTabState({ selectedCompanyId: v });
+  
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [paySpines, setPaySpines] = useState<PaySpine[]>([]);
   const [spinalPoints, setSpinalPoints] = useState<Record<string, SpinalPoint[]>>({});
   const [expandedSpines, setExpandedSpines] = useState<Set<string>>(new Set());
@@ -128,7 +140,10 @@ export default function SpinalPointsPage() {
     
     if (data && data.length > 0) {
       setCompanies(data);
-      setSelectedCompanyId(data[0].id);
+      // Only set default if no existing tab state
+      if (!selectedCompanyId) {
+        setSelectedCompanyId(data[0].id);
+      }
     }
     setIsLoading(false);
   }
