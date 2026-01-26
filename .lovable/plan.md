@@ -1,94 +1,89 @@
 
-# Chapter 4 (Readiness Assessment Framework) - Comprehensive Gap Closure Plan
+# Chapter 5 (Talent Pool Management) - Comprehensive Gap Closure Plan
 
 ## Executive Summary
 
-Chapter 4 of the Succession Planning Manual is currently in **placeholder-only state** with 5 sections containing no substantive content. A deep audit comparing the documentation against the database schema (6 tables), hooks (1 comprehensive hook), and UI components (6+ files) reveals **critical gaps** that need to be addressed to match the depth and quality of Chapter 2 (Foundation Setup) and Chapter 3 (Nine-Box Configuration).
+Chapter 5 of the Succession Planning Manual is currently in **placeholder-only state** with 4 sections containing zero substantive content (~55 lines total). A deep audit comparing the documentation against the database schema (3 tables), hooks (2 files), and UI components (5+ files) reveals **critical gaps** that need to be addressed to match the depth and quality of Chapters 2-4.
 
-**Key Finding:** The current Chapter 4 structure (5 placeholder sections) fundamentally misaligns with the industry-standard readiness assessment workflow. The existing sections overlap with content already documented in Chapter 2 (Foundation Setup sections 2.4, 2.5). Chapter 4 should focus on the **operational workflow** of conducting assessments, not the configuration already covered in Chapter 2.
+**Key Finding:** The current Chapter 5 structure (4 placeholder sections, ~45 min) significantly underestimates the complexity of the talent pool functionality. The implementation includes sophisticated features like JSONB criteria, manager nomination workflows, HR review packets, confidence indicators, and evidence-based decision support that are completely undocumented.
 
 ---
 
 ## Current State Analysis
 
-### Chapter 4 Structure (As-Is) - All Placeholders
+### Chapter 5 Structure (As-Is) - All Placeholders
 
 | Section | Title | Lines | Status |
 |---------|-------|-------|--------|
-| 4.1 | Readiness Indicators Design | ~10 | **Placeholder** - Duplicates 2.4 |
-| 4.2 | Form Builder Configuration | ~10 | **Placeholder** - Duplicates 2.5 |
-| 4.3 | Category & Question Setup | ~10 | **Placeholder** - Duplicates 2.5 |
-| 4.4 | Scoring Guide Definitions | ~10 | **Placeholder** - Overlaps 2.3-2.4 |
-| 4.5 | Multi-Assessor Workflows | ~10 | **Placeholder** - Should be expanded |
+| 5.1 | Pool Types & Purposes | ~10 | **Placeholder only** |
+| 5.2 | Pool Creation & Configuration | ~10 | **Placeholder only** |
+| 5.3 | Member Management | ~10 | **Placeholder only** |
+| 5.4 | Review Packet Generation | ~10 | **Placeholder only** |
 
 **Total: ~55 lines** (all placeholders, zero substantive content)
-
-### Critical Problem: Content Duplication with Chapter 2
-
-Chapter 2 (Foundation Setup) already documents:
-- **2.3 Readiness Rating Bands** - Score-to-band mappings (5-band model)
-- **2.4 Readiness Indicators & BARS** - 8 categories, 32 indicators with behavioral anchors
-- **2.4a Weight Normalization Rules** - Weight calculations
-- **2.5 Readiness Forms** - Form builder configuration
-- **2.5a Staff Type Form Selection** - Auto-selection algorithm
-
-Current Chapter 4 sections 4.1-4.4 duplicate this content.
+**Estimated Read Time: 45 min** (significantly underestimated)
 
 ---
 
-## Industry-Standard Chapter 4 Restructure
+## Industry-Standard Chapter 5 Restructure
 
-Following SAP SuccessFactors, Workday, and SHRM implementation patterns, Chapter 4 should focus on the **operational assessment lifecycle**, not configuration (which is Chapter 2's domain).
+Following SAP SuccessFactors, Workday, and SHRM talent pool management patterns, Chapter 5 should expand to cover the complete operational lifecycle including manager-driven nominations, HR review workflows, and evidence-based calibration.
 
-### Proposed Section Structure (8 Sections, ~120 min)
+### Proposed Section Structure (8 Sections, ~90 min)
 
 | Section | Title | Focus | Status |
 |---------|-------|-------|--------|
-| 4.1 | Readiness Assessment Overview | Lifecycle, roles, strategic value | NEW |
-| 4.2 | Assessment Event Creation | Initiating assessments | NEW |
-| 4.3 | Form Selection & Assignment | Staff-type matching | NEW |
-| 4.4 | Manager Assessment Workflow | Direct manager completion | NEW |
-| 4.5 | HR Assessment Workflow | HR Partner review process | NEW |
-| 4.6 | Executive Assessment Workflow | Optional executive layer | NEW |
-| 4.7 | Score Calculation & Band Assignment | Weighted average, band mapping | NEW |
-| 4.8 | Assessment Completion & Candidate Update | Finalization, audit | NEW |
+| 5.1 | Talent Pool Overview | Strategic value, pool types, lifecycle | NEW |
+| 5.2 | Pool Types & Classification | High Potential, Leadership, Technical, Emerging, Critical Role | REWRITE |
+| 5.3 | Pool Creation & Configuration | Create pools with JSONB criteria | REWRITE |
+| 5.4 | Member Management | Add, view, graduate, remove members | REWRITE |
+| 5.5 | Manager Nomination Workflow (NEW) | MSS-driven talent nomination | NEW |
+| 5.6 | HR Review & Approval (NEW) | Review packets, confidence indicators | NEW |
+| 5.7 | Evidence-Based Decision Support (NEW) | Talent signals, evidence snapshots | NEW |
+| 5.8 | Pool Analytics & Reporting (NEW) | Pool health, pipeline metrics | NEW |
 
 ---
 
 ## Gap Analysis: Documentation vs. Implementation
 
-### Database Tables Supporting Chapter 4 Workflow
+### Database Tables Supporting Chapter 5
 
-| Table | Fields | Hook | UI Component | Chapter 4 Doc |
-|-------|--------|------|--------------|---------------|
-| `readiness_assessment_events` | 12 fields | useReadinessAssessment | ReadinessAssessmentEventDialog | **NOT DOCUMENTED** |
-| `readiness_assessment_responses` | 9 fields | useReadinessAssessment | ReadinessAssessmentForm | **NOT DOCUMENTED** |
-| `readiness_assessment_forms` | 8 fields | useReadinessAssessment | ReadinessFormBuilder | Documented in 2.5 |
-| `readiness_assessment_categories` | 6 fields | useReadinessAssessment | ReadinessFormBuilder | Documented in 2.5 |
-| `readiness_assessment_indicators` | 12 fields | useReadinessAssessment | ReadinessIndicatorsConfig | Documented in 2.4 |
-| `readiness_rating_bands` | 8 fields | useReadinessRatingBands | ReadinessRatingBandsConfig | Documented in 2.3 |
+| Table | Fields | Hook | UI Component | Current Doc |
+|-------|--------|------|--------------|-------------|
+| `talent_pools` | 13 fields | useSuccession | TalentPoolsTab | **Placeholder** |
+| `talent_pool_members` | 10 fields | useSuccession | TalentPoolsTab | **Placeholder** |
+| `talent_pool_review_packets` | 13 fields | useTalentPoolReviewPackets | HRReviewConfidenceIndicators | **NOT DOCUMENTED** |
 
-### Direction 1: Schema/Code → Documentation (What EXISTS but NOT documented in Chapter 4)
+### Direction 1: Schema/Code → Documentation (What EXISTS but NOT documented)
 
 | Component | Fields/Features | Current Doc | Proposed Fix |
 |-----------|-----------------|-------------|--------------|
-| `readiness_assessment_events` | 12 fields: `id`, `company_id`, `candidate_id`, `form_id`, `initiated_by`, `status`, `due_date`, `completed_at`, `overall_score`, `readiness_band`, `created_at`, `updated_at` | **NOT DOCUMENTED** | NEW Section 4.2 |
-| `readiness_assessment_responses` | 9 fields: `id`, `event_id`, `indicator_id`, `assessor_id`, `assessor_type`, `rating`, `comments`, `submitted_at`, `created_at` | **NOT DOCUMENTED** | NEW Sections 4.4-4.6 |
-| `useReadinessAssessment` hook | `createEvent`, `fetchEvents`, `submitResponse`, `calculateOverallScore` | **NOT DOCUMENTED** | NEW Sections 4.2, 4.4-4.8 |
-| `ReadinessAssessmentEventDialog` | Event creation, candidate selection, form auto-detect | **NOT DOCUMENTED** | NEW Section 4.2 |
-| `ReadinessAssessmentForm` | Multi-category accordion, slider ratings, BARS tooltips, progress tracking | **NOT DOCUMENTED** | NEW Sections 4.4-4.6 |
-| `ReadinessAssessmentEvidence` | Gap analysis, readiness evidence aggregation | **NOT DOCUMENTED** | NEW Section 4.8 |
-| Workflow integration | `SUCC_READINESS_APPROVAL` transaction type, HR Hub workflow | **NOT DOCUMENTED** | NEW Section 4.2 |
-| Score calculation algorithm | Weighted average formula, band assignment, candidate update | **NOT DOCUMENTED** | NEW Section 4.7 |
+| `talent_pools` table | 13 fields: `id`, `company_id`, `name`, `code`, `description`, `pool_type`, `criteria` (JSONB), `is_active`, `start_date`, `end_date`, `created_by`, `created_at`, `updated_at` | **Placeholder** | Section 5.3 |
+| `talent_pool_members` table | 10 fields: `id`, `pool_id`, `employee_id`, `added_by`, `reason`, `status`, `start_date`, `end_date`, `created_at`, `updated_at` | **Placeholder** | Section 5.4 |
+| `talent_pool_review_packets` table | 13 fields: `id`, `talent_pool_id`, `member_id`, `employee_id`, `company_id`, `evidence_snapshot`, `signal_summary`, `leadership_indicators`, `review_status`, `reviewed_by`, `reviewed_at`, `notes`, `created_at` | **NOT DOCUMENTED** | NEW Section 5.6 |
+| `pool_type` enum values | `high_potential`, `leadership`, `technical`, `emerging`, `critical_role` | **Placeholder** | Section 5.2 |
+| JSONB `criteria` field | Custom eligibility rules, minimum scores, required signals | **NOT DOCUMENTED** | Section 5.3 |
+| `useSuccession.ts` hook | `fetchTalentPools`, `createTalentPool`, `updateTalentPool`, `deleteTalentPool`, `fetchTalentPoolMembers`, `addTalentPoolMember`, `removeTalentPoolMember`, `member_count` aggregation | **NOT DOCUMENTED** | Sections 5.3, 5.4 |
+| `useTalentPoolReviewPackets.ts` hook | `fetchPacketsForPool`, `fetchPacketForMember`, `createReviewPacket`, `updateReviewStatus`, `addReviewNotes`, `calculateSignalSummary`, `calculateLeadershipIndicators` | **NOT DOCUMENTED** | NEW Section 5.6, 5.7 |
+| `TalentPoolsTab.tsx` UI | Pool list, member table, create/edit dialogs, evidence panel, confidence indicators | **NOT DOCUMENTED** | Sections 5.3, 5.4 |
+| `MssNominateTalentPoolPage.tsx` | Manager nomination workflow: team member list, nomination dialog, justification, recommended development | **NOT DOCUMENTED** | NEW Section 5.5 |
+| `TalentPoolNominationEvidence.tsx` | Evidence summary, pool criteria validation, strengths/weaknesses | **NOT DOCUMENTED** | NEW Section 5.7 |
+| `HRReviewConfidenceIndicators.tsx` | Confidence score, bias risk level, data freshness, source count, signal count, recommendation confidence | **NOT DOCUMENTED** | NEW Section 5.6 |
+| Member status lifecycle | `active`, `nominated`, `approved`, `rejected`, `graduated`, `removed` | **NOT DOCUMENTED** | Section 5.4 |
+| Review packet workflow | `pending`, `approved`, `declined` with reviewer tracking | **NOT DOCUMENTED** | NEW Section 5.6 |
 
-### Direction 2: Documentation → Schema/Code (What is DOCUMENTED but INCORRECT/MISSING)
+### Direction 2: Documentation Gaps
 
-| Documented Item | Current Doc | Actual Implementation | Proposed Fix |
-|-----------------|-------------|----------------------|--------------|
-| Multi-Assessor Workflows (4.5) | 10-line placeholder | Sophisticated role-based assessment with `assessor_type` field | Complete rewrite as operational workflow |
-| Scoring Guide Definitions (4.4) | 10-line placeholder | `calculateOverallScore` function with weighted average, band lookup | Document in Section 4.7 |
-| Assessment event statuses | Not documented | `pending`, `in_progress`, `completed` lifecycle | Document in Section 4.1 |
-| Candidate readiness update | Not documented | Updates `succession_candidates` table with score and band | Document in Section 4.8 |
+| Expected Content | Current State | Proposed Fix |
+|------------------|---------------|--------------|
+| Pool type strategic purposes | Not documented | Section 5.2 with business use cases |
+| JSONB criteria configuration | Not documented | Section 5.3 with schema examples |
+| Nomination → Review → Approval workflow | Not documented | NEW Sections 5.5-5.6 |
+| Evidence-based decision framework | Not documented | NEW Section 5.7 |
+| Signal summary calculations | Not documented | NEW Section 5.7 (formulas from hook) |
+| Leadership indicator extraction | Not documented | NEW Section 5.7 |
+| Bias risk level thresholds | Not documented | NEW Section 5.6 |
+| Data freshness status rules | Not documented | NEW Section 5.6 |
 
 ---
 
@@ -98,170 +93,207 @@ Following SAP SuccessFactors, Workday, and SHRM implementation patterns, Chapter
 
 **Directory Structure:**
 ```text
-src/components/enablement/manual/succession/sections/readiness/
+src/components/enablement/manual/succession/sections/talentpools/
 ├── index.ts
-├── ReadinessOverview.tsx           (4.1 - 400 lines)
-├── ReadinessEventCreation.tsx      (4.2 - 450 lines)
-├── ReadinessFormSelection.tsx      (4.3 - 350 lines)
-├── ReadinessManagerWorkflow.tsx    (4.4 - 400 lines)
-├── ReadinessHRWorkflow.tsx         (4.5 - 350 lines)
-├── ReadinessExecutiveWorkflow.tsx  (4.6 - 300 lines)
-├── ReadinessScoreCalculation.tsx   (4.7 - 400 lines)
-└── ReadinessCompletion.tsx         (4.8 - 350 lines)
+├── TalentPoolOverview.tsx           (5.1 - 400 lines)
+├── TalentPoolTypes.tsx              (5.2 - 350 lines)
+├── TalentPoolCreation.tsx           (5.3 - 450 lines)
+├── TalentPoolMembers.tsx            (5.4 - 400 lines)
+├── TalentPoolNomination.tsx         (5.5 - 400 lines) - NEW
+├── TalentPoolHRReview.tsx           (5.6 - 450 lines) - NEW
+├── TalentPoolEvidence.tsx           (5.7 - 400 lines) - NEW
+└── TalentPoolAnalytics.tsx          (5.8 - 300 lines) - NEW
 ```
 
 ### Phase 2: Section Content Specifications
 
-#### Section 4.1: Readiness Assessment Overview (~15 min) - NEW
+#### Section 5.1: Talent Pool Overview (~10 min) - NEW
 
 **Content:**
 - Learning objectives card (4 bullets)
-- Chapter overview: Configuration (Ch 2) vs. Operations (Ch 4)
-- Assessment lifecycle diagram (Initiated → In Progress → Completed)
-- Role responsibilities matrix (HR initiates, Managers assess, HR reviews)
-- Event status definitions (`pending`, `in_progress`, `completed`)
-- Strategic value of multi-assessor readiness evaluation
-- Cross-module integration (Succession Plans → Assessment → Candidate Update)
+- Navigation path: Performance → Succession → Talent Pools
+- Strategic value of talent pools in succession planning
+- Pool lifecycle diagram (Create → Populate → Develop → Graduate → Promote)
+- Cross-module integration (Nine-Box → Talent Pools → Succession Plans)
+- Industry context: SHRM talent segmentation best practices
 
-#### Section 4.2: Assessment Event Creation (~20 min) - NEW
+#### Section 5.2: Pool Types & Classification (~12 min) - REWRITE
 
 **Content:**
 - Learning objectives
-- Navigation path: Succession → Assessments → Initiate
-- Field reference table for `readiness_assessment_events`:
+- 5 pool type definitions with business use cases:
+  - **High Potential** (`high_potential`): Future leaders with exceptional growth capacity
+  - **Leadership Pipeline** (`leadership`): Prepared for management/executive roles
+  - **Technical Expert** (`technical`): Deep specialists in critical domains
+  - **Emerging Talent** (`emerging`): Early-career employees with high potential
+  - **Critical Role** (`critical_role`): Successors for hard-to-fill positions
+- Pool type selection guidance matrix
+- Color coding standards (from `poolTypeColors` in UI)
+- Best practices: Avoid overlapping pool membership
+
+#### Section 5.3: Pool Creation & Configuration (~15 min) - REWRITE
+
+**Content:**
+- Learning objectives
+- Field reference table for `talent_pools`:
   - `id` (UUID, PK)
   - `company_id` (UUID, FK)
-  - `candidate_id` (UUID, FK to succession_candidates)
-  - `form_id` (UUID, FK, optional - auto-detect)
-  - `initiated_by` (UUID, FK to profiles)
-  - `status` (Text: pending, in_progress, completed)
-  - `due_date` (Date, optional)
-  - `completed_at` (Timestamp, null until complete)
-  - `overall_score` (Numeric, calculated)
-  - `readiness_band` (Text, from rating bands)
+  - `name` (Text, required) - Display name
+  - `code` (Text, required) - Unique identifier
+  - `description` (Text) - Pool purpose and scope
+  - `pool_type` (Text, enum) - Classification
+  - `criteria` (JSONB) - Eligibility rules
+  - `is_active` (Boolean) - Active/archived status
+  - `start_date` (Date) - Pool effective date
+  - `end_date` (Date, nullable) - Pool expiration
+  - `created_by` (UUID, FK) - Creator reference
   - `created_at`, `updated_at` (Timestamps)
-- Step-by-step: Initiate assessment event (from `ReadinessAssessmentEventDialog`)
-  1. Navigate to Assessments tab
-  2. Click "Initiate Assessment"
-  3. Select succession candidate
-  4. Select form (or auto-detect from staff type)
-  5. Set due date (optional)
-  6. Submit to create event
-- Workflow integration: `SUCC_READINESS_APPROVAL` auto-start
-- Business rules: One active assessment per candidate
-- Troubleshooting: Form not auto-detecting
+- JSONB criteria structure:
+  ```json
+  {
+    "minimumScore": 3.5,
+    "minimumConfidence": 0.7,
+    "requiredSignals": ["leadership", "strategic_thinking"],
+    "excludeRoles": ["contractor", "intern"]
+  }
+  ```
+- Step-by-step: Create new talent pool (from TalentPoolsTab dialog)
+- Step-by-step: Edit pool configuration
+- Step-by-step: Archive/deactivate pool
+- Business rules: Code uniqueness per company
 
-#### Section 4.3: Form Selection & Assignment (~15 min) - NEW
-
-**Content:**
-- Learning objectives
-- Staff type → Form matching algorithm
-- Form selection priority:
-  1. Explicit form selection
-  2. Staff type match
-  3. Generic fallback
-- Auto-detect logic from `useReadinessAssessment.createEvent`
-- Form versioning considerations
-- Best practices: Creating staff-type-specific forms
-
-#### Section 4.4: Manager Assessment Workflow (~20 min) - NEW
+#### Section 5.4: Member Management (~12 min) - REWRITE
 
 **Content:**
 - Learning objectives
-- Navigation path: MSS → My Team → Succession → Assessments
-- Field reference table for `readiness_assessment_responses`:
+- Field reference table for `talent_pool_members`:
   - `id` (UUID, PK)
-  - `event_id` (UUID, FK)
-  - `indicator_id` (UUID, FK)
-  - `assessor_id` (UUID, FK to profiles)
-  - `assessor_type` (Text: manager, hr, executive)
-  - `rating` (Integer: 1-5)
-  - `comments` (Text, optional)
-  - `submitted_at` (Timestamp)
+  - `pool_id` (UUID, FK)
+  - `employee_id` (UUID, FK)
+  - `added_by` (UUID, FK) - Who added the member
+  - `reason` (Text) - Justification for inclusion
+  - `status` (Text) - Membership status
+  - `start_date` (Date) - When added
+  - `end_date` (Date, nullable) - When removed/graduated
+  - `created_at`, `updated_at` (Timestamps)
+- Member status lifecycle:
+  - `nominated` → Manager has proposed the employee
+  - `active` → HR has approved the nomination
+  - `approved` → Approved for pool membership
+  - `rejected` → Nomination declined
+  - `graduated` → Promoted to succession candidate
+  - `removed` → Exited from pool
+- Step-by-step: Add member directly (HR workflow)
+- Step-by-step: Remove member from pool
+- Member table UI walkthrough (from TalentPoolsTab)
+- Duplicate membership prevention
+
+#### Section 5.5: Manager Nomination Workflow (~15 min) - NEW SECTION
+
+**Content:**
+- Learning objectives
+- Navigation path: MSS → Talent Pool Nomination
+- UI overview: MssNominateTalentPoolPage
+  - Team member list (direct reports)
+  - Summary cards (Total, Nominated, Approved)
+  - Nomination status badges
+  - Search and filter controls
+- Step-by-step: Manager nominates team member
+  1. Navigate to MSS → Talent Pool Nomination
+  2. Review team member list
+  3. Click "Nominate" on eligible employee
+  4. Select target talent pool
+  5. Provide justification (required)
+  6. Add recommended development (optional)
+  7. Submit nomination
+- Expected result: Employee added with `status = 'nominated'`
+- Business rules: One nomination per pool per employee
+- Notification triggers to HR
+
+#### Section 5.6: HR Review & Approval (~15 min) - NEW SECTION
+
+**Content:**
+- Learning objectives
+- Field reference table for `talent_pool_review_packets`:
+  - `id` (UUID, PK)
+  - `talent_pool_id` (UUID, FK)
+  - `member_id` (UUID, FK)
+  - `employee_id` (UUID, FK)
+  - `company_id` (UUID, FK)
+  - `evidence_snapshot` (JSONB) - Captured talent profile evidence
+  - `signal_summary` (JSONB) - Aggregated signal data
+  - `leadership_indicators` (JSONB) - Leadership-specific metrics
+  - `review_status` (Text) - `pending`, `approved`, `declined`
+  - `reviewed_by` (UUID, FK)
+  - `reviewed_at` (Timestamp)
+  - `notes` (Text) - Reviewer comments
   - `created_at` (Timestamp)
-- UI walkthrough (from `ReadinessAssessmentForm`):
-  - Category accordion navigation
-  - Slider ratings with BARS tooltips
-  - Progress tracking (answered / total)
-  - Comments per indicator
-  - Submit validation
-- Expected result: Manager responses saved with `assessor_type = 'manager'`
-- Partial save behavior (Save Draft vs Submit)
-
-#### Section 4.5: HR Assessment Workflow (~15 min) - NEW
-
-**Content:**
-- Learning objectives
-- Navigation path: HR Hub → Succession → Assessments
-- HR-specific indicators (filtered by `assessor_type = 'hr'`)
-- Independent assessment vs. reviewing manager responses
-- Consolidation considerations
-- Expected result: HR responses saved with `assessor_type = 'hr'`
-
-#### Section 4.6: Executive Assessment Workflow (~10 min) - NEW
-
-**Content:**
-- Learning objectives
-- Optional executive layer configuration
-- When to enable executive assessment
-- Executive-specific indicators
-- Calibration integration considerations
-
-#### Section 4.7: Score Calculation & Band Assignment (~20 min) - NEW
-
-**Content:**
-- Learning objectives
-- `calculateOverallScore` algorithm documentation:
-  ```text
-  For each indicator:
-    normalizedRating = (response.rating / indicator.rating_scale_max) * 100
-    weightedSum += normalizedRating * indicator.weight_percent
-    totalWeight += indicator.weight_percent
-  
-  overallScore = totalWeight > 0 ? weightedSum / totalWeight : 0
-  ```
-- Band lookup from `readiness_rating_bands`:
-  ```text
-  band = bands.find(b => overallScore >= b.min_percentage && overallScore <= b.max_percentage)
-  ```
-- Partial assessment handling (weight redistribution)
-- Multi-assessor score aggregation (reference to 2.2a)
-- Confidence scoring considerations
-- Manual override capability
-
-#### Section 4.8: Assessment Completion & Candidate Update (~15 min) - NEW
-
-**Content:**
-- Learning objectives
-- Event completion workflow:
-  1. All required assessors submit
-  2. System calculates overall score
-  3. Band assigned from `readiness_rating_bands`
-  4. Event status → `completed`
-  5. `succession_candidates` table updated:
-     - `latest_readiness_score`
-     - `latest_readiness_band`
-     - `readiness_assessed_at`
+- HR review packet creation (from useTalentPoolReviewPackets.createReviewPacket)
+- Confidence indicators (from HRReviewConfidenceIndicators):
+  - **Confidence Score** (0-100%): Reliability based on source count, rater diversity, data consistency
+  - **Bias Risk Level** (low/medium/high): Based on rater relationships and response patterns
+  - **Data Freshness** (Fresh/Recent/Stale): <30 days, 30-90 days, >90 days
+  - **Source Count**: Number of evidence items
+  - **Signal Count**: 360 feedback signals
+  - **Recommendation Confidence**: Strong (≥70%), Additional Evidence Needed (40-70%), Insufficient (<40%)
+- Step-by-step: HR reviews nomination
+- Step-by-step: Approve/decline nomination with notes
 - Audit trail requirements
-- Candidate profile update verification
-- Historical assessment retention
-- Notification triggers (assessment complete)
-- Troubleshooting: Score not calculating
+
+#### Section 5.7: Evidence-Based Decision Support (~10 min) - NEW SECTION
+
+**Content:**
+- Learning objectives
+- Evidence summary structure (from TalentPoolNominationEvidence):
+  - Pool criteria validation (minimum score, confidence)
+  - Overall confidence percentage
+  - Top strengths (score ≥ 3.5)
+  - Development areas (score < 2.5)
+  - Evidence sources by type
+- Signal summary calculation (from useTalentPoolReviewPackets):
+  ```text
+  overallScore = sum(signal_value) / signal_count
+  avgConfidence = sum(confidence_score) / signal_count
+  topStrengths = signals where score >= 3.5, sorted desc, top 3
+  developmentAreas = signals where score < 2.5, sorted asc, top 3
+  biasRiskLevel = high if highBiasCount > 30%, medium if > 10%, else low
+  ```
+- Leadership indicator extraction:
+  - Filter signals by category = 'leadership'
+  - Extract name, score, confidence, trend
+- Evidence snapshot versioning
+- Integration with talent_profile_evidence table
+
+#### Section 5.8: Pool Analytics & Reporting (~10 min) - NEW SECTION
+
+**Content:**
+- Learning objectives
+- Pool health metrics:
+  - Member count by status
+  - Average time in pool
+  - Graduation rate
+  - Rejection rate
+- Pipeline metrics:
+  - Pool → Succession Plan conversion
+  - Ready Now vs Developing ratio
+  - Cross-pool membership patterns
+- Dashboard integration points
+- Best practices for pool review cycles
 
 ---
 
 ### Phase 3: Update Manual Types
 
-Update `src/types/successionManual.ts` Part 4 metadata:
+Update `src/types/successionManual.ts` Part 5 metadata:
 
 ```typescript
 {
-  id: 'part-4',
-  sectionNumber: '4',
-  title: 'Readiness Assessment Workflow',  // Renamed from "Framework"
-  description: 'Execute readiness assessments from initiation through completion, including multi-assessor workflows, score calculation, and candidate updates.',
+  id: 'part-5',
+  sectionNumber: '5',
+  title: 'Talent Pool Management',
+  description: 'Create, configure, and manage talent pools including nomination workflows, HR review processes, and evidence-based decision support.',
   contentLevel: 'procedure',
-  estimatedReadTime: 120,  // Updated from 75
+  estimatedReadTime: 90,  // Updated from 45
   targetRoles: ['Admin', 'HR Partner', 'Manager'],
   subsections: [
     // 8 subsections with proper metadata
@@ -271,33 +303,33 @@ Update `src/types/successionManual.ts` Part 4 metadata:
 
 ### Phase 4: Update Main Section Component
 
-Replace `SuccessionReadinessSection.tsx` placeholder file with modular imports:
+Replace `SuccessionTalentPoolsSection.tsx` placeholder file with modular imports:
 
 ```typescript
 import {
-  ReadinessOverview,
-  ReadinessEventCreation,
-  ReadinessFormSelection,
-  ReadinessManagerWorkflow,
-  ReadinessHRWorkflow,
-  ReadinessExecutiveWorkflow,
-  ReadinessScoreCalculation,
-  ReadinessCompletion
-} from './sections/readiness';
+  TalentPoolOverview,
+  TalentPoolTypes,
+  TalentPoolCreation,
+  TalentPoolMembers,
+  TalentPoolNomination,
+  TalentPoolHRReview,
+  TalentPoolEvidence,
+  TalentPoolAnalytics
+} from './sections/talentpools';
 ```
 
 ---
 
-## Content Standards (Following Chapter 3 Pattern)
+## Content Standards (Following Chapter 4 Pattern)
 
 Each section component must include:
 
 1. **Learning Objectives Card** - 4-5 bullet points
-2. **Navigation Path** - Settings icon + breadcrumb
+2. **Navigation Path** - Module → Submenu → Tab breadcrumb
 3. **Field Reference Table** - All database fields with types (where applicable)
-4. **Step-by-Step Procedure** - Numbered steps with screenshots placeholder
-5. **Business Rules** - Validation, constraints
-6. **Expected Results** - What user should see after each step
+4. **Step-by-Step Procedure** - Numbered steps with expected results
+5. **Business Rules** - Validation, constraints, permissions
+6. **Expected Results** - What user should see after each action
 7. **Best Practices Card** - Green-themed with checkmarks
 8. **Troubleshooting Card** - Amber-themed with issue/cause/solution
 
@@ -305,16 +337,18 @@ Each section component must include:
 
 ## Industry Alignment
 
-The proposed structure follows enterprise succession planning standards:
+The proposed structure follows enterprise talent management standards:
 
 | Industry Standard | HRplus Implementation | Documentation Section |
 |-------------------|----------------------|----------------------|
-| Multi-assessor validation | `assessor_type` field with role-based filtering | 4.4, 4.5, 4.6 |
-| Weighted scoring | `weight_percent` on indicators, normalized calculation | 4.7 |
-| Band assignment | `readiness_rating_bands` with score ranges | 4.7 |
-| Audit trail | `submitted_at` timestamps, `initiated_by` tracking | 4.2, 4.8 |
-| Workflow integration | `SUCC_READINESS_APPROVAL` transaction type | 4.2 |
-| Candidate profile update | `succession_candidates` table sync | 4.8 |
+| Talent segmentation | 5 pool types with business purposes | 5.2 |
+| Criteria-based pools | JSONB criteria field | 5.3 |
+| Manager nomination | MssNominateTalentPoolPage | 5.5 |
+| HR review workflow | Review packets with approval chain | 5.6 |
+| Evidence-based decisions | Signal summary, confidence scores | 5.7 |
+| Bias detection | Bias risk level calculation | 5.6, 5.7 |
+| Data quality indicators | Freshness, source count, confidence | 5.6 |
+| Audit trail | reviewed_by, reviewed_at, notes | 5.6 |
 
 ---
 
@@ -322,18 +356,19 @@ The proposed structure follows enterprise succession planning standards:
 
 After implementation:
 
-- [ ] All 2 operational tables documented (`events`, `responses`)
-- [ ] Assessment lifecycle fully documented (create → assess → complete)
-- [ ] 8 sections follow Chapter 3 component pattern
+- [ ] All 3 talent pool tables documented with complete field references
+- [ ] All 2 hooks documented with interfaces and business logic
+- [ ] Pool lifecycle documented (Create → Populate → Develop → Graduate)
+- [ ] 8 sections follow Chapter 4 component pattern
 - [ ] Learning objectives for each section
 - [ ] Navigation paths match UI structure
 - [ ] Step-by-step procedures with clear numbered steps
-- [ ] Score calculation algorithm documented with formula
-- [ ] Multi-assessor workflows differentiated by role
-- [ ] Troubleshooting section per major workflow
-- [ ] TOC navigation anchors (sec-4-1 through sec-4-8)
-- [ ] Updated read time in successionManual.ts (120 min)
-- [ ] Chapter title updated to "Readiness Assessment Workflow"
+- [ ] Manager nomination workflow documented end-to-end
+- [ ] HR review packet workflow documented with status transitions
+- [ ] Signal summary and confidence calculations documented
+- [ ] TOC navigation anchors (sec-5-1 through sec-5-8)
+- [ ] Updated read time in successionManual.ts (90 min)
+- [ ] Chapter now includes Manager role in target audience
 
 ---
 
@@ -342,28 +377,28 @@ After implementation:
 | Phase | Task | Files | Lines | Hours |
 |-------|------|-------|-------|-------|
 | 1 | Create directory + index.ts | 1 | ~25 | 0.5 |
-| 2 | ReadinessOverview.tsx | 1 | ~400 | 2.5 |
-| 2 | ReadinessEventCreation.tsx | 1 | ~450 | 3 |
-| 2 | ReadinessFormSelection.tsx | 1 | ~350 | 2 |
-| 2 | ReadinessManagerWorkflow.tsx | 1 | ~400 | 2.5 |
-| 2 | ReadinessHRWorkflow.tsx | 1 | ~350 | 2 |
-| 2 | ReadinessExecutiveWorkflow.tsx | 1 | ~300 | 1.5 |
-| 2 | ReadinessScoreCalculation.tsx | 1 | ~400 | 2.5 |
-| 2 | ReadinessCompletion.tsx | 1 | ~350 | 2 |
+| 2 | TalentPoolOverview.tsx | 1 | ~400 | 2 |
+| 2 | TalentPoolTypes.tsx | 1 | ~350 | 2 |
+| 2 | TalentPoolCreation.tsx | 1 | ~450 | 2.5 |
+| 2 | TalentPoolMembers.tsx | 1 | ~400 | 2 |
+| 2 | TalentPoolNomination.tsx (NEW) | 1 | ~400 | 2.5 |
+| 2 | TalentPoolHRReview.tsx (NEW) | 1 | ~450 | 3 |
+| 2 | TalentPoolEvidence.tsx (NEW) | 1 | ~400 | 2.5 |
+| 2 | TalentPoolAnalytics.tsx (NEW) | 1 | ~300 | 1.5 |
 | 3 | Update successionManual.ts | 1 | ~120 | 1 |
-| 4 | Update SuccessionReadinessSection.tsx | 1 | ~80 | 0.5 |
-| **Total** | | **11** | **~3,225** | **~20 hrs** |
+| 4 | Update SuccessionTalentPoolsSection.tsx | 1 | ~80 | 0.5 |
+| **Total** | | **11** | **~3,375** | **~20 hrs** |
 
 ---
 
-## Key Differentiator from Chapter 2
+## Key Differentiators from Other Chapters
 
-| Aspect | Chapter 2 (Foundation) | Chapter 4 (Workflow) |
-|--------|------------------------|---------------------|
-| Focus | Configuration & Setup | Operational Execution |
-| Tables | `forms`, `categories`, `indicators`, `bands`, `assessor_types` | `events`, `responses` |
-| Actions | Create, configure, seed defaults | Initiate, assess, calculate, complete |
-| Users | Admin, Consultant | HR Partner, Manager, Executive |
-| Timing | Pre-implementation | Ongoing operations |
+| Aspect | Chapter 5 Unique Features |
+|--------|--------------------------|
+| User Roles | Managers actively participate (nomination) |
+| Workflow | Nomination → HR Review → Approval chain |
+| Evidence | Real-time signal summary and confidence scoring |
+| Decision Support | Bias risk detection, data freshness indicators |
+| Cross-Module | Integrates talent signals from 360 Feedback |
 
-This restructure ensures Chapter 4 provides unique, operational value without duplicating the configuration content already thoroughly documented in Chapter 2.
+This restructure ensures Chapter 5 documents the complete talent pool management lifecycle, from strategic pool design through manager-driven nominations to HR evidence-based approval decisions.
