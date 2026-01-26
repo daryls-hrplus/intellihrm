@@ -61052,6 +61052,7 @@ export type Database = {
           company_id: string
           created_at: string | null
           id: string
+          is_successor_eligible: boolean | null
           max_percentage: number
           min_percentage: number
           rating_label: string
@@ -61062,6 +61063,7 @@ export type Database = {
           company_id: string
           created_at?: string | null
           id?: string
+          is_successor_eligible?: boolean | null
           max_percentage: number
           min_percentage: number
           rating_label: string
@@ -61072,6 +61074,7 @@ export type Database = {
           company_id?: string
           created_at?: string | null
           id?: string
+          is_successor_eligible?: boolean | null
           max_percentage?: number
           min_percentage?: number
           rating_label?: string
@@ -68798,6 +68801,7 @@ export type Database = {
           sort_order: number | null
           type_code: string
           type_label: string
+          weight_percentage: number | null
         }
         Insert: {
           applies_to_staff_types?: string[] | null
@@ -68809,6 +68813,7 @@ export type Database = {
           sort_order?: number | null
           type_code: string
           type_label: string
+          weight_percentage?: number | null
         }
         Update: {
           applies_to_staff_types?: string[] | null
@@ -68820,6 +68825,7 @@ export type Database = {
           sort_order?: number | null
           type_code?: string
           type_label?: string
+          weight_percentage?: number | null
         }
         Relationships: [
           {
@@ -68833,6 +68839,7 @@ export type Database = {
       }
       succession_availability_reasons: {
         Row: {
+          category: string | null
           code: string
           company_id: string
           created_at: string | null
@@ -68840,8 +68847,11 @@ export type Database = {
           id: string
           is_active: boolean | null
           sort_order: number | null
+          typical_notice_months: number | null
+          urgency_level: string | null
         }
         Insert: {
+          category?: string | null
           code: string
           company_id: string
           created_at?: string | null
@@ -68849,8 +68859,11 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           sort_order?: number | null
+          typical_notice_months?: number | null
+          urgency_level?: string | null
         }
         Update: {
+          category?: string | null
           code?: string
           company_id?: string
           created_at?: string | null
@@ -68858,6 +68871,8 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           sort_order?: number | null
+          typical_notice_months?: number | null
+          urgency_level?: string | null
         }
         Relationships: [
           {

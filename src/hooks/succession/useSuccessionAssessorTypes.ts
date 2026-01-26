@@ -10,6 +10,7 @@ export interface SuccessionAssessorType {
   is_required: boolean;
   is_enabled: boolean;
   applies_to_staff_types: string[] | null;
+  weight_percentage: number | null;
   sort_order: number;
   created_at: string;
 }
@@ -51,6 +52,7 @@ export function useSuccessionAssessorTypes(companyId?: string) {
           is_required: type.is_required ?? false,
           is_enabled: type.is_enabled ?? true,
           applies_to_staff_types: type.applies_to_staff_types,
+          weight_percentage: type.weight_percentage,
           sort_order: type.sort_order ?? 0,
         })
         .select()
@@ -75,6 +77,7 @@ export function useSuccessionAssessorTypes(companyId?: string) {
           is_required: updates.is_required,
           is_enabled: updates.is_enabled,
           applies_to_staff_types: updates.applies_to_staff_types,
+          weight_percentage: updates.weight_percentage,
           sort_order: updates.sort_order,
         })
         .eq('id', id)
@@ -116,9 +119,10 @@ export function useSuccessionAssessorTypes(companyId?: string) {
     if (existing.length > 0) return true;
 
     const defaults = [
-      { type_code: 'manager', type_label: 'Direct Manager', is_required: true, is_enabled: true, sort_order: 1 },
-      { type_code: 'hr', type_label: 'HR Partner', is_required: false, is_enabled: true, sort_order: 2 },
-      { type_code: 'executive', type_label: 'Executive Reviewer', is_required: false, is_enabled: false, sort_order: 3 },
+      { type_code: 'manager', type_label: 'Direct Manager', is_required: true, is_enabled: true, weight_percentage: 40, sort_order: 1 },
+      { type_code: 'hr', type_label: 'HR Partner', is_required: false, is_enabled: true, weight_percentage: 25, sort_order: 2 },
+      { type_code: 'executive', type_label: 'Executive Reviewer', is_required: false, is_enabled: false, weight_percentage: 20, sort_order: 3 },
+      { type_code: 'skip_level', type_label: 'Skip-Level Manager', is_required: false, is_enabled: false, weight_percentage: 15, sort_order: 4 },
     ];
 
     try {

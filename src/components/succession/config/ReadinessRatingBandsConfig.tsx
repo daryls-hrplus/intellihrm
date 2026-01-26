@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
 import { useReadinessRatingBands, ReadinessRatingBand } from '@/hooks/succession/useReadinessRatingBands';
 
 interface ReadinessRatingBandsConfigProps {
@@ -62,9 +63,14 @@ export function ReadinessRatingBandsConfig({ companyId }: ReadinessRatingBandsCo
       min_percentage: 0,
       max_percentage: 100,
       color_code: '#3b82f6',
+      is_successor_eligible: true,
       sort_order: bands.length + 1,
     });
     setDialogOpen(true);
+  };
+
+  const handleToggleEligible = async (band: ReadinessRatingBand) => {
+    await updateBand(band.id, { is_successor_eligible: !band.is_successor_eligible });
   };
 
   if (loading && bands.length === 0) {
@@ -102,6 +108,7 @@ export function ReadinessRatingBandsConfig({ companyId }: ReadinessRatingBandsCo
                 <TableHead>Min %</TableHead>
                 <TableHead>Max %</TableHead>
                 <TableHead>Color</TableHead>
+                <TableHead>Successor Eligible</TableHead>
                 <TableHead>Order</TableHead>
                 <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
@@ -124,6 +131,19 @@ export function ReadinessRatingBandsConfig({ companyId }: ReadinessRatingBandsCo
                       className="h-6 w-6 rounded border"
                       style={{ backgroundColor: band.color_code || '#6b7280' }}
                     />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={band.is_successor_eligible}
+                        onCheckedChange={() => handleToggleEligible(band)}
+                      />
+                      {band.is_successor_eligible ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>{band.sort_order}</TableCell>
                   <TableCell>
@@ -215,6 +235,18 @@ export function ReadinessRatingBandsConfig({ companyId }: ReadinessRatingBandsCo
                   min={1}
                 />
               </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Successor Eligible</Label>
+                <p className="text-xs text-muted-foreground">
+                  Can candidates in this band be designated as successors?
+                </p>
+              </div>
+              <Switch
+                checked={editingBand?.is_successor_eligible !== false}
+                onCheckedChange={(v) => setEditingBand({ ...editingBand, is_successor_eligible: v })}
+              />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>

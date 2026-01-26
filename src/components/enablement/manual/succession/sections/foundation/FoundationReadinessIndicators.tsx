@@ -100,6 +100,16 @@ export function FoundationReadinessIndicators() {
               </thead>
               <tbody className="text-xs">
                 <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">id</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3 text-muted-foreground">Primary key (auto-generated)</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">form_id</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3 text-muted-foreground">FK to readiness_assessment_forms</td>
+                </tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono">indicator_name</td>
                   <td className="py-2 px-3">Text</td>
                   <td className="py-2 px-3 text-muted-foreground">Question/statement text (max 500 chars)</td>
@@ -120,19 +130,34 @@ export function FoundationReadinessIndicators() {
                   <td className="py-2 px-3 text-muted-foreground">Max rating value (3, 4, 5, or 7)</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">scoring_guide_1</td>
+                  <td className="py-2 px-3 font-mono">assessor_type</td>
                   <td className="py-2 px-3">Text</td>
-                  <td className="py-2 px-3 text-muted-foreground">BARS anchor for rating 1</td>
+                  <td className="py-2 px-3 text-muted-foreground">Which assessor type uses this indicator</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">scoring_guide_3</td>
+                  <td className="py-2 px-3 font-mono">scoring_guide_low</td>
                   <td className="py-2 px-3">Text</td>
-                  <td className="py-2 px-3 text-muted-foreground">BARS anchor for rating 3 (mid)</td>
+                  <td className="py-2 px-3 text-muted-foreground">BARS anchor for low ratings (1-2)</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">scoring_guide_mid</td>
+                  <td className="py-2 px-3">Text</td>
+                  <td className="py-2 px-3 text-muted-foreground">BARS anchor for mid ratings (3)</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">scoring_guide_high</td>
+                  <td className="py-2 px-3">Text</td>
+                  <td className="py-2 px-3 text-muted-foreground">BARS anchor for high ratings (4-5)</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">sort_order</td>
+                  <td className="py-2 px-3">Number</td>
+                  <td className="py-2 px-3 text-muted-foreground">Display sequence within category</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono">scoring_guide_5</td>
-                  <td className="py-2 px-3">Text</td>
-                  <td className="py-2 px-3 text-muted-foreground">BARS anchor for rating 5 (high)</td>
+                  <td className="py-2 px-3 font-mono">created_at</td>
+                  <td className="py-2 px-3">Timestamp</td>
+                  <td className="py-2 px-3 text-muted-foreground">Record creation time</td>
                 </tr>
               </tbody>
             </table>

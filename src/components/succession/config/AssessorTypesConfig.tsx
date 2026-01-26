@@ -64,6 +64,7 @@ export function AssessorTypesConfig({ companyId }: AssessorTypesConfigProps) {
       type_label: '',
       is_required: false,
       is_enabled: true,
+      weight_percentage: null,
       sort_order: assessorTypes.length + 1,
     });
     setDialogOpen(true);
@@ -76,6 +77,11 @@ export function AssessorTypesConfig({ companyId }: AssessorTypesConfigProps) {
   const handleToggleRequired = async (type: SuccessionAssessorType) => {
     await updateAssessorType(type.id, { is_required: !type.is_required });
   };
+
+  // Calculate weight sum for validation display
+  const enabledWeightSum = assessorTypes
+    .filter(t => t.is_enabled && t.weight_percentage != null)
+    .reduce((sum, t) => sum + (t.weight_percentage || 0), 0);
 
   if (loading && assessorTypes.length === 0) {
     return (
@@ -92,8 +98,12 @@ export function AssessorTypesConfig({ companyId }: AssessorTypesConfigProps) {
         <AlertDescription>
           <strong>Industry Standard:</strong> Manager is typically required, HR is optional, 
           and Executive is optional (only for senior leadership positions). 
-          Per industry best practice, executive reviews are often handled through calibration sessions 
-          rather than individual assessment forms.
+          Weights should sum to 100% for enabled assessor types.
+          {enabledWeightSum > 0 && (
+            <span className={enabledWeightSum === 100 ? 'text-green-600 ml-2' : 'text-amber-600 ml-2'}>
+              Current weight sum: {enabledWeightSum}%
+            </span>
+          )}
         </AlertDescription>
       </Alert>
 
@@ -120,6 +130,7 @@ export function AssessorTypesConfig({ companyId }: AssessorTypesConfigProps) {
               <TableRow>
                 <TableHead>Type Code</TableHead>
                 <TableHead>Label</TableHead>
+                <TableHead>Weight %</TableHead>
                 <TableHead>Required</TableHead>
                 <TableHead>Enabled</TableHead>
                 <TableHead>Order</TableHead>
@@ -133,6 +144,9 @@ export function AssessorTypesConfig({ companyId }: AssessorTypesConfigProps) {
                     <Badge variant="outline">{type.type_code}</Badge>
                   </TableCell>
                   <TableCell className="font-medium">{type.type_label}</TableCell>
+                  <TableCell>
+                    {type.weight_percentage != null ? `${type.weight_percentage}%` : <span className="text-muted-foreground">-</span>}
+                  </TableCell>
                   <TableCell>
                     <Switch
                       checked={type.is_required}
@@ -188,7 +202,7 @@ export function AssessorTypesConfig({ companyId }: AssessorTypesConfigProps) {
                 disabled={!!editingType?.id}
               />
               <p className="text-xs text-muted-foreground">
-                Unique identifier (manager, hr, executive)
+                Unique identifier (manager, hr, executive, skip_level)
               </p>
             </div>
             <div className="space-y-2">
@@ -223,14 +237,30 @@ export function AssessorTypesConfig({ companyId }: AssessorTypesConfigProps) {
                 onCheckedChange={(v) => setEditingType({ ...editingType, is_enabled: v })}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Sort Order</Label>
-              <Input
-                type="number"
-                value={editingType?.sort_order || 1}
-                onChange={(e) => setEditingType({ ...editingType, sort_order: parseInt(e.target.value) })}
-                min={1}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Weight %</Label>
+                <Input
+                  type="number"
+                  value={editingType?.weight_percentage ?? ''}
+                  onChange={(e) => setEditingType({ ...editingType, weight_percentage: e.target.value ? parseFloat(e.target.value) : null })}
+                  min={0}
+                  max={100}
+                  placeholder="e.g., 40"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Score contribution (0-100)
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Sort Order</Label>
+                <Input
+                  type="number"
+                  value={editingType?.sort_order || 1}
+                  onChange={(e) => setEditingType({ ...editingType, sort_order: parseInt(e.target.value) })}
+                  min={1}
+                />
+              </div>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>

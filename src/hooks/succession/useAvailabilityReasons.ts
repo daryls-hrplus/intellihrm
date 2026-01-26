@@ -7,6 +7,9 @@ export interface SuccessionAvailabilityReason {
   company_id: string;
   code: string;
   description: string;
+  category: 'planned' | 'unplanned' | 'either';
+  urgency_level: 'low' | 'medium' | 'high' | 'critical';
+  typical_notice_months: number | null;
   is_active: boolean;
   sort_order: number;
   created_at: string;
@@ -46,6 +49,9 @@ export function useAvailabilityReasons(companyId?: string) {
           company_id: companyId,
           code: reason.code!,
           description: reason.description!,
+          category: reason.category ?? 'planned',
+          urgency_level: reason.urgency_level ?? 'medium',
+          typical_notice_months: reason.typical_notice_months,
           is_active: reason.is_active ?? true,
           sort_order: reason.sort_order ?? 0,
         })
@@ -69,6 +75,9 @@ export function useAvailabilityReasons(companyId?: string) {
         .update({
           code: updates.code,
           description: updates.description,
+          category: updates.category,
+          urgency_level: updates.urgency_level,
+          typical_notice_months: updates.typical_notice_months,
           is_active: updates.is_active,
           sort_order: updates.sort_order,
         })
@@ -111,12 +120,14 @@ export function useAvailabilityReasons(companyId?: string) {
     if (existing.length > 0) return true;
 
     const defaults = [
-      { code: 'RET', description: 'Retirement', sort_order: 1 },
-      { code: 'PRO', description: 'Promotion', sort_order: 2 },
-      { code: 'RES', description: 'Resignation', sort_order: 3 },
-      { code: 'TRM', description: 'Termination', sort_order: 4 },
-      { code: 'REL', description: 'Relocation', sort_order: 5 },
-      { code: 'REO', description: 'Reorganization', sort_order: 6 },
+      { code: 'RET', description: 'Retirement', category: 'planned', urgency_level: 'medium', typical_notice_months: 12, sort_order: 1 },
+      { code: 'PRO', description: 'Promotion', category: 'planned', urgency_level: 'medium', typical_notice_months: 3, sort_order: 2 },
+      { code: 'TRF', description: 'Internal Transfer', category: 'planned', urgency_level: 'low', typical_notice_months: 2, sort_order: 3 },
+      { code: 'RES', description: 'Resignation', category: 'unplanned', urgency_level: 'high', typical_notice_months: 1, sort_order: 4 },
+      { code: 'TRM', description: 'Termination', category: 'unplanned', urgency_level: 'critical', typical_notice_months: 0, sort_order: 5 },
+      { code: 'MED', description: 'Medical Leave', category: 'unplanned', urgency_level: 'high', typical_notice_months: null, sort_order: 6 },
+      { code: 'REL', description: 'Relocation', category: 'either', urgency_level: 'medium', typical_notice_months: 6, sort_order: 7 },
+      { code: 'REO', description: 'Reorganization', category: 'planned', urgency_level: 'medium', typical_notice_months: 3, sort_order: 8 },
     ];
 
     try {
