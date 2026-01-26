@@ -102,7 +102,7 @@ const manuals = [
     icon: Radar,
     color: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
     badgeColor: "bg-cyan-500/10 text-cyan-700 border-cyan-500/30",
-    sections: 55,
+    sections: 59,
     href: "/enablement/manuals/feedback-360",
     version: "1.0",
   },
