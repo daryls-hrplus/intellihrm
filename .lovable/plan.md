@@ -1,336 +1,374 @@
 
-# Phase 2 & 3 Implementation Plan: Chapter 5 Gap Closure
+# Chapter 5 & 6 Comprehensive Audit and Update Plan
 
 ## Executive Summary
 
-This plan implements **Phase 2 (Code Enhancements)** and **Phase 3 (Types Metadata Update)** from the Chapter 5 Gap Audit to align the codebase with the documented functionality. These changes will enforce the documented member status lifecycle, persist development recommendations, and add essential status management functions.
+After a deep dive into the database schema (34 tables), UI components (13 pages), hooks (5 files), and workflow/notification configurations, I have identified significant gaps in Chapter 5 and Chapter 6 documentation. Chapter 5 was recently updated but is missing critical content, while Chapter 6 remains entirely in placeholder state with zero substantive documentation.
 
 ---
 
-## Phase 2: Code Enhancements
+## Audit Findings
 
-### 2.1 Database Migration - Add Status Constraint & Development Notes Field
+### Current State
 
-**Purpose:** Enforce the 6-stage status lifecycle documented in Section 5.4 and persist the "Recommended Development" field from the MSS nomination form.
+| Chapter | Current Status | Lines | Sections | Substantive Content |
+|---------|----------------|-------|----------|---------------------|
+| Chapter 5 | Recently updated | ~3,400 | 8 sections | 85% complete |
+| Chapter 6 | Placeholder only | ~57 | 6 sections | 0% complete |
 
-**SQL Migration:**
-```sql
--- Add CHECK constraint to enforce allowed statuses
-ALTER TABLE talent_pool_members 
-DROP CONSTRAINT IF EXISTS talent_pool_members_status_check;
+### Database Schema Coverage
 
-ALTER TABLE talent_pool_members 
-ADD CONSTRAINT talent_pool_members_status_check 
-CHECK (status IN ('active', 'nominated', 'approved', 'rejected', 'graduated', 'removed'));
+| Domain | Tables | Total Fields | Ch 5 Coverage | Ch 6 Coverage |
+|--------|--------|--------------|---------------|---------------|
+| Succession Plans | `succession_plans` | 23 | N/A | NOT DOCUMENTED |
+| Succession Candidates | `succession_candidates` | 20 | N/A | NOT DOCUMENTED |
+| Succession Development | `succession_development_plans` | 13 | N/A | NOT DOCUMENTED |
+| Gap-Development Links | `succession_gap_development_links` | 12 | N/A | NOT DOCUMENTED |
+| Candidate Evidence | `succession_candidate_evidence` | 10 | N/A | NOT DOCUMENTED |
+| Availability Reasons | `succession_availability_reasons` | 10 | Partial | NOT DOCUMENTED |
+| Key Position Risks | `key_position_risks` | ~15 | N/A | NOT DOCUMENTED |
 
--- Add development_notes field for manager recommendations
-ALTER TABLE talent_pool_members 
-ADD COLUMN IF NOT EXISTS development_notes TEXT NULL;
+### Critical Missing Documentation
 
--- Add comment for documentation
-COMMENT ON COLUMN talent_pool_members.development_notes IS 'Manager-recommended development activities captured during nomination';
-```
+**Chapter 5 Gaps:**
+1. No reference to HR Hub Integration Dashboard for succession
+2. Missing notification/reminder event type documentation
+3. No workflow approval documentation (SUCCESSION_READINESS_APPROVAL)
+4. Supporting tables (talent_profile_evidence, talent_signal_snapshots) lack field-level detail
 
-**Rationale:**
-- The MssNominateTalentPoolPage already inserts with `status = 'nominated'`
-- The constraint formalizes the lifecycle: `nominated` → `approved`/`rejected` → `active` → `graduated`/`removed`
-- The `development_notes` field captures the existing UI field that was not being persisted
+**Chapter 6 Gaps (Entire Chapter is Placeholder):**
+1. Key Position Identification - No content
+2. Succession Plan Creation - No content  
+3. Candidate Nomination and Ranking - No content
+4. Readiness Assessment Execution - No content
+5. Development Plan Linking - No content
+6. Candidate Evidence Collection - No content
 
----
+### Workflow and Notification Infrastructure
 
-### 2.2 Hook Enhancement - Add updateMemberStatus Function
+**Existing Database Support (NOT DOCUMENTED):**
 
-**File:** `src/hooks/useSuccession.ts`
+| Type | Code | Name | Status |
+|------|------|------|--------|
+| Workflow Template | SUCCESSION_READINESS_APPROVAL | Succession Readiness Assessment Approval | Active |
+| Transaction Type | PERF_SUCCESSION_APPROVAL | Succession Plan Approval | Active |
+| Transaction Type | SUCC_READINESS_APPROVAL | Succession Readiness Approval | Active |
+| Reminder Event | SUCCESSION_UPDATED | Succession Readiness Updated | Active |
+| Reminder Event | talent_review_reminder | Talent Review Reminder | Active |
+| Reminder Event | successor_assessment_due | Successor Assessment Due | Active |
+| Reminder Event | development_plan_action | Development Plan Action Required | Active |
 
-**New Function:**
-```typescript
-const updateMemberStatus = async (
-  memberId: string, 
-  newStatus: 'active' | 'nominated' | 'approved' | 'rejected' | 'graduated' | 'removed',
-  endDate?: string
-): Promise<boolean> => {
-  try {
-    const updates: Record<string, any> = {
-      status: newStatus,
-      updated_at: new Date().toISOString(),
-    };
-
-    // Set end_date for terminal statuses
-    if (['graduated', 'removed', 'rejected'].includes(newStatus) && !endDate) {
-      updates.end_date = new Date().toISOString().split('T')[0];
-    } else if (endDate) {
-      updates.end_date = endDate;
-    }
-
-    const { error } = await supabase
-      .from('talent_pool_members')
-      .update(updates)
-      .eq('id', memberId);
-
-    if (error) throw error;
-
-    const statusMessages: Record<string, string> = {
-      active: 'Member is now active',
-      approved: 'Nomination approved',
-      rejected: 'Nomination declined',
-      graduated: 'Member graduated to succession plan',
-      removed: 'Member removed from pool',
-    };
-    toast.success(statusMessages[newStatus] || 'Status updated');
-    return true;
-  } catch (error: any) {
-    toast.error('Failed to update status: ' + error.message);
-    return false;
-  }
-};
-```
-
-**Changes to Interface:**
-```typescript
-export interface TalentPoolMember {
-  id: string;
-  pool_id: string;
-  employee_id: string;
-  added_by: string | null;
-  reason: string | null;
-  status: 'active' | 'nominated' | 'approved' | 'rejected' | 'graduated' | 'removed';
-  start_date: string;
-  end_date: string | null;
-  development_notes: string | null;  // NEW
-  employee?: { ... };
-}
-```
-
-**Export Addition:**
-```typescript
-return {
-  // ... existing exports
-  updateMemberStatus,  // NEW
-};
-```
+**HR Hub Integration:**
+- IntegrationDashboardPage.tsx supports succession module with MODULE_ICONS and MODULE_LABELS
+- TransactionWorkflowSettingsPage.tsx enables succession workflow configuration per company
+- Route config exists: `/succession/plans` for navigation from HR Hub
 
 ---
 
-### 2.3 UI Enhancement - Add Status Change Dropdown to TalentPoolsTab
+## Proposed Chapter Structure Updates
 
-**File:** `src/components/succession/TalentPoolsTab.tsx`
+### Chapter 5: Talent Pool Management (Enhancements)
 
-**Changes:**
-1. Import `updateMemberStatus` from useSuccession hook
-2. Replace the "Remove" (Trash2) button with a status dropdown
-3. Add proper status transitions based on current state
+**Current: 8 sections (~90 min)**
+**Proposed: 10 sections (~110 min)** - Add notification and workflow integration
 
-**UI Changes:**
-```tsx
-// In the members table, replace:
-<Button size="sm" variant="ghost" onClick={() => handleRemoveMember(member.id)}>
-  <Trash2 className="h-4 w-4 text-destructive" />
-</Button>
+| Section | Title | Status | Action |
+|---------|-------|--------|--------|
+| 5.1 | Talent Pool Overview | Complete | Minor updates |
+| 5.2 | Pool Types and Classification | Complete | No change |
+| 5.3 | Pool Creation and Configuration | Complete | No change |
+| 5.4 | Member Management | Complete | No change |
+| 5.5 | Manager Nomination Workflow | Complete | No change |
+| 5.6 | HR Review and Approval | Complete | Add HR Hub navigation |
+| 5.7 | Evidence-Based Decision Support | Complete | Add supporting table field references |
+| 5.8 | Pool Analytics and Reporting | Complete | No change |
+| 5.9 | Notifications and Reminders (NEW) | Missing | Create new section |
+| 5.10 | HR Hub Integration (NEW) | Missing | Create new section |
 
-// With:
-<DropdownMenu>
-  <DropdownMenuTrigger asChild>
-    <Button size="sm" variant="ghost">
-      <MoreHorizontal className="h-4 w-4" />
-    </Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent align="end">
-    {member.status === 'nominated' && (
-      <>
-        <DropdownMenuItem onClick={() => handleStatusChange(member.id, 'approved')}>
-          <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
-          Approve
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleStatusChange(member.id, 'rejected')}>
-          <XCircle className="h-4 w-4 mr-2 text-red-500" />
-          Reject
-        </DropdownMenuItem>
-      </>
-    )}
-    {(member.status === 'active' || member.status === 'approved') && (
-      <>
-        <DropdownMenuItem onClick={() => handleStatusChange(member.id, 'graduated')}>
-          <GraduationCap className="h-4 w-4 mr-2 text-blue-500" />
-          Graduate to Succession
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-      </>
-    )}
-    <DropdownMenuItem 
-      onClick={() => handleStatusChange(member.id, 'removed')}
-      className="text-destructive"
-    >
-      <Trash2 className="h-4 w-4 mr-2" />
-      Remove from Pool
-    </DropdownMenuItem>
-  </DropdownMenuContent>
-</DropdownMenu>
-```
+### Chapter 6: Succession Planning Workflow (Complete Rewrite)
 
-**New Handler:**
-```typescript
-const handleStatusChange = async (memberId: string, newStatus: string) => {
-  const statusLabels: Record<string, string> = {
-    approved: 'approve this nomination',
-    rejected: 'reject this nomination',
-    graduated: 'graduate this member to succession planning',
-    removed: 'remove this member from the pool',
-  };
-  
-  if (!confirm(`Are you sure you want to ${statusLabels[newStatus]}?`)) return;
-  
-  const result = await updateMemberStatus(memberId, newStatus as any);
-  if (result && selectedPool) {
-    loadMembers(selectedPool.id);
-    loadPools();
-  }
-};
-```
+**Current: Placeholder only (~57 lines)**
+**Proposed: 10 sections (~120 min)** - Full operational documentation
+
+| Section | Title | Database Tables | Status |
+|---------|-------|-----------------|--------|
+| 6.1 | Succession Planning Overview | N/A | NEW - Lifecycle and value proposition |
+| 6.2 | Key Position Identification | jobs (is_key_position), key_position_risks | NEW - Mark positions as critical |
+| 6.3 | Position Risk Assessment | key_position_risks (15 fields) | NEW - Criticality, vacancy risk, impact |
+| 6.4 | Succession Plan Creation | succession_plans (23 fields) | NEW - Full field reference and procedures |
+| 6.5 | Candidate Nomination and Ranking | succession_candidates (20 fields) | NEW - Add candidates, readiness levels |
+| 6.6 | Readiness Assessment Integration | Links to Ch 4 readiness workflow | NEW - Assessment execution reference |
+| 6.7 | Development Plan Management | succession_development_plans (13 fields) | NEW - Create and track dev plans |
+| 6.8 | Gap-to-Development Linking | succession_gap_development_links (12 fields) | NEW - IDP/Learning integration |
+| 6.9 | Candidate Evidence Collection | succession_candidate_evidence (10 fields) | NEW - Evidence capture procedures |
+| 6.10 | Workflow and Approval Configuration | workflow_templates, company_transaction_workflow_settings | NEW - SUCCESSION_READINESS_APPROVAL |
 
 ---
 
-### 2.4 MSS Page Enhancement - Persist Development Recommendations
+## Technical Implementation Plan
 
-**File:** `src/pages/mss/MssNominateTalentPoolPage.tsx`
+### Phase 1: Chapter 5 Enhancements
 
-**Changes to handleSubmitNomination:**
-```typescript
-const handleSubmitNomination = async () => {
-  if (!selectedMember || !nominationForm.talent_pool_id) {
-    toast.error("Please select a talent pool");
-    return;
-  }
+**Task 1.1: Create TalentPoolNotifications.tsx (NEW Section 5.9)**
 
-  setSubmitting(true);
-  
-  const { error } = await (supabase
-    .from('talent_pool_members') as any)
-    .insert({
-      pool_id: nominationForm.talent_pool_id,
-      employee_id: selectedMember.id,
-      added_by: profile?.id,
-      status: 'nominated',
-      reason: nominationForm.justification,
-      development_notes: nominationForm.recommended_development || null,  // NEW
-    });
+Content:
+- Field reference for `reminder_event_types` (performance_succession category)
+- 4 succession-specific reminder events:
+  - SUCCESSION_UPDATED
+  - talent_review_reminder
+  - successor_assessment_due
+  - development_plan_action
+- Step-by-step: Configure reminder rules for talent review
+- Integration with HR Reminders page
 
-  if (error) {
-    toast.error("Failed to submit nomination");
-  } else {
-    toast.success(`${selectedMember.full_name} nominated to talent pool`);
-    setDialogOpen(false);
-    await loadData();
-  }
-  setSubmitting(false);
-};
+**Task 1.2: Create TalentPoolHRHubIntegration.tsx (NEW Section 5.10)**
+
+Content:
+- HR Hub Integration Dashboard navigation
+- MODULE_ICONS and MODULE_LABELS mapping
+- View pending approvals via HR Hub
+- Transaction workflow settings configuration
+- Step-by-step: Enable succession workflow for company
+
+**Task 1.3: Update index.ts exports**
+
+Add exports for new section components.
+
+**Task 1.4: Update successionManual.ts Part 5 metadata**
+
+Add sections 5.9 and 5.10 with proper metadata.
+
+### Phase 2: Chapter 6 Complete Implementation
+
+**Directory Structure:**
+```text
+src/components/enablement/manual/succession/sections/successionplans/
+├── index.ts
+├── SuccessionPlanningOverview.tsx          (6.1 - ~350 lines)
+├── KeyPositionIdentification.tsx            (6.2 - ~400 lines)
+├── PositionRiskAssessment.tsx               (6.3 - ~450 lines)
+├── SuccessionPlanCreation.tsx               (6.4 - ~500 lines)
+├── CandidateNominationRanking.tsx           (6.5 - ~450 lines)
+├── ReadinessAssessmentIntegration.tsx       (6.6 - ~300 lines)
+├── DevelopmentPlanManagement.tsx            (6.7 - ~400 lines)
+├── GapDevelopmentLinking.tsx                (6.8 - ~350 lines)
+├── CandidateEvidenceCollection.tsx          (6.9 - ~350 lines)
+└── WorkflowApprovalConfiguration.tsx        (6.10 - ~400 lines)
 ```
+
+**Task 2.1: Create SuccessionPlanningOverview.tsx (Section 6.1)**
+
+Content:
+- Learning objectives
+- 8-stage lifecycle diagram (Identify → Plan → Nominate → Assess → Develop → Evidence → Review → Promote)
+- Cross-module integration architecture
+- Persona responsibilities (HR Admin, Manager, Executive)
+- Industry context: Workday succession planning patterns
+
+**Task 2.2: Create KeyPositionIdentification.tsx (Section 6.2)**
+
+Content:
+- Learning objectives
+- Navigation path: Succession → Key Positions
+- Field reference for `jobs.is_key_position` flag
+- UI walkthrough: KeyPositionsTab.tsx
+- Step-by-step: Mark job as key position
+- Industry benchmark: 10-15% of positions are typically key/critical
+
+**Task 2.3: Create PositionRiskAssessment.tsx (Section 6.3)**
+
+Content:
+- Learning objectives
+- Field reference for `key_position_risks` table (15 fields):
+  - id, company_id, position_id
+  - is_key_position, criticality_level (low/medium/high/critical)
+  - vacancy_risk (low/medium/high)
+  - impact_if_vacant
+  - current_incumbent_id
+  - retirement_risk, flight_risk
+  - risk_notes
+- Risk assessment form walkthrough
+- Step-by-step: Assess key position risk
+- Criticality and vacancy risk color coding
+
+**Task 2.4: Create SuccessionPlanCreation.tsx (Section 6.4)**
+
+Content:
+- Learning objectives
+- Navigation path: Succession → Succession Plans
+- Field reference for `succession_plans` table (23 fields):
+  - id, company_id, position_id
+  - plan_name, plan_name_en, description, description_en
+  - risk_level (low/medium/high), priority (low/medium/high/critical)
+  - status (active/inactive), target_date
+  - notes, notes_en
+  - position_criticality, replacement_difficulty
+  - calculated_risk_level, availability_reason_id
+  - is_active, start_date, end_date
+  - created_by, created_at, updated_at
+- UI walkthrough: SuccessionPlansTab.tsx
+- Step-by-step: Create succession plan for key position
+- Step-by-step: Edit plan details
+- Risk and priority color coding (from riskColors, priorityColors)
+
+**Task 2.5: Create CandidateNominationRanking.tsx (Section 6.5)**
+
+Content:
+- Learning objectives
+- Field reference for `succession_candidates` table (20 fields):
+  - id, plan_id, employee_id
+  - readiness_level (ready_now/ready_1_year/ready_2_years/developing)
+  - readiness_timeline
+  - strengths, development_areas
+  - ranking, status (active/removed)
+  - notes, nominated_by
+  - performance_risk_id, is_promotion_blocked, block_reason, last_risk_check_at
+  - latest_readiness_score, latest_readiness_band, readiness_assessed_at
+  - created_at, updated_at
+- Candidate card layout (avatar, ranking badge, readiness)
+- Step-by-step: Nominate candidate to succession plan
+- Step-by-step: Reorder candidate ranking
+- ValuesPromotionCheck integration
+- SuccessorProfileLeadershipSignals integration
+- CandidateSignalComparison for 2+ candidates
+
+**Task 2.6: Create ReadinessAssessmentIntegration.tsx (Section 6.6)**
+
+Content:
+- Learning objectives
+- Cross-reference to Chapter 4 (Readiness Assessment Workflow)
+- How readiness_assessment_events link to succession_candidates
+- Automatic sync of latest_readiness_score and latest_readiness_band
+- readiness_assessed_at timestamp tracking
+- Workflow trigger: SUCCESSION_READINESS_APPROVAL
+
+**Task 2.7: Create DevelopmentPlanManagement.tsx (Section 6.7)**
+
+Content:
+- Learning objectives
+- Field reference for `succession_development_plans` table (13 fields):
+  - id, candidate_id
+  - title, description
+  - development_type (training/project/mentoring/assignment/other)
+  - target_date, completion_date
+  - status (not_started/in_progress/completed/cancelled)
+  - progress (0-100)
+  - notes, created_by, created_at, updated_at
+- Development progress visualization (Progress component)
+- Step-by-step: Create development plan for candidate
+- Step-by-step: Update progress
+- Development type options
+
+**Task 2.8: Create GapDevelopmentLinking.tsx (Section 6.8)**
+
+Content:
+- Learning objectives
+- Field reference for `succession_gap_development_links` table (12 fields):
+  - id, candidate_id, company_id
+  - gap_type, gap_description, gap_severity (low/medium/high)
+  - linked_idp_item_id (FK to IDP items)
+  - linked_learning_id (FK to LMS courses)
+  - recommended_experience
+  - status (identified/in_progress/closed)
+  - created_at, updated_at
+- Integration with IDP module
+- Integration with Learning module
+- Step-by-step: Link gap to IDP goal
+- Step-by-step: Link gap to learning assignment
+
+**Task 2.9: Create CandidateEvidenceCollection.tsx (Section 6.9)**
+
+Content:
+- Learning objectives
+- Field reference for `succession_candidate_evidence` table (10 fields):
+  - id, candidate_id, company_id
+  - evidence_type (nine_box/signal_snapshot/manual)
+  - source_snapshot_id (FK to talent_signal_snapshots)
+  - source_nine_box_id (FK to nine_box_assessments)
+  - signal_summary (JSONB), leadership_indicators (JSONB)
+  - readiness_contribution (numeric)
+  - created_at
+- Evidence sources: Nine-Box, Talent Signals, Manual upload
+- Step-by-step: View candidate evidence summary
+- Evidence contribution to readiness score
+
+**Task 2.10: Create WorkflowApprovalConfiguration.tsx (Section 6.10)**
+
+Content:
+- Learning objectives
+- Workflow templates: SUCCESSION_READINESS_APPROVAL
+- Transaction types: PERF_SUCCESSION_APPROVAL, SUCC_READINESS_APPROVAL
+- Field reference for `company_transaction_workflow_settings`
+- HR Hub → Transaction Workflow Settings navigation
+- Step-by-step: Enable succession approval workflow for company
+- Step-by-step: Configure approval chain
+- Notification integration with HR Reminders
+
+**Task 2.11: Update SuccessionPlansSection.tsx**
+
+Replace placeholder content with modular imports from new section components.
+
+**Task 2.12: Update successionManual.ts Part 6 metadata**
+
+Update to 10 sections with proper metadata including:
+- industryContext for each section
+- Updated estimatedReadTime (120 min)
+- targetRoles including Manager for nomination sections
+
+### Phase 3: Update TOC and Index Files
+
+**Task 3.1: Update index.ts**
+
+Add exports for all new Chapter 6 section components.
+
+**Task 3.2: Update SuccessionTalentPoolsSection.tsx**
+
+Add imports for new sections 5.9 and 5.10.
 
 ---
 
-## Phase 3: Types Metadata Update
+## Content Standards (Following Existing Patterns)
 
-### 3.1 Update successionManual.ts Part 5 Metadata
+Each section component must include:
 
-**File:** `src/types/successionManual.ts`
-
-**Updated Description (lines 533-536):**
-```typescript
-{
-  id: 'part-5',
-  sectionNumber: '5',
-  title: 'Talent Pool Management',
-  description: 'Create, configure, and manage talent pools including nomination workflows, HR review processes, evidence-based decision support, and integration with supporting evidence tables (talent_profile_evidence, talent_signal_snapshots, talent_signal_definitions).',
-  contentLevel: 'procedure',
-  estimatedReadTime: 90,
-  targetRoles: ['Admin', 'HR Partner', 'Manager'],
-```
-
-**Updated Section 5.4 Description:**
-```typescript
-{
-  id: 'sec-5-4',
-  sectionNumber: '5.4',
-  title: 'Member Management',
-  description: 'Add, review, approve, graduate, and remove talent pool members with 6-stage status lifecycle (nominated → approved/rejected → active → graduated/removed). Includes DB-enforced status constraint.',
-  contentLevel: 'procedure',
-  estimatedReadTime: 12,
-  targetRoles: ['Admin', 'HR Partner'],
-  industryContext: {
-    frequency: 'Quarterly review',
-    timing: 'Ongoing operations',
-    benchmark: 'Active pool management with formal status transitions'
-  }
-}
-```
-
-**Updated Section 5.5 Description:**
-```typescript
-{
-  id: 'sec-5-5',
-  sectionNumber: '5.5',
-  title: 'Manager Nomination Workflow',
-  description: 'MSS-driven talent nomination with justification requirements, development recommendations (persisted to development_notes field), and notification triggers',
-  contentLevel: 'procedure',
-  estimatedReadTime: 15,
-  targetRoles: ['Manager'],
-  industryContext: {
-    frequency: 'Per nomination',
-    timing: 'Ongoing operations',
-    benchmark: 'Manager-initiated talent identification with development planning'
-  }
-}
-```
-
-**Updated Section 5.7 Description:**
-```typescript
-{
-  id: 'sec-5-7',
-  sectionNumber: '5.7',
-  title: 'Evidence-Based Decision Support',
-  description: 'Talent signals, evidence snapshots, signal summary calculations, and leadership indicators. Integrates with talent_profile_evidence (13 fields), talent_signal_snapshots (18 fields), and talent_signal_definitions (15 fields) tables.',
-  contentLevel: 'reference',
-  estimatedReadTime: 10,
-  targetRoles: ['Admin', 'HR Partner'],
-  industryContext: {
-    frequency: 'Reference',
-    timing: 'During review',
-    benchmark: 'McKinsey evidence-based talent decisions'
-  }
-}
-```
+1. **Learning Objectives Card** - 4-5 bullet points
+2. **Navigation Path** - Module → Submenu → Tab breadcrumb
+3. **Field Reference Table** - All database fields with types, required status, defaults
+4. **Step-by-Step Procedure** - Numbered steps with expected results
+5. **Business Rules** - Validation, constraints, permissions
+6. **Best Practices Card** - Green-themed with checkmarks
+7. **Troubleshooting Card** - Amber-themed with issue/cause/solution (where applicable)
+8. **Industry Context Callout** - Blue-themed with benchmark data
 
 ---
 
-## Implementation Summary
+## Notification and Reminder Documentation
 
-| Phase | Task | File | Type |
-|-------|------|------|------|
-| 2.1 | Add status CHECK constraint | DB Migration | Schema |
-| 2.1 | Add development_notes column | DB Migration | Schema |
-| 2.2 | Add updateMemberStatus function | useSuccession.ts | Hook |
-| 2.2 | Add development_notes to TalentPoolMember interface | useSuccession.ts | Type |
-| 2.3 | Replace delete button with status dropdown | TalentPoolsTab.tsx | UI |
-| 2.3 | Add handleStatusChange handler | TalentPoolsTab.tsx | UI |
-| 2.4 | Persist development_notes in nomination | MssNominateTalentPoolPage.tsx | UI |
-| 3.1 | Update Part 5 main description | successionManual.ts | Metadata |
-| 3.1 | Update Section 5.4 description | successionManual.ts | Metadata |
-| 3.1 | Update Section 5.5 description | successionManual.ts | Metadata |
-| 3.1 | Update Section 5.7 description | successionManual.ts | Metadata |
+### Reminder Event Types (performance_succession category)
+
+| Code | Name | Source Table | Date Field |
+|------|------|--------------|------------|
+| SUCCESSION_UPDATED | Succession Readiness Updated | succession_candidates | updated_at |
+| talent_review_reminder | Talent Review Reminder | - | - |
+| successor_assessment_due | Successor Assessment Due | - | - |
+| development_plan_action | Development Plan Action Required | - | - |
+
+### Workflow Templates
+
+| Code | Name | Category | Description |
+|------|------|----------|-------------|
+| SUCCESSION_READINESS_APPROVAL | Succession Readiness Assessment Approval | succession_approval | Multi-assessor readiness assessment workflow |
 
 ---
 
-## Expected Outcomes
+## Estimated Implementation Effort
 
-After implementation:
-
-1. **Database Constraint:** Status values are now DB-enforced, preventing invalid states
-2. **Development Recommendations:** Manager development suggestions are persisted and available for HR review
-3. **Status Workflow:** HR can now approve/reject nominations; members can be graduated to succession plans
-4. **Type Safety:** TypeScript interfaces reflect the actual DB schema including new field
-5. **Documentation Alignment:** The successionManual.ts metadata accurately reflects the implementation including:
-   - 6-stage status lifecycle
-   - development_notes persistence
-   - Supporting evidence table integration
+| Phase | Task Count | Files | Lines | Hours |
+|-------|------------|-------|-------|-------|
+| Phase 1 (Ch 5 Enhancement) | 4 | 4 | ~800 | 5 |
+| Phase 2 (Ch 6 Complete) | 12 | 12 | ~4,000 | 25 |
+| Phase 3 (Index Updates) | 2 | 2 | ~50 | 1 |
+| **Total** | **18** | **18** | **~4,850** | **~31 hrs** |
 
 ---
 
@@ -338,13 +376,42 @@ After implementation:
 
 Post-implementation verification:
 
-- [ ] DB migration applied successfully
-- [ ] Status constraint prevents invalid status values
-- [ ] development_notes column exists in talent_pool_members
-- [ ] MssNominateTalentPoolPage saves development recommendations
-- [ ] TalentPoolsTab shows status dropdown with appropriate actions
-- [ ] Approve/Reject options appear for 'nominated' members
-- [ ] Graduate option appears for 'active'/'approved' members
-- [ ] successionManual.ts reflects actual implementation
-- [ ] Documentation sections 5.4, 5.5, 5.7 match new behavior
+**Chapter 5 Additions:**
+- [ ] Section 5.9 documents all 4 succession reminder event types
+- [ ] Section 5.10 documents HR Hub Integration Dashboard navigation
+- [ ] Section 5.10 documents Transaction Workflow Settings for succession
+- [ ] TOC navigation works for sec-5-9 and sec-5-10
 
+**Chapter 6 Complete:**
+- [ ] All 6 core tables documented with complete field references
+- [ ] All hook functions documented (useSuccession.ts)
+- [ ] Key Positions workflow documented end-to-end
+- [ ] Succession Plans workflow documented end-to-end
+- [ ] Candidate Nomination workflow documented
+- [ ] Development Plans creation and tracking documented
+- [ ] Gap-to-IDP/Learning linking documented
+- [ ] Evidence collection documented
+- [ ] Workflow approval configuration documented
+- [ ] 10 sections follow established component pattern
+- [ ] TOC navigation anchors (sec-6-1 through sec-6-10)
+- [ ] Updated read time in successionManual.ts (120 min)
+
+---
+
+## Industry Alignment
+
+| Standard | HRplus Implementation | Documentation Section |
+|----------|----------------------|----------------------|
+| Key Position Identification | jobs.is_key_position flag | 6.2 |
+| Position Risk Assessment | key_position_risks table | 6.3 |
+| Succession Plan per Position | succession_plans table | 6.4 |
+| Multiple Candidates per Plan | succession_candidates table | 6.5 |
+| Readiness Assessment | Links to Ch 4 workflow | 6.6 |
+| Development Planning | succession_development_plans | 6.7 |
+| Gap-to-Development Linking | succession_gap_development_links + IDP/LMS | 6.8 |
+| Evidence Collection | succession_candidate_evidence | 6.9 |
+| Approval Workflows | SUCCESSION_READINESS_APPROVAL | 6.10 |
+| Notification Reminders | reminder_event_types | 5.9 |
+| HR Hub Centralization | IntegrationDashboardPage | 5.10 |
+
+This plan ensures Chapters 5 and 6 provide comprehensive, industry-aligned documentation matching the quality and depth of Chapters 2-4.
