@@ -18,13 +18,22 @@ import {
 export function WorkflowApprovalConfiguration() {
   const workflowTemplateFields: FieldDefinition[] = [
     { name: 'id', required: true, type: 'UUID', description: 'Primary key, auto-generated', validation: 'System-assigned' },
-    { name: 'company_id', required: true, type: 'UUID', description: 'Reference to company', validation: 'Must be valid company' },
-    { name: 'template_code', required: true, type: 'Text', description: 'Unique template identifier', validation: 'e.g., SUCCESSION_READINESS_APPROVAL' },
-    { name: 'template_name', required: true, type: 'Text', description: 'Human-readable template name' },
+    { name: 'company_id', required: false, type: 'UUID', description: 'Reference to company (null for global templates)' },
+    { name: 'code', required: true, type: 'Text', description: 'Unique template identifier', validation: 'e.g., SUCCESSION_READINESS_APPROVAL' },
+    { name: 'name', required: true, type: 'Text', description: 'Human-readable template name' },
     { name: 'description', required: false, type: 'Text', description: 'Template purpose and usage' },
     { name: 'category', required: true, type: 'Text', description: 'Workflow category', validation: 'succession_approval' },
     { name: 'is_active', required: true, type: 'Boolean', description: 'Whether template is enabled', defaultValue: 'true' },
-    { name: 'steps', required: true, type: 'JSONB', description: 'Array of approval step definitions' },
+    { name: 'is_global', required: false, type: 'Boolean', description: 'Whether template is available globally', defaultValue: 'false' },
+    { name: 'requires_signature', required: false, type: 'Boolean', description: 'Whether digital signature is required', defaultValue: 'false' },
+    { name: 'requires_letter', required: false, type: 'Boolean', description: 'Whether formal letter is required', defaultValue: 'false' },
+    { name: 'letter_template_id', required: false, type: 'UUID', description: 'Reference to letter template if required' },
+    { name: 'auto_terminate_hours', required: false, type: 'Integer', description: 'Hours until workflow auto-terminates' },
+    { name: 'allow_return_to_previous', required: false, type: 'Boolean', description: 'Allow returning to previous step', defaultValue: 'true' },
+    { name: 'start_date', required: false, type: 'Date', description: 'Template effective start date' },
+    { name: 'end_date', required: false, type: 'Date', description: 'Template effective end date' },
+    { name: 'department_id', required: false, type: 'UUID', description: 'Scope to specific department' },
+    { name: 'section_id', required: false, type: 'UUID', description: 'Scope to specific section' },
     { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },
     { name: 'updated_at', required: true, type: 'Timestamp', description: 'Last modification timestamp', defaultValue: 'now()' }
   ];
@@ -32,9 +41,15 @@ export function WorkflowApprovalConfiguration() {
   const transactionWorkflowFields: FieldDefinition[] = [
     { name: 'id', required: true, type: 'UUID', description: 'Primary key, auto-generated', validation: 'System-assigned' },
     { name: 'company_id', required: true, type: 'UUID', description: 'Reference to company', validation: 'Must be valid company' },
-    { name: 'transaction_type_code', required: true, type: 'Text', description: 'Transaction type code', validation: 'e.g., SUCC_READINESS_APPROVAL' },
-    { name: 'requires_workflow', required: true, type: 'Boolean', description: 'Whether workflow approval is required', defaultValue: 'false' },
-    { name: 'workflow_template_id', required: false, type: 'UUID', description: 'Reference to workflow template', validation: 'Required if requires_workflow is true' },
+    { name: 'transaction_type_id', required: true, type: 'UUID', description: 'Reference to transaction type', validation: 'Foreign key to transaction_types' },
+    { name: 'workflow_enabled', required: true, type: 'Boolean', description: 'Whether workflow approval is required', defaultValue: 'false' },
+    { name: 'workflow_template_id', required: false, type: 'UUID', description: 'Reference to workflow template', validation: 'Required if workflow_enabled is true' },
+    { name: 'requires_approval_before_effective', required: false, type: 'Boolean', description: 'Block effective date until approved', defaultValue: 'false' },
+    { name: 'auto_start_workflow', required: false, type: 'Boolean', description: 'Automatically start workflow on submit', defaultValue: 'false' },
+    { name: 'effective_date', required: false, type: 'Date', description: 'When setting becomes effective' },
+    { name: 'end_date', required: false, type: 'Date', description: 'When setting expires' },
+    { name: 'is_active', required: false, type: 'Boolean', description: 'Whether setting is active', defaultValue: 'true' },
+    { name: 'created_by', required: false, type: 'UUID', description: 'User who created the setting' },
     { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },
     { name: 'updated_at', required: true, type: 'Timestamp', description: 'Last modification timestamp', defaultValue: 'now()' }
   ];

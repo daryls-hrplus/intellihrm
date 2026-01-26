@@ -18,15 +18,15 @@ import {
 export function CandidateEvidenceCollection() {
   const candidateEvidenceFields: FieldDefinition[] = [
     { name: 'id', required: true, type: 'UUID', description: 'Primary key, auto-generated', validation: 'System-assigned' },
-    { name: 'candidate_id', required: true, type: 'UUID', description: 'Reference to succession candidate', validation: 'Must be valid candidate' },
-    { name: 'company_id', required: true, type: 'UUID', description: 'Reference to company', validation: 'Must be valid company' },
+    { name: 'candidate_id', required: false, type: 'UUID', description: 'Reference to succession candidate', validation: 'Recommended but nullable' },
+    { name: 'company_id', required: false, type: 'UUID', description: 'Reference to company', validation: 'Recommended but nullable' },
     { name: 'evidence_type', required: true, type: 'Text', description: 'Source type of the evidence', validation: 'nine_box, signal_snapshot, manual' },
     { name: 'source_snapshot_id', required: false, type: 'UUID', description: 'Reference to talent_signal_snapshots', validation: 'Required if evidence_type is signal_snapshot' },
     { name: 'source_nine_box_id', required: false, type: 'UUID', description: 'Reference to nine_box_assessments', validation: 'Required if evidence_type is nine_box' },
     { name: 'signal_summary', required: false, type: 'JSONB', description: 'Aggregated talent signal data and scores' },
     { name: 'leadership_indicators', required: false, type: 'JSONB', description: 'Leadership-specific behavioral indicators' },
     { name: 'readiness_contribution', required: false, type: 'Numeric', description: 'How this evidence contributes to readiness score', validation: '0-100' },
-    { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' }
+    { name: 'created_at', required: false, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' }
   ];
 
   const evidenceTypes = [
@@ -125,7 +125,7 @@ export function CandidateEvidenceCollection() {
   ];
 
   const businessRules: BusinessRule[] = [
-    { rule: 'Candidate required', enforcement: 'System', description: 'Evidence must be linked to a succession candidate.' },
+    { rule: 'Candidate recommended', enforcement: 'Advisory', description: 'Evidence should be linked to a succession candidate for tracking; nullable in DB.' },
     { rule: 'Evidence type required', enforcement: 'System', description: 'Each evidence record must have a type: nine_box, signal_snapshot, or manual.' },
     { rule: 'Source reference', enforcement: 'System', description: 'Nine-Box and Signal Snapshot types require the corresponding source ID.' },
     { rule: 'Auto-collection', enforcement: 'System', description: 'Nine-Box and Signal Snapshot evidence is automatically collected when assessments complete.' },
@@ -239,7 +239,21 @@ export function CandidateEvidenceCollection() {
         </CardContent>
       </Card>
 
-      {/* Evidence Summary Display */}
+      {/* Implementation Status Note */}
+      <Card className="border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20">
+        <CardContent className="pt-4">
+          <p className="text-sm text-foreground flex items-start gap-2">
+            <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <span>
+              <strong>Implementation Note:</strong> Manual evidence upload functionality is currently 
+              in development. The <code className="bg-muted mx-1 px-1 rounded text-xs">succession_candidate_evidence</code> 
+              table supports manual evidence types, but the UI form for adding manual evidence is pending 
+              implementation. Currently, evidence is automatically collected from Nine-Box Assessments 
+              (when completed) and Talent Signal Snapshots (when captured).
+            </span>
+          </p>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">

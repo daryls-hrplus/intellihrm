@@ -19,17 +19,17 @@ import {
 export function GapDevelopmentLinking() {
   const gapDevelopmentFields: FieldDefinition[] = [
     { name: 'id', required: true, type: 'UUID', description: 'Primary key, auto-generated', validation: 'System-assigned' },
-    { name: 'candidate_id', required: true, type: 'UUID', description: 'Reference to succession candidate', validation: 'Must be valid candidate' },
-    { name: 'company_id', required: true, type: 'UUID', description: 'Reference to company', validation: 'Must be valid company' },
+    { name: 'candidate_id', required: false, type: 'UUID', description: 'Reference to succession candidate', validation: 'Recommended but nullable' },
+    { name: 'company_id', required: false, type: 'UUID', description: 'Reference to company', validation: 'Recommended but nullable' },
     { name: 'gap_type', required: true, type: 'Text', description: 'Category of the development gap', validation: 'competency, experience, skill, knowledge, leadership' },
-    { name: 'gap_description', required: true, type: 'Text', description: 'Description of the gap', validation: 'Required, max 500 chars' },
-    { name: 'gap_severity', required: true, type: 'Text', description: 'Severity of the gap', defaultValue: 'medium', validation: 'low, medium, high' },
+    { name: 'gap_description', required: false, type: 'Text', description: 'Description of the gap', validation: 'Recommended, max 500 chars' },
+    { name: 'gap_severity', required: false, type: 'Text', description: 'Severity of the gap', defaultValue: 'medium', validation: 'low, medium, high' },
     { name: 'linked_idp_item_id', required: false, type: 'UUID', description: 'Reference to IDP goal item', validation: 'Must be valid IDP item' },
     { name: 'linked_learning_id', required: false, type: 'UUID', description: 'Reference to learning assignment or course', validation: 'Must be valid learning record' },
     { name: 'recommended_experience', required: false, type: 'Text', description: 'Recommended experience or assignment to close gap' },
-    { name: 'status', required: true, type: 'Text', description: 'Gap closure status', defaultValue: 'identified', validation: 'identified, in_progress, closed' },
-    { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },
-    { name: 'updated_at', required: true, type: 'Timestamp', description: 'Last modification timestamp', defaultValue: 'now()' }
+    { name: 'status', required: false, type: 'Text', description: 'Gap closure status', defaultValue: 'identified', validation: 'identified, in_progress, closed' },
+    { name: 'created_at', required: false, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },
+    { name: 'updated_at', required: false, type: 'Timestamp', description: 'Last modification timestamp', defaultValue: 'now()' }
   ];
 
   const gapTypes = [
@@ -101,9 +101,9 @@ export function GapDevelopmentLinking() {
   ];
 
   const businessRules: BusinessRule[] = [
-    { rule: 'Candidate required', enforcement: 'System', description: 'Gaps must be linked to a succession candidate.' },
+    { rule: 'Candidate recommended', enforcement: 'Advisory', description: 'Gaps should be linked to a succession candidate for tracking purposes.' },
     { rule: 'Gap type required', enforcement: 'System', description: 'Each gap must have a categorized type.' },
-    { rule: 'Description required', enforcement: 'System', description: 'Gaps must have a description for clarity.' },
+    { rule: 'Description recommended', enforcement: 'Advisory', description: 'Gaps should have a description for clarity; optional in DB.' },
     { rule: 'Optional linkages', enforcement: 'System', description: 'IDP and Learning links are optional; gaps can have neither, one, or both.' },
     { rule: 'Foreign key validation', enforcement: 'System', description: 'Linked IDP and Learning records must exist and be valid.' },
     { rule: 'Status transitions', enforcement: 'Policy', description: 'Status should progress: identified → in_progress → closed.' }
@@ -146,7 +146,23 @@ export function GapDevelopmentLinking() {
         </CardContent>
       </Card>
 
-      {/* Integration Architecture */}
+      {/* Implementation Status Note */}
+      <Card className="border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20">
+        <CardContent className="pt-4">
+          <p className="text-sm text-foreground flex items-start gap-2">
+            <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <span>
+              <strong>Implementation Note:</strong> Gap-to-Development linking in HRplus is primarily 
+              managed through the IDP (Individual Development Plan) and Learning modules. While the 
+              <code className="bg-muted mx-1 px-1 rounded text-xs">succession_gap_development_links</code> 
+              table stores the associations, the user interface for creating and managing these links 
+              is accessed via the IDP Module (link development goals to succession gaps) and Learning 
+              Module (assign courses addressing identified gaps). A dedicated Succession UI for gap 
+              management is planned for future release.
+            </span>
+          </p>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
