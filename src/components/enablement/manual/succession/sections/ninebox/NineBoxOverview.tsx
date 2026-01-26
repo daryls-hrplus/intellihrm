@@ -271,14 +271,14 @@ export function NineBoxOverview() {
           </p>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <FeatureCardGrid columns={1}>
+          <FeatureCardGrid columns={2}>
               <InfoFeatureCard
                 icon={TrendingUp}
                 title="Performance Axis Inputs"
                 description="Appraisal overall scores (50%), Goal achievement rates (30%), Competency assessment averages (20%)"
               />
             </FeatureCardGrid>
-            <FeatureCardGrid columns={1}>
+            <FeatureCardGrid columns={2}>
               <InfoFeatureCard
                 icon={Brain}
                 title="Potential Axis Inputs"
