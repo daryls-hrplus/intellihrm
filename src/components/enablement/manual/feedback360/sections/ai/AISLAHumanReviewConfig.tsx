@@ -361,7 +361,7 @@ export function AISLAHumanReviewConfig() {
             <p className="text-sm text-muted-foreground mt-1">
               Start with conservative (shorter) SLAs and gradually extend based on actual review 
               patterns. Track the percentage of reviews that are "rubber stamp" approvals vs. 
-              meaningful corrections - if >95% are unchanged, consider extending the SLA or 
+              meaningful corrections - if {'>'}95% are unchanged, consider extending the SLA or 
               reducing review requirements for that action type.
             </p>
           </div>
