@@ -257,6 +257,69 @@ export function AIBiasDetectionWarnings() {
         </div>
       </div>
 
+      {/* Fairness Metrics Dashboard */}
+      <Card>
+        <CardContent className="pt-6">
+          <h4 className="font-medium flex items-center gap-2 mb-4">
+            <Shield className="h-4 w-4 text-primary" />
+            Aggregated Fairness Metrics
+          </h4>
+          <p className="text-sm text-muted-foreground mb-4">
+            EEOC-aligned fairness monitoring tracks bias patterns across demographic groups without exposing individual data.
+          </p>
+          
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="text-left p-3 font-medium">Metric</th>
+                  <th className="text-left p-3 font-medium">Calculation</th>
+                  <th className="text-left p-3 font-medium">Target</th>
+                  <th className="text-left p-3 font-medium">Review Frequency</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                <tr>
+                  <td className="p-3 font-medium">Demographic Parity Score</td>
+                  <td className="p-3 text-muted-foreground">Bias incident rate across protected groups</td>
+                  <td className="p-3"><Badge variant="outline" className="bg-green-50 text-green-700">&lt;10% variance</Badge></td>
+                  <td className="p-3">Quarterly</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-medium">Adverse Impact Ratio</td>
+                  <td className="p-3 text-muted-foreground">Selection/warning rate ratio (4/5ths rule)</td>
+                  <td className="p-3"><Badge variant="outline" className="bg-green-50 text-green-700">≥0.80</Badge></td>
+                  <td className="p-3">Quarterly</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-medium">False Positive Rate</td>
+                  <td className="p-3 text-muted-foreground">Disputed warnings confirmed as false positive</td>
+                  <td className="p-3"><Badge variant="outline" className="bg-green-50 text-green-700">&lt;5%</Badge></td>
+                  <td className="p-3">Monthly</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-medium">Pattern Detection Coverage</td>
+                  <td className="p-3 text-muted-foreground">% of feedback analyzed for bias patterns</td>
+                  <td className="p-3"><Badge variant="outline" className="bg-green-50 text-green-700">100%</Badge></td>
+                  <td className="p-3">Per cycle</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 p-3 bg-muted rounded-lg">
+            <h5 className="text-sm font-medium mb-2">Quarterly Fairness Review Process</h5>
+            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+              <li>Generate aggregated fairness report from <code className="text-xs bg-background px-1 py-0.5 rounded">ai_governance_metrics</code></li>
+              <li>Review bias incident patterns by category and severity</li>
+              <li>Identify training needs for departments with elevated patterns</li>
+              <li>Update bias detection model if false positive rate exceeds threshold</li>
+              <li>Document findings in quarterly AI governance report</li>
+            </ol>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Measured Impact */}
       <Card>
         <CardContent className="pt-6">

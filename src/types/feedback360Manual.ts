@@ -878,7 +878,7 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
           benchmark: 'Signal routing based on cycle purpose and consent'
         }
       },
-      // Group G: AI Governance (5.12)
+      // Group G: AI Governance (5.12-5.15)
       {
         id: 'sec-5-12',
         sectionNumber: '5.12',
@@ -891,6 +891,48 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
           frequency: 'Continuous monitoring',
           timing: 'Throughout AI operations',
           benchmark: 'All AI outputs logged with model version, confidence, and decision factors'
+        }
+      },
+      {
+        id: 'sec-5-13',
+        sectionNumber: '5.13',
+        title: 'AI Incident Response Procedure',
+        description: 'AI-specific incident classification, immediate response steps, escalation matrix, root cause analysis, and post-incident review',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Incident-driven',
+          timing: 'Within 4 hours of detection',
+          benchmark: 'ISO 42001 incident management requirements'
+        }
+      },
+      {
+        id: 'sec-5-14',
+        sectionNumber: '5.14',
+        title: 'Human Review SLA Configuration',
+        description: 'Review timeframe requirements, escalation workflows, SLA breach alerting, and metrics tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Configuration-based',
+          timing: 'Pre-implementation',
+          benchmark: '24-48 hour SLA for high-risk AI actions'
+        }
+      },
+      {
+        id: 'sec-5-15',
+        sectionNumber: '5.15',
+        title: 'Model Performance Drift Monitoring',
+        description: 'Drift score calculation, threshold configuration, alerting workflows, and model version tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Continuous monitoring',
+          timing: 'Daily automated checks',
+          benchmark: 'NIST AI RMF measurement requirements'
         }
       }
     ]
