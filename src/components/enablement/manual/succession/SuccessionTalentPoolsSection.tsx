@@ -1,5 +1,14 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Clock } from 'lucide-react';
+import {
+  TalentPoolOverview,
+  TalentPoolTypes,
+  TalentPoolCreation,
+  TalentPoolMembers,
+  TalentPoolNomination,
+  TalentPoolHRReview,
+  TalentPoolEvidence,
+  TalentPoolAnalytics
+} from './sections/talentpools';
 
 export function SuccessionTalentPoolsSection() {
   return (
@@ -13,43 +22,43 @@ export function SuccessionTalentPoolsSection() {
           <div>
             <h2 className="text-2xl font-bold">5. Talent Pool Management</h2>
             <p className="text-muted-foreground">
-              Create and manage talent pools for high potentials, leadership pipeline, and critical skills
+              Create, configure, and manage talent pools including nomination workflows, 
+              HR review processes, and evidence-based decision support
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            ~45 min read
+            ~90 min read
           </span>
-          <span>Target: Admin, HR Partner</span>
+          <span>Target: Admin, HR Partner, Manager</span>
         </div>
       </section>
 
-      {/* Placeholder Sections */}
-      {['sec-5-1', 'sec-5-2', 'sec-5-3', 'sec-5-4'].map((secId, index) => {
-        const titles = [
-          '5.1 Pool Types & Purposes',
-          '5.2 Pool Creation & Configuration',
-          '5.3 Member Management',
-          '5.4 Review Packet Generation'
-        ];
-        return (
-          <section key={secId} id={secId} data-manual-anchor={secId} className="scroll-mt-32 space-y-6">
-            <div className="border-l-4 border-orange-500 pl-4">
-              <h3 className="text-xl font-semibold">{titles[index]}</h3>
-            </div>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-muted-foreground">
-                  Detailed content for this section will be populated in subsequent content iterations. 
-                  This section will cover comprehensive procedures and configuration guidance.
-                </p>
-              </CardContent>
-            </Card>
-          </section>
-        );
-      })}
+      {/* Section 5.1: Overview */}
+      <TalentPoolOverview />
+
+      {/* Section 5.2: Pool Types */}
+      <TalentPoolTypes />
+
+      {/* Section 5.3: Pool Creation */}
+      <TalentPoolCreation />
+
+      {/* Section 5.4: Member Management */}
+      <TalentPoolMembers />
+
+      {/* Section 5.5: Manager Nomination */}
+      <TalentPoolNomination />
+
+      {/* Section 5.6: HR Review */}
+      <TalentPoolHRReview />
+
+      {/* Section 5.7: Evidence-Based Decisions */}
+      <TalentPoolEvidence />
+
+      {/* Section 5.8: Analytics */}
+      <TalentPoolAnalytics />
     </div>
   );
 }
