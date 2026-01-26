@@ -494,10 +494,10 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
     id: 'part-4',
     sectionNumber: '4',
     title: 'Governance & Compliance',
-    description: 'Complete governance framework for 360 feedback: anonymity, consent, data policies, investigations, AI governance, and audit compliance',
+    description: 'Complete governance framework for 360 feedback: anonymity, consent, data policies, investigations, AI governance, regulatory compliance, and audit',
     contentLevel: 'reference',
-    estimatedReadTime: 100,
-    targetRoles: ['Admin', 'HR Partner'],
+    estimatedReadTime: 140,
+    targetRoles: ['Admin', 'HR Partner', 'DPO', 'Compliance', 'Legal'],
     subsections: [
       // Group A: Anonymity Foundation (4.1-4.2)
       {
@@ -644,6 +644,63 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
           frequency: 'Continuous + annual audit',
           timing: 'Throughout system operation',
           benchmark: 'Complete audit trail for all governance actions'
+        }
+      },
+      // Group H: Regulatory Compliance (4.11-4.14)
+      {
+        id: 'sec-4-11',
+        sectionNumber: '4.11',
+        title: 'Data Subject Rights (DSAR)',
+        description: 'GDPR Articles 15-22 compliance: access, rectification, erasure, portability, and objection rights workflows',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner', 'DPO'],
+        industryContext: {
+          frequency: 'As-needed',
+          timing: 'Within 30 days of request',
+          benchmark: 'GDPR Articles 15-22'
+        }
+      },
+      {
+        id: 'sec-4-12',
+        sectionNumber: '4.12',
+        title: 'Breach Notification Procedures',
+        description: '72-hour notification workflow, incident classification, authority reporting, and remediation tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner', 'DPO', 'Legal'],
+        industryContext: {
+          frequency: 'Incident-driven',
+          timing: 'Within 72 hours of detection',
+          benchmark: 'GDPR Article 33'
+        }
+      },
+      {
+        id: 'sec-4-13',
+        sectionNumber: '4.13',
+        title: 'Cross-Border Data Transfer',
+        description: 'Regional data residency, transfer mechanisms (SCCs, BCRs), and Caribbean/Africa compliance requirements',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'DPO', 'Legal'],
+        industryContext: {
+          frequency: 'Initial setup + changes',
+          timing: 'Pre-implementation',
+          benchmark: 'GDPR Chapter V'
+        }
+      },
+      {
+        id: 'sec-4-14',
+        sectionNumber: '4.14',
+        title: 'Data Protection Impact Assessment',
+        description: 'DPIA triggers, risk assessment methodology, DPO consultation, and approval workflows',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'DPO'],
+        industryContext: {
+          frequency: 'Annual + new processing',
+          timing: 'Before AI features enabled',
+          benchmark: 'GDPR Article 35'
         }
       }
     ]
