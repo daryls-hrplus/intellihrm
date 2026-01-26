@@ -115,24 +115,24 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 2: FOUNDATION SETUP (~60 min)
+  // PART 2: FOUNDATION SETUP (~99 min)
   // ==========================================================================
   {
     id: 'part-2',
     sectionNumber: '2',
     title: 'Foundation Setup',
-    description: 'Prerequisites, assessor types, readiness bands, availability reasons, and company-specific settings.',
+    description: 'Prerequisites, assessor types, readiness bands, indicators, forms, availability reasons, and company settings.',
     contentLevel: 'procedure',
-    estimatedReadTime: 60,
+    estimatedReadTime: 99,
     targetRoles: ['Admin', 'Consultant'],
     subsections: [
       {
         id: 'sec-2-1',
         sectionNumber: '2.1',
         title: 'Prerequisites Checklist',
-        description: 'Required configurations from Workforce, Performance, and Competency modules before succession setup',
+        description: 'Required configurations from Core Framework, Workforce, Performance, and Competency modules before succession setup',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['Admin', 'Consultant'],
         industryContext: {
           frequency: 'One-time',
@@ -144,23 +144,37 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         id: 'sec-2-2',
         sectionNumber: '2.2',
         title: 'Assessor Types Configuration',
-        description: 'Configure Manager, HR, Executive, and Skip-Level assessor roles with permissions',
+        description: 'Configure Manager, HR, Executive, and Skip-Level assessor roles with permissions and weights',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['Admin'],
         industryContext: {
           frequency: 'One-time setup',
           timing: 'Pre-implementation',
-          benchmark: 'Multi-assessor validation for objective readiness evaluation'
+          benchmark: 'Multi-assessor validation for objective readiness evaluation (SAP SuccessFactors)'
+        }
+      },
+      {
+        id: 'sec-2-2a',
+        sectionNumber: '2.2a',
+        title: 'Multi-Assessor Score Aggregation',
+        description: 'Weighted average formulas, partial assessment handling, variance detection, and calibration triggers',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'Post assessor types',
+          benchmark: 'Multi-rater consolidation following Workday patterns'
         }
       },
       {
         id: 'sec-2-3',
         sectionNumber: '2.3',
         title: 'Readiness Rating Bands',
-        description: 'Define Ready Now, 1-2 Years, 3+ Years, Developing, and Not a Successor bands with score ranges',
+        description: 'Define Ready Now, 1-3 Years, 3-5 Years, Developing, and Not a Successor bands with score ranges and strategic implications',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 10,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
           frequency: 'One-time, annual review',
@@ -171,24 +185,80 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
       {
         id: 'sec-2-4',
         sectionNumber: '2.4',
-        title: 'Availability Reasons',
-        description: 'Configure Retirement, Promotion, Resignation, Transfer, and custom availability reasons',
+        title: 'Readiness Indicators & BARS',
+        description: '8 categories, 32 default indicators with behaviorally anchored rating scales (BARS) for consistent assessment',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
+        estimatedReadTime: 18,
+        targetRoles: ['Admin', 'Consultant'],
         industryContext: {
-          frequency: 'One-time setup',
-          timing: 'Pre-implementation',
-          benchmark: 'Standardized reason codes for vacancy planning'
+          frequency: 'One-time, annual review',
+          timing: 'Post readiness bands',
+          benchmark: 'BARS methodology for objective behavioral assessment'
+        }
+      },
+      {
+        id: 'sec-2-4a',
+        sectionNumber: '2.4a',
+        title: 'Weight Normalization Rules',
+        description: 'Indicator weight normalization, skipped indicator handling, validation rules, and relative vs absolute weights',
+        contentLevel: 'reference',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'Post indicators',
+          benchmark: 'Normalized scoring for partial assessments'
         }
       },
       {
         id: 'sec-2-5',
         sectionNumber: '2.5',
-        title: 'Company-Specific Settings',
-        description: 'Multi-company configuration, inheritance rules, and regional compliance settings',
+        title: 'Readiness Forms',
+        description: 'Build readiness assessment forms using form builder, organize indicators into categories, configure staff-type-specific forms',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Per staff type',
+          timing: 'Post indicators',
+          benchmark: 'Role-appropriate assessment depth and questions'
+        }
+      },
+      {
+        id: 'sec-2-5a',
+        sectionNumber: '2.5a',
+        title: 'Staff Type Form Selection',
+        description: 'Automatic form selection algorithm, staff type hierarchy, and override capabilities',
+        contentLevel: 'reference',
+        estimatedReadTime: 5,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'Post forms',
+          benchmark: 'Role-based form assignment automation'
+        }
+      },
+      {
+        id: 'sec-2-6',
+        sectionNumber: '2.6',
+        title: 'Availability Reasons',
+        description: 'Configure planned vs unplanned departure reasons with urgency levels and notification triggers',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup',
+          timing: 'Post forms',
+          benchmark: 'Standardized reason codes for vacancy planning'
+        }
+      },
+      {
+        id: 'sec-2-7',
+        sectionNumber: '2.7',
+        title: 'Company-Specific Settings',
+        description: 'Multi-company configuration inheritance, regional compliance settings, and cross-company talent pools',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
         targetRoles: ['Admin'],
         industryContext: {
           frequency: 'Per company',
