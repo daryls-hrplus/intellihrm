@@ -524,24 +524,38 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 5: TALENT POOL MANAGEMENT (~45 min)
+  // PART 5: TALENT POOL MANAGEMENT (~90 min)
   // ==========================================================================
   {
     id: 'part-5',
     sectionNumber: '5',
     title: 'Talent Pool Management',
-    description: 'Create and manage talent pools for high potentials, leadership pipeline, and critical skills.',
+    description: 'Create, configure, and manage talent pools including nomination workflows, HR review processes, and evidence-based decision support.',
     contentLevel: 'procedure',
-    estimatedReadTime: 45,
-    targetRoles: ['Admin', 'HR Partner'],
+    estimatedReadTime: 90,
+    targetRoles: ['Admin', 'HR Partner', 'Manager'],
     subsections: [
       {
         id: 'sec-5-1',
         sectionNumber: '5.1',
-        title: 'Pool Types & Purposes',
-        description: 'Understanding High Potential, Leadership Pipeline, Critical Skills, and Emerging Talent pools',
+        title: 'Talent Pool Overview',
+        description: 'Strategic value, pool lifecycle, and cross-module integration architecture',
         contentLevel: 'concept',
         estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner', 'Manager'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'Pre-configuration',
+          benchmark: 'SHRM talent segmentation best practices'
+        }
+      },
+      {
+        id: 'sec-5-2',
+        sectionNumber: '5.2',
+        title: 'Pool Types & Classification',
+        description: 'Five pool types (High Potential, Leadership, Technical, Emerging, Critical Role) with selection criteria and color coding',
+        contentLevel: 'concept',
+        estimatedReadTime: 12,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
           frequency: 'Reference',
@@ -550,10 +564,10 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         }
       },
       {
-        id: 'sec-5-2',
-        sectionNumber: '5.2',
+        id: 'sec-5-3',
+        sectionNumber: '5.3',
         title: 'Pool Creation & Configuration',
-        description: 'Create pools with criteria, capacity limits, and automatic nomination rules',
+        description: 'Create pools with JSONB eligibility criteria, field reference, and step-by-step procedures',
         contentLevel: 'procedure',
         estimatedReadTime: 15,
         targetRoles: ['Admin'],
@@ -564,12 +578,12 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         }
       },
       {
-        id: 'sec-5-3',
-        sectionNumber: '5.3',
+        id: 'sec-5-4',
+        sectionNumber: '5.4',
         title: 'Member Management',
-        description: 'Add, review, and graduate talent pool members with development tracking',
+        description: 'Add, review, graduate, and remove talent pool members with status lifecycle',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
           frequency: 'Quarterly review',
@@ -578,17 +592,59 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         }
       },
       {
-        id: 'sec-5-4',
-        sectionNumber: '5.4',
-        title: 'Review Packet Generation',
-        description: 'Create executive review packets for talent pool calibration sessions',
+        id: 'sec-5-5',
+        sectionNumber: '5.5',
+        title: 'Manager Nomination Workflow',
+        description: 'MSS-driven talent nomination with justification requirements and notification triggers',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
+        estimatedReadTime: 15,
+        targetRoles: ['Manager'],
         industryContext: {
-          frequency: 'Per review cycle',
-          timing: 'Pre-calibration',
-          benchmark: 'Comprehensive talent dossiers for leadership review'
+          frequency: 'Per nomination',
+          timing: 'Ongoing operations',
+          benchmark: 'Manager-initiated talent identification with HR validation'
+        }
+      },
+      {
+        id: 'sec-5-6',
+        sectionNumber: '5.6',
+        title: 'HR Review & Approval',
+        description: 'Review packets, confidence indicators, bias risk assessment, and approval procedures',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per nomination',
+          timing: 'Post manager nomination',
+          benchmark: 'Evidence-based review with SLA compliance'
+        }
+      },
+      {
+        id: 'sec-5-7',
+        sectionNumber: '5.7',
+        title: 'Evidence-Based Decision Support',
+        description: 'Talent signals, evidence snapshots, signal summary calculations, and leadership indicators',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'During review',
+          benchmark: 'McKinsey evidence-based talent decisions'
+        }
+      },
+      {
+        id: 'sec-5-8',
+        sectionNumber: '5.8',
+        title: 'Pool Analytics & Reporting',
+        description: 'Pool health metrics, pipeline analytics, and review cycle recommendations',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner', 'Executive'],
+        industryContext: {
+          frequency: 'Monthly/Quarterly',
+          timing: 'Review cycles',
+          benchmark: 'Gartner talent pipeline management metrics'
         }
       }
     ]
