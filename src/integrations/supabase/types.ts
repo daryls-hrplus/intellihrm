@@ -26582,6 +26582,8 @@ export type Database = {
           nomination_window_end: string | null
           nomination_window_start: string | null
           reminder_days_before: number[] | null
+          report_acknowledgment_deadline: string | null
+          report_acknowledgment_required: boolean | null
           report_template_config: Json | null
           require_comments: boolean | null
           response_window_end: string | null
@@ -26630,6 +26632,8 @@ export type Database = {
           nomination_window_end?: string | null
           nomination_window_start?: string | null
           reminder_days_before?: number[] | null
+          report_acknowledgment_deadline?: string | null
+          report_acknowledgment_required?: boolean | null
           report_template_config?: Json | null
           require_comments?: boolean | null
           response_window_end?: string | null
@@ -26678,6 +26682,8 @@ export type Database = {
           nomination_window_end?: string | null
           nomination_window_start?: string | null
           reminder_days_before?: number[] | null
+          report_acknowledgment_deadline?: string | null
+          report_acknowledgment_required?: boolean | null
           report_template_config?: Json | null
           require_comments?: boolean | null
           response_window_end?: string | null
@@ -28178,6 +28184,107 @@ export type Database = {
           },
         ]
       }
+      feedback_generated_reports: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          cycle_id: string | null
+          data_snapshot: Json | null
+          error_message: string | null
+          file_size_bytes: number | null
+          file_url: string | null
+          generated_at: string | null
+          generated_by: string | null
+          generation_status: string
+          id: string
+          participant_id: string | null
+          report_version: number
+          template_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          cycle_id?: string | null
+          data_snapshot?: Json | null
+          error_message?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          generated_at?: string | null
+          generated_by?: string | null
+          generation_status?: string
+          id?: string
+          participant_id?: string | null
+          report_version?: number
+          template_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          cycle_id?: string | null
+          data_snapshot?: Json | null
+          error_message?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          generated_at?: string | null
+          generated_by?: string | null
+          generation_status?: string
+          id?: string
+          participant_id?: string | null
+          report_version?: number
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_generated_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_generated_reports_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_generated_reports_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_generated_reports_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_generated_reports_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_generated_reports_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_generated_reports_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_investigation_access_log: {
         Row: {
           access_justification: string | null
@@ -28416,6 +28523,124 @@ export type Database = {
             columns: ["source_cycle_id"]
             isOneToOne: false
             referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_report_distribution_log: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledgment_required: boolean | null
+          company_id: string | null
+          created_at: string | null
+          cycle_id: string | null
+          distributed_at: string | null
+          distributed_by: string | null
+          distribution_method: string
+          file_url: string | null
+          id: string
+          participant_id: string | null
+          recipient_id: string
+          recipient_type: string
+          report_format: string | null
+          template_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledgment_required?: boolean | null
+          company_id?: string | null
+          created_at?: string | null
+          cycle_id?: string | null
+          distributed_at?: string | null
+          distributed_by?: string | null
+          distribution_method: string
+          file_url?: string | null
+          id?: string
+          participant_id?: string | null
+          recipient_id: string
+          recipient_type: string
+          report_format?: string | null
+          template_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledgment_required?: boolean | null
+          company_id?: string | null
+          created_at?: string | null
+          cycle_id?: string | null
+          distributed_at?: string | null
+          distributed_by?: string | null
+          distribution_method?: string
+          file_url?: string | null
+          id?: string
+          participant_id?: string | null
+          recipient_id?: string
+          recipient_type?: string
+          report_format?: string | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_report_distribution_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_report_distribution_log_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_report_distribution_log_distributed_by_fkey"
+            columns: ["distributed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_report_distribution_log_distributed_by_fkey"
+            columns: ["distributed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_report_distribution_log_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_report_distribution_log_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_report_distribution_log_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_report_distribution_log_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_report_distribution_log_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_report_templates"
             referencedColumns: ["id"]
           },
         ]
