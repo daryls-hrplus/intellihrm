@@ -281,6 +281,20 @@ export function KeyPositionIdentification() {
             and their succession coverage status.
           </p>
 
+          {/* Technical Architecture Note */}
+          <div className="p-3 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/30 rounded-r-lg">
+            <p className="text-sm text-foreground flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Technical Note:</strong> Key positions are determined by the 
+                <code className="bg-muted mx-1 px-1 rounded text-xs">jobs.is_key_position</code> flag. 
+                The KeyPositionsTab UI shows <em>positions</em> that are linked to jobs where 
+                <code className="bg-muted mx-1 px-1 rounded text-xs">is_key_position = true</code>. 
+                Unmarking a job as key removes its associated positions from the Key Positions view.
+              </span>
+            </p>
+          </div>
+
           {/* Simulated UI */}
           <div className="border rounded-lg overflow-hidden">
             <div className="p-3 bg-muted border-b">

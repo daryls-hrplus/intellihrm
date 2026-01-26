@@ -26,7 +26,7 @@ export function CandidateNominationRanking() {
     { name: 'readiness_timeline', required: false, type: 'Text', description: 'Estimated time to readiness' },
     { name: 'strengths', required: false, type: 'Text', description: 'Candidate strengths relevant to position' },
     { name: 'development_areas', required: false, type: 'Text', description: 'Areas requiring development' },
-    { name: 'ranking', required: false, type: 'Integer', description: 'Succession priority ranking (1 = primary)', defaultValue: 'null' },
+    { name: 'ranking', required: false, type: 'Integer', description: 'Succession priority ranking (1 = primary)', defaultValue: '1' },
     { name: 'status', required: true, type: 'Text', description: 'Candidate status in the plan', defaultValue: 'active', validation: 'active, removed' },
     { name: 'notes', required: false, type: 'Text', description: 'Additional notes about the candidate' },
     { name: 'nominated_by', required: false, type: 'UUID', description: 'User who nominated the candidate' },
@@ -317,6 +317,136 @@ export function CandidateNominationRanking() {
                 </div>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Values Promotion Check */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <CheckCircle className="h-5 w-5 text-primary" />
+            Values Promotion Check
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            The ValuesPromotionCheck component validates candidates against company values 
+            before promotion decisions are finalized.
+          </p>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="p-3 border rounded-lg">
+              <h5 className="font-medium text-sm mb-2">Data Source</h5>
+              <p className="text-xs text-muted-foreground">
+                Queries <code className="bg-muted px-1 rounded">skills_competencies</code> where 
+                type='VALUE' and <code className="bg-muted px-1 rounded">appraisal_capability_scores</code> 
+                for ratings.
+              </p>
+            </div>
+            <div className="p-3 border rounded-lg">
+              <h5 className="font-medium text-sm mb-2">Promotion Criteria</h5>
+              <p className="text-xs text-muted-foreground">
+                Values with <code className="bg-muted px-1 rounded">is_promotion_factor=true</code> 
+                must have rating ≥3 to meet promotion criteria.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3 border rounded-lg">
+            <h5 className="font-medium text-sm mb-2">Display Modes</h5>
+            <div className="flex gap-4 items-center">
+              <Badge className="bg-emerald-100 text-emerald-800">Values OK</Badge>
+              <span className="text-xs text-muted-foreground">or</span>
+              <Badge className="bg-amber-100 text-amber-800">2/3 Values</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Compact mode shows badge; full mode shows detailed card with rating breakdown.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Leadership Signals Display */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Star className="h-5 w-5 text-primary" />
+            Leadership Signals Display
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            The SuccessorProfileLeadershipSignals component displays leadership-category 
+            talent signals for succession candidates.
+          </p>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="p-3 border rounded-lg">
+              <h5 className="font-medium text-sm mb-2">Data Source</h5>
+              <p className="text-xs text-muted-foreground">
+                <code className="bg-muted px-1 rounded">talent_signal_snapshots</code> table 
+                filtered by <code className="bg-muted px-1 rounded">signal_category = 'leadership'</code>
+              </p>
+            </div>
+            <div className="p-3 border rounded-lg">
+              <h5 className="font-medium text-sm mb-2">Signal Metrics</h5>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                <li>• Score: 1-5 scale</li>
+                <li>• Confidence: percentage</li>
+                <li>• Trend: up/down/stable</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="p-3 border rounded-lg">
+            <h5 className="font-medium text-sm mb-2">Display Modes</h5>
+            <p className="text-xs text-muted-foreground">
+              <strong>Compact:</strong> Top 3 signals with tooltips | 
+              <strong> Full:</strong> Up to 5 signals with progress bars
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Candidate Signal Comparison */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ArrowUpDown className="h-5 w-5 text-primary" />
+            Candidate Signal Comparison
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            The CandidateSignalComparison component enables side-by-side comparison 
+            of talent signals across multiple candidates.
+          </p>
+
+          <div className="p-3 border rounded-lg">
+            <h5 className="font-medium text-sm mb-2">Availability</h5>
+            <p className="text-xs text-muted-foreground">
+              Appears when 2 or more candidates exist in a succession plan. Accessible 
+              via the comparison panel in the Candidates tab.
+            </p>
+          </div>
+
+          <div className="p-3 border rounded-lg">
+            <h5 className="font-medium text-sm mb-2">Usage Context</h5>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>• Succession committee meetings</li>
+              <li>• Calibration discussions</li>
+              <li>• Development prioritization decisions</li>
+            </ul>
+          </div>
+
+          <div className="p-3 border rounded-lg">
+            <h5 className="font-medium text-sm mb-2">Features</h5>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>• Expandable comparison panel</li>
+              <li>• Side-by-side signal visualization</li>
+              <li>• Highlight gaps between candidates</li>
+            </ul>
           </div>
         </CardContent>
       </Card>
