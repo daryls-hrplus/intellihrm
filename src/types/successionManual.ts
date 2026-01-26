@@ -270,25 +270,25 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 3: NINE-BOX ASSESSMENT CONFIGURATION (~90 min)
+  // PART 3: NINE-BOX ASSESSMENT CONFIGURATION (~140 min)
   // ==========================================================================
   {
     id: 'part-3',
     sectionNumber: '3',
     title: 'Nine-Box Assessment Configuration',
-    description: 'Complete Nine-Box grid setup including rating sources, signal mappings, axis configuration, and label customization.',
+    description: 'Complete Nine-Box grid setup including rating sources, signal mappings, axis configuration, quadrant labels, assessment workflows, and evidence audit trails.',
     contentLevel: 'procedure',
-    estimatedReadTime: 90,
+    estimatedReadTime: 140,
     targetRoles: ['Admin', 'Consultant'],
     subsections: [
       {
         id: 'sec-3-1',
         sectionNumber: '3.1',
         title: 'Nine-Box Model Overview',
-        description: 'Performance vs. Potential matrix theory, box definitions, and strategic implications',
+        description: 'McKinsey 9-Box theory, strategic value, axis definitions, quadrant implications, and cross-module integration architecture',
         contentLevel: 'concept',
-        estimatedReadTime: 15,
-        targetRoles: ['Admin', 'HR Partner'],
+        estimatedReadTime: 20,
+        targetRoles: ['Admin', 'HR Partner', 'Consultant'],
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-configuration',
@@ -299,37 +299,37 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         id: 'sec-3-2',
         sectionNumber: '3.2',
         title: 'Rating Sources Configuration',
-        description: 'Configure appraisal scores, goal achievement, 360 feedback, and custom sources as inputs',
+        description: 'Configure nine_box_rating_sources table: axis assignment, source types, weights, priority ordering, and default seeds',
         contentLevel: 'procedure',
-        estimatedReadTime: 20,
+        estimatedReadTime: 25,
         targetRoles: ['Admin', 'Consultant'],
         industryContext: {
           frequency: 'One-time, annual review',
           timing: 'Post foundation setup',
-          benchmark: 'Multi-source input for objective assessment'
+          benchmark: 'Multi-source input for objective assessment (SAP SuccessFactors pattern)'
         }
       },
       {
         id: 'sec-3-3',
         sectionNumber: '3.3',
         title: 'Signal Mappings',
-        description: 'Map performance signals to Nine-Box axes with weighted calculations',
+        description: 'Configure nine_box_signal_mappings: talent signal integration, contributes_to axis, bias risk adjustment, and minimum confidence thresholds',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 20,
         targetRoles: ['Admin', 'Consultant'],
         industryContext: {
           frequency: 'One-time, optimization quarterly',
           timing: 'Post rating sources',
-          benchmark: 'Signal-to-axis mapping for automated placement'
+          benchmark: 'Signal-to-axis mapping with bias detection (Workday pattern)'
         }
       },
       {
         id: 'sec-3-4',
         sectionNumber: '3.4',
         title: 'Box Labels & Descriptions',
-        description: 'Customize 9 box labels, descriptions, and recommended actions per company',
+        description: 'Configure nine_box_indicator_configs: 9 quadrant labels, custom terminology, color coding, suggested actions, and initialize defaults workflow',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 20,
         targetRoles: ['Admin'],
         industryContext: {
           frequency: 'One-time, annual review',
@@ -340,11 +340,11 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
       {
         id: 'sec-3-5',
         sectionNumber: '3.5',
-        title: 'Performance Axis Sources',
-        description: 'Configure performance axis inputs: appraisal ratings, goal completion, KPI achievement',
+        title: 'Performance Axis Configuration',
+        description: 'Performance axis formula: appraisal (50%), goals (30%), competency (20%), score normalization, and rating conversion thresholds',
         contentLevel: 'procedure',
         estimatedReadTime: 15,
-        targetRoles: ['Admin'],
+        targetRoles: ['Admin', 'Consultant'],
         industryContext: {
           frequency: 'One-time',
           timing: 'Post rating sources',
@@ -354,15 +354,43 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
       {
         id: 'sec-3-6',
         sectionNumber: '3.6',
-        title: 'Potential Axis Sources',
-        description: 'Configure potential axis inputs: learning agility, leadership assessment, career aspirations',
+        title: 'Potential Axis Configuration',
+        description: 'Potential axis formula: assessment (40%), leadership signals (40%), values (20%), learning agility indicators, and bias adjustment',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'Consultant'],
         industryContext: {
           frequency: 'One-time',
           timing: 'Post performance axis',
           benchmark: 'Potential = Future capability and growth capacity'
+        }
+      },
+      {
+        id: 'sec-3-7',
+        sectionNumber: '3.7',
+        title: 'Nine-Box Assessment Workflow',
+        description: 'Configure nine_box_assessments: assessment lifecycle, is_current flag behavior, AI-suggested ratings, override workflow, and historical retention',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per assessment cycle',
+          timing: 'Post configuration',
+          benchmark: 'Current vs historical assessment tracking (SAP SuccessFactors pattern)'
+        }
+      },
+      {
+        id: 'sec-3-8',
+        sectionNumber: '3.8',
+        title: 'Evidence & Audit Trail',
+        description: 'Configure nine_box_evidence_sources: evidence capture, confidence scoring, contribution summaries, SOC 2 compliance, and audit requirements',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Automatic per assessment',
+          timing: 'Post assessment workflow',
+          benchmark: 'Evidence-based ratings with full audit trail (SOC 2 compliance)'
         }
       }
     ]
