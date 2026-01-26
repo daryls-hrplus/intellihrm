@@ -5,6 +5,7 @@ export interface Step {
   title: string;
   description: string;
   substeps?: string[];
+  notes?: string[];
   expectedResult?: string;
   screenshot?: ReactNode;
 }
@@ -41,6 +42,17 @@ export function StepByStep({ steps, title = 'Step-by-Step Procedure' }: StepBySt
                     <li key={subIndex} className="text-sm text-muted-foreground flex items-start gap-2">
                       <span className="text-muted-foreground/60">•</span>
                       {substep}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              
+              {step.notes && step.notes.length > 0 && (
+                <ul className="mt-2 space-y-1 pl-4">
+                  {step.notes.map((note, noteIndex) => (
+                    <li key={noteIndex} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <span className="text-primary/70">→</span>
+                      {note}
                     </li>
                   ))}
                 </ul>
