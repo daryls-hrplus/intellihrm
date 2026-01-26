@@ -30,24 +30,24 @@ export interface SuccessionGlossaryTerm {
 
 export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   // ==========================================================================
-  // PART 1: SYSTEM ARCHITECTURE & OVERVIEW (~40 min)
+  // PART 1: SYSTEM ARCHITECTURE & OVERVIEW (~62 min)
   // ==========================================================================
   {
     id: 'part-1',
     sectionNumber: '1',
     title: 'System Architecture & Overview',
-    description: 'Introduction to succession planning, business value, persona journeys, and complete data architecture covering 29+ database tables.',
+    description: 'Introduction to succession planning, business value, core concepts, persona journeys, and complete data architecture covering 29+ database tables.',
     contentLevel: 'overview',
-    estimatedReadTime: 40,
+    estimatedReadTime: 62,
     targetRoles: ['Admin', 'Consultant', 'HR Partner'],
     subsections: [
       {
         id: 'sec-1-1',
         sectionNumber: '1.1',
         title: 'Introduction & Business Value',
-        description: 'Strategic importance of succession planning, ROI metrics, and industry benchmarks',
+        description: 'Executive summary, strategic value proposition, document scope, learning objectives, and document conventions',
         contentLevel: 'overview',
-        estimatedReadTime: 10,
+        estimatedReadTime: 15,
         targetRoles: ['Admin', 'Consultant', 'HR Partner'],
         industryContext: {
           frequency: 'Reference',
@@ -58,10 +58,24 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
       {
         id: 'sec-1-2',
         sectionNumber: '1.2',
-        title: 'User Personas & Access Rights',
-        description: 'HR Admin, Manager, Executive, and Employee persona journeys with role-based access matrix',
+        title: 'Core Concepts & Terminology',
+        description: 'Nine-Box model theory, readiness assessment model, scoring methodology, 40+ key terms, and lifecycle states',
         contentLevel: 'concept',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'Consultant', 'HR Partner'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'Pre-implementation',
+          benchmark: 'McKinsey 9-Box talent matrix methodology'
+        }
+      },
+      {
+        id: 'sec-1-3',
+        sectionNumber: '1.3',
+        title: 'User Personas & Journeys',
+        description: 'HR Admin, Manager, Executive, and Employee persona journeys with step-by-step tables and role-based access matrix',
+        contentLevel: 'concept',
+        estimatedReadTime: 12,
         targetRoles: ['Admin', 'Consultant'],
         industryContext: {
           frequency: 'Reference',
@@ -70,10 +84,10 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         }
       },
       {
-        id: 'sec-1-3',
-        sectionNumber: '1.3',
+        id: 'sec-1-4',
+        sectionNumber: '1.4',
         title: 'Database Architecture',
-        description: 'Complete data model with 29+ tables across Nine-Box, Talent Pools, Succession Plans, Readiness, Career, and Mentorship domains',
+        description: 'Entity relationship diagram, 29 table specifications across 7 domains with key fields and relationships',
         contentLevel: 'reference',
         estimatedReadTime: 15,
         targetRoles: ['Admin', 'Consultant'],
@@ -84,12 +98,12 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         }
       },
       {
-        id: 'sec-1-4',
-        sectionNumber: '1.4',
-        title: 'Module Dependencies',
-        description: 'Integration points with Performance, Workforce, Learning, Compensation, and 360 Feedback modules',
+        id: 'sec-1-5',
+        sectionNumber: '1.5',
+        title: 'Module Dependencies & Calendar',
+        description: 'Data flow architecture, prerequisites checklist, integration timing, and annual succession planning calendar',
         contentLevel: 'concept',
-        estimatedReadTime: 5,
+        estimatedReadTime: 8,
         targetRoles: ['Admin', 'Consultant'],
         industryContext: {
           frequency: 'Reference',
