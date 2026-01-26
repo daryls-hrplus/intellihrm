@@ -121,13 +121,15 @@ const STATUS_TRANSITIONS = [
   { from: 'Released', to: 'Closed', requirements: 'All audiences notified, integrations synced, retention policy set' }
 ];
 
-const FIELD_REFERENCES = [
-  { field: 'status', table: 'feedback_360_cycles', description: 'Current lifecycle state controlling available actions' },
-  { field: 'activated_at', table: 'feedback_360_cycles', description: 'Timestamp when cycle moved from draft to nomination' },
-  { field: 'signal_processing_status', table: 'feedback_360_cycles', description: 'AI processing state: pending, processing, completed, failed' },
-  { field: 'rater_count', table: 'feedback_360_participants', description: 'Number of assigned raters across all categories' },
-  { field: 'nominations_approved_at', table: 'feedback_360_participants', description: 'When manager approved participant rater nominations' },
-  { field: 'is_locked', table: 'feedback_360_cycles', description: 'Prevents further modifications when true' }
+import { FieldDefinition } from '../../../components/FieldReferenceTable';
+
+const FIELD_REFERENCES: FieldDefinition[] = [
+  { name: 'feedback_360_cycles.status', required: true, type: 'enum', description: 'Current lifecycle state controlling available actions' },
+  { name: 'feedback_360_cycles.activated_at', required: false, type: 'timestamp', description: 'Timestamp when cycle moved from draft to nomination' },
+  { name: 'feedback_360_cycles.signal_processing_status', required: true, type: 'enum', description: 'AI processing state: pending, processing, completed, failed' },
+  { name: 'feedback_360_participants.rater_count', required: false, type: 'integer', description: 'Number of assigned raters across all categories' },
+  { name: 'feedback_360_participants.nominations_approved_at', required: false, type: 'timestamp', description: 'When manager approved participant rater nominations' },
+  { name: 'feedback_360_cycles.is_locked', required: true, type: 'boolean', description: 'Prevents further modifications when true' }
 ];
 
 export function F360CycleManagementIssues() {
