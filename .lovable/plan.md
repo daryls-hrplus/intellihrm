@@ -1,222 +1,384 @@
 
-# Update Succession Manual Types for Chapter 2
+# Chapter 2 Documentation vs. Schema/UI Audit - Gap Analysis & Remediation Plan
 
-## Overview
+## Executive Summary
 
-Update `src/types/successionManual.ts` to reflect the newly implemented 10-section Chapter 2 structure, ensuring TOC navigation and section metadata accurately match the modular components.
-
----
-
-## Current State vs. Target State
-
-| Attribute | Current | Target |
-|-----------|---------|--------|
-| Read Time | 60 min | 99 min |
-| Subsections | 5 | 10 |
-| Description | Basic | Comprehensive |
-
-### Current Subsections (5)
-- 2.1 Prerequisites Checklist (10 min)
-- 2.2 Assessor Types Configuration (10 min)
-- 2.3 Readiness Rating Bands (15 min)
-- 2.4 Availability Reasons (10 min)
-- 2.5 Company-Specific Settings (15 min)
-
-### Target Subsections (10)
-- 2.1 Prerequisites Checklist (12 min)
-- 2.2 Assessor Types Configuration (12 min)
-- **2.2a Multi-Assessor Score Aggregation (8 min)** - NEW
-- 2.3 Readiness Rating Bands (10 min)
-- 2.4 Readiness Indicators & BARS (18 min) - EXPANDED
-- **2.4a Weight Normalization Rules (6 min)** - NEW
-- 2.5 Readiness Forms (10 min) - REFOCUSED
-- **2.5a Staff Type Form Selection (5 min)** - NEW
-- 2.6 Availability Reasons (8 min) - RENUMBERED
-- 2.7 Company-Specific Settings (10 min) - RENUMBERED
+This audit compares the Chapter 2 (Foundation Setup) documentation against the actual database schema in `src/integrations/supabase/types.ts`, the hooks in `src/hooks/succession/`, and UI components in `src/components/succession/config/`. **35 gaps identified** across 6 tables, requiring updates to both documentation and code.
 
 ---
 
-## Implementation Details
+## Audit Methodology
 
-### File to Modify
-`src/types/successionManual.ts` (Lines 117-200)
+| Source | Purpose |
+|--------|---------|
+| Documentation Files | `src/components/enablement/manual/succession/sections/foundation/*.tsx` |
+| Database Schema | `src/integrations/supabase/types.ts` (lines 60760-68875) |
+| Hooks | `src/hooks/succession/use*.ts` |
+| UI Config Components | `src/components/succession/config/*.tsx` |
 
-### Changes Required
+---
 
-**1. Update Part 2 Header (Line 118)**
-```typescript
-// PART 2: FOUNDATION SETUP (~99 min)
+## Gap Analysis by Table
+
+### 1. succession_assessor_types
+
+#### Documentation Claims vs. Actual Schema
+
+| Field | Documented | In DB Schema | In Hook | In UI | Gap Type |
+|-------|------------|--------------|---------|-------|----------|
+| `id` | Yes | Yes | Yes | N/A | None |
+| `company_id` | Yes | Yes | Yes | N/A | None |
+| `type_code` | Yes | Yes | Yes | Yes | None |
+| `type_label` | Yes | Yes | Yes | Yes | None |
+| `is_required` | Yes | Yes | Yes | Yes | None |
+| `is_enabled` | Yes (as toggle action) | Yes | Yes | N/A | None |
+| `applies_to_staff_types` | Yes | Yes | Yes | N/A | None |
+| `sort_order` | Yes | Yes | Yes | N/A | None |
+| `weight_percentage` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `can_view_other_assessments` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `can_override_score` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `description` | **NOT DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **ASPIRATIONAL** |
+| `created_at` | Yes | Yes | Yes | N/A | None |
+| `updated_at` | NOT DOCUMENTED | **NOT IN DB** | N/A | N/A | None |
+
+**Critical Gap:** Documentation describes `weight_percentage`, `can_view_other_assessments`, and `can_override_score` fields that **DO NOT EXIST** in the database schema.
+
+**Seed Defaults Mismatch:**
+- Documentation: 4 defaults (manager, hr, executive, skip_level)
+- Hook code: 3 defaults (manager, hr, executive) - missing `skip_level`
+
+---
+
+### 2. readiness_rating_bands
+
+#### Documentation Claims vs. Actual Schema
+
+| Field | Documented | In DB Schema | In Hook | In UI | Gap Type |
+|-------|------------|--------------|---------|-------|----------|
+| `id` | NOT DOCUMENTED | Yes | Yes | N/A | **MISSING DOC** |
+| `company_id` | NOT DOCUMENTED | Yes | Yes | N/A | **MISSING DOC** |
+| `band_code` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `rating_label` | Yes | Yes | Yes | Yes | None |
+| `min_percentage` | Yes | Yes | Yes | Yes | None |
+| `max_percentage` | Yes | Yes | Yes | Yes | None |
+| `color_code` | Yes | Yes | Yes | Yes | None |
+| `sort_order` | NOT DOCUMENTED | Yes | Yes | Yes | **MISSING DOC** |
+| `strategic_implication` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `is_successor_eligible` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `created_at` | NOT DOCUMENTED | Yes | Yes | N/A | **MISSING DOC** |
+
+**Critical Gap:** Documentation describes `band_code`, `strategic_implication`, and `is_successor_eligible` fields that **DO NOT EXIST** in the database.
+
+---
+
+### 3. readiness_assessment_indicators
+
+#### Documentation Claims vs. Actual Schema
+
+| Field | Documented | In DB Schema | In Hook | Gap Type |
+|-------|------------|--------------|---------|----------|
+| `id` | NOT DOCUMENTED | Yes | Yes | **MISSING DOC** |
+| `company_id` | NOT DOCUMENTED | **NOT IN DB** | N/A | None (correct) |
+| `form_id` | NOT DOCUMENTED | Yes | Yes | **MISSING DOC** |
+| `indicator_name` | Yes | Yes | Yes | None |
+| `category_id` | Yes | Yes | Yes | None |
+| `weight_percent` | Yes | Yes | Yes | None |
+| `rating_scale_max` | Yes | Yes | Yes | None |
+| `assessor_type` | NOT DOCUMENTED | Yes | Yes | **MISSING DOC** |
+| `scoring_guide_1` | **DOCUMENTED** | **NOT IN DB** (named `scoring_guide_low`) | N/A | **NAMING MISMATCH** |
+| `scoring_guide_3` | **DOCUMENTED** | **NOT IN DB** (named `scoring_guide_mid`) | N/A | **NAMING MISMATCH** |
+| `scoring_guide_5` | **DOCUMENTED** | **NOT IN DB** (named `scoring_guide_high`) | N/A | **NAMING MISMATCH** |
+| `indicator_code` | **DOCUMENTED** | **NOT IN DB** | N/A | **DOC ONLY** |
+| `description` | **DOCUMENTED** | **NOT IN DB** | N/A | **DOC ONLY** |
+| `is_required` | **DOCUMENTED** | **NOT IN DB** | N/A | **DOC ONLY** |
+| `is_active` | **DOCUMENTED** | **NOT IN DB** | N/A | **DOC ONLY** |
+| `linked_competency_id` | **DOCUMENTED** | **NOT IN DB** | N/A | **DOC ONLY** |
+| `sort_order` | NOT DOCUMENTED | Yes | N/A | **MISSING DOC** |
+| `created_at` | NOT DOCUMENTED | Yes | N/A | **MISSING DOC** |
+
+**Critical Gap:** BARS scoring guide fields use different naming convention (`scoring_guide_1/3/5` vs `scoring_guide_low/mid/high`).
+
+---
+
+### 4. readiness_assessment_categories
+
+#### Documentation Claims vs. Actual Schema
+
+| Field | Documented | In DB Schema | Gap Type |
+|-------|------------|--------------|----------|
+| `id` | NOT DOCUMENTED | Yes | **MISSING DOC** |
+| `company_id` | NOT DOCUMENTED | Yes | **MISSING DOC** |
+| `form_id` | NOT DOCUMENTED | Yes | **MISSING DOC** |
+| `category_name` | Yes (implied) | Yes | None |
+| `category_code` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `description` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `weight_percent` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `icon_name` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `color_code` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `sort_order` | Yes | Yes | None |
+| `created_at` | NOT DOCUMENTED | Yes | **MISSING DOC** |
+
+---
+
+### 5. succession_availability_reasons
+
+#### Documentation Claims vs. Actual Schema
+
+| Field | Documented | In DB Schema | In Hook | In UI | Gap Type |
+|-------|------------|--------------|---------|-------|----------|
+| `id` | NOT DOCUMENTED | Yes | Yes | N/A | **MISSING DOC** |
+| `company_id` | NOT DOCUMENTED | Yes | Yes | N/A | **MISSING DOC** |
+| `code` | Yes | Yes | Yes | Yes | None |
+| `label` | **DOCUMENTED** | **NOT IN DB** (field is `description`) | N/A | N/A | **NAMING MISMATCH** |
+| `description` | NOT DOCUMENTED AS FIELD | Yes | Yes | Yes | **NAMING MISMATCH** |
+| `is_active` | Yes | Yes | Yes | Yes | None |
+| `sort_order` | Yes | Yes | Yes | Yes | None |
+| `category` | **DOCUMENTED** (planned/unplanned) | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `typical_notice_months` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `urgency_level` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `triggers_notification` | **DOCUMENTED** | **NOT IN DB** | **NOT IN HOOK** | **NOT IN UI** | **DOC ONLY** |
+| `created_at` | NOT DOCUMENTED | Yes | Yes | N/A | **MISSING DOC** |
+
+**Critical Gap:** Documentation describes a rich availability reasons model with `category`, `urgency_level`, `typical_notice_months`, and `triggers_notification` that **DO NOT EXIST** in the database. The actual table is much simpler.
+
+**Seed Defaults Mismatch:**
+- Documentation: 8 defaults (RET, PRO, TRF, RES, TRM, MED, REL, REO)
+- Hook code: 6 defaults (RET, PRO, RES, TRM, REL, REO) - missing `TRF` and `MED`
+
+---
+
+### 6. readiness_assessment_forms
+
+#### Documentation Claims vs. Actual Schema
+
+| Field | Documented | In DB Schema | Gap Type |
+|-------|------------|--------------|----------|
+| `id` | NOT DOCUMENTED | Yes | **MISSING DOC** |
+| `company_id` | NOT DOCUMENTED | Yes | **MISSING DOC** |
+| `name` | Yes | Yes | None |
+| `code` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `description` | Yes | Yes | None |
+| `staff_type_id` | **DOCUMENTED** | **NOT IN DB** (field is `staff_type` as Text) | **TYPE MISMATCH** |
+| `version` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `is_active` | Yes | Yes | None |
+| `is_template` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `total_indicators` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `total_weight` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `created_by` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `created_at` | Yes | Yes | None |
+| `published_at` | **DOCUMENTED** | **NOT IN DB** | **DOC ONLY** |
+| `updated_at` | NOT DOCUMENTED | Yes | **MISSING DOC** |
+
+---
+
+## Gap Summary
+
+### Direction 1: Documentation Describes Features NOT in Code/DB
+
+| Count | Table | Fields |
+|-------|-------|--------|
+| 3 | succession_assessor_types | weight_percentage, can_view_other_assessments, can_override_score |
+| 3 | readiness_rating_bands | band_code, strategic_implication, is_successor_eligible |
+| 5 | readiness_assessment_indicators | indicator_code, description, is_required, is_active, linked_competency_id |
+| 5 | readiness_assessment_categories | category_code, description, weight_percent, icon_name, color_code |
+| 4 | succession_availability_reasons | category, typical_notice_months, urgency_level, triggers_notification |
+| 7 | readiness_assessment_forms | code, version, is_template, total_indicators, total_weight, created_by, published_at |
+| **27** | **TOTAL** | **Fields documented but not implemented** |
+
+### Direction 2: Code/DB Has Features NOT in Documentation
+
+| Count | Table | Fields |
+|-------|-------|--------|
+| 0 | succession_assessor_types | (well documented) |
+| 3 | readiness_rating_bands | id, company_id, created_at |
+| 4 | readiness_assessment_indicators | id, form_id, assessor_type, sort_order, created_at |
+| 3 | readiness_assessment_categories | id, company_id, form_id, created_at |
+| 2 | succession_availability_reasons | id, company_id, created_at |
+| 2 | readiness_assessment_forms | id, company_id, updated_at |
+| **14** | **TOTAL** | **Fields in DB not documented** |
+
+### Direction 3: Naming Mismatches
+
+| Table | Doc Name | Actual DB Name |
+|-------|----------|----------------|
+| readiness_assessment_indicators | scoring_guide_1 | scoring_guide_low |
+| readiness_assessment_indicators | scoring_guide_3 | scoring_guide_mid |
+| readiness_assessment_indicators | scoring_guide_5 | scoring_guide_high |
+| succession_availability_reasons | label | description |
+| readiness_assessment_forms | staff_type_id (UUID) | staff_type (Text) |
+
+### Direction 4: Seed Data Mismatches
+
+| Table | Doc Count | Hook Count | Missing in Hook |
+|-------|-----------|------------|-----------------|
+| succession_assessor_types | 4 | 3 | skip_level |
+| succession_availability_reasons | 8 | 6 | TRF, MED |
+
+---
+
+## Remediation Plan
+
+### Phase 1: Critical Decisions (Requires Product Decision)
+
+Before making changes, the following strategic decisions must be made:
+
+**Decision 1:** For features documented but not in DB, should we:
+- **Option A:** Add columns to DB to match documentation (implement the feature)
+- **Option B:** Remove from documentation (descope the feature)
+
+**Recommendation:** Prioritize based on enterprise value:
+- **IMPLEMENT (High Value):** 
+  - `succession_assessor_types.weight_percentage` (core to multi-assessor aggregation)
+  - `succession_availability_reasons.urgency_level` and `category` (core to urgency-based planning)
+  - `readiness_rating_bands.is_successor_eligible` (core to successor eligibility)
+- **DESCOPE (Lower Priority):**
+  - `can_view_other_assessments`, `can_override_score` (advanced calibration features)
+  - `readiness_assessment_forms.version`, `published_at` (form versioning)
+
+---
+
+### Phase 2: Documentation Corrections (No DB Changes)
+
+**2.1 Fix Field Naming in Documentation**
+
+| File | Current | Correct |
+|------|---------|---------|
+| FoundationReadinessIndicators.tsx | `scoring_guide_1`, `scoring_guide_3`, `scoring_guide_5` | `scoring_guide_low`, `scoring_guide_mid`, `scoring_guide_high` |
+| FoundationAvailabilityReasons.tsx | `label` field | `description` field |
+| FoundationReadinessForms.tsx | `staff_type_id (UUID)` | `staff_type (Text)` |
+
+**2.2 Add Missing Documented Fields**
+
+Add to documentation tables:
+- `id`, `company_id`, `created_at` for all tables
+- `assessor_type`, `sort_order` for indicators
+- `form_id` for categories
+
+**2.3 Remove/Mark Aspirational Features**
+
+Add "Future Enhancement" badge to documented features not yet implemented:
+- `can_view_other_assessments`, `can_override_score`
+- `band_code`, `strategic_implication`
+- `indicator_code`, `linked_competency_id`
+- Form versioning fields
+
+---
+
+### Phase 3: Database Schema Enhancements
+
+**3.1 High-Priority Column Additions**
+
+```sql
+-- Add weight_percentage to assessor types
+ALTER TABLE succession_assessor_types 
+ADD COLUMN weight_percentage numeric(5,2) DEFAULT NULL;
+
+-- Add urgency and category to availability reasons
+ALTER TABLE succession_availability_reasons 
+ADD COLUMN category text DEFAULT 'planned' CHECK (category IN ('planned', 'unplanned', 'either')),
+ADD COLUMN urgency_level text DEFAULT 'medium' CHECK (urgency_level IN ('low', 'medium', 'high', 'critical')),
+ADD COLUMN typical_notice_months integer DEFAULT NULL;
+
+-- Add successor eligibility to readiness bands
+ALTER TABLE readiness_rating_bands 
+ADD COLUMN is_successor_eligible boolean DEFAULT true;
 ```
 
-**2. Update Part 2 Object Properties (Lines 121-127)**
-- Change `estimatedReadTime` from 60 to 99
-- Update `description` to include new sections
+**3.2 Hook Updates**
 
-**3. Replace Subsections Array (Lines 128-199)**
-Add 10 subsections with proper IDs matching scroll anchors:
+Update `useSuccessionAssessorTypes.ts`:
+- Add `weight_percentage` to interface and CRUD operations
+- Add `skip_level` to default seeds
 
-```typescript
-subsections: [
-  {
-    id: 'sec-2-1',
-    sectionNumber: '2.1',
-    title: 'Prerequisites Checklist',
-    description: 'Required configurations from Core Framework, Workforce, Performance, and Competency modules before succession setup',
-    contentLevel: 'procedure',
-    estimatedReadTime: 12,
-    targetRoles: ['Admin', 'Consultant'],
-    industryContext: {
-      frequency: 'One-time',
-      timing: 'Pre-implementation',
-      benchmark: 'Job architecture, competency framework, and org structure must be in place'
-    }
-  },
-  {
-    id: 'sec-2-2',
-    sectionNumber: '2.2',
-    title: 'Assessor Types Configuration',
-    description: 'Configure Manager, HR, Executive, and Skip-Level assessor roles with permissions and weights',
-    contentLevel: 'procedure',
-    estimatedReadTime: 12,
-    targetRoles: ['Admin'],
-    industryContext: {
-      frequency: 'One-time setup',
-      timing: 'Pre-implementation',
-      benchmark: 'Multi-assessor validation for objective readiness evaluation (SAP SuccessFactors)'
-    }
-  },
-  {
-    id: 'sec-2-2a',
-    sectionNumber: '2.2a',
-    title: 'Multi-Assessor Score Aggregation',
-    description: 'Weighted average formulas, partial assessment handling, variance detection, and calibration triggers',
-    contentLevel: 'reference',
-    estimatedReadTime: 8,
-    targetRoles: ['Admin', 'Consultant'],
-    industryContext: {
-      frequency: 'Reference',
-      timing: 'Post assessor types',
-      benchmark: 'Multi-rater consolidation following Workday patterns'
-    }
-  },
-  {
-    id: 'sec-2-3',
-    sectionNumber: '2.3',
-    title: 'Readiness Rating Bands',
-    description: 'Define Ready Now, 1-3 Years, 3-5 Years, Developing, and Not a Successor bands with score ranges and strategic implications',
-    contentLevel: 'procedure',
-    estimatedReadTime: 10,
-    targetRoles: ['Admin', 'HR Partner'],
-    industryContext: {
-      frequency: 'One-time, annual review',
-      timing: 'Pre-implementation',
-      benchmark: '5-band model aligned with SAP SuccessFactors and Workday patterns'
-    }
-  },
-  {
-    id: 'sec-2-4',
-    sectionNumber: '2.4',
-    title: 'Readiness Indicators & BARS',
-    description: '8 categories, 32 default indicators with behaviorally anchored rating scales (BARS) for consistent assessment',
-    contentLevel: 'procedure',
-    estimatedReadTime: 18,
-    targetRoles: ['Admin', 'Consultant'],
-    industryContext: {
-      frequency: 'One-time, annual review',
-      timing: 'Post readiness bands',
-      benchmark: 'BARS methodology for objective behavioral assessment'
-    }
-  },
-  {
-    id: 'sec-2-4a',
-    sectionNumber: '2.4a',
-    title: 'Weight Normalization Rules',
-    description: 'Indicator weight normalization, skipped indicator handling, validation rules, and relative vs absolute weights',
-    contentLevel: 'reference',
-    estimatedReadTime: 6,
-    targetRoles: ['Admin', 'Consultant'],
-    industryContext: {
-      frequency: 'Reference',
-      timing: 'Post indicators',
-      benchmark: 'Normalized scoring for partial assessments'
-    }
-  },
-  {
-    id: 'sec-2-5',
-    sectionNumber: '2.5',
-    title: 'Readiness Forms',
-    description: 'Build readiness assessment forms using form builder, organize indicators into categories, configure staff-type-specific forms',
-    contentLevel: 'procedure',
-    estimatedReadTime: 10,
-    targetRoles: ['Admin'],
-    industryContext: {
-      frequency: 'Per staff type',
-      timing: 'Post indicators',
-      benchmark: 'Role-appropriate assessment depth and questions'
-    }
-  },
-  {
-    id: 'sec-2-5a',
-    sectionNumber: '2.5a',
-    title: 'Staff Type Form Selection',
-    description: 'Automatic form selection algorithm, staff type hierarchy, and override capabilities',
-    contentLevel: 'reference',
-    estimatedReadTime: 5,
-    targetRoles: ['Admin', 'Consultant'],
-    industryContext: {
-      frequency: 'Reference',
-      timing: 'Post forms',
-      benchmark: 'Role-based form assignment automation'
-    }
-  },
-  {
-    id: 'sec-2-6',
-    sectionNumber: '2.6',
-    title: 'Availability Reasons',
-    description: 'Configure planned vs unplanned departure reasons with urgency levels and notification triggers',
-    contentLevel: 'procedure',
-    estimatedReadTime: 8,
-    targetRoles: ['Admin'],
-    industryContext: {
-      frequency: 'One-time setup',
-      timing: 'Post forms',
-      benchmark: 'Standardized reason codes for vacancy planning'
-    }
-  },
-  {
-    id: 'sec-2-7',
-    sectionNumber: '2.7',
-    title: 'Company-Specific Settings',
-    description: 'Multi-company configuration inheritance, regional compliance settings, and cross-company talent pools',
-    contentLevel: 'procedure',
-    estimatedReadTime: 10,
-    targetRoles: ['Admin'],
-    industryContext: {
-      frequency: 'Per company',
-      timing: 'Post foundation setup',
-      benchmark: 'Multi-entity support for global organizations'
-    }
-  }
-]
-```
+Update `useAvailabilityReasons.ts`:
+- Add `category`, `urgency_level`, `typical_notice_months` to interface
+- Add `TRF` and `MED` to default seeds
+
+Update `useReadinessRatingBands.ts`:
+- Add `is_successor_eligible` to interface and CRUD operations
+
+---
+
+### Phase 4: UI Component Updates
+
+**4.1 AssessorTypesConfig.tsx**
+- Add weight_percentage input field
+- Add visual weight sum validation
+
+**4.2 AvailabilityReasonsConfig.tsx**
+- Add category dropdown (Planned/Unplanned/Either)
+- Add urgency level dropdown
+- Add notice months input
+
+**4.3 ReadinessRatingBandsConfig.tsx**
+- Add successor eligibility toggle
+
+---
+
+### Phase 5: Implementation Sequence
+
+| Order | Task | Estimated Effort |
+|-------|------|------------------|
+| 1 | Get product decision on scope | Decision meeting |
+| 2 | Documentation naming corrections | 1 hour |
+| 3 | Documentation: add missing standard fields | 2 hours |
+| 4 | Documentation: mark aspirational features | 1 hour |
+| 5 | DB migrations for approved columns | 1 hour |
+| 6 | Hook interface updates | 2 hours |
+| 7 | Hook CRUD operation updates | 2 hours |
+| 8 | Hook seed data updates | 30 min |
+| 9 | UI config component updates | 3 hours |
+| 10 | End-to-end testing | 2 hours |
+| **Total** | | **~15 hours** |
+
+---
+
+## Files to Modify
+
+### Documentation Files (Read-Only Mode - Will Require Implementation)
+
+| File | Changes |
+|------|---------|
+| `FoundationAssessorTypes.tsx` | Fix field table, add weight_percentage, mark aspirational |
+| `FoundationReadinessBands.tsx` | Fix field table, add missing fields, remove band_code |
+| `FoundationReadinessIndicators.tsx` | Fix scoring_guide naming |
+| `FoundationAvailabilityReasons.tsx` | Fix label→description, add missing fields |
+| `FoundationReadinessForms.tsx` | Fix staff_type type, mark versioning as future |
+| `FoundationStaffTypeMapping.tsx` | Align with actual staff_type field |
+
+### Database Migrations
+
+| Migration | Tables Affected |
+|-----------|----------------|
+| `add_assessor_type_weights.sql` | succession_assessor_types |
+| `add_availability_reason_metadata.sql` | succession_availability_reasons |
+| `add_band_eligibility.sql` | readiness_rating_bands |
+
+### Hook Files
+
+| File | Changes |
+|------|---------|
+| `useSuccessionAssessorTypes.ts` | Interface + CRUD + seeds |
+| `useAvailabilityReasons.ts` | Interface + CRUD + seeds |
+| `useReadinessRatingBands.ts` | Interface + CRUD |
+
+### UI Config Files
+
+| File | Changes |
+|------|---------|
+| `AssessorTypesConfig.tsx` (to be created or modified) | Add weight field |
+| `AvailabilityReasonsConfig.tsx` | Add category, urgency, notice fields |
+| `ReadinessRatingBandsConfig.tsx` | Add eligibility toggle |
 
 ---
 
 ## Validation Checklist
 
 After implementation:
-- [ ] Part 2 `estimatedReadTime` = 99
-- [ ] Part 2 has 10 subsections
-- [ ] All section IDs match scroll anchors in `SuccessionFoundationSection.tsx`:
-  - sec-2-1, sec-2-2, sec-2-2a, sec-2-3, sec-2-4, sec-2-4a, sec-2-5, sec-2-5a, sec-2-6, sec-2-7
-- [ ] All new sections have proper industry context
-- [ ] Total subsection read times sum to 99 minutes (12+12+8+10+18+6+10+5+8+10 = 99)
-- [ ] TOC navigation correctly scrolls to each section
-
----
-
-## Technical Notes
-
-- Section IDs use the pattern `sec-X-Y` to match `data-manual-anchor` attributes
-- Subsections 2.2a, 2.4a, and 2.5a use lowercase 'a' suffix for sub-subsections
-- The `contentLevel: 'reference'` is used for the new aggregation/normalization sections as they are formula-focused rather than procedural
+- [ ] All documented fields exist in DB or are marked as "Future Enhancement"
+- [ ] All DB fields are documented
+- [ ] Scoring guide field names match between docs and DB
+- [ ] Hook interfaces match DB schema
+- [ ] UI config components match hook interfaces
+- [ ] Seed defaults match between docs and hooks
+- [ ] No orphaned references in documentation
