@@ -44,15 +44,18 @@ export interface TalentPool {
   member_count?: number;
 }
 
+export type TalentPoolMemberStatus = 'active' | 'nominated' | 'approved' | 'rejected' | 'graduated' | 'removed';
+
 export interface TalentPoolMember {
   id: string;
   pool_id: string;
   employee_id: string;
   added_by: string | null;
   reason: string | null;
-  status: string;
+  status: TalentPoolMemberStatus;
   start_date: string;
   end_date: string | null;
+  development_notes: string | null;
   employee?: {
     id: string;
     full_name: string;
@@ -404,6 +407,47 @@ export function useSuccession(companyId?: string) {
     }
   };
 
+  const updateTalentPoolMemberStatus = async (
+    memberId: string,
+    newStatus: TalentPoolMemberStatus,
+    endDate?: string
+  ): Promise<boolean> => {
+    try {
+      const updates: Record<string, any> = {
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Set end_date for terminal statuses
+      if (['graduated', 'removed', 'rejected'].includes(newStatus) && !endDate) {
+        updates.end_date = new Date().toISOString().split('T')[0];
+      } else if (endDate) {
+        updates.end_date = endDate;
+      }
+
+      const { error } = await supabase
+        .from('talent_pool_members')
+        .update(updates)
+        .eq('id', memberId);
+
+      if (error) throw error;
+
+      const statusMessages: Record<string, string> = {
+        active: 'Member is now active',
+        approved: 'Nomination approved',
+        rejected: 'Nomination declined',
+        graduated: 'Member graduated to succession plan',
+        removed: 'Member removed from pool',
+        nominated: 'Member nominated',
+      };
+      toast.success(statusMessages[newStatus] || 'Status updated');
+      return true;
+    } catch (error: any) {
+      toast.error('Failed to update status: ' + error.message);
+      return false;
+    }
+  };
+
   // Succession Plans
   const fetchSuccessionPlans = async () => {
     if (!companyId) return [];
@@ -746,6 +790,7 @@ export function useSuccession(companyId?: string) {
     fetchTalentPoolMembers,
     addTalentPoolMember,
     removeTalentPoolMember,
+    updateTalentPoolMemberStatus,
     // Succession Plans
     fetchSuccessionPlans,
     createSuccessionPlan,

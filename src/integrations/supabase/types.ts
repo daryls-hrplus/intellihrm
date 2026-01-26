@@ -69674,6 +69674,7 @@ export type Database = {
         Row: {
           added_by: string | null
           created_at: string
+          development_notes: string | null
           employee_id: string
           end_date: string | null
           id: string
@@ -69686,6 +69687,7 @@ export type Database = {
         Insert: {
           added_by?: string | null
           created_at?: string
+          development_notes?: string | null
           employee_id: string
           end_date?: string | null
           id?: string
@@ -69698,6 +69700,7 @@ export type Database = {
         Update: {
           added_by?: string | null
           created_at?: string
+          development_notes?: string | null
           employee_id?: string
           end_date?: string | null
           id?: string
