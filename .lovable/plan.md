@@ -1,404 +1,296 @@
 
-# Chapter 5 (Talent Pool Management) - Comprehensive Gap Closure Plan
+# Chapter 5 (Talent Pool Management) - Comprehensive Gap Audit Report
 
 ## Executive Summary
 
-Chapter 5 of the Succession Planning Manual is currently in **placeholder-only state** with 4 sections containing zero substantive content (~55 lines total). A deep audit comparing the documentation against the database schema (3 tables), hooks (2 files), and UI components (5+ files) reveals **critical gaps** that need to be addressed to match the depth and quality of Chapters 2-4.
-
-**Key Finding:** The current Chapter 5 structure (4 placeholder sections, ~45 min) significantly underestimates the complexity of the talent pool functionality. The implementation includes sophisticated features like JSONB criteria, manager nomination workflows, HR review packets, confidence indicators, and evidence-based decision support that are completely undocumented.
+After auditing Chapter 5 documentation against the actual database schema (3 core tables + 3 supporting tables), hooks (3 files), and UI components (8+ files), I have identified **moderate alignment** with some critical gaps that need to be addressed. The recently implemented documentation (~3,400 lines across 8 section components) covers the majority of the functionality but has specific areas where the code/schema reality diverges from the documentation.
 
 ---
 
-## Current State Analysis
+## Audit Methodology
 
-### Chapter 5 Structure (As-Is) - All Placeholders
+### Direction 1: Schema/Code → Documentation
+Verifying that all database fields, hook functions, and UI features are documented
 
-| Section | Title | Lines | Status |
-|---------|-------|-------|--------|
-| 5.1 | Pool Types & Purposes | ~10 | **Placeholder only** |
-| 5.2 | Pool Creation & Configuration | ~10 | **Placeholder only** |
-| 5.3 | Member Management | ~10 | **Placeholder only** |
-| 5.4 | Review Packet Generation | ~10 | **Placeholder only** |
-
-**Total: ~55 lines** (all placeholders, zero substantive content)
-**Estimated Read Time: 45 min** (significantly underestimated)
+### Direction 2: Documentation → Schema/Code
+Verifying that everything documented actually exists in the implementation
 
 ---
 
-## Industry-Standard Chapter 5 Restructure
+## Gap Analysis Summary
 
-Following SAP SuccessFactors, Workday, and SHRM talent pool management patterns, Chapter 5 should expand to cover the complete operational lifecycle including manager-driven nominations, HR review workflows, and evidence-based calibration.
-
-### Proposed Section Structure (8 Sections, ~90 min)
-
-| Section | Title | Focus | Status |
-|---------|-------|-------|--------|
-| 5.1 | Talent Pool Overview | Strategic value, pool types, lifecycle | NEW |
-| 5.2 | Pool Types & Classification | High Potential, Leadership, Technical, Emerging, Critical Role | REWRITE |
-| 5.3 | Pool Creation & Configuration | Create pools with JSONB criteria | REWRITE |
-| 5.4 | Member Management | Add, view, graduate, remove members | REWRITE |
-| 5.5 | Manager Nomination Workflow (NEW) | MSS-driven talent nomination | NEW |
-| 5.6 | HR Review & Approval (NEW) | Review packets, confidence indicators | NEW |
-| 5.7 | Evidence-Based Decision Support (NEW) | Talent signals, evidence snapshots | NEW |
-| 5.8 | Pool Analytics & Reporting (NEW) | Pool health, pipeline metrics | NEW |
+| Category | Documented | Actually Exists | Gap Type |
+|----------|------------|-----------------|----------|
+| Database Tables | 3 | 3 | Aligned |
+| Table Fields | 36 | 35 | Minor discrepancy |
+| Hook Functions | 10 | 10 | Aligned |
+| UI Components | 5 | 8 | Documentation missing 3 |
+| Member Statuses | 6 | 1 (only 'active') | Major - Doc overstates |
+| Supporting Tables | 0 | 3 | Documentation missing |
 
 ---
 
-## Gap Analysis: Documentation vs. Implementation
+## Direction 1: Schema/Code → Documentation
 
-### Database Tables Supporting Chapter 5
+### 1.1 Database Schema Gaps
 
-| Table | Fields | Hook | UI Component | Current Doc |
-|-------|--------|------|--------------|-------------|
-| `talent_pools` | 13 fields | useSuccession | TalentPoolsTab | **Placeholder** |
-| `talent_pool_members` | 10 fields | useSuccession | TalentPoolsTab | **Placeholder** |
-| `talent_pool_review_packets` | 13 fields | useTalentPoolReviewPackets | HRReviewConfidenceIndicators | **NOT DOCUMENTED** |
+#### `talent_pools` Table (13 fields) - WELL DOCUMENTED
+| Field | Schema | Documented | Status |
+|-------|--------|------------|--------|
+| id | uuid NOT NULL | Yes (sec 5.3) | OK |
+| company_id | uuid NOT NULL | Yes | OK |
+| name | text NOT NULL | Yes | OK |
+| code | text NOT NULL | Yes | OK |
+| description | text NULL | Yes | OK |
+| pool_type | text NOT NULL DEFAULT 'high_potential' | Yes | OK |
+| criteria | jsonb NULL DEFAULT '{}' | Yes + examples | OK |
+| is_active | boolean NOT NULL DEFAULT true | Yes | OK |
+| start_date | date NOT NULL DEFAULT CURRENT_DATE | Yes | **MINOR**: Doc says "required: false" but schema says NOT NULL |
+| end_date | date NULL | Yes | OK |
+| created_by | uuid NULL | Yes | **MINOR**: Doc says "required: true" but schema says NULL |
+| created_at | timestamptz NOT NULL | Yes | OK |
+| updated_at | timestamptz NOT NULL | Yes | OK |
 
-### Direction 1: Schema/Code → Documentation (What EXISTS but NOT documented)
+#### `talent_pool_members` Table (10 fields) - WELL DOCUMENTED
+| Field | Schema | Documented | Status |
+|-------|--------|------------|--------|
+| id | uuid NOT NULL | Yes (sec 5.4) | OK |
+| pool_id | uuid NOT NULL | Yes | OK |
+| employee_id | uuid NOT NULL | Yes | OK |
+| added_by | uuid NULL | Yes | **MINOR**: Doc says "required: true" but schema says NULL |
+| reason | text NULL | Yes | OK |
+| status | text NOT NULL DEFAULT 'active' | Yes | **MAJOR GAP**: Doc lists 6 statuses, DB only has 'active' |
+| start_date | date NOT NULL DEFAULT CURRENT_DATE | Yes | **MINOR**: Doc says "required: false" but schema says NOT NULL |
+| end_date | date NULL | Yes | OK |
+| created_at | timestamptz NOT NULL | Yes | OK |
+| updated_at | timestamptz NOT NULL | Yes | OK |
 
-| Component | Fields/Features | Current Doc | Proposed Fix |
-|-----------|-----------------|-------------|--------------|
-| `talent_pools` table | 13 fields: `id`, `company_id`, `name`, `code`, `description`, `pool_type`, `criteria` (JSONB), `is_active`, `start_date`, `end_date`, `created_by`, `created_at`, `updated_at` | **Placeholder** | Section 5.3 |
-| `talent_pool_members` table | 10 fields: `id`, `pool_id`, `employee_id`, `added_by`, `reason`, `status`, `start_date`, `end_date`, `created_at`, `updated_at` | **Placeholder** | Section 5.4 |
-| `talent_pool_review_packets` table | 13 fields: `id`, `talent_pool_id`, `member_id`, `employee_id`, `company_id`, `evidence_snapshot`, `signal_summary`, `leadership_indicators`, `review_status`, `reviewed_by`, `reviewed_at`, `notes`, `created_at` | **NOT DOCUMENTED** | NEW Section 5.6 |
-| `pool_type` enum values | `high_potential`, `leadership`, `technical`, `emerging`, `critical_role` | **Placeholder** | Section 5.2 |
-| JSONB `criteria` field | Custom eligibility rules, minimum scores, required signals | **NOT DOCUMENTED** | Section 5.3 |
-| `useSuccession.ts` hook | `fetchTalentPools`, `createTalentPool`, `updateTalentPool`, `deleteTalentPool`, `fetchTalentPoolMembers`, `addTalentPoolMember`, `removeTalentPoolMember`, `member_count` aggregation | **NOT DOCUMENTED** | Sections 5.3, 5.4 |
-| `useTalentPoolReviewPackets.ts` hook | `fetchPacketsForPool`, `fetchPacketForMember`, `createReviewPacket`, `updateReviewStatus`, `addReviewNotes`, `calculateSignalSummary`, `calculateLeadershipIndicators` | **NOT DOCUMENTED** | NEW Section 5.6, 5.7 |
-| `TalentPoolsTab.tsx` UI | Pool list, member table, create/edit dialogs, evidence panel, confidence indicators | **NOT DOCUMENTED** | Sections 5.3, 5.4 |
-| `MssNominateTalentPoolPage.tsx` | Manager nomination workflow: team member list, nomination dialog, justification, recommended development | **NOT DOCUMENTED** | NEW Section 5.5 |
-| `TalentPoolNominationEvidence.tsx` | Evidence summary, pool criteria validation, strengths/weaknesses | **NOT DOCUMENTED** | NEW Section 5.7 |
-| `HRReviewConfidenceIndicators.tsx` | Confidence score, bias risk level, data freshness, source count, signal count, recommendation confidence | **NOT DOCUMENTED** | NEW Section 5.6 |
-| Member status lifecycle | `active`, `nominated`, `approved`, `rejected`, `graduated`, `removed` | **NOT DOCUMENTED** | Section 5.4 |
-| Review packet workflow | `pending`, `approved`, `declined` with reviewer tracking | **NOT DOCUMENTED** | NEW Section 5.6 |
+#### `talent_pool_review_packets` Table (13 fields) - WELL DOCUMENTED
+| Field | Schema | Documented | Status |
+|-------|--------|------------|--------|
+| id | uuid NOT NULL | Yes (sec 5.6) | OK |
+| talent_pool_id | uuid NULL | Yes | OK |
+| member_id | uuid NULL | Yes | OK |
+| employee_id | uuid NULL | Yes | OK |
+| company_id | uuid NULL | Yes | OK |
+| evidence_snapshot | jsonb NULL | Yes | OK |
+| signal_summary | jsonb NULL | Yes | OK |
+| leadership_indicators | jsonb NULL | Yes | OK |
+| review_status | text NULL DEFAULT 'pending' | Yes | OK |
+| reviewed_by | uuid NULL | Yes | OK |
+| reviewed_at | timestamptz NULL | Yes | OK |
+| notes | text NULL | Yes | OK |
+| created_at | timestamptz NULL | Yes | OK |
 
-### Direction 2: Documentation Gaps
+### 1.2 Supporting Tables NOT in Chapter 5 Documentation
 
-| Expected Content | Current State | Proposed Fix |
-|------------------|---------------|--------------|
-| Pool type strategic purposes | Not documented | Section 5.2 with business use cases |
-| JSONB criteria configuration | Not documented | Section 5.3 with schema examples |
-| Nomination → Review → Approval workflow | Not documented | NEW Sections 5.5-5.6 |
-| Evidence-based decision framework | Not documented | NEW Section 5.7 |
-| Signal summary calculations | Not documented | NEW Section 5.7 (formulas from hook) |
-| Leadership indicator extraction | Not documented | NEW Section 5.7 |
-| Bias risk level thresholds | Not documented | NEW Section 5.6 |
-| Data freshness status rules | Not documented | NEW Section 5.6 |
+These tables power the evidence features documented in section 5.7 but aren't explicitly referenced:
 
----
+| Table | Fields | Used By | Documentation Status |
+|-------|--------|---------|---------------------|
+| `talent_profile_evidence` | 13 fields | useTalentProfileEvidence | Mentioned conceptually, no field reference |
+| `talent_signal_snapshots` | ~18 fields | useTalentProfileEvidence, useTalentPoolReviewPackets | Mentioned conceptually, no field reference |
+| `talent_signal_definitions` | ~15 fields | Signal mappings | Not documented |
 
-## Implementation Plan
+### 1.3 Hook Function Gaps
 
-### Phase 1: Create Modular Section Components
+#### `useSuccession.ts` - Talent Pool Functions
+| Function | Documented | Status |
+|----------|------------|--------|
+| fetchTalentPools | Yes (sec 5.3) | OK |
+| createTalentPool | Yes (sec 5.3) | OK |
+| updateTalentPool | Yes (sec 5.3) | OK |
+| deleteTalentPool | Yes (sec 5.3) | OK |
+| fetchTalentPoolMembers | Yes (sec 5.4) | OK |
+| addTalentPoolMember | Yes (sec 5.4) | OK |
+| removeTalentPoolMember | Yes (sec 5.4) | OK |
 
-**Directory Structure:**
-```text
-src/components/enablement/manual/succession/sections/talentpools/
-├── index.ts
-├── TalentPoolOverview.tsx           (5.1 - 400 lines)
-├── TalentPoolTypes.tsx              (5.2 - 350 lines)
-├── TalentPoolCreation.tsx           (5.3 - 450 lines)
-├── TalentPoolMembers.tsx            (5.4 - 400 lines)
-├── TalentPoolNomination.tsx         (5.5 - 400 lines) - NEW
-├── TalentPoolHRReview.tsx           (5.6 - 450 lines) - NEW
-├── TalentPoolEvidence.tsx           (5.7 - 400 lines) - NEW
-└── TalentPoolAnalytics.tsx          (5.8 - 300 lines) - NEW
-```
+#### `useTalentPoolReviewPackets.ts`
+| Function | Documented | Status |
+|----------|------------|--------|
+| fetchPacketsForPool | Yes (sec 5.6) | OK |
+| fetchPacketForMember | Yes (sec 5.6) | OK |
+| createReviewPacket | Yes (sec 5.6) | OK |
+| updateReviewStatus | Yes (sec 5.6) | OK |
+| addReviewNotes | Yes (sec 5.6) | OK |
+| calculateSignalSummary (internal) | Yes (sec 5.7) | Formulas documented |
+| calculateLeadershipIndicators (internal) | Yes (sec 5.7) | Algorithm documented |
 
-### Phase 2: Section Content Specifications
+#### `useTalentProfileEvidence.ts`
+| Function | Documented | Status |
+|----------|------------|--------|
+| fetchEvidenceForEmployee | Conceptually (sec 5.7) | No explicit reference |
+| fetchEvidenceSummary | Conceptually (sec 5.7) | OK - formulas shown |
+| addEvidence | Not documented | **GAP** - Admin can add evidence |
+| updateEvidence | Not documented | **GAP** - Admin can update evidence |
+| markEvidenceExpired | Not documented | **GAP** - Evidence lifecycle |
+| createEvidenceFromSignal | Not documented | **GAP** - Integration feature |
 
-#### Section 5.1: Talent Pool Overview (~10 min) - NEW
+### 1.4 UI Component Gaps
 
-**Content:**
-- Learning objectives card (4 bullets)
-- Navigation path: Performance → Succession → Talent Pools
-- Strategic value of talent pools in succession planning
-- Pool lifecycle diagram (Create → Populate → Develop → Graduate → Promote)
-- Cross-module integration (Nine-Box → Talent Pools → Succession Plans)
-- Industry context: SHRM talent segmentation best practices
+| Component | Location | Documented | Status |
+|-----------|----------|------------|--------|
+| TalentPoolsTab.tsx | succession/ | Yes (sec 5.3, 5.4) | OK |
+| TalentPoolNominationEvidence.tsx | talent/pool/ | Yes (sec 5.7) | OK |
+| HRReviewConfidenceIndicators.tsx | talent/pool/ | Yes (sec 5.6) | OK |
+| MssNominateTalentPoolPage.tsx | pages/mss/ | Yes (sec 5.5) | OK |
+| TalentPoolsPage.tsx | pages/succession/ | Not documented | **GAP** - Entry point page |
+| poolTypeColors constant | TalentPoolsTab | Mentioned in 5.2 | OK |
 
-#### Section 5.2: Pool Types & Classification (~12 min) - REWRITE
+### 1.5 UI Features Not Documented
 
-**Content:**
-- Learning objectives
-- 5 pool type definitions with business use cases:
-  - **High Potential** (`high_potential`): Future leaders with exceptional growth capacity
-  - **Leadership Pipeline** (`leadership`): Prepared for management/executive roles
-  - **Technical Expert** (`technical`): Deep specialists in critical domains
-  - **Emerging Talent** (`emerging`): Early-career employees with high potential
-  - **Critical Role** (`critical_role`): Successors for hard-to-fill positions
-- Pool type selection guidance matrix
-- Color coding standards (from `poolTypeColors` in UI)
-- Best practices: Avoid overlapping pool membership
-
-#### Section 5.3: Pool Creation & Configuration (~15 min) - REWRITE
-
-**Content:**
-- Learning objectives
-- Field reference table for `talent_pools`:
-  - `id` (UUID, PK)
-  - `company_id` (UUID, FK)
-  - `name` (Text, required) - Display name
-  - `code` (Text, required) - Unique identifier
-  - `description` (Text) - Pool purpose and scope
-  - `pool_type` (Text, enum) - Classification
-  - `criteria` (JSONB) - Eligibility rules
-  - `is_active` (Boolean) - Active/archived status
-  - `start_date` (Date) - Pool effective date
-  - `end_date` (Date, nullable) - Pool expiration
-  - `created_by` (UUID, FK) - Creator reference
-  - `created_at`, `updated_at` (Timestamps)
-- JSONB criteria structure:
-  ```json
-  {
-    "minimumScore": 3.5,
-    "minimumConfidence": 0.7,
-    "requiredSignals": ["leadership", "strategic_thinking"],
-    "excludeRoles": ["contractor", "intern"]
-  }
-  ```
-- Step-by-step: Create new talent pool (from TalentPoolsTab dialog)
-- Step-by-step: Edit pool configuration
-- Step-by-step: Archive/deactivate pool
-- Business rules: Code uniqueness per company
-
-#### Section 5.4: Member Management (~12 min) - REWRITE
-
-**Content:**
-- Learning objectives
-- Field reference table for `talent_pool_members`:
-  - `id` (UUID, PK)
-  - `pool_id` (UUID, FK)
-  - `employee_id` (UUID, FK)
-  - `added_by` (UUID, FK) - Who added the member
-  - `reason` (Text) - Justification for inclusion
-  - `status` (Text) - Membership status
-  - `start_date` (Date) - When added
-  - `end_date` (Date, nullable) - When removed/graduated
-  - `created_at`, `updated_at` (Timestamps)
-- Member status lifecycle:
-  - `nominated` → Manager has proposed the employee
-  - `active` → HR has approved the nomination
-  - `approved` → Approved for pool membership
-  - `rejected` → Nomination declined
-  - `graduated` → Promoted to succession candidate
-  - `removed` → Exited from pool
-- Step-by-step: Add member directly (HR workflow)
-- Step-by-step: Remove member from pool
-- Member table UI walkthrough (from TalentPoolsTab)
-- Duplicate membership prevention
-
-#### Section 5.5: Manager Nomination Workflow (~15 min) - NEW SECTION
-
-**Content:**
-- Learning objectives
-- Navigation path: MSS → Talent Pool Nomination
-- UI overview: MssNominateTalentPoolPage
-  - Team member list (direct reports)
-  - Summary cards (Total, Nominated, Approved)
-  - Nomination status badges
-  - Search and filter controls
-- Step-by-step: Manager nominates team member
-  1. Navigate to MSS → Talent Pool Nomination
-  2. Review team member list
-  3. Click "Nominate" on eligible employee
-  4. Select target talent pool
-  5. Provide justification (required)
-  6. Add recommended development (optional)
-  7. Submit nomination
-- Expected result: Employee added with `status = 'nominated'`
-- Business rules: One nomination per pool per employee
-- Notification triggers to HR
-
-#### Section 5.6: HR Review & Approval (~15 min) - NEW SECTION
-
-**Content:**
-- Learning objectives
-- Field reference table for `talent_pool_review_packets`:
-  - `id` (UUID, PK)
-  - `talent_pool_id` (UUID, FK)
-  - `member_id` (UUID, FK)
-  - `employee_id` (UUID, FK)
-  - `company_id` (UUID, FK)
-  - `evidence_snapshot` (JSONB) - Captured talent profile evidence
-  - `signal_summary` (JSONB) - Aggregated signal data
-  - `leadership_indicators` (JSONB) - Leadership-specific metrics
-  - `review_status` (Text) - `pending`, `approved`, `declined`
-  - `reviewed_by` (UUID, FK)
-  - `reviewed_at` (Timestamp)
-  - `notes` (Text) - Reviewer comments
-  - `created_at` (Timestamp)
-- HR review packet creation (from useTalentPoolReviewPackets.createReviewPacket)
-- Confidence indicators (from HRReviewConfidenceIndicators):
-  - **Confidence Score** (0-100%): Reliability based on source count, rater diversity, data consistency
-  - **Bias Risk Level** (low/medium/high): Based on rater relationships and response patterns
-  - **Data Freshness** (Fresh/Recent/Stale): <30 days, 30-90 days, >90 days
-  - **Source Count**: Number of evidence items
-  - **Signal Count**: 360 feedback signals
-  - **Recommendation Confidence**: Strong (≥70%), Additional Evidence Needed (40-70%), Insufficient (<40%)
-- Step-by-step: HR reviews nomination
-- Step-by-step: Approve/decline nomination with notes
-- Audit trail requirements
-
-#### Section 5.7: Evidence-Based Decision Support (~10 min) - NEW SECTION
-
-**Content:**
-- Learning objectives
-- Evidence summary structure (from TalentPoolNominationEvidence):
-  - Pool criteria validation (minimum score, confidence)
-  - Overall confidence percentage
-  - Top strengths (score ≥ 3.5)
-  - Development areas (score < 2.5)
-  - Evidence sources by type
-- Signal summary calculation (from useTalentPoolReviewPackets):
-  ```text
-  overallScore = sum(signal_value) / signal_count
-  avgConfidence = sum(confidence_score) / signal_count
-  topStrengths = signals where score >= 3.5, sorted desc, top 3
-  developmentAreas = signals where score < 2.5, sorted asc, top 3
-  biasRiskLevel = high if highBiasCount > 30%, medium if > 10%, else low
-  ```
-- Leadership indicator extraction:
-  - Filter signals by category = 'leadership'
-  - Extract name, score, confidence, trend
-- Evidence snapshot versioning
-- Integration with talent_profile_evidence table
-
-#### Section 5.8: Pool Analytics & Reporting (~10 min) - NEW SECTION
-
-**Content:**
-- Learning objectives
-- Pool health metrics:
-  - Member count by status
-  - Average time in pool
-  - Graduation rate
-  - Rejection rate
-- Pipeline metrics:
-  - Pool → Succession Plan conversion
-  - Ready Now vs Developing ratio
-  - Cross-pool membership patterns
-- Dashboard integration points
-- Best practices for pool review cycles
+| Feature | Component | Status |
+|---------|-----------|--------|
+| `recommended_development` field in MSS nomination | MssNominateTalentPoolPage | **GAP** - Form has this field, not saved to DB |
+| Employee filtering by `manager_id` | MssNominateTalentPoolPage | Documented conceptually |
+| Existing nomination status check | MssNominateTalentPoolPage | Documented |
+| Pool criteria auto-population | TalentPoolsTab | **GAP** - hardcoded {minimumScore: 3.5, minimumConfidence: 0.7} |
 
 ---
 
-### Phase 3: Update Manual Types
+## Direction 2: Documentation → Schema/Code
 
-Update `src/types/successionManual.ts` Part 5 metadata:
+### 2.1 Documented Features That DON'T Exist in Code
 
-```typescript
-{
-  id: 'part-5',
-  sectionNumber: '5',
-  title: 'Talent Pool Management',
-  description: 'Create, configure, and manage talent pools including nomination workflows, HR review processes, and evidence-based decision support.',
-  contentLevel: 'procedure',
-  estimatedReadTime: 90,  // Updated from 45
-  targetRoles: ['Admin', 'HR Partner', 'Manager'],
-  subsections: [
-    // 8 subsections with proper metadata
-  ]
-}
-```
+| Documented Feature | Section | Actual Implementation | Fix Required |
+|--------------------|---------|----------------------|--------------|
+| 6 member statuses (nominated, active, approved, rejected, graduated, removed) | 5.4 | Only 'active' exists in DB data | Update doc OR add DB constraint |
+| "Graduate to Succession" button | 5.4 | No graduation workflow in TalentPoolsTab | Update doc OR add feature |
+| "Pending Reviews" tab in HR Hub | 5.6 | Not implemented as separate tab | Update doc to reflect actual UI |
+| Review packet generation trigger | 5.6 | Manual via createReviewPacket | Clarify trigger mechanism |
+| 5 business day SLA enforcement | 5.6 | Not system-enforced | Document as policy, not system |
+| Escalation after 7 days | 5.6 | Not implemented | Document as policy |
+| Pool criteria validation in nomination | 5.5 | Only hardcoded values shown | Clarify actual behavior |
+| Development recommendations saved | 5.5 | Field exists in UI but not saved to DB | Either add DB field or remove from doc |
 
-### Phase 4: Update Main Section Component
+### 2.2 Documented Calculations That Match Code
 
-Replace `SuccessionTalentPoolsSection.tsx` placeholder file with modular imports:
-
-```typescript
-import {
-  TalentPoolOverview,
-  TalentPoolTypes,
-  TalentPoolCreation,
-  TalentPoolMembers,
-  TalentPoolNomination,
-  TalentPoolHRReview,
-  TalentPoolEvidence,
-  TalentPoolAnalytics
-} from './sections/talentpools';
-```
+| Calculation | Section | Code Location | Status |
+|-------------|---------|---------------|--------|
+| Overall Score formula | 5.7 | useTalentPoolReviewPackets.calculateSignalSummary | MATCHES |
+| Average Confidence formula | 5.7 | useTalentPoolReviewPackets.calculateSignalSummary | MATCHES |
+| Top Strengths extraction (score >= 3.5) | 5.7 | useTalentPoolReviewPackets + useTalentProfileEvidence | MATCHES |
+| Development Areas (score < 2.5) | 5.7 | useTalentPoolReviewPackets + useTalentProfileEvidence | MATCHES |
+| Bias Risk Level thresholds (10%, 30%) | 5.7 | useTalentPoolReviewPackets line 229 | MATCHES |
+| Data Freshness thresholds (30d, 90d) | 5.6 | HRReviewConfidenceIndicators | MATCHES |
 
 ---
 
-## Content Standards (Following Chapter 4 Pattern)
+## Critical Gaps Requiring Immediate Attention
 
-Each section component must include:
+### GAP 1: Member Status Lifecycle Over-Documentation
+**Severity: HIGH**
 
-1. **Learning Objectives Card** - 4-5 bullet points
-2. **Navigation Path** - Module → Submenu → Tab breadcrumb
-3. **Field Reference Table** - All database fields with types (where applicable)
-4. **Step-by-Step Procedure** - Numbered steps with expected results
-5. **Business Rules** - Validation, constraints, permissions
-6. **Expected Results** - What user should see after each action
-7. **Best Practices Card** - Green-themed with checkmarks
-8. **Troubleshooting Card** - Amber-themed with issue/cause/solution
+**Documentation (Section 5.4)** shows 6 statuses:
+- nominated, active, approved, rejected, graduated, removed
 
----
+**Database Reality:**
+- Only 'active' exists in current data
+- No DB constraint enforcing allowed values
+- MssNominateTalentPoolPage inserts with status = 'nominated' (works, but no other code uses it)
+- removeTalentPoolMember uses DELETE, not status update to 'removed'
 
-## Industry Alignment
+**Recommendation:** Either:
+1. Add CHECK constraint to DB for allowed statuses + update code to use status transitions
+2. OR simplify documentation to match current reality (add/delete only)
 
-The proposed structure follows enterprise talent management standards:
+### GAP 2: Graduation Workflow Not Implemented
+**Severity: MEDIUM**
 
-| Industry Standard | HRplus Implementation | Documentation Section |
-|-------------------|----------------------|----------------------|
-| Talent segmentation | 5 pool types with business purposes | 5.2 |
-| Criteria-based pools | JSONB criteria field | 5.3 |
-| Manager nomination | MssNominateTalentPoolPage | 5.5 |
-| HR review workflow | Review packets with approval chain | 5.6 |
-| Evidence-based decisions | Signal summary, confidence scores | 5.7 |
-| Bias detection | Bias risk level calculation | 5.6, 5.7 |
-| Data quality indicators | Freshness, source count, confidence | 5.6 |
-| Audit trail | reviewed_by, reviewed_at, notes | 5.6 |
+**Documentation (Section 5.4)** describes detailed graduation steps
+**Reality:** No graduation feature exists in TalentPoolsTab or hooks
 
----
+**Recommendation:**
+1. Add graduation feature to TalentPoolsTab
+2. OR remove graduation steps from documentation and add as "Future Feature" note
 
-## Validation Checklist
+### GAP 3: Development Recommendations Field
+**Severity: LOW**
 
-After implementation:
+**Documentation (Section 5.5)** shows "Recommended Development" field
+**Reality:** UI has the field but doesn't save to DB
 
-- [ ] All 3 talent pool tables documented with complete field references
-- [ ] All 2 hooks documented with interfaces and business logic
-- [ ] Pool lifecycle documented (Create → Populate → Develop → Graduate)
-- [ ] 8 sections follow Chapter 4 component pattern
-- [ ] Learning objectives for each section
-- [ ] Navigation paths match UI structure
-- [ ] Step-by-step procedures with clear numbered steps
-- [ ] Manager nomination workflow documented end-to-end
-- [ ] HR review packet workflow documented with status transitions
-- [ ] Signal summary and confidence calculations documented
-- [ ] TOC navigation anchors (sec-5-1 through sec-5-8)
-- [ ] Updated read time in successionManual.ts (90 min)
-- [ ] Chapter now includes Manager role in target audience
+**Recommendation:**
+1. Add `development_notes` field to talent_pool_members table
+2. OR remove field from MSS UI and documentation
 
----
+### GAP 4: Supporting Tables Not Referenced
+**Severity: LOW**
 
-## Estimated Implementation Effort
+Section 5.7 describes evidence integration conceptually but doesn't reference:
+- `talent_profile_evidence` table (13 fields)
+- `talent_signal_snapshots` table (18 fields)
+- `talent_signal_definitions` table (15 fields)
 
-| Phase | Task | Files | Lines | Hours |
-|-------|------|-------|-------|-------|
-| 1 | Create directory + index.ts | 1 | ~25 | 0.5 |
-| 2 | TalentPoolOverview.tsx | 1 | ~400 | 2 |
-| 2 | TalentPoolTypes.tsx | 1 | ~350 | 2 |
-| 2 | TalentPoolCreation.tsx | 1 | ~450 | 2.5 |
-| 2 | TalentPoolMembers.tsx | 1 | ~400 | 2 |
-| 2 | TalentPoolNomination.tsx (NEW) | 1 | ~400 | 2.5 |
-| 2 | TalentPoolHRReview.tsx (NEW) | 1 | ~450 | 3 |
-| 2 | TalentPoolEvidence.tsx (NEW) | 1 | ~400 | 2.5 |
-| 2 | TalentPoolAnalytics.tsx (NEW) | 1 | ~300 | 1.5 |
-| 3 | Update successionManual.ts | 1 | ~120 | 1 |
-| 4 | Update SuccessionTalentPoolsSection.tsx | 1 | ~80 | 0.5 |
-| **Total** | | **11** | **~3,375** | **~20 hrs** |
+**Recommendation:** Add field reference tables or explicit cross-references to these tables in Section 5.7
+
+### GAP 5: Field Required/Nullable Mismatches
+**Severity: LOW**
+
+Several fields documented as "required: true" are nullable in schema:
+- talent_pools.created_by
+- talent_pool_members.added_by
+
+**Recommendation:** Update documentation to reflect actual DB constraints
 
 ---
 
-## Key Differentiators from Other Chapters
+## Remediation Plan
 
-| Aspect | Chapter 5 Unique Features |
-|--------|--------------------------|
-| User Roles | Managers actively participate (nomination) |
-| Workflow | Nomination → HR Review → Approval chain |
-| Evidence | Real-time signal summary and confidence scoring |
-| Decision Support | Bias risk detection, data freshness indicators |
-| Cross-Module | Integrates talent signals from 360 Feedback |
+### Phase 1: Documentation Corrections (No Code Changes)
 
-This restructure ensures Chapter 5 documents the complete talent pool management lifecycle, from strategic pool design through manager-driven nominations to HR evidence-based approval decisions.
+| Task | File | Change |
+|------|------|--------|
+| 1.1 | TalentPoolCreation.tsx | Fix `start_date` to required: true, `created_by` to required: false |
+| 1.2 | TalentPoolMembers.tsx | Fix `start_date` to required: true, `added_by` to required: false |
+| 1.3 | TalentPoolMembers.tsx | Add note that status values are not DB-enforced; simplify lifecycle diagram |
+| 1.4 | TalentPoolMembers.tsx | Mark "Graduate to Succession" as roadmap/future feature |
+| 1.5 | TalentPoolHRReview.tsx | Clarify that review SLA is policy-based, not system-enforced |
+| 1.6 | TalentPoolNomination.tsx | Note that recommended_development is captured for display only |
+| 1.7 | TalentPoolEvidence.tsx | Add field reference tables for supporting evidence tables |
+
+### Phase 2: Code Enhancements (Optional, Feature Alignment)
+
+| Task | Files | Change |
+|------|-------|--------|
+| 2.1 | DB Migration | Add CHECK constraint: status IN ('active', 'nominated', 'approved', 'rejected', 'graduated', 'removed') |
+| 2.2 | useSuccession.ts | Add updateMemberStatus function for status transitions |
+| 2.3 | TalentPoolsTab.tsx | Add member status change dropdown instead of delete |
+| 2.4 | DB Migration | Add `development_notes` field to talent_pool_members |
+| 2.5 | MssNominateTalentPoolPage.tsx | Save development recommendations to new field |
+
+### Phase 3: Types Metadata Update
+
+Update `src/types/successionManual.ts` Part 5 to include:
+- Note about supporting tables (talent_profile_evidence, talent_signal_snapshots, talent_signal_definitions)
+- Updated subsection descriptions reflecting actual vs. aspirational features
+
+---
+
+## Industry Alignment Assessment
+
+| Standard | HRplus Implementation | Documentation | Aligned |
+|----------|----------------------|---------------|---------|
+| Talent segmentation (5 pool types) | Yes | Yes (5.2) | YES |
+| JSONB criteria | Yes | Yes (5.3) | YES |
+| Manager nomination workflow | Yes (MSS page) | Yes (5.5) | YES |
+| HR review workflow | Partial (review packets exist) | Yes (5.6) | PARTIAL |
+| Evidence-based decisions | Yes (hooks, UI) | Yes (5.7) | YES |
+| Bias detection | Yes (calculations) | Yes (5.6, 5.7) | YES |
+| Status lifecycle | Partial (only active used) | Yes (6 statuses) | GAP |
+| Graduation to succession | No | Yes (5.4) | GAP |
+| Audit trail | Yes (created_at, reviewed_by) | Yes (5.6) | YES |
+
+---
+
+## Summary
+
+**Overall Alignment Score: 82%**
+
+The Chapter 5 documentation is comprehensive and follows industry standards well. The primary gaps are:
+
+1. **Aspirational vs. Actual:** Some documented workflows (graduation, multi-status lifecycle) aren't fully implemented
+2. **Field constraints:** Minor mismatches between documented required/optional and actual DB nullability
+3. **Supporting tables:** Evidence tables are conceptually documented but lack field-level detail
+
+**Recommendation:** Implement Phase 1 (documentation corrections) immediately to align documentation with current reality. Phase 2 (code enhancements) can be deferred to a feature sprint to implement the documented but missing functionality.
