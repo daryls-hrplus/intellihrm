@@ -530,7 +530,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
     id: 'part-5',
     sectionNumber: '5',
     title: 'Talent Pool Management',
-    description: 'Create, configure, and manage talent pools including nomination workflows, HR review processes, and evidence-based decision support.',
+    description: 'Create, configure, and manage talent pools including nomination workflows, HR review processes, evidence-based decision support, and integration with supporting evidence tables (talent_profile_evidence, talent_signal_snapshots, talent_signal_definitions).',
     contentLevel: 'procedure',
     estimatedReadTime: 90,
     targetRoles: ['Admin', 'HR Partner', 'Manager'],
@@ -581,28 +581,28 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         id: 'sec-5-4',
         sectionNumber: '5.4',
         title: 'Member Management',
-        description: 'Add, review, graduate, and remove talent pool members with status lifecycle',
+        description: 'Add, review, approve, graduate, and remove talent pool members with 6-stage status lifecycle (nominated → approved/rejected → active → graduated/removed). Includes DB-enforced status constraint.',
         contentLevel: 'procedure',
         estimatedReadTime: 12,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
           frequency: 'Quarterly review',
           timing: 'Ongoing operations',
-          benchmark: 'Active pool management for pipeline health'
+          benchmark: 'Active pool management with formal status transitions'
         }
       },
       {
         id: 'sec-5-5',
         sectionNumber: '5.5',
         title: 'Manager Nomination Workflow',
-        description: 'MSS-driven talent nomination with justification requirements and notification triggers',
+        description: 'MSS-driven talent nomination with justification requirements, development recommendations (persisted to development_notes field), and notification triggers',
         contentLevel: 'procedure',
         estimatedReadTime: 15,
         targetRoles: ['Manager'],
         industryContext: {
           frequency: 'Per nomination',
           timing: 'Ongoing operations',
-          benchmark: 'Manager-initiated talent identification with HR validation'
+          benchmark: 'Manager-initiated talent identification with development planning'
         }
       },
       {
@@ -623,7 +623,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         id: 'sec-5-7',
         sectionNumber: '5.7',
         title: 'Evidence-Based Decision Support',
-        description: 'Talent signals, evidence snapshots, signal summary calculations, and leadership indicators',
+        description: 'Talent signals, evidence snapshots, signal summary calculations, and leadership indicators. Integrates with talent_profile_evidence (13 fields), talent_signal_snapshots (18 fields), and talent_signal_definitions (15 fields) tables.',
         contentLevel: 'reference',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'HR Partner'],

@@ -144,6 +144,7 @@ export default function MssNominateTalentPoolPage() {
         added_by: profile?.id,
         status: 'nominated',
         reason: nominationForm.justification,
+        development_notes: nominationForm.recommended_development || null,
       });
 
     if (error) {

@@ -9,8 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Users, Edit, Trash2, UserPlus, Loader2, FileCheck } from 'lucide-react';
-import { TalentPool, TalentPoolMember, useSuccession } from '@/hooks/useSuccession';
+import { Plus, Users, Edit, Trash2, UserPlus, Loader2, FileCheck, MoreHorizontal, CheckCircle2, XCircle, GraduationCap } from 'lucide-react';
+import { TalentPool, TalentPoolMember, TalentPoolMemberStatus, useSuccession } from '@/hooks/useSuccession';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 import { TalentPoolNominationEvidence } from '@/components/talent/pool/TalentPoolNominationEvidence';
@@ -38,6 +39,7 @@ export function TalentPoolsTab({ companyId }: TalentPoolsTabProps) {
     fetchTalentPoolMembers,
     addTalentPoolMember,
     removeTalentPoolMember,
+    updateTalentPoolMemberStatus,
   } = useSuccession(companyId);
 
   const [pools, setPools] = useState<TalentPool[]>([]);
@@ -139,6 +141,41 @@ export function TalentPoolsTab({ companyId }: TalentPoolsTabProps) {
     if (result && selectedPool) {
       loadMembers(selectedPool.id);
       loadPools();
+    }
+  };
+
+  const handleStatusChange = async (memberId: string, newStatus: TalentPoolMemberStatus) => {
+    const statusLabels: Record<string, string> = {
+      approved: 'approve this nomination',
+      rejected: 'reject this nomination',
+      graduated: 'graduate this member to succession planning',
+      removed: 'remove this member from the pool',
+      active: 'activate this member',
+    };
+    
+    if (!confirm(`Are you sure you want to ${statusLabels[newStatus] || 'change the status'}?`)) return;
+    
+    const result = await updateTalentPoolMemberStatus(memberId, newStatus);
+    if (result && selectedPool) {
+      loadMembers(selectedPool.id);
+      loadPools();
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'active':
+      case 'approved':
+        return 'default';
+      case 'nominated':
+        return 'secondary';
+      case 'graduated':
+        return 'outline';
+      case 'rejected':
+      case 'removed':
+        return 'destructive';
+      default:
+        return 'secondary';
     }
   };
 
@@ -295,14 +332,49 @@ export function TalentPoolsTab({ companyId }: TalentPoolsTabProps) {
                           <TableCell>{formatDateForDisplay(member.start_date)}</TableCell>
                           <TableCell>{member.reason || '-'}</TableCell>
                           <TableCell>
-                            <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                            <Badge variant={getStatusBadgeVariant(member.status)}>
                               {member.status}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Button size="sm" variant="ghost" onClick={() => handleRemoveMember(member.id)}>
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="ghost">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-popover">
+                                {member.status === 'nominated' && (
+                                  <>
+                                    <DropdownMenuItem onClick={() => handleStatusChange(member.id, 'approved')}>
+                                      <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                                      Approve
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusChange(member.id, 'rejected')}>
+                                      <XCircle className="h-4 w-4 mr-2 text-red-500" />
+                                      Reject
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                  </>
+                                )}
+                                {(member.status === 'active' || member.status === 'approved') && (
+                                  <>
+                                    <DropdownMenuItem onClick={() => handleStatusChange(member.id, 'graduated')}>
+                                      <GraduationCap className="h-4 w-4 mr-2 text-blue-500" />
+                                      Graduate to Succession
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                  </>
+                                )}
+                                <DropdownMenuItem 
+                                  onClick={() => handleStatusChange(member.id, 'removed')}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Remove from Pool
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       );
