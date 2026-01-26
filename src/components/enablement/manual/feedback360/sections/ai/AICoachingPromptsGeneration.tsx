@@ -1,9 +1,78 @@
 import { LearningObjectives } from '../../../components/LearningObjectives';
 import { StepByStep, Step } from '../../../components/StepByStep';
+import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
 import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
-import { MessageSquare, Lightbulb, Target, TrendingUp } from 'lucide-react';
+import { MessageSquare, Lightbulb, Target, TrendingUp, Database } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+const coachingPromptFields: FieldDefinition[] = [
+  {
+    name: 'prompt_category',
+    required: true,
+    type: 'enum',
+    description: 'Category: strength, development, blind_spot, exploration',
+    defaultValue: '—',
+    validation: 'Valid category'
+  },
+  {
+    name: 'prompt_text',
+    required: true,
+    type: 'text',
+    description: 'The AI-generated coaching question or conversation starter',
+    defaultValue: '—',
+    validation: 'Non-empty'
+  },
+  {
+    name: 'source_theme_id',
+    required: false,
+    type: 'UUID',
+    description: 'Link to development_themes that generated this prompt',
+    defaultValue: 'null',
+    validation: 'Valid theme ID'
+  },
+  {
+    name: 'source_signal_ids',
+    required: false,
+    type: 'UUID[]',
+    description: 'Array of talent signals used to generate the prompt',
+    defaultValue: '[]',
+    validation: 'Array of UUIDs'
+  },
+  {
+    name: 'confidence_score',
+    required: false,
+    type: 'decimal',
+    description: 'AI confidence in prompt relevance (0-1)',
+    defaultValue: 'null',
+    validation: '0.0 - 1.0'
+  },
+  {
+    name: 'is_starred',
+    required: false,
+    type: 'boolean',
+    description: 'Manager saved this prompt for use',
+    defaultValue: 'false',
+    validation: 'Boolean'
+  },
+  {
+    name: 'is_used',
+    required: false,
+    type: 'boolean',
+    description: 'Manager used this prompt in a coaching conversation',
+    defaultValue: 'false',
+    validation: 'Boolean'
+  },
+  {
+    name: 'manager_notes',
+    required: false,
+    type: 'text',
+    description: 'Manager notes from coaching conversation',
+    defaultValue: 'null',
+    validation: 'Free text'
+  }
+];
 
 const learningObjectives = [
   'Understand the four categories of coaching prompts',
@@ -253,6 +322,22 @@ export function AICoachingPromptsGeneration() {
       </Card>
 
       <StepByStep steps={usageSteps} title="Using Coaching Prompts" />
+
+      <FieldReferenceTable 
+        fields={coachingPromptFields} 
+        title="Coaching Prompts Fields (feedback_coaching_prompts)" 
+      />
+
+      {/* Database Note */}
+      <Alert className="border-green-200 bg-green-50 dark:bg-green-950/50">
+        <Database className="h-4 w-4 text-green-600" />
+        <AlertTitle>Database Architecture</AlertTitle>
+        <AlertDescription>
+          Coaching prompts are stored in the <code className="bg-green-100 dark:bg-green-900 px-1 rounded text-xs">feedback_coaching_prompts</code> table 
+          with full traceability to source themes and signals. Manager interactions (starring, using, noting) 
+          are tracked for analytics on prompt effectiveness and adoption rates.
+        </AlertDescription>
+      </Alert>
 
       <TroubleshootingSection items={troubleshootingItems} />
 

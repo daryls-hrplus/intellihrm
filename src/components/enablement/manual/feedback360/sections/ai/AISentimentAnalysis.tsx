@@ -1,8 +1,9 @@
 import { LearningObjectives } from '../../../components/LearningObjectives';
 import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
-import { TrendingUp, MessageCircle, BarChart3, AlertTriangle } from 'lucide-react';
+import { TrendingUp, MessageCircle, BarChart3, AlertTriangle, Database, Info } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const learningObjectives = [
   'Understand how sentiment is detected and classified',
@@ -207,9 +208,21 @@ export function AISentimentAnalysis() {
         </CardContent>
       </Card>
 
+      {/* Database Architecture Note */}
+      <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/50">
+        <Database className="h-4 w-4 text-blue-600" />
+        <AlertTitle>Data Architecture</AlertTitle>
+        <AlertDescription>
+          Sentiment analysis results are stored as metadata within the <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded text-xs">feedback_360_responses</code> table 
+          using JSONB fields (<code className="bg-blue-100 dark:bg-blue-900 px-1 rounded text-xs">ai_analysis_metadata</code>). 
+          For pulse surveys and continuous feedback, sentiment is stored in <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded text-xs">pulse_sentiment_analysis</code>.
+          This design minimizes table proliferation while maintaining query performance through JSONB indexing.
+        </AlertDescription>
+      </Alert>
+
       <FieldReferenceTable 
         fields={sentimentFields} 
-        title="Sentiment Analysis Fields" 
+        title="Sentiment Analysis Fields (stored in ai_analysis_metadata JSONB)" 
       />
 
       {/* Important Warning */}

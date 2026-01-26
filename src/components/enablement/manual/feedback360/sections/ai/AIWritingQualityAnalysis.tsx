@@ -17,7 +17,7 @@ const qualityFields: FieldDefinition[] = [
   {
     name: 'clarity_score',
     required: false,
-    type: 'integer',
+    type: 'decimal',
     description: 'How clear and understandable the feedback is (0-100)',
     defaultValue: 'null',
     validation: '0-100'
@@ -25,7 +25,7 @@ const qualityFields: FieldDefinition[] = [
   {
     name: 'specificity_score',
     required: false,
-    type: 'integer',
+    type: 'decimal',
     description: 'How specific vs. vague the feedback is (0-100)',
     defaultValue: 'null',
     validation: '0-100'
@@ -33,7 +33,7 @@ const qualityFields: FieldDefinition[] = [
   {
     name: 'bias_risk_score',
     required: false,
-    type: 'integer',
+    type: 'decimal',
     description: 'Inverse of bias detection - higher is less biased (0-100)',
     defaultValue: 'null',
     validation: '0-100'
@@ -41,7 +41,7 @@ const qualityFields: FieldDefinition[] = [
   {
     name: 'behavioral_focus_score',
     required: false,
-    type: 'integer',
+    type: 'decimal',
     description: 'How focused on observable behaviors vs. personality (0-100)',
     defaultValue: 'null',
     validation: '0-100'
@@ -49,7 +49,7 @@ const qualityFields: FieldDefinition[] = [
   {
     name: 'overall_quality_score',
     required: false,
-    type: 'integer',
+    type: 'decimal',
     description: 'Weighted composite of all dimensions (0-100)',
     defaultValue: 'null',
     validation: '0-100'

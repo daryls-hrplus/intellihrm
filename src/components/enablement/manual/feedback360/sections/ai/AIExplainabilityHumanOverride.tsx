@@ -50,6 +50,12 @@ const actionTypes = [
     description: 'Generating manager conversation starters',
     confidence: 'Optional',
     humanReview: 'Optional customization'
+  },
+  {
+    type: 'incident_response',
+    description: 'Documenting AI-related incidents and remediation',
+    confidence: 'N/A',
+    humanReview: 'Required - full documentation'
   }
 ];
 
