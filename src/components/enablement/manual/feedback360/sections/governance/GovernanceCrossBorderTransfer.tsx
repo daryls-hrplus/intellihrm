@@ -3,7 +3,7 @@ import { StepByStep, Step } from '../../../components/StepByStep';
 import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
 import { BusinessRules, BusinessRule } from '../../../components/BusinessRules';
 import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
-import { Globe, ArrowRight, Shield, MapPin } from 'lucide-react';
+import { Globe, ArrowRight, Shield, MapPin, Info } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -323,6 +323,24 @@ export function GovernanceCrossBorderTransfer() {
         <AlertDescription className="text-blue-700 dark:text-blue-300">
           This section implements cross-border transfer requirements per GDPR Articles 44-49 and aligns with 
           regional data protection laws in the Caribbean and Africa for multinational 360 feedback operations.
+        </AlertDescription>
+      </Alert>
+
+      {/* Implementation Architecture Note */}
+      <Alert className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+        <Info className="h-4 w-4 text-green-600" />
+        <AlertTitle className="text-green-800 dark:text-green-200">Implementation Architecture</AlertTitle>
+        <AlertDescription className="text-green-700 dark:text-green-300">
+          <p className="mb-2">
+            The <code className="text-xs bg-green-100 dark:bg-green-900 px-1 rounded">feedback_data_transfer_records</code> table 
+            is fully implemented for transfer documentation. Per enterprise data governance standards, cross-border transfer 
+            management is typically administered via Data Governance platforms (Collibra, Informatica, BigID) or Legal/Compliance 
+            contract management systems.
+          </p>
+          <p className="text-sm">
+            <strong>Integration Pattern:</strong> Legal/Compliance teams document transfers during vendor onboarding; the 360 Feedback 
+            module enforces regional data residency and logs all cross-border data flows for audit.
+          </p>
         </AlertDescription>
       </Alert>
 

@@ -3,7 +3,7 @@ import { StepByStep, Step } from '../../../components/StepByStep';
 import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
 import { BusinessRules, BusinessRule } from '../../../components/BusinessRules';
 import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
-import { UserCheck, ArrowRight, Shield, Clock, AlertTriangle } from 'lucide-react';
+import { UserCheck, ArrowRight, Shield, Clock, AlertTriangle, Info } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -285,6 +285,24 @@ export function GovernanceDataSubjectRights() {
         <AlertDescription className="text-blue-700 dark:text-blue-300">
           This section implements data subject rights per GDPR Articles 15-22 and aligns with enterprise HRMS governance 
           standards (Workday, SAP SuccessFactors) for handling employee data requests.
+        </AlertDescription>
+      </Alert>
+
+      {/* Implementation Architecture Note */}
+      <Alert className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+        <Info className="h-4 w-4 text-green-600" />
+        <AlertTitle className="text-green-800 dark:text-green-200">Implementation Architecture</AlertTitle>
+        <AlertDescription className="text-green-700 dark:text-green-300">
+          <p className="mb-2">
+            The <code className="text-xs bg-green-100 dark:bg-green-900 px-1 rounded">feedback_dsar_requests</code> table 
+            is fully implemented and ready for data storage. Per enterprise HRMS standards (Workday, SAP SuccessFactors), 
+            DSAR workflows are typically managed via dedicated GRC platforms (OneTrust, ServiceNow, TrustArc) rather than 
+            embedded module UIs.
+          </p>
+          <p className="text-sm">
+            <strong>Integration Pattern:</strong> External GRC tools write to this table via API; the 360 Feedback module 
+            enforces data restrictions and logs all access for audit compliance.
+          </p>
         </AlertDescription>
       </Alert>
 
