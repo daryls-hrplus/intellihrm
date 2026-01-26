@@ -188,13 +188,15 @@ const DIAGNOSTIC_STEPS = [
   }
 ];
 
-const FIELD_REFERENCES = [
-  { field: 'status', table: 'feedback_360_cycles', description: 'Cycle lifecycle state: draft, nomination, collection, processing, review, released, closed' },
-  { field: 'anonymity_threshold', table: 'feedback_360_rater_categories', description: 'Minimum responses required before data is aggregated (default: 3)' },
-  { field: 'is_active', table: 'feedback_360_questions', description: 'Whether question is available for assignment to cycles' },
-  { field: 'weight_percentage', table: 'feedback_360_rater_categories', description: 'Contribution weight for this category to overall score (0-100)' },
-  { field: 'framework_id', table: 'feedback_360_cycles', description: 'Assigned competency framework for this cycle' },
-  { field: 'external_raters_enabled', table: 'feedback_360_cycles', description: 'Whether non-employee raters can participate' }
+import { FieldDefinition } from '../../../components/FieldReferenceTable';
+
+const FIELD_REFERENCES: FieldDefinition[] = [
+  { name: 'feedback_360_cycles.status', required: true, type: 'enum', description: 'Cycle lifecycle state: draft, nomination, collection, processing, review, released, closed' },
+  { name: 'feedback_360_rater_categories.anonymity_threshold', required: true, type: 'integer', description: 'Minimum responses required before data is aggregated (default: 3)' },
+  { name: 'feedback_360_questions.is_active', required: true, type: 'boolean', description: 'Whether question is available for assignment to cycles' },
+  { name: 'feedback_360_rater_categories.weight_percentage', required: true, type: 'integer', description: 'Contribution weight for this category to overall score (0-100)' },
+  { name: 'feedback_360_cycles.framework_id', required: false, type: 'uuid', description: 'Assigned competency framework for this cycle' },
+  { name: 'feedback_360_cycles.external_raters_enabled', required: true, type: 'boolean', description: 'Whether non-employee raters can participate' }
 ];
 
 export function F360CommonIssuesSection() {
@@ -250,7 +252,7 @@ export function F360CommonIssuesSection() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <StepByStep steps={DIAGNOSTIC_STEPS} variant="numbered" />
+          <StepByStep steps={DIAGNOSTIC_STEPS} />
         </CardContent>
       </Card>
 

@@ -131,13 +131,15 @@ const THRESHOLD_GUIDE = [
   { category: 'External', isAnonymous: true, minRaters: 2, threshold: '2-3 based on pool size' }
 ];
 
-const FIELD_REFERENCES = [
-  { field: 'is_anonymous', table: 'feedback_360_rater_categories', description: 'Whether responses in this category are aggregated for privacy' },
-  { field: 'anonymity_threshold', table: 'feedback_360_rater_categories', description: 'Minimum responses required before category data is shown' },
-  { field: 'consent_status', table: 'feedback_consent_records', description: 'Participant consent state: pending, granted, declined, expired' },
-  { field: 'can_view_rater_breakdown', table: 'feedback_360_visibility_rules', description: 'Whether user can see scores by rater category' },
-  { field: 'k_anonymity_threshold', table: 'feedback_360_analytics_config', description: 'Minimum individuals in any data intersection (default: 5)' },
-  { field: 'investigation_mode', table: 'feedback_360_cycles', description: 'Whether non-aggregated access is enabled for investigations' }
+import { FieldDefinition } from '../../../components/FieldReferenceTable';
+
+const FIELD_REFERENCES: FieldDefinition[] = [
+  { name: 'feedback_360_rater_categories.is_anonymous', required: true, type: 'boolean', description: 'Whether responses in this category are aggregated for privacy' },
+  { name: 'feedback_360_rater_categories.anonymity_threshold', required: true, type: 'integer', description: 'Minimum responses required before category data is shown' },
+  { name: 'feedback_consent_records.consent_status', required: true, type: 'enum', description: 'Participant consent state: pending, granted, declined, expired' },
+  { name: 'feedback_360_visibility_rules.can_view_rater_breakdown', required: true, type: 'boolean', description: 'Whether user can see scores by rater category' },
+  { name: 'feedback_360_analytics_config.k_anonymity_threshold', required: true, type: 'integer', description: 'Minimum individuals in any data intersection (default: 5)' },
+  { name: 'feedback_360_cycles.investigation_mode', required: true, type: 'boolean', description: 'Whether non-aggregated access is enabled for investigations' }
 ];
 
 export function F360AnonymityPrivacyIssues() {
