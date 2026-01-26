@@ -1064,43 +1064,128 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
     ]
   },
   // ========================================================================
-  // PART 7: INTEGRATION & ADVANCED
+  // PART 7: INTEGRATION & CROSS-MODULE FEATURES
   // ========================================================================
   {
     id: 'part-7',
     sectionNumber: '7',
-    title: 'Integration & Advanced',
-    description: 'System integrations and advanced configuration options',
-    contentLevel: 'reference',
-    estimatedReadTime: 20,
-    targetRoles: ['Admin', 'Consultant'],
+    title: 'Integration & Cross-Module Features',
+    description: 'Comprehensive cross-module integration patterns connecting 360 Feedback with Appraisals, Talent Management, Succession Planning, IDP, Learning, and Continuous Feedback systems following industry-standard HRMS integration architectures.',
+    contentLevel: 'procedure',
+    estimatedReadTime: 100,
+    targetRoles: ['Admin', 'Consultant', 'HR Partner'],
     subsections: [
       {
         id: 'sec-7-1',
         sectionNumber: '7.1',
-        title: 'Performance Index Integration',
-        description: 'How 360 scores contribute to the unified Performance Index',
+        title: 'Integration Architecture Overview',
+        description: 'System architecture showing data flows between 360 Feedback and other HRplus modules, consent gates, policy enforcement, and bidirectional synchronization patterns.',
         contentLevel: 'concept',
-        estimatedReadTime: 8,
-        targetRoles: ['Admin', 'Consultant']
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'One-time understanding',
+          timing: 'Pre-implementation planning',
+          benchmark: 'SAP SuccessFactors integration-first design pattern'
+        }
       },
       {
         id: 'sec-7-2',
         sectionNumber: '7.2',
-        title: 'Succession Planning Links',
-        description: 'Using 360 data for talent calibration and succession readiness',
-        contentLevel: 'concept',
-        estimatedReadTime: 7,
-        targetRoles: ['Admin', 'HR Partner']
+        title: 'Appraisal Integration',
+        description: 'CRGV+360 model integration, score contribution calculation, weighted scoring, timing dependencies, and appraisal cycle linkage configuration.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per cycle configuration',
+          timing: 'Before 360 cycle activation',
+          benchmark: 'Multi-source feedback as 5th CRGV component'
+        }
       },
       {
         id: 'sec-7-3',
         sectionNumber: '7.3',
+        title: 'Talent Profile Integration',
+        description: 'Signal snapshot generation, talent card updates, consent gate enforcement, and aggregation with k-anonymity preservation.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per cycle completion',
+          timing: 'Post-results processing',
+          benchmark: 'Talent signal snapshot versioning per cycle'
+        }
+      },
+      {
+        id: 'sec-7-4',
+        sectionNumber: '7.4',
+        title: 'Nine-Box & Succession Integration',
+        description: 'Performance axis mapping from 360 scores, succession readiness updates, Nine-Box signal configuration, and candidate pool refreshes.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Per cycle or quarterly',
+          timing: 'Post-360 results release',
+          benchmark: '360 feeds Performance axis; Potential remains separate assessment'
+        }
+      },
+      {
+        id: 'sec-7-5',
+        sectionNumber: '7.5',
+        title: 'IDP & Development Planning',
+        description: 'Development theme to IDP goal linking, three link types (derived, informed, validated), manager approval workflows, and goal auto-creation.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per cycle completion',
+          timing: 'Post-theme generation',
+          benchmark: 'Manager-validated theme-to-goal linking'
+        }
+      },
+      {
+        id: 'sec-7-6',
+        sectionNumber: '7.6',
         title: 'Learning Recommendations',
-        description: 'Triggering learning paths based on 360 feedback patterns',
-        contentLevel: 'concept',
-        estimatedReadTime: 5,
-        targetRoles: ['Admin']
+        description: 'Skill gap detection from themes, AI-powered course matching, competency-to-training mapping, and LMS synchronization.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Per cycle completion',
+          timing: 'Post-theme confirmation',
+          benchmark: 'Competency-based gap to course mapping'
+        }
+      },
+      {
+        id: 'sec-7-7',
+        sectionNumber: '7.7',
+        title: 'Continuous Feedback Connection',
+        description: 'Linking formal 360 cycles with ongoing check-ins, evidence collection, signal continuity, and manager coaching prompt integration.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Continuous',
+          timing: 'Between formal cycles',
+          benchmark: 'Formal-informal feedback loop integration'
+        }
+      },
+      {
+        id: 'sec-7-8',
+        sectionNumber: '7.8',
+        title: 'Integration Rules Configuration',
+        description: 'Automation rule setup, 360-specific triggers, condition definitions, target module actions, approval workflows, and execution logging.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'One-time setup, periodic review',
+          timing: 'Pre-implementation',
+          benchmark: 'Event-driven cross-module orchestration'
+        }
       }
     ]
   },
