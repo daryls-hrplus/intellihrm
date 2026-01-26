@@ -524,15 +524,15 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 5: TALENT POOL MANAGEMENT (~90 min)
+  // PART 5: TALENT POOL MANAGEMENT (~110 min)
   // ==========================================================================
   {
     id: 'part-5',
     sectionNumber: '5',
     title: 'Talent Pool Management',
-    description: 'Create, configure, and manage talent pools including nomination workflows, HR review processes, evidence-based decision support, and integration with supporting evidence tables (talent_profile_evidence, talent_signal_snapshots, talent_signal_definitions).',
+    description: 'Create, configure, and manage talent pools including nomination workflows, HR review processes, evidence-based decision support, notifications, reminders, and HR Hub integration.',
     contentLevel: 'procedure',
-    estimatedReadTime: 90,
+    estimatedReadTime: 110,
     targetRoles: ['Admin', 'HR Partner', 'Manager'],
     subsections: [
       {
@@ -646,29 +646,71 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
           timing: 'Review cycles',
           benchmark: 'Gartner talent pipeline management metrics'
         }
+      },
+      {
+        id: 'sec-5-9',
+        sectionNumber: '5.9',
+        title: 'Notifications & Reminders',
+        description: 'Configure succession-specific reminder event types (SUCCESSION_UPDATED, talent_review_reminder, successor_assessment_due, development_plan_action) with reminder rules and automated triggers.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup',
+          timing: 'Post pool configuration',
+          benchmark: 'Proactive notifications reduce missed review cycles by 40%'
+        }
+      },
+      {
+        id: 'sec-5-10',
+        sectionNumber: '5.10',
+        title: 'HR Hub Integration',
+        description: 'Navigate succession from HR Hub Integration Dashboard, configure transaction workflow settings (company_transaction_workflow_settings), and view pending approvals.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'Post workflow setup',
+          benchmark: 'Centralized HR Hub reduces context switching by 50%'
+        }
       }
     ]
   },
 
   // ==========================================================================
-  // PART 6: SUCCESSION PLANNING WORKFLOW (~90 min)
+  // PART 6: SUCCESSION PLANNING WORKFLOW (~120 min)
   // ==========================================================================
   {
     id: 'part-6',
     sectionNumber: '6',
     title: 'Succession Planning Workflow',
-    description: 'End-to-end succession planning from key position identification to development plan execution.',
+    description: 'End-to-end succession planning from key position identification to development plan execution, including candidate management, evidence collection, and workflow approvals.',
     contentLevel: 'procedure',
-    estimatedReadTime: 90,
-    targetRoles: ['Admin', 'HR Partner'],
+    estimatedReadTime: 120,
+    targetRoles: ['Admin', 'HR Partner', 'Manager'],
     subsections: [
       {
         id: 'sec-6-1',
         sectionNumber: '6.1',
+        title: 'Succession Planning Overview',
+        description: '8-stage lifecycle (Identify → Plan → Nominate → Assess → Develop → Evidence → Review → Promote), persona responsibilities, and cross-module integration architecture.',
+        contentLevel: 'concept',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner', 'Manager'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'Pre-operations',
+          benchmark: 'Workday/SAP SuccessFactors succession lifecycle patterns'
+        }
+      },
+      {
+        id: 'sec-6-2',
+        sectionNumber: '6.2',
         title: 'Key Position Identification',
-        description: 'Mark positions as key/critical with business impact scoring and risk assessment',
+        description: 'Mark positions as key/critical using jobs.is_key_position flag with business impact assessment and navigation via KeyPositionsTab.',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 12,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
           frequency: 'Annual review',
@@ -677,27 +719,41 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         }
       },
       {
-        id: 'sec-6-2',
-        sectionNumber: '6.2',
-        title: 'Succession Plan Creation',
-        description: 'Create succession plans for key positions with timeframes and coverage targets',
+        id: 'sec-6-3',
+        sectionNumber: '6.3',
+        title: 'Position Risk Assessment',
+        description: 'Field reference for key_position_risks table (16 fields): criticality_level, vacancy_risk, retirement_risk, flight_risk, impact_if_vacant, and mitigation planning.',
         contentLevel: 'procedure',
-        estimatedReadTime: 20,
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Quarterly review',
+          timing: 'Post key position identification',
+          benchmark: 'Risk-weighted succession prioritization'
+        }
+      },
+      {
+        id: 'sec-6-4',
+        sectionNumber: '6.4',
+        title: 'Succession Plan Creation',
+        description: 'Field reference for succession_plans table (23 fields): plan_name, risk_level, priority, position_criticality, replacement_difficulty, and calculated risk scoring.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
         targetRoles: ['Admin'],
         industryContext: {
           frequency: 'Per key position',
-          timing: 'Post position identification',
+          timing: 'Post risk assessment',
           benchmark: '2-3 ready successors per key position'
         }
       },
       {
-        id: 'sec-6-3',
-        sectionNumber: '6.3',
+        id: 'sec-6-5',
+        sectionNumber: '6.5',
         title: 'Candidate Nomination & Ranking',
-        description: 'Nominate candidates, assess readiness, and establish succession order',
+        description: 'Field reference for succession_candidates table (20 fields): readiness_level, ranking, strengths, development_areas, values promotion check, and leadership signals.',
         contentLevel: 'procedure',
-        estimatedReadTime: 20,
-        targetRoles: ['Admin', 'HR Partner'],
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'HR Partner', 'Manager'],
         industryContext: {
           frequency: 'Per plan',
           timing: 'Post plan creation',
@@ -705,45 +761,73 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         }
       },
       {
-        id: 'sec-6-4',
-        sectionNumber: '6.4',
-        title: 'Readiness Assessment Execution',
-        description: 'Conduct readiness assessments, collect evidence, and determine readiness bands',
+        id: 'sec-6-6',
+        sectionNumber: '6.6',
+        title: 'Readiness Assessment Integration',
+        description: 'Cross-reference to Chapter 4 workflow, automatic sync of latest_readiness_score and latest_readiness_band to succession_candidates, and SUCCESSION_READINESS_APPROVAL workflow trigger.',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['Admin'],
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
           frequency: 'Per candidate',
           timing: 'Post nomination',
-          benchmark: 'Multi-assessor validation for objective placement'
+          benchmark: 'Multi-assessor validation for objective readiness placement'
         }
       },
       {
-        id: 'sec-6-5',
-        sectionNumber: '6.5',
-        title: 'Development Plan Linking',
-        description: 'Connect succession gaps to IDP goals, learning assignments, and stretch projects',
+        id: 'sec-6-7',
+        sectionNumber: '6.7',
+        title: 'Development Plan Management',
+        description: 'Field reference for succession_development_plans table (13 fields): development_type (training/project/mentoring/assignment/other), progress tracking, and status lifecycle.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per candidate',
+          timing: 'Post readiness assessment',
+          benchmark: 'Development-driven readiness acceleration reduces time-to-ready by 25%'
+        }
+      },
+      {
+        id: 'sec-6-8',
+        sectionNumber: '6.8',
+        title: 'Gap-to-Development Linking',
+        description: 'Field reference for succession_gap_development_links table (12 fields): link gaps to IDP items (linked_idp_item_id) and LMS courses (linked_learning_id) with severity tracking.',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin'],
         industryContext: {
-          frequency: 'Per candidate',
-          timing: 'Post readiness assessment',
-          benchmark: 'Development-driven succession readiness acceleration'
+          frequency: 'Per identified gap',
+          timing: 'Post development plan creation',
+          benchmark: 'Cross-module integration following SAP SuccessFactors patterns'
         }
       },
       {
-        id: 'sec-6-6',
-        sectionNumber: '6.6',
+        id: 'sec-6-9',
+        sectionNumber: '6.9',
         title: 'Candidate Evidence Collection',
-        description: 'Document accomplishments, certifications, and readiness evidence for candidates',
+        description: 'Field reference for succession_candidate_evidence table (10 fields): evidence_type (nine_box/signal_snapshot/manual), signal_summary JSONB, leadership_indicators JSONB, and readiness_contribution.',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
           frequency: 'Ongoing',
           timing: 'Throughout planning cycle',
-          benchmark: 'Evidence-based succession decisions'
+          benchmark: 'SOC 2 compliant evidence trail for succession decisions'
+        }
+      },
+      {
+        id: 'sec-6-10',
+        sectionNumber: '6.10',
+        title: 'Workflow & Approval Configuration',
+        description: 'Configure SUCCESSION_READINESS_APPROVAL workflow template, transaction types (PERF_SUCCESSION_APPROVAL, SUCC_READINESS_APPROVAL), and company_transaction_workflow_settings.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup',
+          timing: 'Post initial configuration',
+          benchmark: 'Multi-level approval workflows following enterprise HR patterns'
         }
       }
     ]
