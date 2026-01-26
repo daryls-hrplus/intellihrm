@@ -10,7 +10,10 @@ import {
   AIIDPLearningIntegration,
   AIRemeasurementTracking,
   AICrossModuleIntelligence,
-  AIExplainabilityHumanOverride
+  AIExplainabilityHumanOverride,
+  AIIncidentResponseProcedure,
+  AISLAHumanReviewConfig,
+  AIModelDriftMonitoring
 } from './sections/ai';
 import { Brain } from 'lucide-react';
 
@@ -29,18 +32,34 @@ export function F360AISection() {
         </p>
       </div>
 
+      {/* Group A: Foundation */}
       <AICapabilitiesOverview />
+      
+      {/* Group B: Core Processing */}
       <AISignalProcessingEngine />
       <AIDevelopmentThemeGeneration />
+      
+      {/* Group C: Real-Time Analysis */}
       <AIWritingQualityAnalysis />
       <AIBiasDetectionWarnings />
       <AISentimentAnalysis />
+      
+      {/* Group D: Insight Generation */}
       <AIBlindSpotIdentification />
       <AICoachingPromptsGeneration />
+      
+      {/* Group E: Development Integration */}
       <AIIDPLearningIntegration />
       <AIRemeasurementTracking />
+      
+      {/* Group F: Cross-Module Intelligence */}
       <AICrossModuleIntelligence />
+      
+      {/* Group G: AI Governance */}
       <AIExplainabilityHumanOverride />
+      <AIIncidentResponseProcedure />
+      <AISLAHumanReviewConfig />
+      <AIModelDriftMonitoring />
     </div>
   );
 }
