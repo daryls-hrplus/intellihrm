@@ -1,5 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlayCircle, Clock } from 'lucide-react';
+import {
+  SuccessionPlanningOverview,
+  KeyPositionIdentification,
+  PositionRiskAssessment,
+  SuccessionPlanCreation,
+  CandidateNominationRanking,
+  ReadinessAssessmentIntegration,
+  DevelopmentPlanManagement,
+  GapDevelopmentLinking,
+  CandidateEvidenceCollection,
+  WorkflowApprovalConfiguration
+} from './sections/successionplans';
 
 export function SuccessionPlansSection() {
   return (
@@ -13,45 +24,49 @@ export function SuccessionPlansSection() {
           <div>
             <h2 className="text-2xl font-bold">6. Succession Planning Workflow</h2>
             <p className="text-muted-foreground">
-              End-to-end succession planning from key position identification to development plan execution
+              End-to-end succession planning from key position identification to development plan execution,
+              including candidate management, evidence collection, and workflow approvals
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            ~90 min read
+            ~120 min read
           </span>
-          <span>Target: Admin, HR Partner</span>
+          <span>Target: Admin, HR Partner, Manager</span>
         </div>
       </section>
 
-      {/* Placeholder Sections */}
-      {['sec-6-1', 'sec-6-2', 'sec-6-3', 'sec-6-4', 'sec-6-5', 'sec-6-6'].map((secId, index) => {
-        const titles = [
-          '6.1 Key Position Identification',
-          '6.2 Succession Plan Creation',
-          '6.3 Candidate Nomination & Ranking',
-          '6.4 Readiness Assessment Execution',
-          '6.5 Development Plan Linking',
-          '6.6 Candidate Evidence Collection'
-        ];
-        return (
-          <section key={secId} id={secId} data-manual-anchor={secId} className="scroll-mt-32 space-y-6">
-            <div className="border-l-4 border-orange-500 pl-4">
-              <h3 className="text-xl font-semibold">{titles[index]}</h3>
-            </div>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-muted-foreground">
-                  Detailed content for this section will be populated in subsequent content iterations. 
-                  This section will cover comprehensive procedures and configuration guidance.
-                </p>
-              </CardContent>
-            </Card>
-          </section>
-        );
-      })}
+      {/* Section 6.1: Overview */}
+      <SuccessionPlanningOverview />
+
+      {/* Section 6.2: Key Position Identification */}
+      <KeyPositionIdentification />
+
+      {/* Section 6.3: Position Risk Assessment */}
+      <PositionRiskAssessment />
+
+      {/* Section 6.4: Succession Plan Creation */}
+      <SuccessionPlanCreation />
+
+      {/* Section 6.5: Candidate Nomination & Ranking */}
+      <CandidateNominationRanking />
+
+      {/* Section 6.6: Readiness Assessment Integration */}
+      <ReadinessAssessmentIntegration />
+
+      {/* Section 6.7: Development Plan Management */}
+      <DevelopmentPlanManagement />
+
+      {/* Section 6.8: Gap-Development Linking */}
+      <GapDevelopmentLinking />
+
+      {/* Section 6.9: Candidate Evidence Collection */}
+      <CandidateEvidenceCollection />
+
+      {/* Section 6.10: Workflow & Approval Configuration */}
+      <WorkflowApprovalConfiguration />
     </div>
   );
 }

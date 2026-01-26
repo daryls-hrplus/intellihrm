@@ -7,7 +7,9 @@ import {
   TalentPoolNomination,
   TalentPoolHRReview,
   TalentPoolEvidence,
-  TalentPoolAnalytics
+  TalentPoolAnalytics,
+  TalentPoolNotifications,
+  TalentPoolHRHubIntegration
 } from './sections/talentpools';
 
 export function SuccessionTalentPoolsSection() {
@@ -23,14 +25,14 @@ export function SuccessionTalentPoolsSection() {
             <h2 className="text-2xl font-bold">5. Talent Pool Management</h2>
             <p className="text-muted-foreground">
               Create, configure, and manage talent pools including nomination workflows, 
-              HR review processes, and evidence-based decision support
+              HR review processes, evidence-based decision support, and HR Hub integration
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            ~90 min read
+            ~110 min read
           </span>
           <span>Target: Admin, HR Partner, Manager</span>
         </div>
@@ -59,6 +61,12 @@ export function SuccessionTalentPoolsSection() {
 
       {/* Section 5.8: Analytics */}
       <TalentPoolAnalytics />
+
+      {/* Section 5.9: Notifications & Reminders */}
+      <TalentPoolNotifications />
+
+      {/* Section 5.10: HR Hub Integration */}
+      <TalentPoolHRHubIntegration />
     </div>
   );
 }
