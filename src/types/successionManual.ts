@@ -397,85 +397,127 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 4: READINESS ASSESSMENT FRAMEWORK (~75 min)
+  // PART 4: READINESS ASSESSMENT WORKFLOW (~120 min)
   // ==========================================================================
   {
     id: 'part-4',
     sectionNumber: '4',
-    title: 'Readiness Assessment Framework',
-    description: 'Design readiness indicators, build assessment forms, configure scoring, and set up multi-assessor workflows.',
+    title: 'Readiness Assessment Workflow',
+    description: 'Execute readiness assessments from initiation through completion, including multi-assessor workflows, score calculation, and candidate updates.',
     contentLevel: 'procedure',
-    estimatedReadTime: 75,
-    targetRoles: ['Admin', 'Consultant', 'HR Partner'],
+    estimatedReadTime: 120,
+    targetRoles: ['Admin', 'HR Partner', 'Manager'],
     subsections: [
       {
         id: 'sec-4-1',
         sectionNumber: '4.1',
-        title: 'Readiness Indicators Design',
-        description: 'Create weighted indicators for experience, competency gaps, mobility, and readiness signals',
-        contentLevel: 'procedure',
+        title: 'Readiness Assessment Overview',
+        description: 'Lifecycle stages, role responsibilities, strategic value, and cross-module integration architecture',
+        contentLevel: 'concept',
         estimatedReadTime: 15,
-        targetRoles: ['Admin', 'Consultant'],
+        targetRoles: ['Admin', 'HR Partner', 'Manager'],
         industryContext: {
-          frequency: 'One-time, annual review',
-          timing: 'Post readiness bands',
-          benchmark: 'Weighted scoring for objective readiness calculation'
+          frequency: 'Reference',
+          timing: 'Pre-operations',
+          benchmark: 'Configuration (Ch 2) vs. Operations (Ch 4) separation per SAP SuccessFactors pattern'
         }
       },
       {
         id: 'sec-4-2',
         sectionNumber: '4.2',
-        title: 'Form Builder Configuration',
-        description: 'Create readiness assessment forms by staff type (Executive, Manager, Professional)',
+        title: 'Assessment Event Creation',
+        description: 'Initiate assessments, field reference for readiness_assessment_events, workflow integration',
         contentLevel: 'procedure',
         estimatedReadTime: 20,
-        targetRoles: ['Admin'],
+        targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Per staff type',
-          timing: 'Post indicators',
-          benchmark: 'Role-appropriate assessment depth and questions'
+          frequency: 'Per candidate assessment',
+          timing: 'Ongoing operations',
+          benchmark: 'One active assessment per candidate rule'
         }
       },
       {
         id: 'sec-4-3',
         sectionNumber: '4.3',
-        title: 'Category & Question Setup',
-        description: 'Organize indicators into categories with guidance text and scoring rubrics',
+        title: 'Form Selection & Assignment',
+        description: 'Staff type matching algorithm, auto-detect logic, form selection priority hierarchy',
         contentLevel: 'procedure',
         estimatedReadTime: 15,
-        targetRoles: ['Admin'],
+        targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Per form',
-          timing: 'During form creation',
-          benchmark: 'Consistent structure for assessor guidance'
+          frequency: 'Per assessment initiation',
+          timing: 'Event creation',
+          benchmark: 'Staff-type-specific forms for role-appropriate depth'
         }
       },
       {
         id: 'sec-4-4',
         sectionNumber: '4.4',
-        title: 'Scoring Guide Definitions',
-        description: 'Define score-to-band mappings, threshold calculations, and override rules',
+        title: 'Manager Assessment Workflow',
+        description: 'Field reference for responses, UI walkthrough, BARS tooltips, save draft vs. submit behavior',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HR Partner'],
+        estimatedReadTime: 20,
+        targetRoles: ['Manager'],
         industryContext: {
-          frequency: 'One-time, annual calibration',
-          timing: 'Post form setup',
-          benchmark: 'Automated band assignment with HR override capability'
+          frequency: 'Per assessment event',
+          timing: 'After event creation',
+          benchmark: 'Direct manager provides primary readiness input'
         }
       },
       {
         id: 'sec-4-5',
         sectionNumber: '4.5',
-        title: 'Multi-Assessor Workflows',
-        description: 'Configure Manager, HR, and Executive assessment sequences with consolidation rules',
+        title: 'HR Assessment Workflow',
+        description: 'Independent vs. validation modes, HR-specific indicators, variance detection',
         contentLevel: 'procedure',
         estimatedReadTime: 15,
+        targetRoles: ['HR Partner'],
+        industryContext: {
+          frequency: 'Per assessment event',
+          timing: 'After manager submission',
+          benchmark: 'HR provides compliance and history perspective'
+        }
+      },
+      {
+        id: 'sec-4-6',
+        sectionNumber: '4.6',
+        title: 'Executive Assessment Workflow',
+        description: 'Optional executive layer, when to enable, consolidated view, calibration integration',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Executive'],
+        industryContext: {
+          frequency: 'Optional, per event',
+          timing: 'After HR submission',
+          benchmark: 'Reserved for C-suite succession candidates'
+        }
+      },
+      {
+        id: 'sec-4-7',
+        sectionNumber: '4.7',
+        title: 'Score Calculation & Band Assignment',
+        description: 'Weighted average algorithm, band lookup, partial assessment handling, multi-assessor aggregation',
+        contentLevel: 'reference',
+        estimatedReadTime: 20,
         targetRoles: ['Admin', 'Consultant'],
         industryContext: {
-          frequency: 'One-time',
-          timing: 'Post forms',
-          benchmark: 'Multi-rater validation for objective readiness assessment'
+          frequency: 'Automatic on completion',
+          timing: 'After all assessors submit',
+          benchmark: 'Normalized scoring with weight redistribution for skipped indicators'
+        }
+      },
+      {
+        id: 'sec-4-8',
+        sectionNumber: '4.8',
+        title: 'Assessment Completion & Candidate Update',
+        description: 'Event finalization, candidate profile sync, audit trail, historical retention, notifications',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Automatic on completion',
+          timing: 'After score calculation',
+          benchmark: 'SOC 2 compliant audit trail with full traceability'
         }
       }
     ]
