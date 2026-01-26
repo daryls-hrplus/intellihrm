@@ -938,43 +938,128 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
     ]
   },
   // ========================================================================
-  // PART 6: ANALYTICS & REPORTING
+  // PART 6: REPORTS & ANALYTICS
   // ========================================================================
   {
     id: 'part-6',
     sectionNumber: '6',
-    title: 'Analytics & Reporting',
-    description: 'Understanding and utilizing 360 feedback analytics',
-    contentLevel: 'reference',
-    estimatedReadTime: 30,
+    title: 'Reports & Analytics',
+    description: 'Comprehensive reporting framework including template systems, audience-specific reports, workforce analytics, response monitoring, audit logging, and benchmarking with SOC 2 compliance.',
+    contentLevel: 'procedure',
+    estimatedReadTime: 100,
     targetRoles: ['Admin', 'HR Partner', 'Manager'],
     subsections: [
       {
         id: 'sec-6-1',
         sectionNumber: '6.1',
-        title: 'Individual Feedback Reports',
-        description: 'Understanding the employee feedback report structure',
-        contentLevel: 'reference',
-        estimatedReadTime: 10,
-        targetRoles: ['HR Partner', 'Manager']
+        title: 'Report Template System',
+        description: 'Template architecture, CRUD operations, audience types, sections configuration, and visualization settings.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup, annual review',
+          timing: 'Pre-implementation setup',
+          benchmark: 'Audience-specific template methodology'
+        }
       },
       {
         id: 'sec-6-2',
         sectionNumber: '6.2',
-        title: 'Team & Organizational Analytics',
-        description: 'Aggregate insights across teams, departments, and the organization',
-        contentLevel: 'reference',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HR Partner']
+        title: 'Audience-Specific Reports',
+        description: 'Executive, Manager, Individual Contributor, HR, and Self report configurations with content depth and anonymity levels.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per cycle, per audience',
+          timing: 'Report configuration phase',
+          benchmark: '5 standard audiences with depth customization'
+        }
       },
       {
         id: 'sec-6-3',
         sectionNumber: '6.3',
-        title: 'Trend Analysis',
-        description: 'Year-over-year comparisons and improvement tracking',
-        contentLevel: 'reference',
+        title: 'Visualizations & Charts',
+        description: 'Radar charts, bar charts, trend lines, Recharts integration, and WCAG 2.1 accessibility compliance.',
+        contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HR Partner']
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'One-time setup',
+          timing: 'During template configuration',
+          benchmark: 'WCAG 2.1 AA color contrast compliance'
+        }
+      },
+      {
+        id: 'sec-6-4',
+        sectionNumber: '6.4',
+        title: 'Workforce Analytics Dashboard',
+        description: 'Organization-wide signal aggregates, dimension filtering, sample size thresholds, and anonymity enforcement.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Continuous',
+          timing: 'Post-cycle analysis',
+          benchmark: 'Minimum 5 responses for anonymity threshold'
+        }
+      },
+      {
+        id: 'sec-6-5',
+        sectionNumber: '6.5',
+        title: 'Response Monitoring Dashboard',
+        description: 'Real-time completion tracking, reminder workflows, bulk actions, and SHRM response rate benchmarks.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Daily during collection',
+          timing: 'Throughout feedback window',
+          benchmark: '80-85% response rate target (SHRM)'
+        }
+      },
+      {
+        id: 'sec-6-6',
+        sectionNumber: '6.6',
+        title: 'Results Release Audit',
+        description: 'Distribution logging, acknowledgment workflow, SOC 2 compliance, and audit trail CSV export.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Per distribution event',
+          timing: 'At results release',
+          benchmark: 'SOC 2 Type II audit trail requirements'
+        }
+      },
+      {
+        id: 'sec-6-7',
+        sectionNumber: '6.7',
+        title: 'PDF Export Configuration',
+        description: 'Report generation options, jsPDF configuration, print preview, and format support.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Per report generation',
+          timing: 'At results release',
+          benchmark: 'PDF/DOCX/Print multi-format support'
+        }
+      },
+      {
+        id: 'sec-6-8',
+        sectionNumber: '6.8',
+        title: 'Benchmarking & Trends',
+        description: 'Year-over-year comparison, organization benchmarks, trend direction indicators, and historical analysis.',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Quarterly/Annually',
+          timing: 'Post-cycle and trend review',
+          benchmark: 'Period-over-period comparison methodology'
+        }
       }
     ]
   },
