@@ -10,3 +10,6 @@ export { AIIDPLearningIntegration } from './AIIDPLearningIntegration';
 export { AIRemeasurementTracking } from './AIRemeasurementTracking';
 export { AICrossModuleIntelligence } from './AICrossModuleIntelligence';
 export { AIExplainabilityHumanOverride } from './AIExplainabilityHumanOverride';
+export { AIIncidentResponseProcedure } from './AIIncidentResponseProcedure';
+export { AISLAHumanReviewConfig } from './AISLAHumanReviewConfig';
+export { AIModelDriftMonitoring } from './AIModelDriftMonitoring';

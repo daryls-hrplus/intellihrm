@@ -919,13 +919,17 @@ export type Database = {
           company_id: string | null
           compliance_rate: number | null
           created_at: string | null
+          drift_alert_sent_at: string | null
+          drift_threshold_breached: boolean | null
           high_risk_interactions: number | null
           human_reviews_completed: number | null
           human_reviews_required: number | null
           id: string
           metric_date: string
           metric_type: string
+          model_version: string | null
           overrides_count: number | null
+          performance_drift_score: number | null
           total_interactions: number | null
         }
         Insert: {
@@ -935,13 +939,17 @@ export type Database = {
           company_id?: string | null
           compliance_rate?: number | null
           created_at?: string | null
+          drift_alert_sent_at?: string | null
+          drift_threshold_breached?: boolean | null
           high_risk_interactions?: number | null
           human_reviews_completed?: number | null
           human_reviews_required?: number | null
           id?: string
           metric_date: string
           metric_type: string
+          model_version?: string | null
           overrides_count?: number | null
+          performance_drift_score?: number | null
           total_interactions?: number | null
         }
         Update: {
@@ -951,13 +959,17 @@ export type Database = {
           company_id?: string | null
           compliance_rate?: number | null
           created_at?: string | null
+          drift_alert_sent_at?: string | null
+          drift_threshold_breached?: boolean | null
           high_risk_interactions?: number | null
           human_reviews_completed?: number | null
           human_reviews_required?: number | null
           id?: string
           metric_date?: string
           metric_type?: string
+          model_version?: string | null
           overrides_count?: number | null
+          performance_drift_score?: number | null
           total_interactions?: number | null
         }
         Relationships: [
@@ -1102,6 +1114,169 @@ export type Database = {
           },
         ]
       }
+      ai_human_review_sla_config: {
+        Row: {
+          action_type: string
+          company_id: string | null
+          created_at: string | null
+          escalation_hours: number
+          escalation_role: string | null
+          id: string
+          is_active: boolean | null
+          notify_on_breach: boolean | null
+          sla_hours: number
+          updated_at: string | null
+        }
+        Insert: {
+          action_type: string
+          company_id?: string | null
+          created_at?: string | null
+          escalation_hours?: number
+          escalation_role?: string | null
+          id?: string
+          is_active?: boolean | null
+          notify_on_breach?: boolean | null
+          sla_hours?: number
+          updated_at?: string | null
+        }
+        Update: {
+          action_type?: string
+          company_id?: string | null
+          created_at?: string | null
+          escalation_hours?: number
+          escalation_role?: string | null
+          id?: string
+          is_active?: boolean | null
+          notify_on_breach?: boolean | null
+          sla_hours?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_human_review_sla_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_incident_response_log: {
+        Row: {
+          assigned_to: string | null
+          company_id: string
+          corrective_actions: Json | null
+          created_at: string | null
+          description: string
+          id: string
+          immediate_action_taken: string | null
+          incident_type: string
+          lessons_learned: string | null
+          post_incident_review_date: string | null
+          reported_by: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          root_cause_analysis: string | null
+          severity: string
+          source_record_id: string | null
+          source_table: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_id: string
+          corrective_actions?: Json | null
+          created_at?: string | null
+          description: string
+          id?: string
+          immediate_action_taken?: string | null
+          incident_type: string
+          lessons_learned?: string | null
+          post_incident_review_date?: string | null
+          reported_by?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          root_cause_analysis?: string | null
+          severity: string
+          source_record_id?: string | null
+          source_table?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          company_id?: string
+          corrective_actions?: Json | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          immediate_action_taken?: string | null
+          incident_type?: string
+          lessons_learned?: string | null
+          post_incident_review_date?: string | null
+          reported_by?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          root_cause_analysis?: string | null
+          severity?: string
+          source_record_id?: string | null
+          source_table?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_incident_response_log_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "ai_incident_response_log_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_incident_response_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_incident_response_log_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "ai_incident_response_log_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_incident_response_log_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "ai_incident_response_log_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_interaction_logs: {
         Row: {
           ai_response: string
@@ -1168,9 +1343,13 @@ export type Database = {
           created_by: string | null
           data_retention_policy: string | null
           display_name: string
+          fairness_metrics: Json | null
+          fairness_score: number | null
           id: string
           is_active: boolean | null
           last_audit_date: string | null
+          last_fairness_audit: string | null
+          model_card: Json | null
           model_identifier: string
           next_audit_due: string | null
           prohibited_use_cases: string[] | null
@@ -1189,9 +1368,13 @@ export type Database = {
           created_by?: string | null
           data_retention_policy?: string | null
           display_name: string
+          fairness_metrics?: Json | null
+          fairness_score?: number | null
           id?: string
           is_active?: boolean | null
           last_audit_date?: string | null
+          last_fairness_audit?: string | null
+          model_card?: Json | null
           model_identifier: string
           next_audit_due?: string | null
           prohibited_use_cases?: string[] | null
@@ -1210,9 +1393,13 @@ export type Database = {
           created_by?: string | null
           data_retention_policy?: string | null
           display_name?: string
+          fairness_metrics?: Json | null
+          fairness_score?: number | null
           id?: string
           is_active?: boolean | null
           last_audit_date?: string | null
+          last_fairness_audit?: string | null
+          model_card?: Json | null
           model_identifier?: string
           next_audit_due?: string | null
           prohibited_use_cases?: string[] | null
@@ -27180,6 +27367,96 @@ export type Database = {
             columns: ["reported_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_coaching_prompts: {
+        Row: {
+          ai_model_version: string | null
+          company_id: string
+          confidence_score: number | null
+          created_at: string | null
+          cycle_id: string | null
+          employee_id: string | null
+          id: string
+          is_starred: boolean | null
+          is_used: boolean | null
+          manager_notes: string | null
+          prompt_category: string
+          prompt_text: string
+          source_signal_ids: string[] | null
+          source_theme_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_model_version?: string | null
+          company_id: string
+          confidence_score?: number | null
+          created_at?: string | null
+          cycle_id?: string | null
+          employee_id?: string | null
+          id?: string
+          is_starred?: boolean | null
+          is_used?: boolean | null
+          manager_notes?: string | null
+          prompt_category: string
+          prompt_text: string
+          source_signal_ids?: string[] | null
+          source_theme_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_model_version?: string | null
+          company_id?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          cycle_id?: string | null
+          employee_id?: string | null
+          id?: string
+          is_starred?: boolean | null
+          is_used?: boolean | null
+          manager_notes?: string | null
+          prompt_category?: string
+          prompt_text?: string
+          source_signal_ids?: string[] | null
+          source_theme_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_coaching_prompts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_coaching_prompts_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_coaching_prompts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_coaching_prompts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_coaching_prompts_source_theme_id_fkey"
+            columns: ["source_theme_id"]
+            isOneToOne: false
+            referencedRelation: "development_themes"
             referencedColumns: ["id"]
           },
         ]
