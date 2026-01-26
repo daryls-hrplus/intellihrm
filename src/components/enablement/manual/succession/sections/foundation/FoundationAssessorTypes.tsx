@@ -146,18 +146,25 @@ export function FoundationAssessorTypes() {
                   <td className="py-2 px-3 text-muted-foreground">null (all)</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">can_view_other_assessments</td>
+                  <td className="py-2 px-3 font-mono">is_enabled</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
                   <td className="py-2 px-3">Boolean</td>
-                  <td className="py-2 px-3 text-muted-foreground">See other assessor ratings</td>
-                  <td className="py-2 px-3 text-muted-foreground">false</td>
+                  <td className="py-2 px-3 text-muted-foreground">Include in assessment workflow</td>
+                  <td className="py-2 px-3 text-muted-foreground">true</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">sort_order</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">Number</td>
+                  <td className="py-2 px-3 text-muted-foreground">Display sequence</td>
+                  <td className="py-2 px-3 text-muted-foreground">-</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono">can_override_score</td>
+                  <td className="py-2 px-3 font-mono">created_at</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
-                  <td className="py-2 px-3">Boolean</td>
-                  <td className="py-2 px-3 text-muted-foreground">Adjust final score</td>
-                  <td className="py-2 px-3 text-muted-foreground">false</td>
+                  <td className="py-2 px-3">Timestamp</td>
+                  <td className="py-2 px-3 text-muted-foreground">Record creation time</td>
+                  <td className="py-2 px-3 text-muted-foreground">Auto</td>
                 </tr>
               </tbody>
             </table>

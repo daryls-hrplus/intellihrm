@@ -99,10 +99,17 @@ export function FoundationReadinessBands() {
               </thead>
               <tbody className="text-xs">
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">band_code</td>
+                  <td className="py-2 px-3 font-mono">id</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
-                  <td className="py-2 px-3">Text</td>
-                  <td className="py-2 px-3 text-muted-foreground">Unique identifier</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3 text-muted-foreground">Primary key (auto-generated)</td>
+                  <td className="py-2 px-3 text-muted-foreground">-</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">company_id</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3 text-muted-foreground">Organization scope</td>
                   <td className="py-2 px-3 text-muted-foreground">-</td>
                 </tr>
                 <tr className="border-b">
@@ -127,25 +134,32 @@ export function FoundationReadinessBands() {
                   <td className="py-2 px-3 text-muted-foreground">-</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">strategic_implication</td>
-                  <td className="py-2 px-3"><Badge variant="secondary" className="text-xs">No</Badge></td>
-                  <td className="py-2 px-3">Text</td>
-                  <td className="py-2 px-3 text-muted-foreground">What this band means for planning</td>
-                  <td className="py-2 px-3 text-muted-foreground">null</td>
-                </tr>
-                <tr className="border-b">
                   <td className="py-2 px-3 font-mono">color_code</td>
                   <td className="py-2 px-3"><Badge variant="secondary" className="text-xs">No</Badge></td>
                   <td className="py-2 px-3">Text</td>
                   <td className="py-2 px-3 text-muted-foreground">Hex color for UI</td>
                   <td className="py-2 px-3 text-muted-foreground">#6b7280</td>
                 </tr>
-                <tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono">is_successor_eligible</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
                   <td className="py-2 px-3">Boolean</td>
                   <td className="py-2 px-3 text-muted-foreground">Can be designated as successor</td>
                   <td className="py-2 px-3 text-muted-foreground">true</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">sort_order</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">Number</td>
+                  <td className="py-2 px-3 text-muted-foreground">Display sequence</td>
+                  <td className="py-2 px-3 text-muted-foreground">-</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono">created_at</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">Timestamp</td>
+                  <td className="py-2 px-3 text-muted-foreground">Record creation time</td>
+                  <td className="py-2 px-3 text-muted-foreground">Auto</td>
                 </tr>
               </tbody>
             </table>

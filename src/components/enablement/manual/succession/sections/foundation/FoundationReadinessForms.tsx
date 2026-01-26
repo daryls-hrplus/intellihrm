@@ -94,28 +94,34 @@ export function FoundationReadinessForms() {
               </thead>
               <tbody className="text-xs">
                 <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">id</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3 text-muted-foreground">Primary key (auto-generated)</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">company_id</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3 text-muted-foreground">Organization scope</td>
+                </tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono">name</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
                   <td className="py-2 px-3">Text</td>
                   <td className="py-2 px-3 text-muted-foreground">Form title (max 100 chars)</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">code</td>
-                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
-                  <td className="py-2 px-3">Text</td>
-                  <td className="py-2 px-3 text-muted-foreground">Unique identifier (max 30 chars)</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">staff_type_id</td>
+                  <td className="py-2 px-3 font-mono">description</td>
                   <td className="py-2 px-3"><Badge variant="secondary" className="text-xs">No</Badge></td>
-                  <td className="py-2 px-3">UUID</td>
-                  <td className="py-2 px-3 text-muted-foreground">Restrict to staff type (null = all)</td>
+                  <td className="py-2 px-3">Text</td>
+                  <td className="py-2 px-3 text-muted-foreground">Form purpose and usage</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">version</td>
-                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
-                  <td className="py-2 px-3">Number</td>
-                  <td className="py-2 px-3 text-muted-foreground">Form version (auto-increment)</td>
+                  <td className="py-2 px-3 font-mono">staff_type</td>
+                  <td className="py-2 px-3"><Badge variant="secondary" className="text-xs">No</Badge></td>
+                  <td className="py-2 px-3">Text</td>
+                  <td className="py-2 px-3 text-muted-foreground">Restrict to staff type (null = all)</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono">is_active</td>
@@ -123,11 +129,17 @@ export function FoundationReadinessForms() {
                   <td className="py-2 px-3">Boolean</td>
                   <td className="py-2 px-3 text-muted-foreground">Available for use</td>
                 </tr>
-                <tr>
-                  <td className="py-2 px-3 font-mono">total_indicators</td>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">created_at</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
-                  <td className="py-2 px-3">Number</td>
-                  <td className="py-2 px-3 text-muted-foreground">Count of indicators (computed)</td>
+                  <td className="py-2 px-3">Timestamp</td>
+                  <td className="py-2 px-3 text-muted-foreground">Record creation time</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono">updated_at</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">Timestamp</td>
+                  <td className="py-2 px-3 text-muted-foreground">Last modification time</td>
                 </tr>
               </tbody>
             </table>

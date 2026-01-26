@@ -9,6 +9,7 @@ export interface ReadinessRatingBand {
   min_percentage: number;
   max_percentage: number;
   color_code: string | null;
+  is_successor_eligible: boolean;
   sort_order: number;
   created_at: string;
 }
@@ -49,6 +50,7 @@ export function useReadinessRatingBands(companyId?: string) {
           min_percentage: band.min_percentage!,
           max_percentage: band.max_percentage!,
           color_code: band.color_code,
+          is_successor_eligible: band.is_successor_eligible ?? true,
           sort_order: band.sort_order ?? 0,
         })
         .select()
@@ -73,6 +75,7 @@ export function useReadinessRatingBands(companyId?: string) {
           min_percentage: updates.min_percentage,
           max_percentage: updates.max_percentage,
           color_code: updates.color_code,
+          is_successor_eligible: updates.is_successor_eligible,
           sort_order: updates.sort_order,
         })
         .eq('id', id)
@@ -114,11 +117,11 @@ export function useReadinessRatingBands(companyId?: string) {
     if (existing.length > 0) return true;
 
     const defaults = [
-      { rating_label: 'Ready Now', min_percentage: 85, max_percentage: 100, color_code: '#22c55e', sort_order: 1 },
-      { rating_label: 'Ready in 1-3 Years', min_percentage: 70, max_percentage: 84.99, color_code: '#3b82f6', sort_order: 2 },
-      { rating_label: 'Ready in 3-5 Years', min_percentage: 55, max_percentage: 69.99, color_code: '#f59e0b', sort_order: 3 },
-      { rating_label: 'Ready in Over 5 Years', min_percentage: 40, max_percentage: 54.99, color_code: '#f97316', sort_order: 4 },
-      { rating_label: 'Not a Successor', min_percentage: 0, max_percentage: 39.99, color_code: '#ef4444', sort_order: 5 },
+      { rating_label: 'Ready Now', min_percentage: 85, max_percentage: 100, color_code: '#22c55e', is_successor_eligible: true, sort_order: 1 },
+      { rating_label: 'Ready in 1-3 Years', min_percentage: 70, max_percentage: 84.99, color_code: '#3b82f6', is_successor_eligible: true, sort_order: 2 },
+      { rating_label: 'Ready in 3-5 Years', min_percentage: 55, max_percentage: 69.99, color_code: '#f59e0b', is_successor_eligible: true, sort_order: 3 },
+      { rating_label: 'Developing', min_percentage: 40, max_percentage: 54.99, color_code: '#f97316', is_successor_eligible: false, sort_order: 4 },
+      { rating_label: 'Not a Successor', min_percentage: 0, max_percentage: 39.99, color_code: '#ef4444', is_successor_eligible: false, sort_order: 5 },
     ];
 
     try {

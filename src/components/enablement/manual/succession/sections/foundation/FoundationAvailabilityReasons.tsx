@@ -93,13 +93,25 @@ export function FoundationAvailabilityReasons() {
               </thead>
               <tbody className="text-xs">
                 <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">id</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3 text-muted-foreground">Primary key (auto-generated)</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">company_id</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3 text-muted-foreground">Organization scope</td>
+                </tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono">code</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
                   <td className="py-2 px-3">Text</td>
                   <td className="py-2 px-3 text-muted-foreground">Short code (max 5 chars, uppercase)</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">label</td>
+                  <td className="py-2 px-3 font-mono">description</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
                   <td className="py-2 px-3">Text</td>
                   <td className="py-2 px-3 text-muted-foreground">Display name (max 50 chars)</td>
@@ -108,7 +120,13 @@ export function FoundationAvailabilityReasons() {
                   <td className="py-2 px-3 font-mono">category</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
                   <td className="py-2 px-3">Text</td>
-                  <td className="py-2 px-3 text-muted-foreground">planned / unplanned</td>
+                  <td className="py-2 px-3 text-muted-foreground">planned / unplanned / either</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">urgency_level</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">Text</td>
+                  <td className="py-2 px-3 text-muted-foreground">low / medium / high / critical</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono">typical_notice_months</td>
@@ -117,16 +135,22 @@ export function FoundationAvailabilityReasons() {
                   <td className="py-2 px-3 text-muted-foreground">Expected lead time (0-36)</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono">urgency_level</td>
-                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
-                  <td className="py-2 px-3">Text</td>
-                  <td className="py-2 px-3 text-muted-foreground">low / medium / high / critical</td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-3 font-mono">triggers_notification</td>
+                  <td className="py-2 px-3 font-mono">is_active</td>
                   <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
                   <td className="py-2 px-3">Boolean</td>
-                  <td className="py-2 px-3 text-muted-foreground">Alert HR on selection</td>
+                  <td className="py-2 px-3 text-muted-foreground">Available for selection</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono">sort_order</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">Number</td>
+                  <td className="py-2 px-3 text-muted-foreground">Display sequence</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono">created_at</td>
+                  <td className="py-2 px-3"><Badge variant="outline" className="text-xs">Yes</Badge></td>
+                  <td className="py-2 px-3">Timestamp</td>
+                  <td className="py-2 px-3 text-muted-foreground">Record creation time</td>
                 </tr>
               </tbody>
             </table>
