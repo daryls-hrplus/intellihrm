@@ -71,6 +71,13 @@ const investigationFields: FieldDefinition[] = [
     validation: 'Auto-generated'
   },
   {
+    name: 'company_id',
+    required: true,
+    type: 'UUID',
+    description: 'Reference to the company',
+    validation: 'Must exist in companies table'
+  },
+  {
     name: 'cycle_id',
     required: true,
     type: 'UUID',
@@ -78,25 +85,32 @@ const investigationFields: FieldDefinition[] = [
     validation: 'Must exist in feedback_360_cycles'
   },
   {
-    name: 'target_participant_id',
+    name: 'target_employee_id',
     required: true,
     type: 'UUID',
-    description: 'Participant whose feedback is being investigated',
-    validation: 'Must exist in feedback_360_participants'
+    description: 'Employee whose feedback is being investigated',
+    validation: 'Must exist in profiles'
   },
   {
-    name: 'investigation_reason',
+    name: 'request_type',
     required: true,
     type: 'text',
     description: 'Category of investigation reason',
     validation: 'One of: policy_violation, safety_concern, legal_requirement, ethics_violation, pattern_analysis'
   },
   {
-    name: 'reason_details',
+    name: 'request_reason',
     required: true,
     type: 'text',
     description: 'Detailed explanation of the investigation need',
     validation: 'Minimum 100 characters'
+  },
+  {
+    name: 'legal_reference',
+    required: false,
+    type: 'text',
+    description: 'Legal basis or case reference for the investigation',
+    validation: 'Optional for legal_requirement type'
   },
   {
     name: 'requested_by',
@@ -106,7 +120,7 @@ const investigationFields: FieldDefinition[] = [
     validation: 'Must have investigation request permission'
   },
   {
-    name: 'requested_at',
+    name: 'created_at',
     required: true,
     type: 'timestamp',
     description: 'When the investigation was requested',
@@ -114,12 +128,12 @@ const investigationFields: FieldDefinition[] = [
     validation: 'Auto-set on insert'
   },
   {
-    name: 'status',
+    name: 'outcome_status',
     required: true,
     type: 'text',
     description: 'Current status of the investigation',
     defaultValue: 'pending',
-    validation: 'One of: pending, approved, rejected, in_progress, completed, closed'
+    validation: 'One of: pending, approved, denied, in_progress, completed'
   },
   {
     name: 'approved_by',
@@ -129,32 +143,61 @@ const investigationFields: FieldDefinition[] = [
     validation: 'HR Director or designated approver'
   },
   {
-    name: 'scope_limitations',
+    name: 'denial_reason',
     required: false,
-    type: 'JSONB',
-    description: 'Restrictions on what can be accessed during investigation',
-    validation: 'JSON object defining access boundaries'
+    type: 'text',
+    description: 'Reason for denying the investigation request',
+    validation: 'Required when outcome_status = denied'
   },
   {
-    name: 'findings_summary',
+    name: 'expires_at',
+    required: false,
+    type: 'timestamp',
+    description: 'When investigation access expires',
+    validation: 'Default 30 days from approval'
+  },
+  {
+    name: 'access_count',
+    required: false,
+    type: 'integer',
+    description: 'Number of times investigation data has been accessed',
+    defaultValue: '0',
+    validation: 'Incremented on each access'
+  },
+  {
+    name: 'last_accessed_at',
+    required: false,
+    type: 'timestamp',
+    description: 'Most recent access to investigation data',
+    validation: 'Updated on each access'
+  },
+  {
+    name: 'outcome_summary',
     required: false,
     type: 'text',
     description: 'Summary of investigation findings',
-    validation: 'Required when status = completed'
+    validation: 'Required when outcome_status = completed'
   },
   {
-    name: 'outcome',
+    name: 'next_steps',
     required: false,
     type: 'text',
-    description: 'Final outcome/decision from the investigation',
-    validation: 'One of: substantiated, unsubstantiated, inconclusive, referred'
+    description: 'Recommended actions following investigation',
+    validation: 'Optional documentation'
   },
   {
-    name: 'closed_at',
+    name: 'outcome_documented_by',
+    required: false,
+    type: 'UUID',
+    description: 'User who documented the investigation outcome',
+    validation: 'Must be the investigator'
+  },
+  {
+    name: 'outcome_documented_at',
     required: false,
     type: 'timestamp',
-    description: 'When the investigation was closed',
-    validation: 'Set when status = closed'
+    description: 'When the outcome was documented',
+    validation: 'Set when outcome is recorded'
   }
 ];
 
@@ -168,7 +211,7 @@ const accessLogFields: FieldDefinition[] = [
     validation: 'Auto-generated'
   },
   {
-    name: 'investigation_id',
+    name: 'investigation_request_id',
     required: true,
     type: 'UUID',
     description: 'Reference to the investigation request',
@@ -182,7 +225,7 @@ const accessLogFields: FieldDefinition[] = [
     validation: 'Must be authorized investigator'
   },
   {
-    name: 'accessed_at',
+    name: 'created_at',
     required: true,
     type: 'timestamp',
     description: 'When the data was accessed',
@@ -190,26 +233,32 @@ const accessLogFields: FieldDefinition[] = [
     validation: 'Auto-set on access'
   },
   {
-    name: 'data_accessed',
+    name: 'action',
     required: true,
     type: 'text',
-    description: 'Description of what data was viewed',
-    validation: 'Specific record references'
+    description: 'Type of access action performed',
+    validation: 'One of: view_responses, view_raters, export_data, generate_report'
   },
   {
-    name: 'rater_identity_revealed',
-    required: true,
-    type: 'boolean',
-    description: 'Whether rater identity was disclosed',
-    defaultValue: 'false',
-    validation: 'Boolean'
+    name: 'responses_viewed',
+    required: false,
+    type: 'JSONB',
+    description: 'Array of response IDs that were viewed',
+    validation: 'JSON array of UUIDs'
   },
   {
-    name: 'access_justification',
+    name: 'ip_address',
     required: false,
     type: 'text',
-    description: 'Reason for this specific access',
-    validation: 'Recommended for audit purposes'
+    description: 'IP address of the accessing user',
+    validation: 'IPv4 or IPv6 string'
+  },
+  {
+    name: 'user_agent',
+    required: false,
+    type: 'text',
+    description: 'Browser/device information',
+    validation: 'String'
   }
 ];
 

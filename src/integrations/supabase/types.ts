@@ -26941,9 +26941,13 @@ export type Database = {
           confidence_score: number | null
           created_at: string | null
           cycle_id: string | null
+          decision_factors: Json | null
           employee_id: string | null
           explanation: string
           human_override: boolean | null
+          human_review_required: boolean | null
+          human_reviewed_at: string | null
+          human_reviewed_by: string | null
           id: string
           input_summary: Json
           model_used: string | null
@@ -26959,9 +26963,13 @@ export type Database = {
           confidence_score?: number | null
           created_at?: string | null
           cycle_id?: string | null
+          decision_factors?: Json | null
           employee_id?: string | null
           explanation: string
           human_override?: boolean | null
+          human_review_required?: boolean | null
+          human_reviewed_at?: string | null
+          human_reviewed_by?: string | null
           id?: string
           input_summary: Json
           model_used?: string | null
@@ -26977,9 +26985,13 @@ export type Database = {
           confidence_score?: number | null
           created_at?: string | null
           cycle_id?: string | null
+          decision_factors?: Json | null
           employee_id?: string | null
           explanation?: string
           human_override?: boolean | null
+          human_review_required?: boolean | null
+          human_reviewed_at?: string | null
+          human_reviewed_by?: string | null
           id?: string
           input_summary?: Json
           model_used?: string | null
@@ -27019,6 +27031,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "feedback_ai_action_logs_human_reviewed_by_fkey"
+            columns: ["human_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_ai_action_logs_human_reviewed_by_fkey"
+            columns: ["human_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "feedback_ai_action_logs_override_by_fkey"
             columns: ["override_by"]
             isOneToOne: false
@@ -27028,6 +27054,130 @@ export type Database = {
           {
             foreignKeyName: "feedback_ai_action_logs_override_by_fkey"
             columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_breach_incidents: {
+        Row: {
+          affected_data_categories: Json | null
+          affected_records_count: number | null
+          authority_notification_ref: string | null
+          authority_notified_at: string | null
+          breach_description: string
+          breach_type: string
+          closed_at: string | null
+          closed_by: string | null
+          company_id: string
+          created_at: string
+          cycle_id: string | null
+          detection_method: string | null
+          detection_timestamp: string
+          id: string
+          individuals_notified_at: string | null
+          lessons_learned: string | null
+          notification_deadline: string | null
+          notification_method: string | null
+          remediation_actions: Json | null
+          remediation_completed_at: string | null
+          reported_by: string | null
+          root_cause_analysis: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          affected_data_categories?: Json | null
+          affected_records_count?: number | null
+          authority_notification_ref?: string | null
+          authority_notified_at?: string | null
+          breach_description: string
+          breach_type: string
+          closed_at?: string | null
+          closed_by?: string | null
+          company_id: string
+          created_at?: string
+          cycle_id?: string | null
+          detection_method?: string | null
+          detection_timestamp: string
+          id?: string
+          individuals_notified_at?: string | null
+          lessons_learned?: string | null
+          notification_deadline?: string | null
+          notification_method?: string | null
+          remediation_actions?: Json | null
+          remediation_completed_at?: string | null
+          reported_by?: string | null
+          root_cause_analysis?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          affected_data_categories?: Json | null
+          affected_records_count?: number | null
+          authority_notification_ref?: string | null
+          authority_notified_at?: string | null
+          breach_description?: string
+          breach_type?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          company_id?: string
+          created_at?: string
+          cycle_id?: string | null
+          detection_method?: string | null
+          detection_timestamp?: string
+          id?: string
+          individuals_notified_at?: string | null
+          lessons_learned?: string | null
+          notification_deadline?: string | null
+          notification_method?: string | null
+          remediation_actions?: Json | null
+          remediation_completed_at?: string | null
+          reported_by?: string | null
+          root_cause_analysis?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_breach_incidents_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_breach_incidents_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_breach_incidents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_breach_incidents_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_breach_incidents_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_breach_incidents_reported_by_fkey"
+            columns: ["reported_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -27151,7 +27301,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           policy_config: Json
+          policy_name: string | null
           policy_type: string
+          policy_version: string | null
         }
         Insert: {
           approval_date?: string | null
@@ -27163,7 +27315,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           policy_config: Json
+          policy_name?: string | null
           policy_type: string
+          policy_version?: string | null
         }
         Update: {
           approval_date?: string | null
@@ -27175,7 +27329,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           policy_config?: Json
+          policy_name?: string | null
           policy_type?: string
+          policy_version?: string | null
         }
         Relationships: [
           {
@@ -27201,6 +27357,363 @@ export type Database = {
           },
         ]
       }
+      feedback_data_transfer_records: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          data_categories: Json | null
+          destination_jurisdiction: string
+          id: string
+          is_active: boolean | null
+          last_reviewed_at: string | null
+          last_reviewed_by: string | null
+          purpose: string
+          recipient_details: Json | null
+          recipient_name: string | null
+          review_due_date: string | null
+          safeguards_description: string | null
+          source_jurisdiction: string
+          transfer_end_date: string | null
+          transfer_impact_assessment_ref: string | null
+          transfer_mechanism: string
+          transfer_start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          data_categories?: Json | null
+          destination_jurisdiction: string
+          id?: string
+          is_active?: boolean | null
+          last_reviewed_at?: string | null
+          last_reviewed_by?: string | null
+          purpose: string
+          recipient_details?: Json | null
+          recipient_name?: string | null
+          review_due_date?: string | null
+          safeguards_description?: string | null
+          source_jurisdiction: string
+          transfer_end_date?: string | null
+          transfer_impact_assessment_ref?: string | null
+          transfer_mechanism: string
+          transfer_start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          data_categories?: Json | null
+          destination_jurisdiction?: string
+          id?: string
+          is_active?: boolean | null
+          last_reviewed_at?: string | null
+          last_reviewed_by?: string | null
+          purpose?: string
+          recipient_details?: Json | null
+          recipient_name?: string | null
+          review_due_date?: string | null
+          safeguards_description?: string | null
+          source_jurisdiction?: string
+          transfer_end_date?: string | null
+          transfer_impact_assessment_ref?: string | null
+          transfer_mechanism?: string
+          transfer_start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_data_transfer_records_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_data_transfer_records_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_data_transfer_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_data_transfer_records_last_reviewed_by_fkey"
+            columns: ["last_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_data_transfer_records_last_reviewed_by_fkey"
+            columns: ["last_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_dpia_records: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          assessment_name: string
+          assessment_reference: string | null
+          company_id: string
+          created_at: string
+          data_categories: Json | null
+          data_subjects_categories: Json | null
+          dpo_consultation_date: string | null
+          dpo_recommendation: string | null
+          id: string
+          last_reviewed_at: string | null
+          last_reviewed_by: string | null
+          mitigating_measures: Json | null
+          necessity_assessment: string | null
+          next_review_date: string | null
+          processing_description: string
+          processing_purposes: Json | null
+          proportionality_assessment: string | null
+          rejection_reason: string | null
+          residual_risk_level: string | null
+          risk_assessment: Json | null
+          supersedes_id: string | null
+          supervisory_consultation_date: string | null
+          supervisory_consultation_outcome: string | null
+          supervisory_consultation_required: boolean | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          assessment_name: string
+          assessment_reference?: string | null
+          company_id: string
+          created_at?: string
+          data_categories?: Json | null
+          data_subjects_categories?: Json | null
+          dpo_consultation_date?: string | null
+          dpo_recommendation?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          last_reviewed_by?: string | null
+          mitigating_measures?: Json | null
+          necessity_assessment?: string | null
+          next_review_date?: string | null
+          processing_description: string
+          processing_purposes?: Json | null
+          proportionality_assessment?: string | null
+          rejection_reason?: string | null
+          residual_risk_level?: string | null
+          risk_assessment?: Json | null
+          supersedes_id?: string | null
+          supervisory_consultation_date?: string | null
+          supervisory_consultation_outcome?: string | null
+          supervisory_consultation_required?: boolean | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          assessment_name?: string
+          assessment_reference?: string | null
+          company_id?: string
+          created_at?: string
+          data_categories?: Json | null
+          data_subjects_categories?: Json | null
+          dpo_consultation_date?: string | null
+          dpo_recommendation?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          last_reviewed_by?: string | null
+          mitigating_measures?: Json | null
+          necessity_assessment?: string | null
+          next_review_date?: string | null
+          processing_description?: string
+          processing_purposes?: Json | null
+          proportionality_assessment?: string | null
+          rejection_reason?: string | null
+          residual_risk_level?: string | null
+          risk_assessment?: Json | null
+          supersedes_id?: string | null
+          supervisory_consultation_date?: string | null
+          supervisory_consultation_outcome?: string | null
+          supervisory_consultation_required?: boolean | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_dpia_records_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_dpia_records_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_dpia_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_dpia_records_last_reviewed_by_fkey"
+            columns: ["last_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_dpia_records_last_reviewed_by_fkey"
+            columns: ["last_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_dpia_records_supersedes_id_fkey"
+            columns: ["supersedes_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_dpia_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_dsar_requests: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          denial_reason: string | null
+          employee_id: string
+          id: string
+          processing_notes: string | null
+          request_details: Json | null
+          request_type: string
+          response_due_date: string
+          response_summary: string | null
+          status: string
+          updated_at: string
+          verification_method: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          denial_reason?: string | null
+          employee_id: string
+          id?: string
+          processing_notes?: string | null
+          request_details?: Json | null
+          request_type: string
+          response_due_date: string
+          response_summary?: string | null
+          status?: string
+          updated_at?: string
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          denial_reason?: string | null
+          employee_id?: string
+          id?: string
+          processing_notes?: string | null
+          request_details?: Json | null
+          request_type?: string
+          response_due_date?: string
+          response_summary?: string | null
+          status?: string
+          updated_at?: string
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_dsar_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_dsar_requests_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_dsar_requests_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_dsar_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_dsar_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_dsar_requests_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_dsar_requests_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_exceptions: {
         Row: {
           approval_status: string | null
@@ -27214,7 +27727,11 @@ export type Database = {
           id: string
           reason: string
           requested_by: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
           supporting_evidence: string | null
+          valid_from: string | null
           valid_until: string | null
         }
         Insert: {
@@ -27229,7 +27746,11 @@ export type Database = {
           id?: string
           reason: string
           requested_by?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
           supporting_evidence?: string | null
+          valid_from?: string | null
           valid_until?: string | null
         }
         Update: {
@@ -27244,7 +27765,11 @@ export type Database = {
           id?: string
           reason?: string
           requested_by?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
           supporting_evidence?: string | null
+          valid_from?: string | null
           valid_until?: string | null
         }
         Relationships: [
@@ -27300,6 +27825,20 @@ export type Database = {
           {
             foreignKeyName: "feedback_exceptions_requested_by_fkey"
             columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_exceptions_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "feedback_exceptions_revoked_by_fkey"
+            columns: ["revoked_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -27364,32 +27903,38 @@ export type Database = {
       }
       feedback_investigation_access_log: {
         Row: {
+          access_justification: string | null
           accessed_by: string
           action: string
           created_at: string | null
           id: string
           investigation_request_id: string
           ip_address: string | null
+          rater_identity_revealed: boolean | null
           responses_viewed: Json | null
           user_agent: string | null
         }
         Insert: {
+          access_justification?: string | null
           accessed_by: string
           action: string
           created_at?: string | null
           id?: string
           investigation_request_id: string
           ip_address?: string | null
+          rater_identity_revealed?: boolean | null
           responses_viewed?: Json | null
           user_agent?: string | null
         }
         Update: {
+          access_justification?: string | null
           accessed_by?: string
           action?: string
           created_at?: string | null
           id?: string
           investigation_request_id?: string
           ip_address?: string | null
+          rater_identity_revealed?: boolean | null
           responses_viewed?: Json | null
           user_agent?: string | null
         }
@@ -27408,6 +27953,7 @@ export type Database = {
           access_count: number | null
           approved_at: string | null
           approved_by: string | null
+          closed_at: string | null
           company_id: string | null
           created_at: string | null
           cycle_id: string | null
@@ -27424,6 +27970,7 @@ export type Database = {
           request_reason: string
           request_type: string
           requested_by: string
+          scope_limitations: Json | null
           status: string
           target_employee_id: string | null
           updated_at: string | null
@@ -27432,6 +27979,7 @@ export type Database = {
           access_count?: number | null
           approved_at?: string | null
           approved_by?: string | null
+          closed_at?: string | null
           company_id?: string | null
           created_at?: string | null
           cycle_id?: string | null
@@ -27448,6 +27996,7 @@ export type Database = {
           request_reason: string
           request_type: string
           requested_by: string
+          scope_limitations?: Json | null
           status?: string
           target_employee_id?: string | null
           updated_at?: string | null
@@ -27456,6 +28005,7 @@ export type Database = {
           access_count?: number | null
           approved_at?: string | null
           approved_by?: string | null
+          closed_at?: string | null
           company_id?: string | null
           created_at?: string | null
           cycle_id?: string | null
@@ -27472,6 +28022,7 @@ export type Database = {
           request_reason?: string
           request_type?: string
           requested_by?: string
+          scope_limitations?: Json | null
           status?: string
           target_employee_id?: string | null
           updated_at?: string | null

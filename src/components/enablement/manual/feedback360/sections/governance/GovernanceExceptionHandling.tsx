@@ -40,36 +40,36 @@ const exceptionTypes = [
     useCase: 'Rater on leave, technical issues, late addition'
   },
   {
-    type: 'rater_substitution',
-    label: 'Rater Substitution',
-    description: 'Replace assigned rater with alternative',
+    type: 'rater_exclusion',
+    label: 'Rater Exclusion',
+    description: 'Remove assigned rater from providing feedback',
     approver: 'Cycle Owner',
     validity: 'Cycle duration',
     useCase: 'Rater departed, conflict of interest identified'
   },
   {
-    type: 'threshold_override',
-    label: 'Threshold Override',
-    description: 'Show category breakdown below normal threshold',
+    type: 'report_access_override',
+    label: 'Report Access Override',
+    description: 'Grant additional report access beyond default visibility',
     approver: 'HR Director',
-    validity: 'Cycle duration',
-    useCase: 'Small team where threshold cannot be met'
-  },
-  {
-    type: 'consent_waiver',
-    label: 'Consent Waiver',
-    description: 'Proceed without optional consent (never for required)',
-    approver: 'Legal / DPO',
-    validity: 'Cycle duration',
-    useCase: 'Legitimate interest override per GDPR Article 6.1.f'
-  },
-  {
-    type: 'retention_extension',
-    label: 'Retention Extension',
-    description: 'Extend data retention beyond standard period',
-    approver: 'Legal / Compliance',
     validity: 'Specified period',
-    useCase: 'Litigation hold, regulatory inquiry, audit requirement'
+    useCase: 'Executive sponsor review, development planning'
+  },
+  {
+    type: 'ai_opt_out',
+    label: 'AI Opt-Out',
+    description: 'Exclude participant from AI analysis and signal generation',
+    approver: 'HR Partner',
+    validity: 'Cycle duration',
+    useCase: 'Employee request, sensitive role, data protection concern'
+  },
+  {
+    type: 'signal_suppression',
+    label: 'Signal Suppression',
+    description: 'Prevent specific signals from being generated or shared',
+    approver: 'HR Director',
+    validity: 'Specified period',
+    useCase: 'Contested results, appeal in progress, legal review'
   }
 ];
 
@@ -83,6 +83,13 @@ const exceptionFields: FieldDefinition[] = [
     validation: 'Auto-generated'
   },
   {
+    name: 'company_id',
+    required: true,
+    type: 'UUID',
+    description: 'Reference to the company',
+    validation: 'Must exist in companies table'
+  },
+  {
     name: 'cycle_id',
     required: true,
     type: 'UUID',
@@ -94,7 +101,7 @@ const exceptionFields: FieldDefinition[] = [
     required: true,
     type: 'text',
     description: 'Type of exception being requested',
-    validation: 'One of defined exception types'
+    validation: 'One of: anonymity_bypass, deadline_extension, rater_exclusion, report_access_override, ai_opt_out, signal_suppression'
   },
   {
     name: 'requested_by',
@@ -104,7 +111,7 @@ const exceptionFields: FieldDefinition[] = [
     validation: 'Must exist in profiles'
   },
   {
-    name: 'requested_at',
+    name: 'created_at',
     required: true,
     type: 'timestamp',
     description: 'When the exception was requested',
@@ -112,26 +119,33 @@ const exceptionFields: FieldDefinition[] = [
     validation: 'Auto-set on insert'
   },
   {
-    name: 'justification',
+    name: 'reason',
     required: true,
     type: 'text',
     description: 'Business justification for the exception',
     validation: 'Minimum 50 characters'
   },
   {
-    name: 'target_employee_id',
+    name: 'supporting_evidence',
+    required: false,
+    type: 'text',
+    description: 'Additional documentation or evidence supporting the request',
+    validation: 'Optional text field'
+  },
+  {
+    name: 'employee_id',
     required: false,
     type: 'UUID',
     description: 'Employee affected by the exception (if applicable)',
     validation: 'Must exist in profiles'
   },
   {
-    name: 'status',
+    name: 'approval_status',
     required: true,
     type: 'text',
     description: 'Current status of the exception',
     defaultValue: 'pending',
-    validation: 'One of: pending, approved, rejected, expired, revoked'
+    validation: 'One of: pending, approved, rejected, expired'
   },
   {
     name: 'approved_by',
@@ -141,32 +155,18 @@ const exceptionFields: FieldDefinition[] = [
     validation: 'Must have appropriate approval authority'
   },
   {
-    name: 'approved_at',
+    name: 'approval_timestamp',
     required: false,
     type: 'timestamp',
     description: 'When the exception was approved/rejected',
     validation: 'Set when status changes from pending'
   },
   {
-    name: 'valid_from',
-    required: false,
-    type: 'timestamp',
-    description: 'When the exception becomes effective',
-    validation: 'Must be after approved_at'
-  },
-  {
     name: 'valid_until',
     required: false,
     type: 'timestamp',
     description: 'When the exception expires',
-    validation: 'Must be after valid_from'
-  },
-  {
-    name: 'revocation_reason',
-    required: false,
-    type: 'text',
-    description: 'Reason for revoking an approved exception',
-    validation: 'Required when status = revoked'
+    validation: 'Must be after approval_timestamp'
   }
 ];
 

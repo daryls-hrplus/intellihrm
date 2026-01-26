@@ -84,36 +84,43 @@ const aiLogFields: FieldDefinition[] = [
     validation: 'Auto-generated'
   },
   {
-    name: 'cycle_id',
+    name: 'company_id',
     required: true,
     type: 'UUID',
-    description: 'Reference to the feedback cycle',
+    description: 'Reference to the company',
+    validation: 'Must exist in companies table'
+  },
+  {
+    name: 'cycle_id',
+    required: false,
+    type: 'UUID',
+    description: 'Reference to the feedback cycle (if applicable)',
     validation: 'Must exist in feedback_360_cycles'
+  },
+  {
+    name: 'employee_id',
+    required: false,
+    type: 'UUID',
+    description: 'Employee the AI action relates to',
+    validation: 'Must exist in profiles'
   },
   {
     name: 'action_type',
     required: true,
     type: 'text',
     description: 'Type of AI action performed',
-    validation: 'One of defined action types'
+    validation: 'One of: bias_detection, writing_suggestion, signal_extraction, theme_clustering, sentiment_analysis, readiness_scoring'
   },
   {
-    name: 'target_entity_type',
-    required: true,
+    name: 'model_used',
+    required: false,
     type: 'text',
-    description: 'Type of entity AI action was performed on',
-    validation: 'One of: response, participant, cycle, report'
-  },
-  {
-    name: 'target_entity_id',
-    required: true,
-    type: 'UUID',
-    description: 'ID of the entity AI action was performed on',
-    validation: 'Must exist in referenced table'
+    description: 'AI model identifier used for processing',
+    validation: 'Model name from AI registry'
   },
   {
     name: 'model_version',
-    required: true,
+    required: false,
     type: 'text',
     description: 'Version of the AI model used',
     validation: 'Semantic version format'
@@ -121,16 +128,23 @@ const aiLogFields: FieldDefinition[] = [
   {
     name: 'input_summary',
     required: false,
-    type: 'text',
-    description: 'Summary of input data (no PII)',
-    validation: 'Max 1000 characters'
+    type: 'JSONB',
+    description: 'Summary of input data (no PII) as structured JSON',
+    validation: 'JSON object with input metadata'
   },
   {
     name: 'output_summary',
     required: false,
+    type: 'JSONB',
+    description: 'Summary of AI output/recommendation as structured JSON',
+    validation: 'JSON object with output data'
+  },
+  {
+    name: 'explanation',
+    required: true,
     type: 'text',
-    description: 'Summary of AI output/recommendation',
-    validation: 'Max 1000 characters'
+    description: 'Human-readable explanation of the AI action and reasoning',
+    validation: 'Required for ISO 42001 compliance'
   },
   {
     name: 'confidence_score',
@@ -140,36 +154,14 @@ const aiLogFields: FieldDefinition[] = [
     validation: 'Range: 0.0-1.0'
   },
   {
-    name: 'decision_factors',
+    name: 'processing_time_ms',
     required: false,
-    type: 'JSONB',
-    description: 'Explainability data: factors influencing the AI decision',
-    validation: 'JSON object with factor weights'
+    type: 'integer',
+    description: 'Time taken for AI processing in milliseconds',
+    validation: 'Performance monitoring metric'
   },
   {
-    name: 'human_review_required',
-    required: true,
-    type: 'boolean',
-    description: 'Whether human review is needed before action',
-    defaultValue: 'false',
-    validation: 'Based on action type and confidence threshold'
-  },
-  {
-    name: 'human_reviewed_at',
-    required: false,
-    type: 'timestamp',
-    description: 'When human review was completed',
-    validation: 'Set when review is submitted'
-  },
-  {
-    name: 'human_reviewed_by',
-    required: false,
-    type: 'UUID',
-    description: 'User who performed the human review',
-    validation: 'Must have AI review permission'
-  },
-  {
-    name: 'human_override_applied',
+    name: 'human_override',
     required: false,
     type: 'boolean',
     description: 'Whether human modified the AI recommendation',
@@ -177,11 +169,26 @@ const aiLogFields: FieldDefinition[] = [
     validation: 'Boolean'
   },
   {
+    name: 'override_by',
+    required: false,
+    type: 'UUID',
+    description: 'User who overrode the AI recommendation',
+    validation: 'Must have AI review permission'
+  },
+  {
     name: 'override_reason',
     required: false,
     type: 'text',
     description: 'Justification for overriding AI recommendation',
-    validation: 'Required when human_override_applied = true'
+    validation: 'Required when human_override = true'
+  },
+  {
+    name: 'created_at',
+    required: true,
+    type: 'timestamp',
+    description: 'When the AI action was performed',
+    defaultValue: 'now()',
+    validation: 'Auto-generated'
   }
 ];
 
