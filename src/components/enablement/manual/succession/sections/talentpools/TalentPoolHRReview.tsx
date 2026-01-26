@@ -113,7 +113,7 @@ export function TalentPoolHRReview() {
     { rule: 'HR role required', enforcement: 'System', description: 'Only users with HR Partner or Admin role can approve/decline nominations.' },
     { rule: 'Review packet required', enforcement: 'System', description: 'Review packet must be generated before decision can be made.' },
     { rule: 'Notes required for decline', enforcement: 'Policy', description: 'Declining a nomination requires feedback notes to guide the manager.' },
-    { rule: 'Review SLA', enforcement: 'Policy', description: 'Nominations should be reviewed within 5 business days. Escalation after 7 days.' },
+    { rule: 'Review SLA', enforcement: 'Policy', description: 'Organizational policy recommends review within 5 business days. Escalation guidance at 7 days is manual, not automated.' },
     { rule: 'Audit trail', enforcement: 'System', description: 'All review actions are logged with timestamp and reviewer ID.' },
     { rule: 'Pool criteria validation', enforcement: 'Advisory', description: 'System validates against pool criteria but HR can override for exceptions.' }
   ];

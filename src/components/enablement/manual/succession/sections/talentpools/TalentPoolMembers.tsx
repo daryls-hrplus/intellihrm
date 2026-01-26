@@ -12,7 +12,8 @@ import {
   UserMinus,
   GraduationCap,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 
 export function TalentPoolMembers() {
@@ -20,10 +21,10 @@ export function TalentPoolMembers() {
     { name: 'id', required: true, type: 'UUID', description: 'Primary key, auto-generated', validation: 'System-assigned' },
     { name: 'pool_id', required: true, type: 'UUID', description: 'Reference to parent talent pool', validation: 'Must be valid pool' },
     { name: 'employee_id', required: true, type: 'UUID', description: 'Reference to employee (profiles table)', validation: 'Must be active employee' },
-    { name: 'added_by', required: true, type: 'UUID', description: 'User who added/nominated the member', validation: 'Valid user ID' },
+    { name: 'added_by', required: false, type: 'UUID', description: 'User who added/nominated the member (nullable)', defaultValue: 'null' },
     { name: 'reason', required: false, type: 'Text', description: 'Justification for pool membership', defaultValue: 'null' },
-    { name: 'status', required: true, type: 'Text', description: 'Current membership status', defaultValue: 'active', validation: 'Valid status enum' },
-    { name: 'start_date', required: false, type: 'Date', description: 'Date membership began', defaultValue: 'Current date' },
+    { name: 'status', required: true, type: 'Text', description: 'Current membership status', defaultValue: 'active', validation: 'Application-managed (see note)' },
+    { name: 'start_date', required: true, type: 'Date', description: 'Date membership began (auto-set)', defaultValue: 'CURRENT_DATE' },
     { name: 'end_date', required: false, type: 'Date', description: 'Date membership ended (if applicable)', defaultValue: 'null' },
     { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },
     { name: 'updated_at', required: true, type: 'Timestamp', description: 'Record last update timestamp', defaultValue: 'now()' }
@@ -171,6 +172,20 @@ export function TalentPoolMembers() {
             is essential for proper pool management.
           </p>
           
+          {/* Implementation Note */}
+          <div className="p-3 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/30 rounded-r-lg">
+            <p className="text-sm text-foreground flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Implementation Note:</strong> Status values are application-managed, not database-enforced. 
+                The current implementation primarily uses <code className="bg-muted px-1.5 py-0.5 rounded text-xs">active</code> and 
+                <code className="bg-muted px-1.5 py-0.5 rounded text-xs">nominated</code> statuses. 
+                The full lifecycle (graduated, rejected, removed) is documented here as the target workflow 
+                for complete implementation.
+              </span>
+            </p>
+          </div>
+          
           {/* Status Flow Diagram */}
           <div className="flex items-center justify-center gap-2 p-4 bg-muted/50 rounded-lg overflow-x-auto">
             <div className="flex flex-col items-center">
@@ -249,9 +264,20 @@ export function TalentPoolMembers() {
           <CardTitle className="flex items-center gap-2 text-lg">
             <GraduationCap className="h-5 w-5 text-primary" />
             Graduate Member to Succession Plan
+            <Badge variant="outline" className="ml-2 text-xs">Roadmap</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="p-3 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/30 rounded-r-lg mb-4">
+            <p className="text-sm text-foreground flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Future Enhancement:</strong> The graduation workflow is planned for a future release. 
+                Currently, transitioning pool members to succession candidates is a manual process 
+                coordinated by HR. The steps below describe the target workflow.
+              </span>
+            </p>
+          </div>
           <p className="text-sm text-muted-foreground mb-4">
             When a pool member is ready to become a succession candidate, graduate them 
             to link their development history to the succession plan.

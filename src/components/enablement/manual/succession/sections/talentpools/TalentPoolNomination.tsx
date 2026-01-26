@@ -87,7 +87,11 @@ export function TalentPoolNomination() {
         'Add suggested learning activities, stretch assignments, or mentors',
         'Include any skill gaps that should be addressed'
       ],
-      expectedResult: 'Development recommendations are captured (optional)'
+      notes: [
+        'Development recommendations are captured for HR reference during review',
+        'Note: This field is currently for display purposes and is not persisted to the database'
+      ],
+      expectedResult: 'Development recommendations are entered in the form'
     },
     {
       title: 'Submit Nomination',
