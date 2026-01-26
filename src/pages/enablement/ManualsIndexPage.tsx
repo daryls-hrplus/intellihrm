@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Clock,
   Radar,
+  Grid3X3,
 } from "lucide-react";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
@@ -104,6 +105,17 @@ const manuals = [
     badgeColor: "bg-cyan-500/10 text-cyan-700 border-cyan-500/30",
     sections: 59,
     href: "/enablement/manuals/feedback-360",
+    version: "2.5",
+  },
+  {
+    id: "succession",
+    title: "Succession Planning Guide",
+    description: "Comprehensive succession planning including 9-box assessments, talent pools, readiness frameworks, and career paths",
+    icon: Grid3X3,
+    color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    badgeColor: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+    sections: 55,
+    href: "/enablement/manuals/succession",
     version: "1.0",
   },
 ];
