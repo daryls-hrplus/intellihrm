@@ -23,9 +23,9 @@ export function TalentPoolCreation() {
     { name: 'pool_type', required: true, type: 'Text (Enum)', description: 'Classification type', defaultValue: 'high_potential', validation: 'Must be valid pool_type' },
     { name: 'criteria', required: false, type: 'JSONB', description: 'Eligibility criteria for membership', defaultValue: '{}' },
     { name: 'is_active', required: true, type: 'Boolean', description: 'Whether the pool is active', defaultValue: 'true' },
-    { name: 'start_date', required: false, type: 'Date', description: 'Pool effective date', defaultValue: 'Current date' },
+    { name: 'start_date', required: true, type: 'Date', description: 'Pool effective date (auto-set on creation)', defaultValue: 'CURRENT_DATE' },
     { name: 'end_date', required: false, type: 'Date', description: 'Pool expiration date (null = no expiration)', defaultValue: 'null' },
-    { name: 'created_by', required: true, type: 'UUID', description: 'User who created the pool', validation: 'Valid user ID' },
+    { name: 'created_by', required: false, type: 'UUID', description: 'User who created the pool (nullable)', defaultValue: 'null' },
     { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },
     { name: 'updated_at', required: true, type: 'Timestamp', description: 'Record last update timestamp', defaultValue: 'now()' }
   ];

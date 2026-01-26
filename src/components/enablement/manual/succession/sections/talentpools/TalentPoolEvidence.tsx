@@ -334,6 +334,78 @@ return result.sortBy(r => r.score * r.confidence).limit(8)`}
         </CardContent>
       </Card>
 
+      {/* Supporting Tables Reference */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Database className="h-5 w-5 text-primary" />
+            Supporting Database Tables
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            The evidence system relies on three interconnected tables. For complete field-level 
+            documentation, refer to the respective module manuals.
+          </p>
+          
+          <div className="space-y-3">
+            <div className="p-3 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h5 className="font-medium text-sm font-mono">talent_profile_evidence</h5>
+                <Badge variant="outline" className="text-xs">13 fields</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Stores aggregated evidence from source systems. Key fields include: 
+                <code className="bg-muted px-1 rounded">evidence_type</code>, 
+                <code className="bg-muted px-1 rounded">source_table</code>, 
+                <code className="bg-muted px-1 rounded">evidence_summary</code>, 
+                <code className="bg-muted px-1 rounded">confidence_score</code>, 
+                <code className="bg-muted px-1 rounded">is_current</code>.
+              </p>
+            </div>
+            
+            <div className="p-3 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h5 className="font-medium text-sm font-mono">talent_signal_snapshots</h5>
+                <Badge variant="outline" className="text-xs">~18 fields</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Point-in-time captures of talent signals. Key fields include: 
+                <code className="bg-muted px-1 rounded">signal_value</code>, 
+                <code className="bg-muted px-1 rounded">normalized_score</code>, 
+                <code className="bg-muted px-1 rounded">confidence_score</code>, 
+                <code className="bg-muted px-1 rounded">bias_risk_level</code>, 
+                <code className="bg-muted px-1 rounded">is_current</code>.
+              </p>
+            </div>
+            
+            <div className="p-3 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h5 className="font-medium text-sm font-mono">talent_signal_definitions</h5>
+                <Badge variant="outline" className="text-xs">~15 fields</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Configuration of signal types and categories. Key fields include: 
+                <code className="bg-muted px-1 rounded">signal_code</code>, 
+                <code className="bg-muted px-1 rounded">signal_category</code> (e.g., leadership, performance), 
+                <code className="bg-muted px-1 rounded">weight_percentage</code>, 
+                <code className="bg-muted px-1 rounded">bias_adjustment_factor</code>.
+              </p>
+            </div>
+          </div>
+          
+          <div className="p-3 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/30 rounded-r-lg">
+            <p className="text-sm text-foreground flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Cross-Reference:</strong> For complete schema documentation of these tables, 
+                see the Talent Management Module Manual and Nine-Box Assessment Configuration (Chapter 3.3).
+              </span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Best Practices */}
       <Card className="border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20">
         <CardHeader>
