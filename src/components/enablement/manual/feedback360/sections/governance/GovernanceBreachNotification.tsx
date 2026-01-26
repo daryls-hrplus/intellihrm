@@ -3,7 +3,7 @@ import { StepByStep, Step } from '../../../components/StepByStep';
 import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
 import { BusinessRules, BusinessRule } from '../../../components/BusinessRules';
 import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
-import { AlertOctagon, ArrowRight, Shield, Clock, AlertTriangle } from 'lucide-react';
+import { AlertOctagon, ArrowRight, Shield, Clock, AlertTriangle, Info } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -283,6 +283,24 @@ export function GovernanceBreachNotification() {
         <AlertDescription className="text-blue-700 dark:text-blue-300">
           This section implements breach notification procedures per GDPR requirements and aligns with 
           ISO 27001 incident management and enterprise HRMS security standards.
+        </AlertDescription>
+      </Alert>
+
+      {/* Implementation Architecture Note */}
+      <Alert className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+        <Info className="h-4 w-4 text-green-600" />
+        <AlertTitle className="text-green-800 dark:text-green-200">Implementation Architecture</AlertTitle>
+        <AlertDescription className="text-green-700 dark:text-green-300">
+          <p className="mb-2">
+            The <code className="text-xs bg-green-100 dark:bg-green-900 px-1 rounded">feedback_breach_incidents</code> table 
+            is fully implemented and ready for incident logging. Per enterprise security standards (ISO 27001, SOC 2), 
+            breach notification workflows are typically managed via Security Operations Center (SOC) tools or dedicated 
+            incident management platforms (ServiceNow, Splunk SOAR, PagerDuty).
+          </p>
+          <p className="text-sm">
+            <strong>Integration Pattern:</strong> Security monitoring tools create incident records; the 360 Feedback module 
+            provides data for impact assessment and maintains immutable audit trails.
+          </p>
         </AlertDescription>
       </Alert>
 

@@ -3,7 +3,7 @@ import { StepByStep, Step } from '../../../components/StepByStep';
 import { FieldReferenceTable, FieldDefinition } from '../../../components/FieldReferenceTable';
 import { BusinessRules, BusinessRule } from '../../../components/BusinessRules';
 import { TroubleshootingSection, TroubleshootingItem } from '../../../components/TroubleshootingSection';
-import { ClipboardCheck, ArrowRight, Shield, AlertTriangle, Brain } from 'lucide-react';
+import { ClipboardCheck, ArrowRight, Shield, AlertTriangle, Brain, Info } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -336,6 +336,24 @@ export function GovernanceDPIA() {
         <AlertDescription className="text-blue-700 dark:text-blue-300">
           This section implements DPIA requirements per GDPR and aligns with ISO 42001 AI risk assessment 
           for responsible use of AI in 360 feedback systems.
+        </AlertDescription>
+      </Alert>
+
+      {/* Implementation Architecture Note */}
+      <Alert className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+        <Info className="h-4 w-4 text-green-600" />
+        <AlertTitle className="text-green-800 dark:text-green-200">Implementation Architecture</AlertTitle>
+        <AlertDescription className="text-green-700 dark:text-green-300">
+          <p className="mb-2">
+            The <code className="text-xs bg-green-100 dark:bg-green-900 px-1 rounded">feedback_dpia_records</code> table 
+            is fully implemented for assessment documentation. Per enterprise privacy standards (ISO 27701, GDPR Article 35), 
+            DPIA workflows are typically managed via Privacy Management platforms (OneTrust, TrustArc, Securiti) with DPO 
+            review workflows.
+          </p>
+          <p className="text-sm">
+            <strong>Integration Pattern:</strong> DPO conducts DPIA during feature enablement (especially AI features); records 
+            are linked to the 360 Feedback module for traceability and must be approved before AI processing is activated.
+          </p>
         </AlertDescription>
       </Alert>
 
