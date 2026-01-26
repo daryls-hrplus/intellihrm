@@ -81,6 +81,13 @@ const consentRecordFields: FieldDefinition[] = [
     validation: 'Auto-generated'
   },
   {
+    name: 'company_id',
+    required: true,
+    type: 'UUID',
+    description: 'Reference to the company',
+    validation: 'Must exist in companies table'
+  },
+  {
     name: 'employee_id',
     required: true,
     type: 'UUID',
@@ -118,18 +125,18 @@ const consentRecordFields: FieldDefinition[] = [
     validation: 'Semantic version format'
   },
   {
-    name: 'consent_text',
+    name: 'consent_text_hash',
     required: false,
     type: 'text',
-    description: 'Full text of consent language at time of agreement',
-    validation: 'Stored for audit purposes'
+    description: 'Hash of consent text at time of agreement (for audit)',
+    validation: 'SHA-256 hash of consent language'
   },
   {
     name: 'ip_address',
     required: false,
-    type: 'INET',
+    type: 'text',
     description: 'IP address at time of consent (GDPR audit trail)',
-    validation: 'Valid IPv4 or IPv6'
+    validation: 'IPv4 or IPv6 string format'
   },
   {
     name: 'user_agent',
@@ -139,7 +146,7 @@ const consentRecordFields: FieldDefinition[] = [
     validation: 'String'
   },
   {
-    name: 'consented_at',
+    name: 'consent_timestamp',
     required: false,
     type: 'timestamp',
     description: 'Timestamp when consent was recorded',
@@ -158,6 +165,14 @@ const consentRecordFields: FieldDefinition[] = [
     type: 'text',
     description: 'Reason provided for consent withdrawal',
     validation: 'Optional text field'
+  },
+  {
+    name: 'created_at',
+    required: true,
+    type: 'timestamp',
+    description: 'Record creation timestamp',
+    defaultValue: 'now()',
+    validation: 'Auto-generated'
   }
 ];
 
