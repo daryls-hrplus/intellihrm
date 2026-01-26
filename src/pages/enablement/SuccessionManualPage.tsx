@@ -410,9 +410,10 @@ export default function SuccessionManualPage() {
       <ManualPrintPreview
         open={showPrintPreview}
         onOpenChange={setShowPrintPreview}
-        manualTitle="Succession Planning Administrator Manual"
         settings={printSettings}
-        onConfigureSettings={handleOpenPrintConfig}
+        brandColors={brandColors}
+        onConfigureClick={handleOpenPrintConfig}
+        totalReadTime={totalReadTime}
       />
     </div>
   );
