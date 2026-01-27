@@ -23226,16 +23226,86 @@ export type Database = {
         }
         Relationships: []
       }
+      enablement_release_lifecycle: {
+        Row: {
+          base_version: string
+          company_id: string | null
+          created_at: string
+          current_release_id: string | null
+          id: string
+          last_assessment_at: string | null
+          last_readiness_assessment: Json | null
+          last_readiness_score: number | null
+          milestones: Json | null
+          release_status: string
+          target_ga_date: string | null
+          updated_at: string
+          updated_by: string | null
+          version_freeze_enabled: boolean
+        }
+        Insert: {
+          base_version?: string
+          company_id?: string | null
+          created_at?: string
+          current_release_id?: string | null
+          id?: string
+          last_assessment_at?: string | null
+          last_readiness_assessment?: Json | null
+          last_readiness_score?: number | null
+          milestones?: Json | null
+          release_status?: string
+          target_ga_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          version_freeze_enabled?: boolean
+        }
+        Update: {
+          base_version?: string
+          company_id?: string | null
+          created_at?: string
+          current_release_id?: string | null
+          id?: string
+          last_assessment_at?: string | null
+          last_readiness_assessment?: Json | null
+          last_readiness_score?: number | null
+          milestones?: Json | null
+          release_status?: string
+          target_ga_date?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          version_freeze_enabled?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enablement_release_lifecycle_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enablement_release_lifecycle_current_release_id_fkey"
+            columns: ["current_release_id"]
+            isOneToOne: false
+            referencedRelation: "enablement_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enablement_releases: {
         Row: {
+          ai_changelog: string | null
           created_at: string | null
           created_by: string | null
           feature_count: number | null
           id: string
+          is_active: boolean | null
           preview_start_date: string | null
+          readiness_score: number | null
           release_date: string | null
           release_name: string | null
           release_notes: string | null
+          release_type: string | null
           status: string | null
           target_release_date: string | null
           total_estimated_hours: number | null
@@ -23243,14 +23313,18 @@ export type Database = {
           version_number: string
         }
         Insert: {
+          ai_changelog?: string | null
           created_at?: string | null
           created_by?: string | null
           feature_count?: number | null
           id?: string
+          is_active?: boolean | null
           preview_start_date?: string | null
+          readiness_score?: number | null
           release_date?: string | null
           release_name?: string | null
           release_notes?: string | null
+          release_type?: string | null
           status?: string | null
           target_release_date?: string | null
           total_estimated_hours?: number | null
@@ -23258,14 +23332,18 @@ export type Database = {
           version_number: string
         }
         Update: {
+          ai_changelog?: string | null
           created_at?: string | null
           created_by?: string | null
           feature_count?: number | null
           id?: string
+          is_active?: boolean | null
           preview_start_date?: string | null
+          readiness_score?: number | null
           release_date?: string | null
           release_name?: string | null
           release_notes?: string | null
+          release_type?: string | null
           status?: string | null
           target_release_date?: string | null
           total_estimated_hours?: number | null
