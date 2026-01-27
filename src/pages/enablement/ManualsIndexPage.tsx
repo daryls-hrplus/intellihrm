@@ -15,6 +15,7 @@ import {
   Clock,
   Radar,
   Grid3X3,
+  TrendingUp,
 } from "lucide-react";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
@@ -116,6 +117,17 @@ const manuals = [
     badgeColor: "bg-amber-500/10 text-amber-700 border-amber-500/30",
     sections: 55,
     href: "/enablement/manuals/succession",
+    version: "1.0",
+  },
+  {
+    id: "career-development",
+    title: "Career Development Guide",
+    description: "Career paths, individual development plans (IDPs), mentorship programs, and AI-driven development recommendations",
+    icon: TrendingUp,
+    color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    badgeColor: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+    sections: 52,
+    href: "/enablement/manuals/career-development",
     version: "1.0",
   },
 ];
