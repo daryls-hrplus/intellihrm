@@ -905,71 +905,71 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 8: CAREER DEVELOPMENT & MENTORSHIP (~45 min)
+  // PART 8: SUCCESSION-CAREER INTEGRATION (~35 min)
   // ==========================================================================
   {
     id: 'part-8',
     sectionNumber: '8',
-    title: 'Career Development & Mentorship',
-    description: 'Career path design, progression steps, mentorship program setup, and pairing workflows.',
+    title: 'Succession-Career Integration',
+    description: 'Integration between Succession Planning and Career Development modules, including development plans, gap linking, and succession-specific mentorship.',
     contentLevel: 'procedure',
-    estimatedReadTime: 45,
+    estimatedReadTime: 35,
     targetRoles: ['Admin', 'HR Partner'],
     subsections: [
       {
         id: 'sec-8-1',
         sectionNumber: '8.1',
-        title: 'Career Path Design',
-        description: 'Create career paths with job progressions, competency requirements, and typical timeframes',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['Admin', 'HR Partner'],
+        title: 'Integration Overview',
+        description: 'Cross-reference to Career Development Manual, succession-specific use cases, and data flow architecture between modules.',
+        contentLevel: 'concept',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner', 'Consultant'],
         industryContext: {
-          frequency: 'Per career track',
-          timing: 'Post job architecture',
-          benchmark: 'Clear progression visibility drives engagement'
+          frequency: 'Reference',
+          timing: 'Pre-implementation',
+          benchmark: 'Workday Career Hub integration pattern - separate modules with clear touchpoints'
         }
       },
       {
         id: 'sec-8-2',
         sectionNumber: '8.2',
-        title: 'Path Step Configuration',
-        description: 'Define prerequisites, development activities, and assessment criteria per step',
-        contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
+        title: 'Succession Development Plans',
+        description: 'Field reference for succession_development_plans table (13 fields): link candidates to development plans, track progress inline.',
+        contentLevel: 'reference',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Per path',
-          timing: 'During path creation',
-          benchmark: 'Measurable milestones for progression decisions'
+          frequency: 'Per candidate',
+          timing: 'Post candidate nomination',
+          benchmark: 'Candidate-specific development tracking within succession context'
         }
       },
       {
         id: 'sec-8-3',
         sectionNumber: '8.3',
-        title: 'Mentorship Program Setup',
-        description: 'Create mentorship programs with goals, duration, and matching criteria',
+        title: 'Gap-to-Development Linking',
+        description: 'Field reference for succession_gap_development_links table (12 fields): link skill gaps to IDP goals via cross-module workflow.',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Admin'],
+        targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Per program',
-          timing: 'Post career paths',
-          benchmark: 'Mentorship accelerates readiness by 30%'
+          frequency: 'Per gap identified',
+          timing: 'Post readiness assessment',
+          benchmark: 'Succession → IDP → L&D workflow for gap closure'
         }
       },
       {
         id: 'sec-8-4',
         sectionNumber: '8.4',
-        title: 'Mentor-Mentee Pairing',
-        description: 'Match mentors and mentees, track sessions, and measure program effectiveness',
+        title: 'Mentorship for Succession Candidates',
+        description: 'Filter mentorship programs by type="succession", pair candidates with executive mentors. Cross-reference to Career Dev Manual Ch 3.',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 5,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Per program cycle',
-          timing: 'Program operations',
-          benchmark: 'Skills-based matching for maximum impact'
+          frequency: 'Per candidate',
+          timing: 'Post development plan creation',
+          benchmark: 'Executive mentorship accelerates succession readiness by 30%'
         }
       }
     ]
