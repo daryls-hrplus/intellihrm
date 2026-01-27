@@ -1,67 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, CheckCircle, AlertTriangle, Lightbulb, Clock } from 'lucide-react';
+import { FileText, CheckCircle, Lightbulb, Clock, Info, RefreshCw } from 'lucide-react';
 
 const VERSION_HISTORY = [
   {
-    version: '1.3.0',
+    version: '1.0.0',
     date: '2026-01-27',
     status: 'current',
-    changes: [
-      'Removed all vendor-specific brand references (SAP, Workday, Oracle, Visier) from documentation',
-      'Replaced competitor attributions with neutral "Industry Standard" terminology',
-      'Preserved McKinsey, SHRM, ISO, SOC 2 as legitimate industry/compliance standards',
-      'Maintained all industry benchmarks and methodology patterns without brand attribution',
-      'Updated 27+ files across Analytics, Risk, Nine-Box, Foundation, Readiness, and Integration sections',
-      'Aligned terminology with HRplus enterprise positioning and industry neutrality guidelines',
-    ]
-  },
-  {
-    version: '1.2.0',
-    date: '2026-01-27',
-    status: 'previous',
-    changes: [
-      'Appendix A: Added 5 new Quick Reference Cards (Configuration, Go-Live, Annual Cycle, Integration, Keyboard)',
-      'Appendix B: Added 6 new Architecture Diagrams (Signal Mapping, Readiness Lifecycle, Risk Flow, Integration, Pool State Machine, Approval Tree)',
-      'Appendix C: Added 16 new glossary terms in Configuration and Troubleshooting categories',
-      'Appendix D: Added Planned Features roadmap and Deprecation Notices sections',
-      'Section 11.5: Added talent_pool_review_packets field reference (12 fields)',
-      'Section 11.5: Added TalentPoolNominationEvidence and HRReviewConfidenceIndicators UI troubleshooting',
-      'Section 11.5: Added talent_pool_members.development_notes field documentation',
-      'Total glossary terms increased from 55 to 71+',
-      'Total architecture diagrams increased from 3 to 9',
-      'Total quick reference cards increased from 4 to 9',
-    ]
-  },
-  {
-    version: '1.1.0',
-    date: '2026-01-27',
-    status: 'archived',
-    changes: [
-      'Chapter 11 expanded from 5 placeholder sections to 10 comprehensive sections',
-      'Added 100+ documented issues with Issue ID convention (CFG-XXX, NBX-XXX, etc.)',
-      'Added 4-phase diagnostic methodology (Identify → Diagnose → Resolve → Prevent)',
-      'Added symptom-to-section quick reference matrix',
-      'Added Configuration Issues section (11.2) with 12 detailed resolution guides',
-      'Added Nine-Box & Talent Assessment Issues section (11.3) with diagnostic checklist',
-      'Added Readiness Assessment Issues section (11.4) with score calculation reference',
-      'Added Talent Pool & Succession Plan Issues section (11.5) with status lifecycle',
-      'Added Workflow & Approval Issues section (11.6) with transaction type reference',
-      'Added Data Quality & Migration Issues section (11.7) with validation checklist',
-      'Added Security & Permission Issues section (11.8) with access control matrix',
-      'Added AI & Automation Issues section (11.9) with data requirements reference',
-      'Added Escalation Procedures section (11.10) with 4-tier support model and 20+ FAQs',
-      'Chapter 7 Risk terminology aligned with industry standards',
-      'Added database CHECK constraints for position_criticality and replacement_difficulty enums',
-      'Fixed SuccessionAnalytics.tsx impact_level visualization bug',
-      'Added assessed_by capture to FlightRiskTab.tsx for audit compliance',
-      'Updated glossary with Risk of Loss, Impact of Loss, Attrition Risk terms'
-    ]
-  },
-  {
-    version: '1.0.0',
-    date: '2026-01-26',
-    status: 'archived',
     changes: [
       'Initial release of Succession Planning Administrator Manual',
       '11 comprehensive parts covering all succession planning capabilities',
@@ -72,9 +17,11 @@ const VERSION_HISTORY = [
       'Risk management including flight risk (Part 7)',
       'Career development and mentorship (Part 8)',
       'Cross-module integration patterns (Part 9)',
-      '55+ glossary terms across 8 categories',
-      'Quick reference cards for 4 personas',
-      'Architecture diagrams for data model and workflows'
+      'Troubleshooting guide with 100+ documented issues (Part 11)',
+      'Quick reference cards for 9 personas and workflows',
+      'Architecture diagrams (9 comprehensive visualizations)',
+      'Glossary with 71+ terms across 8 categories',
+      'Planned features roadmap and deprecation notices',
     ]
   }
 ];
@@ -86,21 +33,6 @@ const PLANNED_FEATURES = [
   { feature: 'Board-Level Succession Dashboard', timeline: 'Q2 2026', priority: 'High' },
   { feature: 'Mobile Readiness Assessment App', timeline: 'Q4 2026', priority: 'Low' },
   { feature: 'Predictive Vacancy Forecasting', timeline: 'Q3 2026', priority: 'High' },
-];
-
-const DEPRECATION_NOTICES = [
-  { 
-    feature: 'Legacy Nine-Box Single-Rater Mode', 
-    deprecationDate: '2026-06-01', 
-    removalDate: '2026-12-01',
-    migration: 'Migrate to multi-assessor configuration using succession_assessor_types table.'
-  },
-  { 
-    feature: 'Manual Signal Score Entry', 
-    deprecationDate: '2026-09-01', 
-    removalDate: '2027-03-01',
-    migration: 'Configure talent signal integrations via nine_box_signal_mappings for automated score capture.'
-  },
 ];
 
 export function SuccessionVersionHistory() {
@@ -116,6 +48,18 @@ export function SuccessionVersionHistory() {
         </p>
       </div>
 
+      <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg">
+        <div className="flex items-start gap-2">
+          <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Pre-Release Documentation</p>
+            <p className="text-sm text-blue-700 dark:text-blue-400">
+              This documentation is being prepared for initial release. All updates contribute to version 1.0 until product launch.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Version History */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Release History</h3>
@@ -125,18 +69,10 @@ export function SuccessionVersionHistory() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   Version {version.version}
-                  {version.status === 'current' && (
-                    <Badge className="bg-green-600">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Current
-                    </Badge>
-                  )}
-                  {version.status === 'previous' && (
-                    <Badge variant="secondary">Previous</Badge>
-                  )}
-                  {version.status === 'archived' && (
-                    <Badge variant="outline">Archived</Badge>
-                  )}
+                  <Badge className="bg-blue-600">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Pre-Release
+                  </Badge>
                 </CardTitle>
                 <span className="text-sm text-muted-foreground">{version.date}</span>
               </div>
@@ -185,30 +121,17 @@ export function SuccessionVersionHistory() {
         </Card>
       </div>
 
-      {/* Deprecation Notices */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-destructive" />
-          Deprecation Notices
-        </h3>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              {DEPRECATION_NOTICES.map((notice, index) => (
-                <div key={index} className="border-l-4 border-amber-500 pl-4 py-2">
-                  <h4 className="font-medium text-sm">{notice.feature}</h4>
-                  <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
-                    <span>Deprecated: {notice.deprecationDate}</span>
-                    <span>Removal: {notice.removalDate}</span>
-                  </div>
-                  <p className="text-sm mt-2 text-muted-foreground">
-                    <strong>Migration:</strong> {notice.migration}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="p-4 bg-muted/50 rounded-lg">
+        <div className="flex items-start gap-2">
+          <RefreshCw className="h-4 w-4 text-primary mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Version Lifecycle</p>
+            <p className="text-sm text-muted-foreground">
+              All documentation updates contribute to v1.0 until official product launch. 
+              Version numbering will begin incrementing after GA release.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

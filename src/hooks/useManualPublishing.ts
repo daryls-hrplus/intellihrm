@@ -10,7 +10,7 @@ export const MANUAL_CONFIGS = [
   {
     id: 'admin-security',
     name: 'Admin & Security - Administrator Guide',
-    version: 'v1.3.0',
+    version: 'v1.0.0',
     sectionsCount: 55,
     href: '/enablement/manuals/admin-security',
     icon: 'Shield',
@@ -19,7 +19,7 @@ export const MANUAL_CONFIGS = [
   {
     id: 'workforce',
     name: 'Workforce - Administrator Guide',
-    version: 'v1.3.0',
+    version: 'v1.0.0',
     sectionsCount: 80,
     href: '/enablement/manuals/workforce',
     icon: 'Users',
@@ -28,7 +28,7 @@ export const MANUAL_CONFIGS = [
   {
     id: 'hr-hub',
     name: 'HR Hub - Administrator Guide',
-    version: 'v1.3.0',
+    version: 'v1.0.0',
     sectionsCount: 32,
     href: '/enablement/manuals/hr-hub',
     icon: 'HelpCircle',
@@ -37,7 +37,7 @@ export const MANUAL_CONFIGS = [
   {
     id: 'appraisals',
     name: 'Performance Appraisal - Administrator Guide',
-    version: 'v1.3.0',
+    version: 'v1.0.0',
     sectionsCount: 48,
     href: '/enablement/manuals/appraisals',
     icon: 'BookOpen',
@@ -46,7 +46,7 @@ export const MANUAL_CONFIGS = [
   {
     id: 'goals',
     name: 'Goals Manual',
-    version: 'v1.3.0',
+    version: 'v1.0.0',
     sectionsCount: 24,
     href: '/enablement/manuals/goals',
     icon: 'Target',

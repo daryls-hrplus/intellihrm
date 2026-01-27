@@ -1,162 +1,32 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { History, User, Calendar, Plus, RefreshCw, FileText } from 'lucide-react';
+import { History, User, Calendar, FileText, Info, RefreshCw } from 'lucide-react';
 
 const VERSION_HISTORY = [
   {
-    version: '1.4.0',
-    date: '2026-01-13',
-    author: 'Intelli HRM Team',
-    type: 'minor',
-    changes: [
-      'Added Timezone & Business Hours configuration documentation',
-      'Added Rule Effective Dating with status badges (Active/Scheduled/Expired/Inactive)',
-      'Added Notification Lifecycle Management (read_at, expires_at, priority_until)',
-      'Added Workflow Analytics Dashboard documentation (Section 6.4)',
-      'Added Reference Data Catalog documentation (Section 2.4)',
-      'Added Scheduled Jobs validity period and run window configuration',
-      'Expanded Quick Reference Cards with 4 new workflow cards',
-      'Expanded Glossary with 8 new terms',
-    ],
-  },
-  {
-    version: '1.3.0',
-    date: '2026-01-08',
-    author: 'Intelli HRM Team',
-    type: 'major',
-    changes: [
-      'Added comprehensive Appendix section with Architecture Diagrams',
-      'Created searchable Glossary with 45+ HR Hub terms',
-      'Added Quick Reference Cards for common workflows',
-      'Added Version History tracking for manual updates',
-      'Expanded Cross-Module Integration documentation',
-    ],
-  },
-  {
-    version: '1.2.0',
-    date: '2025-12-28',
-    author: 'Intelli HRM Team',
-    type: 'minor',
-    changes: [
-      'Added Part 7: Analytics & Reporting section',
-      'Added Part 8: Troubleshooting & Support section',
-      'Enhanced Workflow & Approval documentation',
-      'Added ESS Change Request configuration guides',
-      'Updated Help Desk SLA management procedures',
-    ],
-  },
-  {
-    version: '1.1.0',
-    date: '2025-12-15',
-    author: 'Intelli HRM Team',
-    type: 'minor',
-    changes: [
-      'Added Knowledge Base management documentation',
-      'Added SOP creation and AI-assisted generation guides',
-      'Enhanced Compliance Tracker configuration',
-      'Added Notification & Reminder system documentation',
-      'Updated Communication Center features',
-    ],
-  },
-  {
     version: '1.0.0',
-    date: '2025-11-20',
+    date: '2026-01-27',
     author: 'Intelli HRM Team',
-    type: 'major',
+    status: 'pre-release',
     changes: [
       'Initial release of HR Hub Administrator Manual',
-      'Core Help Desk setup and configuration',
-      'Document management documentation',
-      'Organization structure integration guides',
-      'Basic workflow configuration',
+      'Complete documentation covering all HR Hub capabilities',
+      'Help Desk setup, configuration, and SLA management',
+      'Document management and policy administration',
+      'Knowledge Base management with AI-assisted SOP generation',
+      'Notification and reminder system configuration',
+      'Workflow and approval engine documentation',
+      'Compliance tracker and regulatory management',
+      'Communication Center features and templates',
+      'Timezone and business hours configuration',
+      'Rule effective dating with status badges',
+      'Workflow analytics dashboard documentation',
+      'Reference data catalog and lookup values',
+      'Architecture diagrams for HR Hub workflows',
+      'Searchable glossary with 45+ terms',
+      'Quick reference cards for common tasks',
+      'Troubleshooting guide with common issues',
     ],
-  },
-];
-
-const FEATURE_LOG = [
-  {
-    feature: 'Timezone Configuration',
-    category: 'Organization',
-    addedIn: '1.4.0',
-    description: 'Company timezone settings affecting reminder processing and SLA calculations',
-  },
-  {
-    feature: 'Rule Effective Dating',
-    category: 'Reminders',
-    addedIn: '1.4.0',
-    description: 'Schedule future rule activation with effective_from/effective_to dates and status badges',
-  },
-  {
-    feature: 'Notification Lifecycle',
-    category: 'Communication',
-    addedIn: '1.4.0',
-    description: 'Read tracking, expiration management, and automatic cleanup processing',
-  },
-  {
-    feature: 'Workflow Analytics Dashboard',
-    category: 'Compliance',
-    addedIn: '1.4.0',
-    description: 'Dashboard with approval rates, trends, and approver performance metrics',
-  },
-  {
-    feature: 'Reference Data Catalog',
-    category: 'Organization',
-    addedIn: '1.4.0',
-    description: 'Browse system reference data and configurable lookup values',
-  },
-  {
-    feature: 'Rule Status Badges',
-    category: 'Reminders',
-    addedIn: '1.4.0',
-    description: 'Visual indicators for Active, Scheduled, Expired, and Inactive rule states',
-  },
-  {
-    feature: 'Architecture Diagrams',
-    category: 'Appendix',
-    addedIn: '1.3.0',
-    description: '6 interactive Mermaid diagrams showing HR Hub workflows and integrations',
-  },
-  {
-    feature: 'Glossary',
-    category: 'Appendix',
-    addedIn: '1.3.0',
-    description: 'Searchable glossary with 45+ terms across 8 categories',
-  },
-  {
-    feature: 'Quick Reference Cards',
-    category: 'Appendix',
-    addedIn: '1.3.0',
-    description: '30 step-by-step workflow cards for common HR Hub tasks',
-  },
-  {
-    feature: 'Troubleshooting Guide',
-    category: 'Support',
-    addedIn: '1.2.0',
-    description: 'Common issues, error codes, and resolution steps',
-  },
-  {
-    feature: 'Analytics Dashboard Guide',
-    category: 'Analytics',
-    addedIn: '1.2.0',
-    description: 'HR Hub metrics, KPIs, and reporting configuration',
-  },
-  {
-    feature: 'SOP AI Generation',
-    category: 'Knowledge',
-    addedIn: '1.1.0',
-    description: 'AI-assisted SOP creation and template management',
-  },
-  {
-    feature: 'Compliance Tracker',
-    category: 'Compliance',
-    addedIn: '1.1.0',
-    description: 'Regulatory compliance tracking and acknowledgment workflows',
-  },
-  {
-    feature: 'Help Desk Configuration',
-    category: 'Service Delivery',
-    addedIn: '1.0.0',
-    description: 'Initial Help Desk setup, categories, and SLA configuration',
   },
 ];
 
@@ -175,6 +45,18 @@ export function HRHubManualVersionHistory() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg">
+            <div className="flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Pre-Release Documentation</p>
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  This documentation is being prepared for initial release. All updates contribute to version 1.0 until product launch.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-6">
             {VERSION_HISTORY.map((entry, index) => (
               <div
@@ -189,8 +71,8 @@ export function HRHubManualVersionHistory() {
                     <Badge variant={index === 0 ? 'default' : 'outline'}>
                       v{entry.version}
                     </Badge>
-                    <Badge variant={entry.type === 'major' ? 'default' : 'secondary'} className="text-xs">
-                      {entry.type === 'major' ? 'Major Release' : 'Minor Update'}
+                    <Badge variant="outline" className="text-blue-600 border-blue-500/30 bg-blue-500/10">
+                      Pre-Release
                     </Badge>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Calendar className="h-3 w-3" />
@@ -216,47 +98,6 @@ export function HRHubManualVersionHistory() {
         </CardContent>
       </Card>
 
-      {/* Feature Log */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Plus className="h-5 w-5 text-primary" />
-            <CardTitle>Feature Documentation Log</CardTitle>
-          </div>
-          <CardDescription>
-            New features and sections added to this manual
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 px-2 font-medium">Feature</th>
-                  <th className="text-left py-2 px-2 font-medium">Category</th>
-                  <th className="text-left py-2 px-2 font-medium">Added In</th>
-                  <th className="text-left py-2 px-2 font-medium">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {FEATURE_LOG.map((item, index) => (
-                  <tr key={index} className="border-b last:border-0">
-                    <td className="py-2 px-2 font-medium">{item.feature}</td>
-                    <td className="py-2 px-2">
-                      <Badge variant="outline" className="text-xs">{item.category}</Badge>
-                    </td>
-                    <td className="py-2 px-2">
-                      <Badge variant="secondary" className="text-xs">v{item.addedIn}</Badge>
-                    </td>
-                    <td className="py-2 px-2 text-muted-foreground">{item.description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Document Information */}
       <Card>
         <CardHeader>
@@ -269,11 +110,13 @@ export function HRHubManualVersionHistory() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <p className="text-sm font-medium">Current Version</p>
-              <p className="text-2xl font-bold text-primary">v1.4.0</p>
+              <p className="text-2xl font-bold text-primary">v1.0.0</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-medium">Last Updated</p>
-              <p className="text-lg text-muted-foreground">January 13, 2026</p>
+              <p className="text-sm font-medium">Status</p>
+              <Badge variant="outline" className="text-blue-600 border-blue-500/30 bg-blue-500/10">
+                Pre-Release
+              </Badge>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium">Document Owner</p>
@@ -289,9 +132,10 @@ export function HRHubManualVersionHistory() {
             <div className="flex items-start gap-2">
               <RefreshCw className="h-4 w-4 text-primary mt-0.5" />
               <div>
-                <p className="text-sm font-medium">Next Scheduled Review</p>
+                <p className="text-sm font-medium">Version Lifecycle</p>
                 <p className="text-sm text-muted-foreground">
-                  April 2026 - Will include updates for Q1 feature releases and user feedback incorporation
+                  All documentation updates contribute to v1.0 until official product launch. 
+                  Version numbering will begin incrementing after GA release.
                 </p>
               </div>
             </div>
