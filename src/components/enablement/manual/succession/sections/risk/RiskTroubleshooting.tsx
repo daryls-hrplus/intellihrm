@@ -34,8 +34,8 @@ export function RiskTroubleshooting() {
     },
     {
       issue: 'Risk factors array saving as empty',
-      cause: 'UI toggles not properly updating form state, or array not serializing correctly.',
-      solution: 'Debug the toggleFactor function in FlightRiskTab.tsx. Ensure risk_factors is sent as a proper text array in the payload.'
+      cause: 'UI toggles not properly updating form state, or JSONB array not serializing correctly.',
+      solution: 'Debug the toggleFactor function in FlightRiskTab.tsx. Ensure risk_factors is sent as a proper JSONB array (not text[]) in the payload. Column type is jsonb with default \'[]\'::jsonb.'
     },
     {
       issue: 'Next review date not triggering reminders',
@@ -65,7 +65,17 @@ export function RiskTroubleshooting() {
     {
       issue: 'AI risk predictions not appearing',
       cause: 'Insufficient data in talent_signal_snapshots, or AI agent not configured.',
-      solution: 'Verify talent signals exist for the employee with recent captured_at dates. Check AI agent status in ai_agents table. Ensure minimum confidence threshold is met.'
+      solution: 'Verify talent signals exist for the employee with recent captured_at dates. Check AI agent status in ai_agents table. Ensure minimum confidence threshold is met (≥0.60).'
+    },
+    {
+      issue: 'Assessed_by field not captured on new assessments',
+      cause: 'User session not retrieved before payload construction.',
+      solution: 'Verify FlightRiskTab.tsx includes assessed_by: user?.id in the insert/update payload. Ensure supabase.auth.getUser() is called and resolves before submission.'
+    },
+    {
+      issue: 'Analytics "Impact Level Distribution" chart empty',
+      cause: 'Prior bug referenced non-existent impact_level field on flight_risk_assessments table.',
+      solution: 'This bug was fixed. Impact of Loss is derived from succession_plans.position_criticality, not flight_risk_assessments. Update to latest version of SuccessionAnalytics.tsx.'
     },
   ];
 

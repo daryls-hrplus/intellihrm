@@ -117,14 +117,15 @@ export function SuccessionAnalytics({ assessments, plans, keyPositions, talentPo
     return { statusData, completionRate, total: mentorshipData.length, active: statusCounts.active };
   }, [mentorshipData]);
 
-  // Flight Risk Analytics
+  // Flight Risk Analytics (Risk of Loss)
+  // Note: Impact of Loss is derived from position_criticality in succession_plans, not stored on flight_risk_assessments
   const flightRiskAnalytics = useMemo(() => {
     const riskLevels = { low: 0, medium: 0, high: 0, critical: 0 };
-    const impactLevels = { low: 0, medium: 0, high: 0, critical: 0 };
     
     flightRiskData.forEach(f => {
-      riskLevels[f.risk_level as keyof typeof riskLevels]++;
-      impactLevels[f.impact_level as keyof typeof impactLevels]++;
+      if (f.risk_level && riskLevels.hasOwnProperty(f.risk_level)) {
+        riskLevels[f.risk_level as keyof typeof riskLevels]++;
+      }
     });
 
     const riskDistribution = [
@@ -134,17 +135,18 @@ export function SuccessionAnalytics({ assessments, plans, keyPositions, talentPo
       { name: 'Critical', value: riskLevels.critical, color: '#991b1b' },
     ];
 
-    const impactDistribution = [
-      { name: 'Low', value: impactLevels.low, color: '#10b981' },
-      { name: 'Medium', value: impactLevels.medium, color: '#f59e0b' },
-      { name: 'High', value: impactLevels.high, color: '#ef4444' },
-      { name: 'Critical', value: impactLevels.critical, color: '#991b1b' },
-    ];
-
     const highRiskCount = riskLevels.high + riskLevels.critical;
     const retentionActionCount = flightRiskData.filter(f => f.retention_actions && f.retention_actions.length > 0).length;
+    const withRetentionPlan = retentionActionCount;
+    const needingAction = highRiskCount - withRetentionPlan;
 
-    return { riskDistribution, impactDistribution, highRiskCount, retentionActionCount, total: flightRiskData.length };
+    return { 
+      riskDistribution, 
+      highRiskCount, 
+      retentionActionCount, 
+      total: flightRiskData.length,
+      needingAction: Math.max(0, needingAction)
+    };
   }, [flightRiskData]);
 
   // IDP Analytics
@@ -471,22 +473,24 @@ export function SuccessionAnalytics({ assessments, plans, keyPositions, talentPo
 
             <Card>
               <CardHeader>
-                <CardTitle>Impact Level Distribution</CardTitle>
+                <CardTitle>Retention Action Coverage</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={flightRiskAnalytics.impactDistribution}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value">
-                      {flightRiskAnalytics.impactDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              <CardContent className="flex flex-col items-center justify-center h-[300px]">
+                <div className="text-center space-y-4">
+                  <div>
+                    <div className="text-5xl font-bold text-green-600">{flightRiskAnalytics.retentionActionCount}</div>
+                    <div className="text-sm text-muted-foreground mt-1">With Retention Plans</div>
+                  </div>
+                  {flightRiskAnalytics.needingAction > 0 && (
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <div className="text-2xl font-bold text-amber-600">{flightRiskAnalytics.needingAction}</div>
+                      <div className="text-xs text-amber-700 dark:text-amber-400">High/Critical risk without action</div>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground max-w-[200px]">
+                    Impact of Loss is assessed at position level via succession plans
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
