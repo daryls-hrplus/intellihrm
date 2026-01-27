@@ -1086,7 +1086,7 @@ export const FEEDBACK_360_MANUAL_STRUCTURE: Feedback360Section[] = [
         industryContext: {
           frequency: 'One-time understanding',
           timing: 'Pre-implementation planning',
-          benchmark: 'SAP SuccessFactors integration-first design pattern'
+          benchmark: 'Enterprise integration-first design pattern'
         }
       },
       {

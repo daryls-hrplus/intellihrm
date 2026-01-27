@@ -229,8 +229,8 @@ export function ReportConfigurationScheduling() {
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
                 <li><strong>SOC 2:</strong> Audit trail requirements for report access</li>
                 <li><strong>GDPR:</strong> Data access logging for EU employees</li>
-                <li><strong>SAP SuccessFactors:</strong> Role-based report visibility</li>
-                <li><strong>Workday:</strong> Scheduled report delivery patterns</li>
+                <li><strong>Industry Standard:</strong> Role-based report visibility</li>
+                <li><strong>Industry Standard:</strong> Scheduled report delivery patterns</li>
               </ul>
             </AlertDescription>
           </Alert>

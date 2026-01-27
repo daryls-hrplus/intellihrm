@@ -15,9 +15,25 @@ interface VersionEntry {
 
 const VERSION_HISTORY: VersionEntry[] = [
   {
+    version: '2.6.0',
+    date: '2026-01-27',
+    status: 'current',
+    type: 'minor',
+    highlights: [
+      'Removed all vendor-specific brand references',
+      'Standardized industry terminology throughout'
+    ],
+    changes: [
+      'Replaced SAP SuccessFactors, Workday, Oracle HCM, Visier references with industry-neutral terms',
+      'Updated benchmark sources to use "Industry Standard" where appropriate',
+      'Retained SHRM, CCL, and other professional association references',
+      'Aligned all cross-module integration documentation with neutral terminology'
+    ]
+  },
+  {
     version: '2.5.0',
     date: '2026-01-26',
-    status: 'current',
+    status: 'previous',
     type: 'major',
     highlights: [
       'Comprehensive Chapter 7 (Integration) with 8 sections',
@@ -61,7 +77,7 @@ const VERSION_HISTORY: VersionEntry[] = [
       'Consent & Governance Architecture with GDPR compliance',
       'Glossary expanded from 20 to 86 terms across 8 categories',
       'New glossary categories: AI & Signals, Integration, Compliance',
-      'Industry benchmarks (SHRM, CCL, SAP) integrated throughout'
+      'Industry benchmarks (SHRM, CCL) integrated throughout'
     ]
   },
   {

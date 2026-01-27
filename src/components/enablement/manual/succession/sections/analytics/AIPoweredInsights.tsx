@@ -98,7 +98,7 @@ export function AIPoweredInsights() {
           {/* Predictive Analytics */}
           <Card className="bg-muted/30">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Predictive Analytics Capabilities (Visier Pattern)</CardTitle>
+              <CardTitle className="text-sm">Predictive Analytics Capabilities (Industry Standard)</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -171,7 +171,7 @@ export function AIPoweredInsights() {
                 <div className="p-3 bg-background rounded border">
                   <p className="text-sm font-medium">"Compare our Nine-Box distribution to industry benchmarks"</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Shows distribution vs. SAP/Workday benchmarks with variance analysis
+                    Shows distribution vs. industry standard benchmarks with variance analysis
                   </p>
                 </div>
               </div>
@@ -213,9 +213,9 @@ export function AIPoweredInsights() {
             <AlertTitle>Industry Alignment</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li><strong>Visier:</strong> Predictive analytics and natural language queries</li>
-                <li><strong>Workday:</strong> AI-powered succession recommendations</li>
-                <li><strong>SAP SuccessFactors:</strong> Talent Intelligence with machine learning</li>
+                <li><strong>Industry Standard:</strong> Predictive analytics and natural language queries</li>
+                <li><strong>Industry Standard:</strong> AI-powered succession recommendations</li>
+                <li><strong>Industry Standard:</strong> Talent Intelligence with machine learning</li>
                 <li><strong>ISO 42001:</strong> AI management system compliance</li>
               </ul>
             </AlertDescription>

@@ -1,5 +1,5 @@
 // Admin & Security Administrator Manual Types
-// Enterprise-grade documentation structure following SAP/Workday/Oracle HCM standards
+// Enterprise-grade documentation structure following industry standards
 
 import { ManualSection, IndustryContext } from './adminManual';
 
@@ -49,7 +49,7 @@ export const ADMIN_SECURITY_MANUAL_STRUCTURE: ManualSection[] = [
         industryContext: {
           frequency: 'Reference material',
           timing: 'Initial onboarding',
-          benchmark: 'Enterprise HRMS administration standards (SAP SuccessFactors, Workday)'
+          benchmark: 'Enterprise HRMS administration standards'
         }
       },
       {
@@ -133,7 +133,7 @@ export const ADMIN_SECURITY_MANUAL_STRUCTURE: ManualSection[] = [
         industryContext: {
           frequency: 'One-time during implementation',
           timing: '4-6 weeks before go-live',
-          benchmark: 'Enterprise implementation methodology (SAP Activate, Workday Deploy)'
+          benchmark: 'Enterprise implementation methodology'
         }
       },
       {
@@ -273,7 +273,7 @@ export const ADMIN_SECURITY_MANUAL_STRUCTURE: ManualSection[] = [
         industryContext: {
           frequency: 'Reference material, annual review',
           timing: 'Initial setup',
-          benchmark: 'SAP RBP model, Workday Security Groups'
+          benchmark: 'Enterprise role-based permission model'
         }
       },
       {

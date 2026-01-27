@@ -20,7 +20,7 @@ export function RiskOverview() {
     'Understand the operational risk management framework and its role in succession planning',
     'Distinguish between configuration (Ch 6) and operational execution (Ch 7)',
     'Navigate the complete risk lifecycle: identify, assess, monitor, mitigate, review',
-    'Apply industry-standard risk terminology (Oracle HCM, SAP SuccessFactors patterns)'
+    'Apply industry-standard risk terminology and patterns'
   ];
 
   const crossModuleDependencies = [
@@ -215,9 +215,9 @@ export function RiskOverview() {
         <AlertTitle>Industry Alignment</AlertTitle>
         <AlertDescription>
           <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-            <li><strong>Oracle HCM:</strong> Risk of Loss × Impact of Loss dual-axis framework</li>
-            <li><strong>SAP SuccessFactors:</strong> Retention risk matrix prioritization</li>
-            <li><strong>Workday:</strong> Proactive retention action workflows</li>
+            <li><strong>Industry Standard:</strong> Risk of Loss × Impact of Loss dual-axis framework</li>
+            <li><strong>Industry Standard:</strong> Retention risk matrix prioritization</li>
+            <li><strong>Industry Standard:</strong> Proactive retention action workflows</li>
             <li><strong>SHRM:</strong> Quarterly talent risk review recommendations</li>
           </ul>
         </AlertDescription>

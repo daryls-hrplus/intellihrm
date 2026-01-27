@@ -40,7 +40,7 @@ export const BENEFITS_MANUAL_STRUCTURE: ManualSection[] = [
         industryContext: {
           frequency: 'Reference material',
           timing: 'Initial onboarding',
-          benchmark: 'Enterprise HRMS standards (Workday, SAP SuccessFactors)'
+          benchmark: 'Enterprise HRMS standards'
         }
       },
       {

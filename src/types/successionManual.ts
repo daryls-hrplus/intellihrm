@@ -1400,14 +1400,14 @@ export const SUCCESSION_GLOSSARY: SuccessionGlossaryTerm[] = [
   { term: 'Multi-Assessor', definition: 'Readiness assessment approach involving multiple raters (Manager, HR, Executive).', category: 'Readiness' },
   { term: 'Assessor Type', definition: 'Role category (Manager, HR, Executive) with different assessment perspectives and weights.', category: 'Readiness' },
 
-  // Risk Terms (Oracle HCM / SAP SuccessFactors aligned terminology)
-  { term: 'Risk of Loss', definition: 'Probability that an employee will voluntarily leave the organization. Industry-standard term (Oracle HCM, SAP SF) for what is commonly called "flight risk". Stored in flight_risk_assessments.risk_level.', category: 'Risk' },
+  // Risk Terms (Industry-standard aligned terminology)
+  { term: 'Risk of Loss', definition: 'Probability that an employee will voluntarily leave the organization. Industry-standard term for what is commonly called "flight risk". Stored in flight_risk_assessments.risk_level.', category: 'Risk' },
   { term: 'Impact of Loss', definition: 'Business consequence if an employee departs. Assessed at position level based on role criticality and replacement difficulty. Derived from succession_plans.position_criticality.', category: 'Risk' },
   { term: 'Flight Risk', definition: 'Common term for Risk of Loss - probability an employee will voluntarily leave. Use "Risk of Loss" in formal documentation.', category: 'Risk' },
   { term: 'Retention Risk', definition: 'Combined assessment of Risk of Loss × Impact of Loss. Used to prioritize retention interventions via the RetentionRiskMatrix.', category: 'Risk' },
   { term: 'Vacancy Risk', definition: 'Position-level probability and timing of becoming vacant due to retirement, flight risk, or other factors. Stored in key_position_risks.vacancy_risk.', category: 'Risk' },
   { term: 'Impact Score', definition: 'Rating of business disruption if a specific employee or position is lost. See "Impact of Loss".', category: 'Risk' },
-  { term: 'Attrition Risk', definition: 'Alternative industry term for Risk of Loss, commonly used in Visier and workforce analytics contexts.', category: 'Risk' },
+  { term: 'Attrition Risk', definition: 'Alternative industry term for Risk of Loss, commonly used in workforce analytics contexts.', category: 'Risk' },
   { term: 'Retention Action', definition: 'Intervention designed to reduce Risk of Loss such as compensation adjustment, development opportunity, or recognition.', category: 'Risk' },
   { term: 'Risk Matrix', definition: 'Grid plotting Impact of Loss vs replacement difficulty to calculate overall Retention Risk level.', category: 'Risk' },
   { term: 'Early Warning', definition: 'Predictive signals indicating increased Risk of Loss before voluntary departure. AI-detected via talent_signal_snapshots.', category: 'Risk' },

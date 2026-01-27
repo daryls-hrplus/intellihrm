@@ -509,7 +509,7 @@ Band Assignment: Ready 1-3 Years (70-84%)`}</pre>
           </div>
 
           <div className="p-4 border rounded-lg">
-            <h4 className="font-semibold mb-2">4-Band Model (SAP SuccessFactors Pattern)</h4>
+            <h4 className="font-semibold mb-2">4-Band Model (Enterprise Pattern)</h4>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>

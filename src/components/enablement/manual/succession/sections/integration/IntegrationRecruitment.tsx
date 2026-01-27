@@ -77,7 +77,7 @@ export function IntegrationRecruitment() {
         <div>
           <h3 className="text-xl font-semibold">9.14 Internal Recruitment Integration</h3>
           <p className="text-sm text-muted-foreground">
-            Fast-track succession candidates for internal mobility (Workday/Oracle pattern)
+            Fast-track succession candidates for internal mobility (Enterprise Pattern)
           </p>
         </div>
       </div>

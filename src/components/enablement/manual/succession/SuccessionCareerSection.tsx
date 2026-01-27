@@ -39,7 +39,7 @@ export function SuccessionCareerSection() {
         <Alert className="border-blue-500/50 bg-blue-500/5">
           <ExternalLink className="h-4 w-4 text-blue-600" />
           <AlertDescription>
-            <strong>Module Separation (Workday Model):</strong> Following industry best practices, Career Development 
+            <strong>Module Separation (Industry Standard):</strong> Following industry best practices, Career Development 
             is a standalone module serving ALL employees. This chapter documents only the succession-specific 
             integration points. For complete career pathing, IDP, and mentorship documentation, see the 
             <strong className="text-primary"> Career Development Administrator Manual</strong> at 

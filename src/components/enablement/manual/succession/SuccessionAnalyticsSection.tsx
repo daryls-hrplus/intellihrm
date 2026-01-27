@@ -26,7 +26,7 @@ export function SuccessionAnalyticsSection() {
           <div>
             <h2 className="text-2xl font-bold">10. Reporting & Analytics</h2>
             <p className="text-muted-foreground">
-              Industry-aligned succession analytics following SAP SuccessFactors, Workday, and Oracle HCM patterns
+              Industry-aligned succession analytics following enterprise talent management patterns
             </p>
           </div>
         </div>

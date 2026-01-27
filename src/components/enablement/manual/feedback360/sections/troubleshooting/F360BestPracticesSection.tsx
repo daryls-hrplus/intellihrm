@@ -135,14 +135,14 @@ const industryBenchmarks = [
   { metric: 'Response Rate', target: '≥70%', source: 'SHRM' },
   { metric: 'Raters per Subject', target: '8-12', source: 'CCL' },
   { metric: 'Anonymous Raters per Category', target: '≥3', source: 'SHRM' },
-  { metric: 'Cycle Frequency', target: 'Annual or Bi-annual', source: 'Workday' },
+  { metric: 'Cycle Frequency', target: 'Annual or Bi-annual', source: 'Industry Standard' },
   { metric: 'Self-Assessment Alignment', target: '±0.5 vs raters', source: 'CCL' },
-  { metric: 'Development Plan Creation', target: '≥80% within 30 days', source: 'SAP' },
+  { metric: 'Development Plan Creation', target: '≥80% within 30 days', source: 'Industry Standard' },
   { metric: 'Manager Debrief Completion', target: '≥90%', source: 'SHRM' },
   { metric: 'Improvement Trend (Repeat)', target: '+5-10%', source: 'CCL' }
 ];
 
-const successFactors = [
+const criticalSuccessFactors = [
   {
     factor: 'Executive Sponsorship',
     description: 'Visible leadership support drives participation and follow-through',
@@ -185,12 +185,12 @@ export function F360BestPracticesSection() {
         <AlertTitle className="text-green-800 dark:text-green-200">Industry Alignment</AlertTitle>
         <AlertDescription className="text-green-700 dark:text-green-300">
           These best practices are aligned with guidelines from SHRM (Society for Human Resource Management),
-          CCL (Center for Creative Leadership), and enterprise HRMS platforms (Workday, SAP SuccessFactors).
+          CCL (Center for Creative Leadership), and enterprise HRMS governance standards.
         </AlertDescription>
       </Alert>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {successFactors.map((sf, index) => (
+        {criticalSuccessFactors.map((sf, index) => (
           <Card key={index}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">

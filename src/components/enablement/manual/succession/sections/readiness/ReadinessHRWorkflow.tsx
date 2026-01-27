@@ -150,7 +150,7 @@ export function ReadinessHRWorkflow() {
           </FeatureCardGrid>
 
           <IndustryCallout>
-            <strong>Workday Pattern:</strong> Enterprise implementations often use Independent mode 
+            <strong>Enterprise Pattern:</strong> Enterprise implementations often use Independent mode 
             for initial assessments, then switch to Validation mode for calibration sessions where 
             the goal is to reconcile differing perspectives.
           </IndustryCallout>

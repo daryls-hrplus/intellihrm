@@ -40,7 +40,7 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         industryContext: {
           frequency: 'Reference material',
           timing: 'Initial onboarding',
-          benchmark: 'Enterprise HRMS standards (Workday, SAP SuccessFactors)'
+          benchmark: 'Enterprise HRMS standards'
         }
       },
       {
@@ -122,7 +122,7 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         industryContext: {
           frequency: 'One-time during implementation',
           timing: '4-6 weeks before go-live',
-          benchmark: 'SAP Activate, Workday Deploy methodology'
+          benchmark: 'Enterprise implementation methodology'
         }
       },
       {
@@ -1478,7 +1478,7 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Continuous improvement',
-          benchmark: 'Workday/SAP benchmarks'
+          benchmark: 'Industry benchmarks'
         }
       },
       {

@@ -18,7 +18,7 @@ export function CareerDevVersionHistory() {
           <div className="space-y-3">
             <div className="border-b pb-2">
               <p className="font-medium">v1.0.0 - 2026-01-27</p>
-              <p className="text-sm text-muted-foreground">Initial Career Development Administrator Manual release following Workday Career Hub architecture separation from Succession module.</p>
+              <p className="text-sm text-muted-foreground">Initial Career Development Administrator Manual release following industry-standard Career Hub architecture separation from Succession module.</p>
             </div>
           </div>
         </CardContent>
