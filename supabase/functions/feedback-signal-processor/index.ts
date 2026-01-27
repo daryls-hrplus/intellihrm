@@ -190,14 +190,14 @@ async function processCycleSignals(
     // Mark previous snapshots as not current
     await supabase
       .from('talent_signal_snapshots')
-      .update({ is_current: false, valid_until: new Date().toISOString() })
+      .update({ is_current: false, expires_at: new Date().toISOString() })
       .eq('employee_id', employeeId)
       .eq('source_cycle_id', cycleId)
       .eq('is_current', true);
 
     // Create signal snapshots
     for (const [signalCode, data] of Object.entries(signalData)) {
-      const signalDef = signalDefs?.find((d: any) => d.code === signalCode);
+      const signalDef = signalDefs?.find((d: any) => d.signal_code === signalCode);
       if (!signalDef) {
         console.log(`[feedback-signal-processor] Signal definition not found for ${signalCode}`);
         continue;
@@ -245,10 +245,10 @@ async function processCycleSignals(
           company_id: companyId,
           signal_definition_id: signalDef.id,
           source_cycle_id: cycleId,
-          source_type: '360_cycle',
+          source_record_type: '360_cycle',
           snapshot_version: newVersion,
           signal_value: Number(normalizedScore.toFixed(2)),
-          raw_score: Number(avg.toFixed(2)),
+          raw_value: Number(avg.toFixed(2)),
           normalized_score: Number(normalizedScore.toFixed(2)),
           confidence_score: confidence,
           bias_risk_level: biasAnalysis.level,
@@ -311,7 +311,7 @@ async function getSignalSummary(
     .from('talent_signal_snapshots')
     .select(`
       *,
-      signal_definition:talent_signal_definitions(code, name, signal_category, description)
+      signal_definition:talent_signal_definitions(signal_code, signal_name, category, description)
     `)
     .eq('employee_id', employeeId)
     .eq('is_current', true)
@@ -335,7 +335,7 @@ async function getSignalSummary(
   // Group by category
   const byCategory: Record<string, any[]> = {};
   for (const snapshot of snapshots) {
-    const category = snapshot.signal_definition?.signal_category || 'general';
+    const category = snapshot.signal_definition?.category || 'general';
     if (!byCategory[category]) byCategory[category] = [];
     byCategory[category].push(snapshot);
   }
@@ -362,14 +362,14 @@ async function getSignalSummary(
       strengths: snapshots
         .filter((s: any) => s.signal_value >= 80)
         .map((s: any) => ({
-          name: s.signal_definition?.name,
+          name: s.signal_definition?.signal_name,
           score: s.signal_value,
           confidence: s.confidence_score
         })),
       development_areas: snapshots
         .filter((s: any) => s.signal_value < 60)
         .map((s: any) => ({
-          name: s.signal_definition?.name,
+          name: s.signal_definition?.signal_name,
           score: s.signal_value,
           confidence: s.confidence_score
         }))
