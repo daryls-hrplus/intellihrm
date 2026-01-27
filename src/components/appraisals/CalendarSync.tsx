@@ -144,9 +144,9 @@ STATUS:${interview.status === 'confirmed' ? 'CONFIRMED' : 'TENTATIVE'}
 END:VEVENT`;
     }).join('\n');
 
-    const icsContent = `BEGIN:VCALENDAR
+const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//HRPlus//Appraisal Interviews//EN
+PRODID:-//IntelliHRM//Appraisal Interviews//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 ${icsEvents}

@@ -32,7 +32,7 @@ export const BENEFITS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'ben-sec-1-1',
         sectionNumber: '1.1',
-        title: 'Introduction to Benefits in HRplus',
+        title: 'Introduction to Benefits in Intelli HRM',
         description: 'Executive summary, business value, and key differentiators',
         contentLevel: 'overview',
         estimatedReadTime: 8,

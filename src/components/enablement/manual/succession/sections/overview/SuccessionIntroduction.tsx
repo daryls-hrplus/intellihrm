@@ -39,7 +39,7 @@ export function SuccessionIntroduction() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-lg leading-relaxed">
-            The <strong>Succession Planning Module</strong> is HRplus's enterprise-grade solution for 
+            The <strong>Succession Planning Module</strong> is Intelli HRM's enterprise-grade solution for 
             identifying, developing, and retaining future leaders. Built on industry standards from 
             SAP SuccessFactors and Workday, it provides configurable Nine-Box assessments, multi-assessor 
             readiness frameworks, and AI-powered talent analytics—all integrated with your existing 
@@ -103,7 +103,7 @@ export function SuccessionIntroduction() {
             <div className="space-y-4">
               <h4 className="font-semibold text-green-600 flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                The HRplus Solution
+                The Intelli HRM Solution
               </h4>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-start gap-2">
@@ -331,7 +331,7 @@ export function SuccessionIntroduction() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-amber-600" />
-            HRplus Enterprise Differentiators
+            Intelli HRM Enterprise Differentiators
           </CardTitle>
         </CardHeader>
         <CardContent>

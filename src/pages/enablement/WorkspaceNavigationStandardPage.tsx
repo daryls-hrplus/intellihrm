@@ -112,7 +112,7 @@ navigateToList({
               Workspace Tab Navigation
             </h1>
             <p className="text-muted-foreground mt-1">
-              Enterprise multi-tab navigation system for HRplus modules
+              Enterprise multi-tab navigation system for Intelli HRM modules
             </p>
           </div>
           <div className="flex gap-2">

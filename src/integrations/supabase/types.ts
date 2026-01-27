@@ -77195,6 +77195,7 @@ export type Database = {
       }
       is_goal_editable: { Args: { p_goal_id: string }; Returns: boolean }
       is_hrplus_internal_user: { Args: never; Returns: boolean }
+      is_intellihrm_internal_user: { Args: never; Returns: boolean }
       is_messaging_channel_admin: {
         Args: { p_channel_id: string; p_user_id: string }
         Returns: boolean

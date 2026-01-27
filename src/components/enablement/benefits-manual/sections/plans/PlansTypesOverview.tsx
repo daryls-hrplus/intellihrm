@@ -16,10 +16,10 @@ import {
 } from 'lucide-react';
 
 const learningObjectives = [
-  'Understand the complete taxonomy of benefit plan types available in HRplus',
+  'Understand the complete taxonomy of benefit plan types available in Intelli HRM',
   'Identify which plan types are appropriate for different employee populations',
   'Recognize regional variations in plan structures across Caribbean, Africa, and global markets',
-  'Map organizational benefit strategy to HRplus plan type configuration'
+  'Map organizational benefit strategy to Intelli HRM plan type configuration'
 ];
 
 const planTypeCategories = [
@@ -114,7 +114,7 @@ export function PlansTypesOverview() {
       <div>
         <h3 className="text-xl font-semibold mb-2">3.1 Plan Type Taxonomy</h3>
         <p className="text-muted-foreground">
-          HRplus supports a comprehensive range of benefit plan types designed to meet the needs of 
+          Intelli HRM supports a comprehensive range of benefit plan types designed to meet the needs of 
           diverse workforces across multiple regions. Understanding the full taxonomy enables strategic 
           benefit program design.
         </p>
@@ -123,7 +123,7 @@ export function PlansTypesOverview() {
       <LearningObjectives objectives={learningObjectives} />
 
       <InfoCallout title="Multi-Region Support">
-        HRplus plan types are designed to accommodate regional variations in benefit structures, 
+        Intelli HRM plan types are designed to accommodate regional variations in benefit structures, 
         compliance requirements, and carrier relationships. A single organization can configure 
         different plan types for employees in different countries while maintaining unified 
         administration.
@@ -228,7 +228,7 @@ export function PlansTypesOverview() {
 
       <ComplianceCallout title="Regional Compliance">
         Each plan type must be configured according to the regulatory requirements of the operating 
-        region. HRplus includes built-in compliance rules for statutory benefit requirements in 
+        region. Intelli HRM includes built-in compliance rules for statutory benefit requirements in 
         supported countries. Review <strong>Chapter 7: Analytics & Reporting</strong> for compliance 
         reporting capabilities.
       </ComplianceCallout>
@@ -236,7 +236,7 @@ export function PlansTypesOverview() {
       <TipCallout title="Strategic Planning">
         When designing your benefit program, start by mapping your workforce demographics (age, 
         location, family status) to identify which plan types will deliver the most value. 
-        HRplus AI can analyze your employee population and recommend optimal plan type combinations.
+        Intelli HRM AI can analyze your employee population and recommend optimal plan type combinations.
       </TipCallout>
     </div>
   );

@@ -152,7 +152,7 @@ export function GapDevelopmentLinking() {
           <p className="text-sm text-foreground flex items-start gap-2">
             <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <span>
-              <strong>Implementation Note:</strong> Gap-to-Development linking in HRplus is primarily 
+              <strong>Implementation Note:</strong> Gap-to-Development linking in Intelli HRM is primarily 
               managed through the IDP (Individual Development Plan) and Learning modules. While the 
               <code className="bg-muted mx-1 px-1 rounded text-xs">succession_gap_development_links</code> 
               table stores the associations, the user interface for creating and managing these links 

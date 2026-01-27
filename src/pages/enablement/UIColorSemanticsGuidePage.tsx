@@ -51,7 +51,7 @@ export default function UIColorSemanticsGuidePage() {
               "Color communicates meaning, not styling. The same meaning must always use the same color across the entire application."
             </blockquote>
             <p className="mt-4 text-sm text-muted-foreground">
-              This standard ensures HRplus communicates status, risk, and guidance consistently, intuitively, and at an enterprise HRMS level — aligned with SAP SuccessFactors, Oracle HCM, and Workday.
+              This standard ensures Intelli HRM communicates status, risk, and guidance consistently, intuitively, and at an enterprise HRMS level — aligned with SAP SuccessFactors, Oracle HCM, and Workday.
             </p>
           </CardContent>
         </Card>

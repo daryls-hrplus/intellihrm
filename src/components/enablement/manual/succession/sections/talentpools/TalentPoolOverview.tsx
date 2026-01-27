@@ -179,7 +179,7 @@ export function TalentPoolOverview() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Talent pools integrate with multiple HRplus modules to provide comprehensive 
+            Talent pools integrate with multiple Intelli HRM modules to provide comprehensive 
             talent intelligence and streamline succession processes.
           </p>
 

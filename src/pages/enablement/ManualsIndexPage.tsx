@@ -175,7 +175,7 @@ export default function ManualsIndexPage() {
               Administrator Manuals
             </h1>
             <p className="text-muted-foreground mt-1">
-              Comprehensive configuration guides for HRplus administrators
+              Comprehensive configuration guides for Intelli HRM administrators
             </p>
           </div>
           <div className="flex items-center gap-4">

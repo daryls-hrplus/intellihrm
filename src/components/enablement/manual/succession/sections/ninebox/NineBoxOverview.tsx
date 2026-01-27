@@ -267,7 +267,7 @@ export function NineBoxOverview() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Nine-Box assessments aggregate data from multiple HRplus modules to calculate axis ratings:
+            Nine-Box assessments aggregate data from multiple Intelli HRM modules to calculate axis ratings:
           </p>
 
           <div className="grid gap-4 md:grid-cols-2">

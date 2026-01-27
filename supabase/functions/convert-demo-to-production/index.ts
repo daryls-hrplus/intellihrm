@@ -177,7 +177,7 @@ async function sendConversionEmail(registration: any, companyDetails: any, selec
     return;
   }
 
-  const loginUrl = `https://${registration.subdomain}.hrplus.app/auth`;
+  const loginUrl = `https://${registration.subdomain}.intellihrm.app/auth`;
 
   try {
     const response = await fetch("https://api.resend.com/emails", {
@@ -187,13 +187,13 @@ async function sendConversionEmail(registration: any, companyDetails: any, selec
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "HRplus <noreply@hrplus.net>",
+        from: "Intelli HRM <noreply@intellihrm.net>",
         to: [companyDetails.billingEmail],
         cc: [registration.contact_email],
-        subject: `Welcome to HRplus Production - ${companyDetails.companyName}`,
+        subject: `Welcome to Intelli HRM Production - ${companyDetails.companyName}`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #6366f1;">Welcome to HRplus Production!</h1>
+            <h1 style="color: #6366f1;">Welcome to Intelli HRM Production!</h1>
             <p>Hi ${registration.contact_name},</p>
             <p>Congratulations! Your demo for <strong>${companyDetails.companyName}</strong> has been successfully converted to a production environment.</p>
             
@@ -213,9 +213,9 @@ async function sendConversionEmail(registration: any, companyDetails: any, selec
             
             <p>Your dedicated implementation consultant will reach out within 24 hours to help you get started.</p>
             
-            <p>Questions? Contact our support team at support@hrplus.net</p>
+            <p>Questions? Contact our support team at support@intellihrm.net</p>
             
-            <p>Best regards,<br>The HRplus Team</p>
+            <p>Best regards,<br>The Intelli HRM Team</p>
           </div>
         `,
       }),

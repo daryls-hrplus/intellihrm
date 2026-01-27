@@ -109,7 +109,7 @@ export function F360FrameworkLibrary() {
                 type: 'System',
                 icon: Lock,
                 color: 'bg-blue-100 dark:bg-blue-900/30 border-blue-300',
-                desc: 'Pre-built frameworks provided by HRplus. Read-only; must clone to customize.',
+                desc: 'Pre-built frameworks provided by Intelli HRM. Read-only; must clone to customize.',
                 examples: ['Universal Leadership', 'Core Values', 'Manager Effectiveness']
               },
               {

@@ -69,7 +69,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a professional video script writer for HRplus Cerebra HRIS training videos.
+            content: `You are a professional video script writer for Intelli HRM HRIS training videos.
 
 Guidelines:
 - Write for spoken delivery (natural pauses, clear sentences)

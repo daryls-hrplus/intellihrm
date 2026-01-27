@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 const learningObjectives = [
-  'Understand how 360 signals feed other HRplus modules',
+  'Understand how 360 signals feed other Intelli HRM modules',
   'Configure signal routing based on cycle purpose',
   'Manage consent and policy gates for cross-module sharing',
   'Interpret 360 insights in downstream contexts'

@@ -344,7 +344,7 @@ export function PlansEligibility() {
       </Card>
 
       <InfoCallout title="Eligibility Engine">
-        HRplus continuously evaluates employee eligibility based on configured rules. When 
+        Intelli HRM continuously evaluates employee eligibility based on configured rules. When 
         employee data changes (promotion, location transfer, hours change), the system 
         automatically updates eligibility status and can trigger enrollment or termination 
         workflows.
@@ -363,7 +363,7 @@ export function PlansEligibility() {
 
       <ComplianceCallout title="ACA Compliance (US)">
         For US operations, the Affordable Care Act requires employers to offer affordable 
-        medical coverage to employees averaging 30+ hours per week. HRplus tracks ACA 
+        medical coverage to employees averaging 30+ hours per week. Intelli HRM tracks ACA 
         measurement periods and generates required IRS forms (1094-C, 1095-C). Configure 
         ACA settings in <strong>Benefits → Compliance → ACA Setup</strong>.
       </ComplianceCallout>

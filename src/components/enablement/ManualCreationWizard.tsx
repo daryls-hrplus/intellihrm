@@ -53,7 +53,7 @@ const STANDARD_STRUCTURE = [
     title: "Module Overview and Conceptual Foundation",
     description: "Introduction, core concepts, terminology, system architecture, user personas",
     subsections: [
-      { number: "1.1", title: "Introduction to [Module] in HRplus" },
+      { number: "1.1", title: "Introduction to [Module] in Intelli HRM" },
       { number: "1.2", title: "Core Concepts and Terminology" },
       { number: "1.3", title: "System Architecture Overview" },
       { number: "1.4", title: "User Personas and Journeys" },
