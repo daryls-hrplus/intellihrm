@@ -1,139 +1,246 @@
 
-# Add Feature Registry and Product Capabilities to Enablement Navigation
+# Fix Code Registry Source and Enable Accurate Orphan Categorization
 
-## Overview
+## Problem Summary
 
-Two critical reference documents are currently inaccessible from the Enablement Hub UI:
+The orphan detection system **already has the intelligence** to categorize orphans into:
+1. **Duplicates** (merge)
+2. **Legacy/Auto-migrated** (archive)
+3. **Legitimate granular features** (keep)
 
-1. **Feature Registry** - The code-defined single source of truth for all 1,200+ features
-2. **Product Capabilities Document** - The business-facing document showing 25 modules and 1,675+ capabilities
-
-Both have working routes but were removed from the navigation during consolidation. This plan restores their visibility in the Reference Library section.
-
----
-
-## Current State
-
-### Enablement Hub - Reference Library Section
-Currently shows 6 items:
-- Administrator Manuals
-- Quick Start Guides
-- Implementation Checklists
-- Module Documentation
-- Enablement Artifacts
-- Platform Standards
-
-### Hidden but Working Routes
-| Document | Route | Status |
-|----------|-------|--------|
-| Product Capabilities | `/enablement/product-capabilities` | Route works, not linked |
-| Route Registry | `/enablement/route-registry` | Route works, not linked |
-| Feature Database | `/enablement/feature-database` | Redirects to Release Center |
+However, it's producing **incorrect results** because it compares database entries against a **static hardcoded array of 62 routes** instead of the actual `FEATURE_REGISTRY` with **261 features**.
 
 ---
 
-## Proposed Changes
+## Current vs Expected State
 
-### File 1: `src/pages/enablement/EnablementHubPage.tsx`
+| Metric | Current (Wrong) | After Fix |
+|--------|-----------------|-----------|
+| Code baseline | 62 static routes | 261 registry features |
+| True orphans | Shown as 817 | ~576 (837 DB - 261 registry) |
+| Synced features | Shown as 20 | ~250+ |
+| False positives | ~200 features incorrectly flagged | 0 |
 
-Add two new entries to the Reference Library section:
+---
+
+## Implementation Plan
+
+### Phase 1: Fix the Source of Truth
+
+**File**: `src/hooks/useCodeRegistryScanner.ts`
+
+Replace the static `CODE_ROUTES` array (lines 13-118) with dynamic extraction from `FEATURE_REGISTRY`:
 
 ```typescript
-{
-  titleKey: "3. Reference Library",
-  items: [
-    // ... existing items ...
-    
-    // NEW: Product Capabilities Document
-    {
-      title: "Product Capabilities",
-      description: "25 modules, 1,675+ capabilities by employee lifecycle",
-      href: "/enablement/product-capabilities",
-      icon: FileText,
-      color: "bg-orange-500/10 text-orange-500",
-      badge: "1,675+ Capabilities",
-    },
-    
-    // NEW: Feature Registry
-    {
-      title: "Feature Registry",
-      description: "Code-defined feature definitions and route mappings",
-      href: "/enablement/route-registry",
-      icon: Database,
-      color: "bg-indigo-500/10 text-indigo-500",
-      badge: "Developer Reference",
-    },
-  ],
-},
+import { FEATURE_REGISTRY } from "@/lib/featureRegistry";
+
+// Build code routes dynamically from FEATURE_REGISTRY
+const codeRoutes = useMemo((): CodeRegistryEntry[] => {
+  const entries: CodeRegistryEntry[] = [];
+  
+  FEATURE_REGISTRY.forEach(module => {
+    // Add all features from all groups
+    module.groups.forEach(group => {
+      group.features.forEach(feature => {
+        entries.push({
+          pageName: feature.name,
+          routePath: feature.routePath,
+          moduleCode: module.code,
+          featureCode: feature.code,  // Direct mapping
+          hasProtection: true,
+          requiredRoles: feature.roleRequirements || [],
+          protectedModuleCode: module.code,
+          sourceFile: "featureRegistry.ts"
+        });
+      });
+    });
+  });
+  
+  return entries;
+}, []);
+```
+
+**Impact**: The `useOrphanDetection` hook already uses `codeRoutes` from this scanner, so fixing the source immediately fixes all downstream calculations.
+
+---
+
+### Phase 2: Enhance Duplicate Detection for Prefixed Variants
+
+The current duplicate detection only matches exact `feature_name`. We need to also detect **prefixed variants** like:
+
+| Pattern | Examples |
+|---------|----------|
+| `admin_{base}` | `admin_announcements` = `announcements` |
+| `ess_{base}` | `ess_leave` = `leave` |
+| `mss_{base}` | `mss_approvals` = `approvals` |
+| `{module}_{base}` | `payroll_audit_trail` = `audit_trail` |
+
+**File**: `src/hooks/useOrphanDetection.ts`
+
+Add prefix-aware duplicate detection:
+
+```typescript
+// New: Detect prefixed duplicates
+const KNOWN_PREFIXES = ['admin_', 'ess_', 'mss_', 'emp_', 'payroll_', 'perf_', 
+                         'recruit_', 'succ_', 'ben_', 'comp_', 'lms_', 'hse_',
+                         'wf_', 'hub_', 'enbl_', 'onb_', 'er_', 'rpt_', 'prop_'];
+
+const getBaseCode = (code: string): string => {
+  for (const prefix of KNOWN_PREFIXES) {
+    if (code.startsWith(prefix)) {
+      return code.slice(prefix.length);
+    }
+  }
+  return code;
+};
+
+// In duplicate detection logic:
+const baseCode = getBaseCode(f.feature_code);
+const prefixedVariants = orphanFeatures
+  .filter(other => {
+    const otherBase = getBaseCode(other.feature_code);
+    return otherBase === baseCode && other.feature_code !== f.feature_code;
+  })
+  .map(v => v.feature_code);
 ```
 
 ---
 
-## Updated Reference Library Structure
+### Phase 3: Add Migration Batch Detection
 
-After implementation, the Reference Library section will show:
+Identify entries created in the same second as likely auto-migrations:
 
-| Item | Description | Audience |
-|------|-------------|----------|
-| Administrator Manuals | 10 comprehensive admin guides (515+ sections) | Administrators |
-| Quick Start Guides | Get modules running in 10-30 minutes | Implementers |
-| Implementation Checklists | Prerequisites and go-live readiness | Project Managers |
-| Module Documentation | Browse all content by module | All Users |
-| Enablement Artifacts | Single source of truth for all content | Content Authors |
-| Platform Standards | 5 enterprise patterns | Developers |
-| **Product Capabilities** (NEW) | 25 modules, 1,675+ capabilities | Sales, Executives |
-| **Feature Registry** (NEW) | Code-defined feature definitions | Developers |
+```typescript
+// Detect batch-created entries (same timestamp = migration)
+const batchTimestamps = new Map<string, string[]>();
+orphanFeatures.forEach(f => {
+  const timestamp = new Date(f.created_at).toISOString().slice(0, 19);
+  if (!batchTimestamps.has(timestamp)) {
+    batchTimestamps.set(timestamp, []);
+  }
+  batchTimestamps.get(timestamp)!.push(f.feature_code);
+});
+
+// Mark entries from large batches (>10) as auto_migration
+const autoMigratedCodes = new Set<string>();
+batchTimestamps.forEach((codes, timestamp) => {
+  if (codes.length > 10) {
+    codes.forEach(code => autoMigratedCodes.add(code));
+  }
+});
+```
+
+---
+
+### Phase 4: Add UI Enhancements to OrphanManagementPanel
+
+**File**: `src/components/enablement/route-registry/OrphanManagementPanel.tsx`
+
+Add new views:
+
+1. **Prefixed Variants Tab**: Shows all `admin_X` / `ess_X` patterns with their base equivalents
+2. **Batch Import Tab**: Groups orphans by creation timestamp to identify migration batches
+3. **Registry Candidates Tab**: Shows orphans with valid routes that could be added to `FEATURE_REGISTRY`
+
+```typescript
+// Add tab for registry candidates
+<TabsTrigger value="registry-candidates">
+  <Plus className="h-4 w-4 mr-2" />
+  Registry Candidates
+  <Badge variant="secondary" className="ml-2">
+    {orphans.filter(o => o.recommendation === 'keep_as_planned').length}
+  </Badge>
+</TabsTrigger>
+```
+
+---
+
+### Phase 5: Add Bulk Actions for Each Category
+
+Add one-click bulk actions:
+
+| Category | Action | Implementation |
+|----------|--------|----------------|
+| Prefixed Duplicates | "Delete all variants, keep base" | Bulk delete where `feature_code` starts with prefix |
+| Auto-Migration Batch | "Archive entire batch" | Archive by `created_at` timestamp |
+| Registry Candidates | "Add to FEATURE_REGISTRY" | Generate registry entries for selected |
+
+---
+
+## Files to Modify
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `src/hooks/useCodeRegistryScanner.ts` | **REWRITE** | Replace static array with `FEATURE_REGISTRY` extraction |
+| `src/hooks/useOrphanDetection.ts` | **MODIFY** | Add prefix-aware duplicate detection + batch detection |
+| `src/components/enablement/route-registry/OrphanManagementPanel.tsx` | **MODIFY** | Add new tabs for categories |
+| `src/components/enablement/route-registry/PrefixedVariantsPanel.tsx` | **CREATE** | UI for prefixed variant analysis |
+| `src/components/enablement/route-registry/RegistryCandidatesPanel.tsx` | **CREATE** | UI for suggesting registry additions |
+
+---
+
+## Expected Outcomes After Implementation
+
+### Accurate Counts
+
+| Metric | Value |
+|--------|-------|
+| Registry Features | 261 |
+| Database Features | 837 |
+| True Orphans | ~576 |
+| Prefixed Duplicates | ~100-150 (estimate) |
+| Legacy/Migration | ~200-300 (estimate) |
+| Registry Candidates | ~100-200 (estimate) |
+
+### Categorization Breakdown (Estimated)
+
+| Category | Count | Recommended Action |
+|----------|-------|-------------------|
+| **True Duplicates** (exact name match) | ~50 | Merge: keep one, delete others |
+| **Prefixed Variants** (admin_X = X) | ~100 | Review: delete variant OR keep if different context |
+| **Auto-Migration Batch** | ~200 | Archive: bulk archive old batches |
+| **Legacy/Stale** | ~100 | Delete: entries >6 months with no description |
+| **Registry Candidates** | ~126 | Add to Registry: have route + description |
 
 ---
 
 ## Technical Details
 
-### Icons to Import
-Add to the imports in `EnablementHubPage.tsx`:
-```typescript
-import { Database } from "lucide-react";
+### Why This Works
+
+1. **Existing Logic is Sound**: The `useOrphanDetection` hook already has:
+   - Levenshtein similarity matching
+   - Source classification (`auto_migration`, `manual_entry`)
+   - Age-based staleness detection
+   - Route presence validation
+   - Recommendation engine
+
+2. **Only the Baseline is Wrong**: By fixing `useCodeRegistryScanner` to read from `FEATURE_REGISTRY`, all downstream calculations become accurate.
+
+3. **No Database Changes Required**: All detection is done client-side against existing data.
+
+---
+
+## Validation
+
+After implementation, the Route Registry should show:
+
 ```
-
-### No Route Changes Required
-Both routes already exist and work:
-- `/enablement/product-capabilities` → `ProductCapabilitiesPage`
-- `/enablement/route-registry` → `RouteRegistryPage`
-
----
-
-## Benefits
-
-| Benefit | Description |
-|---------|-------------|
-| **Discoverability** | Critical reference documents visible from main navigation |
-| **Coverage Analysis** | Content Creation Studio agent can reference these documents |
-| **Developer Access** | Route Registry provides feature-to-route mapping visibility |
-| **Sales Enablement** | Product Capabilities document accessible for demos |
-| **Single Source of Truth** | Feature Registry shows authoritative feature definitions |
-
----
-
-## Files Summary
-
-| File | Action | Changes |
-|------|--------|---------|
-| `src/pages/enablement/EnablementHubPage.tsx` | MODIFY | Add 2 items to Reference Library section, import Database icon |
-
----
-
-## Implementation Notes
-
-1. The Feature Registry page (`RouteRegistryPage`) shows:
-   - Feature sync status (code vs database)
-   - Route validation
-   - Product capabilities validation
-   - Orphan feature management
-
-2. The Product Capabilities page shows:
-   - Executive summary
-   - 25 modules organized by Act (Prologue, Act 1-4)
-   - AI capabilities per module
-   - Regional advantages
-   - PDF export and print functionality
-
-Both are essential for the Documentation Agent to perform accurate coverage analysis.
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          CODE REGISTRY (FIXED)                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Registry Features: 261                                                     │
+│  Database Features: 837                                                     │
+│  Synced: 250+                                                               │
+│  True Orphans: ~576                                                         │
+│                                                                             │
+│  ORPHAN BREAKDOWN:                                                          │
+│  ├── Duplicates (merge): 50                                                 │
+│  ├── Prefixed Variants (review): 100                                        │
+│  ├── Auto-Migration (archive): 200                                          │
+│  ├── Legacy/Stale (delete): 100                                             │
+│  └── Registry Candidates (keep): 126                                        │
+│                                                                             │
+│  [Run Analysis] [Export Report] [Bulk Cleanup]                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
