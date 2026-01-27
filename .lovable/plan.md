@@ -1,352 +1,405 @@
 
-# Chapter 7: Risk Management - Comprehensive Audit Report
-## Documentation vs. Database Schema vs. UI Components vs. Industry Standards
-
----
+# Succession Manual Chapter 11 & Appendices - Comprehensive Review & Update Plan
 
 ## Executive Summary
 
-After an extensive audit comparing Chapter 7 (Risk Management) documentation against the actual database schema, UI components, and industry standards, I have identified:
+Chapter 11 (Troubleshooting & FAQs) is currently in **placeholder state** with only 5 generic sections (~55 lines total), all showing placeholder content. The Appendices (A-D) exist but need enhancement. This audit reveals significant structural gaps, content duplications with other chapters, and missing industry-standard troubleshooting content.
 
-- **4 Database Schema Gaps** - Missing or incorrect field documentation
-- **3 UI Component Issues** - Code bugs and undocumented features
-- **5 Terminology Inconsistencies** - Industry-standard terminology not cascaded throughout the app
-- **2 Industry Standard Gaps** - Features documented but not implemented
+**Current State:**
+- Chapter 11: 5 placeholder sections with no actual content
+- Appendix A (Quick Reference): 4 persona journeys, basic content
+- Appendix B (Diagrams): 3 ASCII diagrams, needs expansion
+- Appendix C (Glossary): 55+ terms across 8 categories (comprehensive)
+- Appendix D (Version History): Single v1.0.0 entry
 
-Overall documentation quality: **~82% accuracy** with critical terminology and code gaps requiring attention.
+**Duplication Analysis:** Chapter 11's planned sections overlap significantly with troubleshooting already embedded in:
+- Section 7.10: Risk Management Troubleshooting (12 issues, 6 FAQs)
+- Section 9.12: Integration Troubleshooting (8 issues, diagnostic checklist)
+- Section 10.12: Analytics Troubleshooting (10 issues, data quality checklist)
 
 ---
 
-## Part 1: Database Schema Gaps
+## Part 1: Duplication Analysis Results
 
-### 1.1 Documented vs Actual: `flight_risk_assessments` Table
+| Planned Ch 11 Section | Existing Coverage | Overlap Status |
+|----------------------|-------------------|----------------|
+| 11.1 Common Configuration Issues | None | **Gap - needs content** |
+| 11.2 Nine-Box Calculation Problems | 3.7 (workflow), 3.8 (evidence) have inline troubleshooting | **Partial overlap** |
+| 11.3 Readiness Assessment Issues | 4.8 (completion) has inline troubleshooting | **Partial overlap** |
+| 11.4 Integration Failures | **9.12 fully documented** (8 issues, diagnostic checklist) | **Major duplication** |
+| 11.5 Escalation Procedures | **9.12 has escalation path** | **Partial duplication** |
 
-| Documentation (13 fields) | Database (13 fields) | Status |
-|---------------------------|----------------------|--------|
-| id, company_id, employee_id, risk_level | Accurate | OK |
-| risk_factors | Documented as `text[]`, **actually `jsonb`** | MISMATCH |
-| retention_actions, assessed_by, assessment_date | Accurate | OK |
-| next_review_date, notes, is_current | Accurate | OK |
-| created_at, updated_at | Accurate | OK |
+**Missing Topics Not Covered Anywhere:**
+1. Talent Pool troubleshooting
+2. Career Path/Mentorship troubleshooting
+3. Workflow/Approval troubleshooting
+4. Data migration/import issues
+5. Security/permission issues
+6. Multi-company configuration issues
+7. AI/ML succession feature troubleshooting
 
-**Action Required:** Update FlightRiskWorkflow.tsx field reference to show `risk_factors` as `jsonb` type with default `'[]'::jsonb`.
+---
 
-### 1.2 Documented vs Actual: `key_position_risks` Table
+## Part 2: Proposed New Chapter 11 Structure
 
-| Documentation Cross-Ref | Database (17 fields) | Status |
-|-------------------------|----------------------|--------|
-| References Ch 6.3 for full field table | 17 fields exist | Incomplete in Ch 7 |
+Following the Appraisals Manual pattern (11 modular sections in Chapter 8), I propose restructuring Chapter 11 into **10 comprehensive sections** that consolidate, cross-reference, and add unique content:
 
-**Missing i18n Fields in Any Documentation:**
-- `impact_if_vacant_en` (exists in DB, not documented anywhere)
-- `risk_notes_en` (exists in DB, not documented anywhere)
-
-**Action Required:** Add i18n fields to Chapter 6.3 field reference table or create a supplemental reference in Chapter 7.5.
-
-### 1.3 Missing Table: `succession_plans` Risk Fields
-
-The `succession_plans` table contains risk-related fields not fully documented in Chapter 7:
-
-| Field | Type | Purpose | Documentation Status |
-|-------|------|---------|---------------------|
-| `risk_level` | text | Plan overall risk (low/medium/high) | Mentioned, not detailed |
-| `position_criticality` | text | Retention matrix input | Referenced but enum values inconsistent |
-| `replacement_difficulty` | text | Retention matrix input | Referenced but enum values inconsistent |
-| `calculated_risk_level` | text | Auto-calculated retention risk | NOT documented |
-
-**Action Required:** Add field reference for risk-related `succession_plans` columns in Section 7.2 or 7.4.
-
-### 1.4 Missing Field Documentation: `assessed_by` Tracking
-
-The `flight_risk_assessments.assessed_by` field is documented but the UI component (`FlightRiskTab.tsx`) does NOT currently save the assessor ID when creating/updating assessments.
-
-**Code Gap (FlightRiskTab.tsx lines 108-116):**
-```typescript
-const payload = {
-  ...formData,
-  company_id: companyId,
-  // Missing: assessed_by: currentUserId
-};
+```text
+Part 11: Troubleshooting & FAQs (~60 min read)
+├── 11.1 Troubleshooting Overview
+│   └── Diagnostic methodology, chapter scope, quick reference matrix
+├── 11.2 Configuration Issues
+│   └── Assessor types, readiness bands, rating sources, forms
+├── 11.3 Nine-Box & Talent Assessment Issues
+│   └── Calculation errors, placement issues, signal mapping problems
+├── 11.4 Readiness Assessment Issues
+│   └── Form errors, scoring problems, multi-assessor conflicts
+├── 11.5 Talent Pool & Succession Plan Issues
+│   └── Pool membership, candidate ranking, development linking
+├── 11.6 Workflow & Approval Issues
+│   └── Pending approvals, workflow configuration, transaction types
+├── 11.7 Data Quality & Migration Issues
+│   └── Import errors, duplicate detection, data validation
+├── 11.8 Security & Permission Issues
+│   └── RLS policies, role access, company scope, audit trails
+├── 11.9 AI & Automation Issues
+│   └── AI suggestions, signal processing, automation rules
+└── 11.10 Escalation Procedures & Support Resources
+    └── 4-tier model, severity definitions, communication templates, FAQ
 ```
 
-**Action Required:** Either document this as a known limitation or fix the code to capture `assessed_by`.
+**Key Differentiator from Other Chapters:**
+- Chapter 11 provides **consolidated quick-reference** troubleshooting
+- Chapters 7.10, 9.12, 10.12 provide **domain-specific deep-dive** troubleshooting
+- Chapter 11 cross-references to domain sections for detailed resolution
 
 ---
 
-## Part 2: UI Component Issues
+## Part 3: Proposed Appendix Enhancements
 
-### 2.1 CRITICAL BUG: `impact_level` Field Does Not Exist
+### Appendix A: Quick Reference Cards (Enhancement)
 
-**Location:** `SuccessionAnalytics.tsx` lines 123-128
+**Current:** 4 persona journeys (HR Admin, Manager, Executive, Employee)
 
-```typescript
-const impactLevels = { low: 0, medium: 0, high: 0, critical: 0 };
-flightRiskData.forEach(f => {
-  riskLevels[f.risk_level as keyof typeof riskLevels]++;
-  impactLevels[f.impact_level as keyof typeof impactLevels]++; // BUG: impact_level doesn't exist
-});
+**Proposed Additions:**
+1. Configuration Checklist Card (pre-go-live validation)
+2. Go-Live Readiness Checklist
+3. Annual Cycle Calendar Template
+4. Integration Validation Checklist
+5. Keyboard Shortcuts & Navigation Quick Reference
+
+### Appendix B: Architecture Diagrams (Enhancement)
+
+**Current:** 3 ASCII diagrams (Data Model, Nine-Box Flow, Lifecycle)
+
+**Proposed Additions:**
+1. Nine-Box Signal Mapping Flow (detailed)
+2. Readiness Assessment Lifecycle
+3. Risk Management Data Flow
+4. Integration Architecture (event-driven)
+5. Talent Pool Lifecycle State Machine
+6. Approval Workflow Decision Tree
+
+### Appendix C: Glossary (Already Comprehensive)
+
+**Current:** 55+ terms across 8 categories - industry-aligned
+
+**Proposed Additions:**
+1. Add "Configuration" category (5-8 terms)
+2. Add "Troubleshooting" category (5-8 terms)
+3. Add cross-references to section IDs for each term
+
+### Appendix D: Version History (Enhancement)
+
+**Current:** Single v1.0.0 entry
+
+**Proposed:**
+1. Update to reflect current version with Chapter 7 and 11 updates
+2. Add planned features/roadmap section
+3. Add deprecation notices section
+
+---
+
+## Part 4: Implementation Plan
+
+### Phase 1: Create Modular Section Files (2-3 hours)
+
+Create new directory and files:
+```
+src/components/enablement/manual/succession/sections/troubleshooting/
+├── index.ts
+├── TroubleshootingOverview.tsx         (11.1)
+├── ConfigurationIssues.tsx             (11.2)
+├── NineBoxAssessmentIssues.tsx         (11.3)
+├── ReadinessAssessmentIssues.tsx       (11.4)
+├── TalentPoolSuccessionIssues.tsx      (11.5)
+├── WorkflowApprovalIssues.tsx          (11.6)
+├── DataQualityMigrationIssues.tsx      (11.7)
+├── SecurityPermissionIssues.tsx        (11.8)
+├── AIAutomationIssues.tsx              (11.9)
+└── EscalationProcedures.tsx            (11.10)
 ```
 
-**Database Reality:** The `flight_risk_assessments` table only has `risk_level`. Impact of Loss is derived from `succession_plans.position_criticality`, not stored on flight risk.
+### Phase 2: Update SuccessionTroubleshootingSection.tsx (30 min)
 
-**Action Required:**
-1. Remove the non-functional `impactDistribution` visualization from `SuccessionAnalytics.tsx`
-2. OR: Join with `succession_plans` to get actual impact data
-3. Update documentation to clarify this distinction
+Replace placeholder content with modular imports following the pattern used in SuccessionRiskSection.tsx.
 
-### 2.2 Missing UI Feature: `assessed_by` Display
+### Phase 3: Update TOC in successionManual.ts (20 min)
 
-The `FlightRiskTab.tsx` component does not display who performed each assessment, even though the field exists in the database.
+Update Part 11 structure from 5 sections to 10 sections with proper metadata.
 
-**Action Required:** Add assessor column to the assessments table or document as planned enhancement.
+### Phase 4: Enhance Appendices (1-2 hours)
 
-### 2.3 Undocumented UI Feature: Risk Factor Categories
-
-The documentation in Section 7.2 lists 10 standard risk factors, but doesn't document their categorization (External, Compensation, Career, Engagement, etc.) which is shown in the RiskTerminologyStandards.tsx documentation component.
-
-**Consistency Gap:** The categories in documentation don't align with how `FlightRiskTab.tsx` handles factors (flat list, no categories).
-
-**Action Required:** Align UI and documentation - either add categories to UI or remove from documentation.
+1. **SuccessionQuickReference.tsx**: Add 5 new checklist cards
+2. **SuccessionDiagrams.tsx**: Add 6 new ASCII diagrams
+3. **Update glossary** in successionManual.ts: Add ~15 new terms
+4. **SuccessionVersionHistory.tsx**: Update to v1.1.0 with change log
 
 ---
 
-## Part 3: Terminology Inconsistencies (Industry Standard Cascade)
+## Part 5: Section Content Specifications
 
-### 3.1 Missing Industry Terms in Glossary
+### Section 11.1: Troubleshooting Overview
 
-The glossary in `successionManual.ts` has Risk category terms but is missing industry-standard terminology:
+**Content:**
+- Diagnostic methodology (identify → diagnose → resolve → prevent)
+- Issue categorization matrix (Configuration vs Data vs Integration vs Security)
+- Quick reference table linking symptoms to sections
+- When to self-service vs escalate decision tree
 
-| Industry Term | Oracle HCM | SAP SF | Current Glossary |
-|--------------|------------|--------|------------------|
-| **Risk of Loss** | Yes | Yes | Missing (uses "Flight Risk" instead) |
-| **Impact of Loss** | Yes | Yes | Has "Impact Score" (close but not exact) |
-| **Loss Impact** | Yes | Yes | Missing |
-| **Attrition Risk** | Common | Common | Missing |
-
-**Action Required:** Add industry-standard terms to glossary:
-- "Risk of Loss" with definition mapping to `flight_risk_assessments.risk_level`
-- "Impact of Loss" with definition mapping to `position_criticality`
-
-### 3.2 Enum Value Inconsistencies: `position_criticality`
-
-| Location | Values Used | Industry Standard |
-|----------|-------------|-------------------|
-| `RetentionRiskMatrix.tsx` | most_critical, critical, important | Oracle pattern |
-| `KeyPositionsTab.tsx` | low, medium, high, critical | Different enum |
-| `succession_plans.position_criticality` | Text field, any value | No enforcement |
-| Documentation (Sec 7.2) | most_critical, critical, important | Oracle pattern |
-
-**Action Required:** 
-1. Standardize to Oracle pattern (most_critical, critical, important) OR SAP pattern (1-4 scale)
-2. Add database CHECK constraint to enforce valid values
-3. Update `KeyPositionsTab.tsx` criticality colors to match the standard enum
-
-### 3.3 Enum Value Inconsistencies: `replacement_difficulty`
-
-| Location | Values Used |
-|----------|-------------|
-| `RetentionRiskMatrix.tsx` | difficult, moderate, easy |
-| `BenchStrengthTab.tsx` | Uses from succession_plans |
-| Database | Text field, any value |
-
-**Action Required:** Add CHECK constraint and ensure consistent enum values across UI.
-
-### 3.4 Terminology: "Risk Level" vs "Risk of Loss"
-
-Throughout the codebase, the term "risk_level" is used consistently in database columns and code, but industry standard terminology is "Risk of Loss."
-
-**Files Using "risk_level":** 87 files contain this term
-
-**Recommendation:** Keep `risk_level` as the database column name (breaking change risk is too high) but update all user-facing labels and documentation to use "Risk of Loss" as the display term.
-
-**Action Required:**
-- Update FlightRiskTab.tsx labels: "Risk Level" → "Risk of Loss"
-- Update documentation consistently
-
-### 3.5 Missing "Impact of Loss" Implementation
-
-Industry-standard succession systems have a separate "Impact of Loss" assessment per employee. Currently:
-- Impact is derived from `position_criticality` on the succession plan
-- No employee-level impact assessment exists
-- Flight risk assessment only captures risk probability, not impact
-
-**Gap:** Oracle HCM and SAP SuccessFactors capture Impact of Loss separately from Risk of Loss at the employee level.
-
-**Options:**
-1. Document current approach as intentional simplification
-2. Add `impact_level` field to `flight_risk_assessments` table to capture employee-level impact
+**Cross-References:**
+- Ch 7.10: Risk troubleshooting
+- Ch 9.12: Integration troubleshooting  
+- Ch 10.12: Analytics troubleshooting
 
 ---
 
-## Part 4: Documentation Content Gaps
+### Section 11.2: Configuration Issues
 
-### 4.1 Section 7.3: Missing `assessed_by` Workflow
+**Issues to Document (15+ issues):**
 
-The FlightRiskWorkflow.tsx documents all 13 fields but doesn't address:
-- How to view who assessed each record
-- Audit trail for assessor changes
-- Multi-assessor scenarios (if allowed)
+| ID | Symptom | Root Cause | Resolution |
+|----|---------|------------|------------|
+| CFG-001 | Assessor type weights not summing to 100% | Manual weight entry error | Adjust weights, total must = 100% |
+| CFG-002 | Readiness band not appearing in dropdown | Missing company_id or is_active=false | Verify company scope and active flag |
+| CFG-003 | Rating source showing "No data" | Source module not configured or no data exists | Configure Performance/360/Goals cycles first |
+| CFG-004 | Form template not available for staff type | No form mapped to staff type | Create form or update staff type mapping |
+| CFG-005 | Availability reason missing urgency level | Optional field not configured | Add urgency_level and typical_notice_months |
+| CFG-006 | Company settings not inheriting | Parent company not linked | Configure company_parent_id |
 
-**Action Required:** Add note about assessor tracking and current UI limitations.
-
-### 4.2 Section 7.5: Cross-Reference Accuracy
-
-VacancyRiskMonitoring.tsx references Section 6.3 for `key_position_risks` table, but:
-- The 2 i18n fields are not documented in 6.3 either
-- Total should be 17 fields, documentation may reference 15
-
-**Action Required:** Verify field count in Section 6.3 and add missing i18n fields.
-
-### 4.3 Section 7.8: AI Prediction Data Sources
-
-AIAssistedRiskPrediction.tsx correctly references `talent_signal_snapshots` but doesn't document:
-- Which specific signal codes are used for risk prediction
-- How signals are weighted for risk calculation
-- Minimum data requirements for predictions
-
-**Action Required:** Add signal code reference or cross-reference to Chapter 3 signal definitions.
-
-### 4.4 Section 7.10: Troubleshooting Gaps
-
-RiskTroubleshooting.tsx is comprehensive but missing:
-- Issue: "assessed_by not captured"
-- Issue: "impact_level visualization showing empty" (the bug mentioned above)
-
-**Action Required:** Add these known issues to troubleshooting section.
+**Prevention Tips:**
+- Run configuration validation before go-live
+- Use the readiness checklist from Ch 2.1
 
 ---
 
-## Part 5: Industry Standard Alignment Gaps
+### Section 11.3: Nine-Box & Talent Assessment Issues
 
-### 5.1 Missing: Dual-Axis Employee-Level Assessment
+**Issues to Document (12+ issues):**
+- AI suggestion shows "No data" for axis
+- Historical assessments not visible in trend
+- Evidence sources not capturing
+- Box label showing "Undefined"
+- Signal mapping not contributing to axis
+- Rating source weight not applying
+- Performance axis showing 0 despite appraisal data
+- Potential axis not updating after 360
 
-**Industry Standard (Oracle HCM):**
-Each employee has BOTH:
-- Risk of Loss (probability they'll leave)
-- Impact of Loss (consequence if they leave)
-
-Combined to create Retention Risk Matrix at employee level.
-
-**Current Implementation:**
-- Risk of Loss: Captured in `flight_risk_assessments.risk_level`
-- Impact of Loss: Derived from position criticality only
-
-**Gap:** No employee-level impact assessment capability.
-
-### 5.2 Missing: Retention Risk Score Calculation
-
-The `RetentionRiskMatrix.tsx` provides visual matrix but:
-- No database field stores the calculated retention risk
-- No aggregation of retention risk across company
-- No trending of retention risk over time
-
-**Gap:** `calculated_risk_level` field exists in `succession_plans` but population logic is not documented.
+**Cross-Reference:** Consolidates inline troubleshooting from 3.7, 3.8
 
 ---
 
-## Part 6: Implementation Plan
+### Section 11.4: Readiness Assessment Issues
 
-### Phase 1: Critical Code Fixes (Priority: High)
+**Issues to Document (10+ issues):**
+- Form not loading for candidate
+- Score calculation mismatch
+- Multi-assessor variance too high
+- Completion workflow not triggering
+- Readiness band not updating on candidate
+- Historical assessments not retained
+- Skip indicator not recalculating weight
 
-| File | Change | Impact |
-|------|--------|--------|
-| `src/components/succession/SuccessionAnalytics.tsx` | Remove or fix `impact_level` visualization (lines 123-142) | Fixes bug |
-| `src/components/succession/FlightRiskTab.tsx` | Add `assessed_by: auth.uid()` to payload | Captures assessor |
+**Cross-Reference:** Consolidates inline troubleshooting from 4.8
 
-### Phase 2: Database Schema Documentation (Priority: High)
+---
+
+### Section 11.5: Talent Pool & Succession Plan Issues
+
+**Issues to Document (12+ issues):**
+- Candidate not appearing in pool nominations
+- Pool member status stuck in "pending"
+- Graduation workflow not executing
+- Development plan not linked to gap
+- Succession plan priority not ranking correctly
+- Key position not showing candidates
+- Bench strength showing 0 coverage
+- Evidence collection failing silently
+
+---
+
+### Section 11.6: Workflow & Approval Issues
+
+**Issues to Document (8+ issues):**
+- Transaction not appearing in approval queue
+- Workflow stuck in "pending" state
+- Approver not receiving notifications
+- Bulk approval not processing all items
+- Transaction type not configured
+- SLA not enforcing escalation
+- Completed workflow not updating record
+
+---
+
+### Section 11.7: Data Quality & Migration Issues
+
+**Issues to Document (10+ issues):**
+- Import file validation errors
+- Duplicate employee records in assessments
+- Historical data not migrating correctly
+- Company ID mismatch between modules
+- is_current flag conflicts
+- Data freshness indicators stale
+- Reference integrity violations
+- Bulk update failing partial records
+
+---
+
+### Section 11.8: Security & Permission Issues
+
+**Issues to Document (8+ issues):**
+- User cannot see succession data
+- RLS policy blocking valid access
+- Cross-company data leaking
+- Audit trail incomplete
+- Role permission not applied
+- Manager hierarchy not respected
+- Executive view showing restricted data
+- API returning 403 for valid user
+
+---
+
+### Section 11.9: AI & Automation Issues
+
+**Issues to Document (10+ issues):**
+- AI suggestions not appearing
+- Signal confidence below threshold
+- Bias detection false positives
+- Automation rule not executing
+- Integration action timing out
+- AI-generated narrative quality issues
+- Signal snapshot not refreshing
+- Minimum data requirements not met
+
+**Cross-Reference:** Builds on 7.8 (AI Risk Prediction), 9.12 (Integration)
+
+---
+
+### Section 11.10: Escalation Procedures & Support Resources
+
+**Content:**
+- 4-tier support model (Self-Service → HR Ops → Technical → Vendor)
+- Severity definitions (P1-P4) with SLA guidance
+- Communication templates for each escalation level
+- Emergency contact placeholder structure
+- FAQ section (20+ questions covering all domains)
+- Support resources directory
+
+---
+
+## Part 6: Files to Create/Modify
+
+### New Files (11 files)
+
+| File | Section | Priority |
+|------|---------|----------|
+| `sections/troubleshooting/index.ts` | Exports | High |
+| `sections/troubleshooting/TroubleshootingOverview.tsx` | 11.1 | High |
+| `sections/troubleshooting/ConfigurationIssues.tsx` | 11.2 | High |
+| `sections/troubleshooting/NineBoxAssessmentIssues.tsx` | 11.3 | High |
+| `sections/troubleshooting/ReadinessAssessmentIssues.tsx` | 11.4 | High |
+| `sections/troubleshooting/TalentPoolSuccessionIssues.tsx` | 11.5 | High |
+| `sections/troubleshooting/WorkflowApprovalIssues.tsx` | 11.6 | Medium |
+| `sections/troubleshooting/DataQualityMigrationIssues.tsx` | 11.7 | Medium |
+| `sections/troubleshooting/SecurityPermissionIssues.tsx` | 11.8 | Medium |
+| `sections/troubleshooting/AIAutomationIssues.tsx` | 11.9 | Medium |
+| `sections/troubleshooting/EscalationProcedures.tsx` | 11.10 | High |
+
+### Files to Modify (4 files)
 
 | File | Change |
 |------|--------|
-| `FlightRiskWorkflow.tsx` | Update `risk_factors` type from `text[]` to `jsonb` |
-| `VacancyRiskMonitoring.tsx` | Add note about 2 i18n fields (impact_if_vacant_en, risk_notes_en) |
-| New addition to 7.2 | Add succession_plans risk fields reference |
-
-### Phase 3: Terminology Standardization (Priority: High)
-
-| Scope | Change |
-|-------|--------|
-| `src/types/successionManual.ts` glossary | Add "Risk of Loss", "Impact of Loss" terms |
-| `FlightRiskTab.tsx` UI labels | Change "Risk Level" to "Risk of Loss" in user-facing text |
-| `KeyPositionsTab.tsx` | Align criticality enum to match RetentionRiskMatrix (most_critical, critical, important) |
-| Documentation (Sec 7.2) | Clarify current approach: Impact derived from position, not employee |
-
-### Phase 4: Enum Standardization (Priority: Medium)
-
-| Table | Add CHECK Constraint |
-|-------|---------------------|
-| `succession_plans.position_criticality` | CHECK (position_criticality IN ('most_critical', 'critical', 'important')) |
-| `succession_plans.replacement_difficulty` | CHECK (replacement_difficulty IN ('difficult', 'moderate', 'easy')) |
-| `flight_risk_assessments.risk_level` | Already has enum but verify values |
-
-### Phase 5: Documentation Updates (Priority: Medium)
-
-| File | Change |
-|------|--------|
-| `RiskTroubleshooting.tsx` | Add issues for assessed_by tracking and impact_level bug |
-| `AIAssistedRiskPrediction.tsx` | Add specific signal code references |
-| `RiskTerminologyStandards.tsx` | Note that Impact of Loss is position-derived |
+| `SuccessionTroubleshootingSection.tsx` | Replace placeholders with modular imports |
+| `src/types/successionManual.ts` | Update Part 11 subsections (5→10) |
+| `SuccessionQuickReference.tsx` | Add 5 new checklist cards |
+| `SuccessionDiagrams.tsx` | Add 6 new architecture diagrams |
+| `SuccessionVersionHistory.tsx` | Update to v1.1.0 with change log |
 
 ---
 
-## Part 7: Files to Modify
-
-### Code Fixes (3 files)
-
-| File | Priority |
-|------|----------|
-| `src/components/succession/SuccessionAnalytics.tsx` | High |
-| `src/components/succession/FlightRiskTab.tsx` | High |
-| `src/components/succession/KeyPositionsTab.tsx` | Medium |
-
-### Documentation Updates (6 files)
-
-| File | Priority |
-|------|----------|
-| `src/components/enablement/manual/succession/sections/risk/FlightRiskWorkflow.tsx` | High |
-| `src/components/enablement/manual/succession/sections/risk/RiskTerminologyStandards.tsx` | High |
-| `src/components/enablement/manual/succession/sections/risk/VacancyRiskMonitoring.tsx` | Medium |
-| `src/components/enablement/manual/succession/sections/risk/RiskTroubleshooting.tsx` | Medium |
-| `src/components/enablement/manual/succession/sections/risk/AIAssistedRiskPrediction.tsx` | Low |
-| `src/types/successionManual.ts` (glossary) | High |
-
-### Database Migration (Optional Enhancement)
-
-| Change | Priority |
-|--------|----------|
-| Add CHECK constraint for position_criticality | Medium |
-| Add CHECK constraint for replacement_difficulty | Medium |
-
----
-
-## Part 8: Quality Metrics After Implementation
+## Part 7: Quality Metrics After Implementation
 
 | Metric | Current | Target |
 |--------|---------|--------|
-| Database field accuracy | 82% | 100% |
-| UI-to-documentation sync | 78% | 95% |
-| Industry terminology coverage | 70% | 95% |
-| Known bugs in analytics | 1 | 0 |
-| Assessed_by capture | No | Yes |
-| Enum consistency | 60% | 100% |
+| Chapter 11 sections | 5 (placeholders) | 10 (comprehensive) |
+| Documented issues | 0 | 100+ issues |
+| Lines of content | ~55 | ~3,500 |
+| Cross-references | 0 | 25+ links |
+| FAQ questions | 0 | 20+ questions |
+| Quick reference cards | 4 | 9 |
+| Architecture diagrams | 3 | 9 |
+| Glossary terms | 55 | 70+ |
 
 ---
 
-## Part 9: Summary of Critical Actions
+## Part 8: Estimated Effort
 
-### Must Fix (Breaking/Incorrect Behavior)
+| Phase | Files | Lines | Time |
+|-------|-------|-------|------|
+| Phase 1: Create 10 section files | 11 | ~2,800 | 3-4 hours |
+| Phase 2: Update main section component | 1 | ~50 | 30 min |
+| Phase 3: Update TOC structure | 1 | ~100 | 20 min |
+| Phase 4: Enhance appendices | 3 | ~600 | 1-2 hours |
+| **Total** | **16** | **~3,550** | **5-7 hours** |
 
-1. **SuccessionAnalytics.tsx impact_level bug** - Remove visualization that references non-existent field
-2. **FlightRiskTab.tsx assessed_by** - Capture current user ID when creating assessments
-3. **Glossary terminology** - Add "Risk of Loss" and "Impact of Loss" industry terms
+---
 
-### Should Fix (Accuracy/Consistency)
+## Part 9: Technical Implementation Notes
 
-4. **risk_factors type** - Document as jsonb not text[]
-5. **Criticality enum alignment** - Standardize KeyPositionsTab to match RetentionRiskMatrix
-6. **UI labels** - Update "Risk Level" to "Risk of Loss" for industry alignment
+### Pattern to Follow
 
-### Nice to Have (Enhancement)
+Based on existing well-structured troubleshooting sections, each section should include:
+1. **Header** with section number, title, description
+2. **Learning Objectives** (4-5 bullet points)
+3. **Quick Reference Table** (Issue ID, Symptom, Severity, Category)
+4. **Detailed Issues Accordion** with:
+   - Symptom description
+   - Root cause analysis
+   - Step-by-step resolution
+   - Prevention tip
+5. **Diagnostic Checklist** (for complex issues)
+6. **Data Quality Checklist** (where applicable)
+7. **Cross-References** to related chapters
+8. **FAQs** (for escalation section)
 
-7. **Assessor display** - Show who performed each assessment in the table
-8. **Database constraints** - Add CHECK constraints for enum fields
-9. **Employee-level impact** - Consider adding impact_level field for full Oracle HCM parity
+### Component Reuse
+
+Leverage existing components:
+- `TroubleshootingSection` from `@/components/enablement/manual/components`
+- `LearningObjectives` from same location
+- `FieldReferenceTable` for configuration details
+- `InfoCallout`, `WarningCallout`, `TipCallout` for guidance
+- `WorkflowDiagram` for decision trees (mermaid)
+
+### Issue ID Convention
+
+Propose standardized issue IDs:
+- CFG-XXX: Configuration issues
+- NBX-XXX: Nine-Box issues
+- RDY-XXX: Readiness issues
+- TPL-XXX: Talent Pool issues
+- WKF-XXX: Workflow issues
+- DTA-XXX: Data quality issues
+- SEC-XXX: Security issues
+- AIA-XXX: AI/Automation issues
+- ESC-XXX: Escalation procedures
