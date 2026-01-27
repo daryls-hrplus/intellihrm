@@ -1331,87 +1331,27 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 11: TROUBLESHOOTING & FAQS (~45 min)
+  // PART 11: TROUBLESHOOTING & FAQS (~60 min)
   // ==========================================================================
   {
     id: 'part-11',
     sectionNumber: '11',
     title: 'Troubleshooting & FAQs',
-    description: 'Common issues, diagnostic procedures, and escalation paths for succession planning.',
+    description: 'Comprehensive diagnostic procedures, issue resolution guides, and escalation paths for succession planning.',
     contentLevel: 'reference',
-    estimatedReadTime: 45,
+    estimatedReadTime: 60,
     targetRoles: ['Admin', 'Consultant'],
     subsections: [
-      {
-        id: 'sec-11-1',
-        sectionNumber: '11.1',
-        title: 'Common Configuration Issues',
-        description: 'Readiness bands, assessor types, rating sources, and form configuration problems',
-        contentLevel: 'reference',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'As needed',
-          timing: 'Implementation and support',
-          benchmark: 'Step-by-step resolution guides'
-        }
-      },
-      {
-        id: 'sec-11-2',
-        sectionNumber: '11.2',
-        title: 'Nine-Box Calculation Problems',
-        description: 'Signal mapping errors, missing source data, axis calculation issues',
-        contentLevel: 'reference',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'As needed',
-          timing: 'Post-configuration',
-          benchmark: 'Diagnostic flowcharts for calculation issues'
-        }
-      },
-      {
-        id: 'sec-11-3',
-        sectionNumber: '11.3',
-        title: 'Readiness Assessment Issues',
-        description: 'Form errors, scoring problems, multi-assessor conflicts',
-        contentLevel: 'reference',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'As needed',
-          timing: 'Assessment execution',
-          benchmark: 'Issue patterns and resolution steps'
-        }
-      },
-      {
-        id: 'sec-11-4',
-        sectionNumber: '11.4',
-        title: 'Integration Failures',
-        description: 'Performance sync, 360 feed, learning link, and workforce data issues',
-        contentLevel: 'reference',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'Consultant'],
-        industryContext: {
-          frequency: 'As needed',
-          timing: 'Integration troubleshooting',
-          benchmark: 'Data flow validation procedures'
-        }
-      },
-      {
-        id: 'sec-11-5',
-        sectionNumber: '11.5',
-        title: 'Escalation Procedures',
-        description: 'Support tiers, severity definitions, and communication templates',
-        contentLevel: 'reference',
-        estimatedReadTime: 5,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Reference',
-          timing: 'Support operations',
-          benchmark: '4-tier support model aligned with ITIL'
-        }
-      }
+      { id: 'sec-11-1', sectionNumber: '11.1', title: 'Troubleshooting Overview', description: 'Diagnostic methodology, chapter scope, quick reference matrix, escalation decision tree', contentLevel: 'overview', estimatedReadTime: 10, targetRoles: ['Admin', 'Consultant'], industryContext: { frequency: 'Reference', timing: 'Initial orientation', benchmark: '4-phase diagnostic methodology (Identify → Diagnose → Resolve → Prevent)' } },
+      { id: 'sec-11-2', sectionNumber: '11.2', title: 'Configuration Issues', description: 'Assessor types, readiness bands, rating sources, forms, signal mappings, and company settings', contentLevel: 'reference', estimatedReadTime: 15, targetRoles: ['Admin'], industryContext: { frequency: 'As needed', timing: 'Implementation and support', benchmark: '12 documented issues with step-by-step resolution' } },
+      { id: 'sec-11-3', sectionNumber: '11.3', title: 'Nine-Box & Talent Assessment Issues', description: 'Calculation errors, placement issues, signal mapping problems, evidence capture', contentLevel: 'reference', estimatedReadTime: 15, targetRoles: ['Admin'], industryContext: { frequency: 'As needed', timing: 'Post-configuration', benchmark: '10 documented issues with diagnostic checklist' } },
+      { id: 'sec-11-4', sectionNumber: '11.4', title: 'Readiness Assessment Issues', description: 'Form errors, scoring problems, multi-assessor conflicts, workflow triggers', contentLevel: 'reference', estimatedReadTime: 12, targetRoles: ['Admin', 'HR Partner'], industryContext: { frequency: 'As needed', timing: 'Assessment execution', benchmark: '10 documented issues with score calculation reference' } },
+      { id: 'sec-11-5', sectionNumber: '11.5', title: 'Talent Pool & Succession Plan Issues', description: 'Pool membership, candidate ranking, development linking, bench strength', contentLevel: 'reference', estimatedReadTime: 15, targetRoles: ['Admin', 'HR Partner'], industryContext: { frequency: 'As needed', timing: 'Ongoing operations', benchmark: '11 documented issues with status lifecycle reference' } },
+      { id: 'sec-11-6', sectionNumber: '11.6', title: 'Workflow & Approval Issues', description: 'Pending approvals, workflow configuration, transaction types, SLA escalation', contentLevel: 'reference', estimatedReadTime: 10, targetRoles: ['Admin', 'HR Partner'], industryContext: { frequency: 'As needed', timing: 'Workflow troubleshooting', benchmark: '8 documented issues with transaction type reference' } },
+      { id: 'sec-11-7', sectionNumber: '11.7', title: 'Data Quality & Migration Issues', description: 'Import errors, duplicate detection, data validation, reference integrity', contentLevel: 'reference', estimatedReadTime: 12, targetRoles: ['Admin', 'Consultant'], industryContext: { frequency: 'As needed', timing: 'Data operations', benchmark: '10 documented issues with data quality checklist' } },
+      { id: 'sec-11-8', sectionNumber: '11.8', title: 'Security & Permission Issues', description: 'RLS policies, role access, company scope, manager hierarchy, audit trails', contentLevel: 'reference', estimatedReadTime: 10, targetRoles: ['Admin', 'Consultant'], industryContext: { frequency: 'As needed', timing: 'Security troubleshooting', benchmark: '8 documented issues with access matrix reference' } },
+      { id: 'sec-11-9', sectionNumber: '11.9', title: 'AI & Automation Issues', description: 'AI suggestions, signal processing, bias detection, automation rules, ISO 42001 compliance', contentLevel: 'reference', estimatedReadTime: 12, targetRoles: ['Admin', 'Consultant'], industryContext: { frequency: 'As needed', timing: 'AI troubleshooting', benchmark: '10 documented issues with AI data requirements reference' } },
+      { id: 'sec-11-10', sectionNumber: '11.10', title: 'Escalation Procedures & Support Resources', description: '4-tier support model, severity definitions, communication templates, FAQ', contentLevel: 'reference', estimatedReadTime: 15, targetRoles: ['Admin', 'HR Partner'], industryContext: { frequency: 'Reference', timing: 'Support operations', benchmark: '4-tier support model aligned with ITIL, 20+ FAQs' } }
     ]
   }
 ];
