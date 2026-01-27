@@ -114,19 +114,12 @@ export default function EnablementHubPage() {
       titleKey: "Create Content",
       items: [
         {
-          title: "AI Documentation Generator",
-          description: "Generate training guides, SOPs, and KB articles with AI",
-          href: "/enablement/docs-generator",
+          title: "Content Creation Studio",
+          description: "AI-powered documentation with templates and schema analysis",
+          href: "/enablement/create",
           icon: Sparkles,
           color: "bg-primary/10 text-primary",
-          badge: "Recommended",
-        },
-        {
-          title: "Template Library",
-          description: "Manage document templates and formatting",
-          href: "/enablement/template-library",
-          icon: Library,
-          color: "bg-purple-500/10 text-purple-500",
+          badge: "Consolidated",
         },
       ],
     },
@@ -135,11 +128,11 @@ export default function EnablementHubPage() {
       items: [
         {
           title: "Administrator Manuals",
-          description: "7 comprehensive admin guides (349 sections)",
+          description: "10 comprehensive admin guides (515+ sections)",
           href: "/enablement/manuals",
           icon: BookOpen,
           color: "bg-blue-500/10 text-blue-500",
-          badge: "7 Guides",
+          badge: "10 Guides",
         },
         {
           title: "Quick Start Guides",
@@ -147,7 +140,6 @@ export default function EnablementHubPage() {
           href: "/enablement/quickstarts",
           icon: Rocket,
           color: "bg-emerald-500/10 text-emerald-500",
-          badge: "New",
         },
         {
           title: "Implementation Checklists",
@@ -201,24 +193,11 @@ export default function EnablementHubPage() {
       items: [
         {
           title: "Release Command Center",
-          description: "Version lifecycle, milestones, and AI release manager",
+          description: "Version lifecycle, milestones, coverage analysis & AI manager",
           href: "/enablement/release-center",
           icon: Rocket,
           color: "bg-primary/10 text-primary",
           badge: "Pre-Release",
-        },
-      ],
-    },
-    {
-      titleKey: "Marketing & Sales",
-      items: [
-        {
-          title: "Product Capabilities Document",
-          description: "Comprehensive 18-module capabilities guide with PDF export",
-          href: "/enablement/product-capabilities",
-          icon: FileText,
-          color: "bg-primary/10 text-primary",
-          badge: "New",
         },
       ],
     },
@@ -481,8 +460,8 @@ export default function EnablementHubPage() {
 
   const handleNavigateToDocsGenerator = () => {
     navigateToList({
-      route: "/enablement/docs-generator",
-      title: "AI Documentation Generator",
+      route: "/enablement/create",
+      title: "Content Creation Studio",
       moduleCode: "enablement",
       icon: Sparkles,
     });

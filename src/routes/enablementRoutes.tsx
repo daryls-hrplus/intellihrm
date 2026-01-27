@@ -43,6 +43,8 @@ const ModulesIndexPage = lazy(() => import('@/pages/enablement/ModulesIndexPage'
 const ModuleDocumentationPage = lazy(() => import('@/pages/enablement/ModuleDocumentationPage'));
 const LnDQuickStartPage = lazy(() => import('@/pages/enablement/LnDQuickStartPage'));
 const CareerDevelopmentManualPage = lazy(() => import('@/pages/enablement/CareerDevelopmentManualPage'));
+const ContentCreationStudioPage = lazy(() => import('@/pages/enablement/ContentCreationStudioPage'));
+const SuccessionManualPage = lazy(() => import('@/pages/enablement/SuccessionManualPage'));
 
 // Wrapper for enablement routes with guards
 function EnablementRoute({ children }: { children: React.ReactNode }) {
@@ -98,6 +100,8 @@ export function EnablementRoutes() {
       <Route path="/enablement/checklists" element={<EnablementRoute><ImplementationChecklistsPage /></EnablementRoute>} />
       <Route path="/enablement/modules" element={<EnablementRoute><ModulesIndexPage /></EnablementRoute>} />
       <Route path="/enablement/modules/:moduleId" element={<EnablementRoute><ModuleDocumentationPage /></EnablementRoute>} />
+      <Route path="/enablement/create" element={<EnablementRoute><ContentCreationStudioPage /></EnablementRoute>} />
+      <Route path="/enablement/manuals/succession" element={<EnablementRoute><SuccessionManualPage /></EnablementRoute>} />
     </>
   );
 }
