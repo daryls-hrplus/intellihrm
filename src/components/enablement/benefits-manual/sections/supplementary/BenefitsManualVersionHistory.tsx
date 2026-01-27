@@ -1,60 +1,33 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { History, CheckCircle2, AlertCircle, PlusCircle, RefreshCw } from "lucide-react";
+import { History, User, Calendar, Info, RefreshCw } from "lucide-react";
 
 const VERSION_HISTORY = [
   {
-    version: "2.4",
-    date: "January 2026",
-    type: "current",
+    version: "1.0.0",
+    date: "2026-01-27",
+    author: "Intelli HRM Team",
+    status: "pre-release",
     changes: [
-      { type: "added", text: "Added comprehensive Benefits Administrator Manual" },
-      { type: "added", text: "New claims processing workflow documentation" },
-      { type: "added", text: "Life events and special enrollment guidance" },
-      { type: "added", text: "Cost projection and analytics documentation" },
-      { type: "improved", text: "Enhanced enrollment management procedures" },
-    ],
-  },
-  {
-    version: "2.3",
-    date: "December 2025",
-    type: "previous",
-    changes: [
-      { type: "added", text: "Auto-enrollment rules configuration" },
-      { type: "added", text: "Eligibility audit trail feature" },
-      { type: "improved", text: "Updated plan comparison tool documentation" },
-      { type: "fixed", text: "Corrected waiting period calculation examples" },
-    ],
-  },
-  {
-    version: "2.2",
-    date: "October 2025",
-    type: "previous",
-    changes: [
-      { type: "added", text: "Open enrollment tracker documentation" },
-      { type: "added", text: "Benefit calculator usage guide" },
-      { type: "improved", text: "Expanded coverage level configuration" },
-      { type: "improved", text: "Regional compliance documentation for Caribbean" },
-    ],
-  },
-  {
-    version: "2.1",
-    date: "August 2025",
-    type: "previous",
-    changes: [
-      { type: "added", text: "Provider management documentation" },
-      { type: "added", text: "Benefit categories setup guide" },
-      { type: "improved", text: "Contribution configuration procedures" },
-    ],
-  },
-  {
-    version: "2.0",
-    date: "June 2025",
-    type: "previous",
-    changes: [
-      { type: "added", text: "Initial Benefits module documentation" },
-      { type: "added", text: "Plan configuration and enrollment basics" },
-      { type: "added", text: "Employee self-service benefits documentation" },
+      "Initial release of Benefits Administrator Manual",
+      "Complete documentation covering all Benefits module capabilities",
+      "Benefit plan configuration and management",
+      "Enrollment management and open enrollment periods",
+      "Claims processing workflow documentation",
+      "Life events and special enrollment guidance",
+      "Auto-enrollment rules configuration",
+      "Eligibility criteria and audit trail features",
+      "Plan comparison tool documentation",
+      "Waiting period calculations and examples",
+      "Open enrollment tracker setup",
+      "Benefit calculator usage guide",
+      "Coverage level configuration",
+      "Regional compliance documentation for Caribbean",
+      "Provider management documentation",
+      "Benefit categories setup guide",
+      "Contribution configuration procedures",
+      "Cost projection and analytics documentation",
+      "Employee self-service benefits documentation",
     ],
   },
 ];
@@ -65,7 +38,7 @@ export function BenefitsManualVersionHistory() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <History className="h-5 w-5 text-orange-500" />
+            <History className="h-5 w-5 text-primary" />
             <CardTitle>Version History</CardTitle>
           </div>
           <CardDescription>
@@ -73,44 +46,63 @@ export function BenefitsManualVersionHistory() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg">
+            <div className="flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Pre-Release Documentation</p>
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  This documentation is being prepared for initial release. All updates contribute to version 1.0 until product launch.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-6">
-            {VERSION_HISTORY.map((release) => (
-              <div key={release.version} className="relative pl-6 pb-6 border-l-2 border-muted last:pb-0">
-                <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-background border-2 border-primary" />
+            {VERSION_HISTORY.map((entry, index) => (
+              <div key={entry.version} className="relative pl-6 pb-6 border-l-2 border-muted last:pb-0 ml-2">
+                <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-primary" />
                 
-                <div className="flex items-center gap-3 mb-3">
-                  <Badge 
-                    variant={release.type === "current" ? "default" : "secondary"}
-                    className={release.type === "current" ? "bg-primary" : ""}
-                  >
-                    v{release.version}
+                <div className="flex items-center gap-3 mb-3 flex-wrap">
+                  <Badge variant={index === 0 ? 'default' : 'outline'}>
+                    v{entry.version}
                   </Badge>
-                  <span className="text-sm text-muted-foreground">{release.date}</span>
-                  {release.type === "current" && (
-                    <Badge variant="outline" className="text-green-600 border-green-500/30 bg-green-500/10">
-                      Current
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className="text-blue-600 border-blue-500/30 bg-blue-500/10">
+                    Pre-Release
+                  </Badge>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    {entry.date}
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <User className="h-3 w-3" />
+                    {entry.author}
+                  </div>
                 </div>
 
                 <ul className="space-y-2">
-                  {release.changes.map((change, idx) => (
+                  {entry.changes.map((change, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
-                      {change.type === "added" && (
-                        <PlusCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                      )}
-                      {change.type === "improved" && (
-                        <RefreshCw className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-                      )}
-                      {change.type === "fixed" && (
-                        <CheckCircle2 className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
-                      )}
-                      <span className="text-muted-foreground">{change.text}</span>
+                      <span className="text-primary mt-0.5">•</span>
+                      <span className="text-muted-foreground">{change}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
+          </div>
+
+          <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-start gap-2">
+              <RefreshCw className="h-4 w-4 text-primary mt-0.5" />
+              <div>
+                <p className="text-sm font-medium">Version Lifecycle</p>
+                <p className="text-sm text-muted-foreground">
+                  All documentation updates contribute to v1.0 until official product launch. 
+                  Version numbering will begin incrementing after GA release.
+                </p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
