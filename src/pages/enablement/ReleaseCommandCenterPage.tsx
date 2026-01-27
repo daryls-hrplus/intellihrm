@@ -203,11 +203,11 @@ export default function ReleaseCommandCenterPage() {
                 </CardHeader>
                 <CardContent>
                   <div className={`text-2xl font-bold ${
-                    (lifecycle?.last_readiness_score || 0) >= 80 ? 'text-green-600' :
-                    (lifecycle?.last_readiness_score || 0) >= 60 ? 'text-amber-600' : 'text-red-600'
+                    (lifecycle?.last_readiness_score ?? 0) >= 80 ? 'text-green-600' :
+                    (lifecycle?.last_readiness_score ?? 0) >= 60 ? 'text-amber-600' : 'text-red-600'
                   }`}>
-                    {lifecycle?.last_readiness_score !== null 
-                      ? `${lifecycle.last_readiness_score}%` 
+                    {lifecycle?.last_readiness_score != null 
+                      ? `${lifecycle?.last_readiness_score}%` 
                       : '—'}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
