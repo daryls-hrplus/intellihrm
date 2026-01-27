@@ -4,9 +4,22 @@ import { FileText, CheckCircle, AlertTriangle, Lightbulb, Clock } from 'lucide-r
 
 const VERSION_HISTORY = [
   {
-    version: '1.2.0',
+    version: '1.3.0',
     date: '2026-01-27',
     status: 'current',
+    changes: [
+      'Removed all vendor-specific brand references (SAP, Workday, Oracle, Visier) from documentation',
+      'Replaced competitor attributions with neutral "Industry Standard" terminology',
+      'Preserved McKinsey, SHRM, ISO, SOC 2 as legitimate industry/compliance standards',
+      'Maintained all industry benchmarks and methodology patterns without brand attribution',
+      'Updated 27+ files across Analytics, Risk, Nine-Box, Foundation, Readiness, and Integration sections',
+      'Aligned terminology with HRplus enterprise positioning and industry neutrality guidelines',
+    ]
+  },
+  {
+    version: '1.2.0',
+    date: '2026-01-27',
+    status: 'previous',
     changes: [
       'Appendix A: Added 5 new Quick Reference Cards (Configuration, Go-Live, Annual Cycle, Integration, Keyboard)',
       'Appendix B: Added 6 new Architecture Diagrams (Signal Mapping, Readiness Lifecycle, Risk Flow, Integration, Pool State Machine, Approval Tree)',
@@ -23,7 +36,7 @@ const VERSION_HISTORY = [
   {
     version: '1.1.0',
     date: '2026-01-27',
-    status: 'previous',
+    status: 'archived',
     changes: [
       'Chapter 11 expanded from 5 placeholder sections to 10 comprehensive sections',
       'Added 100+ documented issues with Issue ID convention (CFG-XXX, NBX-XXX, etc.)',
@@ -38,7 +51,7 @@ const VERSION_HISTORY = [
       'Added Security & Permission Issues section (11.8) with access control matrix',
       'Added AI & Automation Issues section (11.9) with data requirements reference',
       'Added Escalation Procedures section (11.10) with 4-tier support model and 20+ FAQs',
-      'Chapter 7 Risk terminology aligned with Oracle HCM/SAP SuccessFactors standards',
+      'Chapter 7 Risk terminology aligned with industry standards',
       'Added database CHECK constraints for position_criticality and replacement_difficulty enums',
       'Fixed SuccessionAnalytics.tsx impact_level visualization bug',
       'Added assessed_by capture to FlightRiskTab.tsx for audit compliance',

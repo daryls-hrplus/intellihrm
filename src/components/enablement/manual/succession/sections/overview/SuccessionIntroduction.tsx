@@ -40,10 +40,9 @@ export function SuccessionIntroduction() {
         <CardContent className="space-y-4">
           <p className="text-lg leading-relaxed">
             The <strong>Succession Planning Module</strong> is Intelli HRM's enterprise-grade solution for 
-            identifying, developing, and retaining future leaders. Built on industry standards from 
-            SAP SuccessFactors and Workday, it provides configurable Nine-Box assessments, multi-assessor 
-            readiness frameworks, and AI-powered talent analytics—all integrated with your existing 
-            HR ecosystem.
+            identifying, developing, and retaining future leaders. Built on industry standards, it provides 
+            configurable Nine-Box assessments, multi-assessor readiness frameworks, and AI-powered talent 
+            analytics—all integrated with your existing HR ecosystem.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">

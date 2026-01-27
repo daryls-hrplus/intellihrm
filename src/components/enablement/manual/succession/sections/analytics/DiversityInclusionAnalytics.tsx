@@ -43,7 +43,7 @@ export function DiversityInclusionAnalytics() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                DEI Metrics for Succession (SHRM/Visier)
+                DEI Metrics for Succession (SHRM/Industry Standard)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -191,9 +191,9 @@ export function DiversityInclusionAnalytics() {
             <AlertTitle>Industry Alignment</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li><strong>SAP SuccessFactors:</strong> Talent Intelligence with DEI dashboards</li>
-                <li><strong>Workday:</strong> People Analytics with representation tracking</li>
-                <li><strong>Visier:</strong> Diversity metrics as core workforce analytics</li>
+                <li><strong>Industry Standard:</strong> Talent Intelligence with DEI dashboards</li>
+                <li><strong>Industry Standard:</strong> People Analytics with representation tracking</li>
+                <li><strong>Industry Standard:</strong> Diversity metrics as core workforce analytics</li>
                 <li><strong>SHRM:</strong> DEI in succession as organizational health indicator</li>
               </ul>
             </AlertDescription>

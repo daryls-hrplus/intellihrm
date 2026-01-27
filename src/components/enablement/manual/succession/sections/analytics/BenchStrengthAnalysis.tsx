@@ -284,9 +284,9 @@ export function BenchStrengthAnalysis() {
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
                 <li><strong>SHRM:</strong> Bench Strength Ratio of 2-3 ready successors per critical position</li>
-                <li><strong>Visier:</strong> Tiered readiness weighting for accurate pipeline health</li>
-                <li><strong>SAP SuccessFactors:</strong> Position-level coverage tracking with risk indicators</li>
-                <li><strong>Workday:</strong> Real-time bench depth visualization</li>
+                <li><strong>Industry Standard:</strong> Tiered readiness weighting for accurate pipeline health</li>
+                <li><strong>Industry Standard:</strong> Position-level coverage tracking with risk indicators</li>
+                <li><strong>Industry Standard:</strong> Real-time bench depth visualization</li>
               </ul>
             </AlertDescription>
           </Alert>

@@ -61,7 +61,7 @@ export function NineBoxDistributionReports() {
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>Understand the McKinsey 9-Box grid labels and recommended actions</li>
-                <li>Learn healthy distribution benchmarks from SAP/Workday</li>
+                <li>Learn healthy distribution benchmarks from industry standards</li>
                 <li>Analyze movement patterns between assessment cycles</li>
                 <li>Identify calibration variance indicators</li>
               </ul>
@@ -152,7 +152,7 @@ export function NineBoxDistributionReports() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Healthy Distribution Benchmarks (SAP/Workday)
+                Healthy Distribution Benchmarks (Industry Standard)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -307,9 +307,9 @@ export function NineBoxDistributionReports() {
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
                 <li><strong>McKinsey:</strong> Original 9-Box matrix framework with action-oriented labels</li>
-                <li><strong>SAP SuccessFactors:</strong> Calibration session integration for rating consistency</li>
-                <li><strong>Workday:</strong> Talent review with movement tracking over cycles</li>
-                <li><strong>Visier:</strong> Distribution benchmarking and variance detection</li>
+                <li><strong>Industry Standard:</strong> Calibration session integration for rating consistency</li>
+                <li><strong>Industry Standard:</strong> Talent review with movement tracking over cycles</li>
+                <li><strong>Industry Standard:</strong> Distribution benchmarking and variance detection</li>
               </ul>
             </AlertDescription>
           </Alert>

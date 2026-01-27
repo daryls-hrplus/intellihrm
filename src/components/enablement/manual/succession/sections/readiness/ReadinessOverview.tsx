@@ -75,7 +75,7 @@ export function ReadinessOverview() {
           </FeatureCardGrid>
 
           <IndustryCallout>
-            <strong>Industry Standard:</strong> SAP SuccessFactors and Workday both separate 
+            <strong>Industry Standard:</strong> Enterprise talent management platforms separate 
             "Succession Plan Setup" from "Succession Plan Execution" in their documentation. 
             This pattern ensures administrators understand what to configure vs. what HR Partners 
             and Managers execute daily.

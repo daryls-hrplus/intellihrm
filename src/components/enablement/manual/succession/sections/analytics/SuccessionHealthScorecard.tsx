@@ -67,8 +67,8 @@ export function SuccessionHealthScorecard() {
           <div className="prose prose-sm max-w-none">
             <h4 className="text-base font-semibold">Industry-Standard KPIs</h4>
             <p className="text-muted-foreground">
-              The Succession Health Scorecard provides executive-ready metrics following SAP SuccessFactors, 
-              Workday, and SHRM best practices for succession program measurement.
+              The Succession Health Scorecard provides executive-ready metrics following enterprise 
+              talent management and SHRM best practices for succession program measurement.
             </p>
           </div>
 
@@ -101,7 +101,7 @@ export function SuccessionHealthScorecard() {
                       (Plans with Candidates) / (Key Positions) × 100
                     </TableCell>
                     <TableCell><Badge variant="outline">≥80%</Badge></TableCell>
-                    <TableCell className="text-muted-foreground">Visier, SAP SF, SHRM</TableCell>
+                    <TableCell className="text-muted-foreground">Industry Standard, SHRM</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">
@@ -114,7 +114,7 @@ export function SuccessionHealthScorecard() {
                       (Ready Now Candidates) / (Total Candidates) × 100
                     </TableCell>
                     <TableCell><Badge variant="outline">15-25%</Badge></TableCell>
-                    <TableCell className="text-muted-foreground">Workday, Oracle HCM</TableCell>
+                    <TableCell className="text-muted-foreground">Industry Standard</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Bench Strength Ratio</TableCell>
@@ -122,7 +122,7 @@ export function SuccessionHealthScorecard() {
                       (Ready Successors) / (Critical Positions)
                     </TableCell>
                     <TableCell><Badge variant="outline">2-3+ per position</Badge></TableCell>
-                    <TableCell className="text-muted-foreground">Visier, SHRM</TableCell>
+                    <TableCell className="text-muted-foreground">SHRM</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Average Successors per Position</TableCell>
@@ -266,8 +266,8 @@ export function SuccessionHealthScorecard() {
             <AlertTitle>Industry Alignment</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li><strong>SAP SuccessFactors:</strong> Succession Coverage Ratio as primary KPI</li>
-                <li><strong>Workday:</strong> Ready-Now rate for immediate vacancy readiness</li>
+                <li><strong>Industry Standard:</strong> Succession Coverage Ratio as primary KPI</li>
+                <li><strong>Industry Standard:</strong> Ready-Now rate for immediate vacancy readiness</li>
                 <li><strong>SHRM:</strong> Bench Strength Ratio for depth measurement</li>
                 <li><strong>ISO 30414:</strong> Human Capital Reporting standard metrics</li>
               </ul>
