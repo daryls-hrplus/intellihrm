@@ -241,7 +241,7 @@ export function IntegrationTroubleshooting() {
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3">Stale signal snapshots</td>
-                  <td className="py-2 px-3 font-mono text-xs">data_freshness_days > 90</td>
+                  <td className="py-2 px-3 font-mono text-xs">data_freshness_days &gt; 90</td>
                   <td className="py-2 px-3"><Badge variant="secondary">&lt; 10%</Badge></td>
                 </tr>
                 <tr className="border-b">
