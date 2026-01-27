@@ -1,5 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Network, Clock } from 'lucide-react';
+import {
+  IntegrationArchitectureOverview,
+  IntegrationRulesEngine,
+  IntegrationPerformanceAppraisal,
+  Integration360Feedback,
+  IntegrationTalentSignals,
+  IntegrationNineBoxUpdates,
+  IntegrationLearningDevelopment,
+  IntegrationWorkforcePosition,
+  IntegrationCompensation,
+  IntegrationHRHub,
+  IntegrationExecutionAudit,
+  IntegrationTroubleshooting
+} from './sections/integration';
 
 export function SuccessionIntegrationSection() {
   return (
@@ -13,45 +26,32 @@ export function SuccessionIntegrationSection() {
           <div>
             <h2 className="text-2xl font-bold">9. Integration & Cross-Module Features</h2>
             <p className="text-muted-foreground">
-              Performance, 360 Feedback, Learning, Workforce, and Compensation integration patterns
+              Performance, 360 Feedback, Talent Signals, Learning, Workforce, Compensation, and HR Hub integration patterns
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            ~60 min read
+            ~135 min read
           </span>
           <span>Target: Admin, Consultant</span>
         </div>
       </section>
 
-      {/* Placeholder Sections */}
-      {['sec-9-1', 'sec-9-2', 'sec-9-3', 'sec-9-4', 'sec-9-5', 'sec-9-6'].map((secId, index) => {
-        const titles = [
-          '9.1 Integration Architecture',
-          '9.2 Performance Appraisal Integration',
-          '9.3 360 Feedback Integration',
-          '9.4 Learning & IDP Integration',
-          '9.5 Workforce & Position Integration',
-          '9.6 Compensation Integration'
-        ];
-        return (
-          <section key={secId} id={secId} data-manual-anchor={secId} className="scroll-mt-32 space-y-6">
-            <div className="border-l-4 border-orange-500 pl-4">
-              <h3 className="text-xl font-semibold">{titles[index]}</h3>
-            </div>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-muted-foreground">
-                  Detailed content for this section will be populated in subsequent content iterations. 
-                  This section will cover comprehensive procedures and configuration guidance.
-                </p>
-              </CardContent>
-            </Card>
-          </section>
-        );
-      })}
+      {/* Section Components */}
+      <IntegrationArchitectureOverview />
+      <IntegrationRulesEngine />
+      <IntegrationPerformanceAppraisal />
+      <Integration360Feedback />
+      <IntegrationTalentSignals />
+      <IntegrationNineBoxUpdates />
+      <IntegrationLearningDevelopment />
+      <IntegrationWorkforcePosition />
+      <IntegrationCompensation />
+      <IntegrationHRHub />
+      <IntegrationExecutionAudit />
+      <IntegrationTroubleshooting />
     </div>
   );
 }

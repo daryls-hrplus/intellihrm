@@ -982,94 +982,130 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
     id: 'part-9',
     sectionNumber: '9',
     title: 'Integration & Cross-Module Features',
-    description: 'Performance, 360 Feedback, Learning, Workforce, and Compensation integration patterns.',
+    description: 'Comprehensive cross-module integration: Performance, 360 Feedback, Talent Signals, Learning, Workforce, Compensation, and HR Hub workflows.',
     contentLevel: 'procedure',
-    estimatedReadTime: 60,
+    estimatedReadTime: 135,
     targetRoles: ['Admin', 'Consultant'],
     subsections: [
       {
         id: 'sec-9-1',
         sectionNumber: '9.1',
-        title: 'Integration Architecture',
-        description: 'Data flow overview and cross-module dependencies for succession planning',
+        title: 'Integration Architecture Overview',
+        description: 'Event-driven topology, inbound/outbound data flows, consent gates, and integration timing patterns',
         contentLevel: 'concept',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['Admin', 'Consultant'],
-        industryContext: {
-          frequency: 'Reference',
-          timing: 'Pre-integration',
-          benchmark: 'Event-driven integration architecture'
-        }
+        industryContext: { frequency: 'Reference', timing: 'Pre-integration', benchmark: 'Event-driven integration architecture (SAP/Workday pattern)' }
       },
       {
         id: 'sec-9-2',
         sectionNumber: '9.2',
-        title: 'Performance Appraisal Integration',
-        description: 'Feed appraisal ratings to Nine-Box performance axis and succession readiness',
-        contentLevel: 'procedure',
+        title: 'Integration Rules Engine',
+        description: 'appraisal_integration_rules table (28 fields), trigger events, conditions, target modules, and execution order',
+        contentLevel: 'reference',
         estimatedReadTime: 15,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Per appraisal cycle',
-          timing: 'Post-appraisal',
-          benchmark: 'Automated Nine-Box placement from performance data'
-        }
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: { frequency: 'One-time setup', timing: 'Post foundation', benchmark: 'Configurable rules engine for cross-module automation' }
       },
       {
         id: 'sec-9-3',
         sectionNumber: '9.3',
-        title: '360 Feedback Integration',
-        description: 'Incorporate 360 feedback signals into potential assessment and development themes',
+        title: 'Performance Appraisal Integration',
+        description: 'Appraisal score contribution to Nine-Box Performance axis, category-to-readiness mapping, orchestrator function',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 15,
         targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Per 360 cycle',
-          timing: 'Post-360 results',
-          benchmark: 'Multi-rater feedback for leadership potential indicators'
-        }
+        industryContext: { frequency: 'Per appraisal cycle', timing: 'Post-appraisal', benchmark: 'Automated Nine-Box placement from performance data' }
       },
       {
         id: 'sec-9-4',
         sectionNumber: '9.4',
-        title: 'Learning & IDP Integration',
-        description: 'Link succession gaps to learning recommendations and development plans',
+        title: '360 Feedback Integration',
+        description: '360 signals feeding Potential axis, signal categories, confidence scoring, bias adjustment, development themes',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Per candidate',
-          timing: 'Post readiness assessment',
-          benchmark: 'AI-driven learning recommendations for gap closure'
-        }
+        industryContext: { frequency: 'Per 360 cycle', timing: 'Post-360 results', benchmark: 'Multi-rater feedback for leadership potential indicators' }
       },
       {
         id: 'sec-9-5',
         sectionNumber: '9.5',
-        title: 'Workforce & Position Integration',
-        description: 'Sync with org structure, position changes, and headcount planning',
-        contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Real-time sync',
-          timing: 'Ongoing',
-          benchmark: 'Position lifecycle events trigger succession updates'
-        }
+        title: 'Talent Signal Processing',
+        description: 'talent_signal_definitions (15 fields), talent_signal_snapshots (22 fields), nine_box_signal_mappings (9 fields), axis contribution logic',
+        contentLevel: 'reference',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: { frequency: 'Reference', timing: 'Post rules setup', benchmark: 'Signal-to-axis mapping with bias detection' }
       },
       {
         id: 'sec-9-6',
         sectionNumber: '9.6',
-        title: 'Compensation Integration',
-        description: 'Retention bonus triggers, market adjustment recommendations for flight risks',
+        title: 'Nine-Box Automatic Updates',
+        description: 'Automatic Nine-Box placement, is_current lifecycle, AI-suggested ratings, evidence source capture',
         contentLevel: 'procedure',
-        estimatedReadTime: 5,
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: { frequency: 'Per trigger event', timing: 'Ongoing', benchmark: 'Evidence-based ratings with full audit trail' }
+      },
+      {
+        id: 'sec-9-7',
+        sectionNumber: '9.7',
+        title: 'Learning & Development Integration',
+        description: 'Gap-to-training course mapping, auto-enrollment rules, development activity tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
         targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Per cycle',
-          timing: 'Compensation planning',
-          benchmark: 'Compensation as retention lever for high-value talent'
-        }
+        industryContext: { frequency: 'Per candidate', timing: 'Post readiness assessment', benchmark: 'AI-driven learning recommendations for gap closure' }
+      },
+      {
+        id: 'sec-9-8',
+        sectionNumber: '9.8',
+        title: 'Workforce & Position Integration',
+        description: 'jobs.is_key_position sync, position criticality, org structure changes, position lifecycle events',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin'],
+        industryContext: { frequency: 'Real-time sync', timing: 'Ongoing', benchmark: 'Position lifecycle events trigger succession updates' }
+      },
+      {
+        id: 'sec-9-9',
+        sectionNumber: '9.9',
+        title: 'Compensation Integration',
+        description: 'Retention bonus triggers, compa-ratio monitoring, compensation review flags, cycle alignment',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin'],
+        industryContext: { frequency: 'Per cycle', timing: 'Compensation planning', benchmark: 'Compensation as retention lever for high-value talent' }
+      },
+      {
+        id: 'sec-9-10',
+        sectionNumber: '9.10',
+        title: 'HR Hub Workflow Integration',
+        description: 'Succession transaction types, workflow templates, pending approvals queue, bulk approval procedures',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: { frequency: 'Ongoing', timing: 'Post workflow setup', benchmark: 'Multi-level approval workflows following enterprise HR patterns' }
+      },
+      {
+        id: 'sec-9-11',
+        sectionNumber: '9.11',
+        title: 'Integration Execution & Audit',
+        description: 'appraisal_integration_log (21 fields), execution states, error handling, SOC 2 compliance',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: { frequency: 'Reference', timing: 'Ongoing monitoring', benchmark: 'Complete audit trail for SOC 2 compliance' }
+      },
+      {
+        id: 'sec-9-12',
+        sectionNumber: '9.12',
+        title: 'Troubleshooting Integrations',
+        description: 'Common failures, diagnostic checklist, circular dependency prevention, escalation procedures',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: { frequency: 'As needed', timing: 'Issue resolution', benchmark: 'Self-service troubleshooting before escalation' }
       }
     ]
   },
