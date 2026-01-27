@@ -203,8 +203,8 @@ export default function ReleaseCommandCenterPage() {
                 </CardHeader>
                 <CardContent>
                   <div className={`text-2xl font-bold ${
-                    (lifecycle?.last_readiness_score ?? 0) >= 80 ? 'text-green-600' :
-                    (lifecycle?.last_readiness_score ?? 0) >= 60 ? 'text-amber-600' : 'text-red-600'
+                    (lifecycle?.last_readiness_score ?? 0) >= 80 ? 'text-[hsl(var(--semantic-success-text))]' :
+                    (lifecycle?.last_readiness_score ?? 0) >= 60 ? 'text-[hsl(var(--semantic-warning-text))]' : 'text-[hsl(var(--semantic-error-text))]'
                   }`}>
                     {lifecycle?.last_readiness_score != null 
                       ? `${lifecycle?.last_readiness_score}%` 
@@ -319,25 +319,25 @@ export default function ReleaseCommandCenterPage() {
                     <SelectContent>
                       <SelectItem value="pre-release">
                         <span className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-amber-500" />
+                          <Clock className="h-4 w-4 text-[hsl(var(--semantic-warning-text))]" />
                           Pre-Release
                         </span>
                       </SelectItem>
                       <SelectItem value="preview">
                         <span className="flex items-center gap-2">
-                          <BookOpen className="h-4 w-4 text-blue-500" />
+                          <BookOpen className="h-4 w-4 text-[hsl(var(--semantic-info-text))]" />
                           Preview
                         </span>
                       </SelectItem>
                       <SelectItem value="ga-released">
                         <span className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <CheckCircle2 className="h-4 w-4 text-[hsl(var(--semantic-success-text))]" />
                           GA Released
                         </span>
                       </SelectItem>
                       <SelectItem value="maintenance">
                         <span className="flex items-center gap-2">
-                          <Settings className="h-4 w-4 text-slate-500" />
+                          <Settings className="h-4 w-4 text-[hsl(var(--semantic-neutral-text))]" />
                           Maintenance
                         </span>
                       </SelectItem>

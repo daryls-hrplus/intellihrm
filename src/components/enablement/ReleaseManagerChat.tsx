@@ -153,7 +153,7 @@ export function ReleaseManagerChat() {
                 >
                   {message.role === 'assistant' ? (
                     <div 
-                      className="prose prose-sm max-w-none dark:prose-invert"
+                      className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-code:bg-background/50 dark:prose-invert"
                       dangerouslySetInnerHTML={{ 
                         __html: markdownToHtml(message.content) 
                       }}
