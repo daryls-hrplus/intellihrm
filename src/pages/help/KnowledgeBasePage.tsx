@@ -14,6 +14,7 @@ import {
   FileText,
   Eye,
   ThumbsUp,
+  BookOpen,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { markdownToHtml } from "@/lib/utils/markdown";
@@ -25,6 +26,7 @@ interface KBCategory {
   slug: string;
   description: string | null;
   icon: string | null;
+  articleCount?: number;
 }
 
 interface KBArticle {
@@ -37,6 +39,22 @@ interface KBArticle {
   view_count: number;
   helpful_count: number;
   is_featured: boolean;
+  source_manual_id: string | null;
+}
+
+// Empty state component when no published content exists
+function EmptyKnowledgeBase() {
+  return (
+    <Card className="text-center py-12">
+      <CardContent>
+        <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Knowledge Base Coming Soon</h3>
+        <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+          Our documentation is being prepared. Articles will appear here once published from the Enablement Center.
+        </p>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function KnowledgeBasePage() {
@@ -50,6 +68,7 @@ export default function KnowledgeBasePage() {
   const [selectedArticle, setSelectedArticle] = useState<KBArticle | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [totalPublishedArticles, setTotalPublishedArticles] = useState(0);
 
   useEffect(() => {
     fetchCategories();
@@ -69,13 +88,30 @@ export default function KnowledgeBasePage() {
   }, [categorySlug, categories]);
 
   const fetchCategories = async () => {
-    const { data } = await supabase
+    // Get all active categories
+    const { data: categoriesData } = await supabase
       .from("kb_categories")
       .select("*")
       .eq("is_active", true)
       .order("display_order");
 
-    if (data) setCategories(data);
+    // Get article counts per category (only published from manuals)
+    const { data: articleCounts } = await supabase
+      .from("kb_articles")
+      .select("category_id, id")
+      .eq("is_published", true)
+      .not("source_manual_id", "is", null);
+
+    // Calculate total published articles
+    setTotalPublishedArticles(articleCounts?.length || 0);
+
+    // Map categories with their article counts
+    const categoriesWithCounts = categoriesData?.map(cat => ({
+      ...cat,
+      articleCount: articleCounts?.filter(a => a.category_id === cat.id).length || 0
+    })) || [];
+
+    setCategories(categoriesWithCounts);
     setLoading(false);
   };
 
@@ -86,6 +122,7 @@ export default function KnowledgeBasePage() {
       .select("*")
       .eq("is_published", true)
       .eq("category_id", categoryId)
+      .not("source_manual_id", "is", null) // Only manual-published content
       .order("title");
 
     if (data) setArticles(data);
@@ -100,6 +137,7 @@ export default function KnowledgeBasePage() {
       .from("kb_articles")
       .select("*")
       .eq("is_published", true)
+      .not("source_manual_id", "is", null) // Only manual-published content
       .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`);
 
     if (selectedCategory) {
@@ -241,140 +279,162 @@ export default function KnowledgeBasePage() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="flex gap-2 max-w-md">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={`Search ${selectedCategory ? selectedCategory.name : "articles"}...`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="pl-9"
-            />
-          </div>
-          <Button onClick={handleSearch}>Search</Button>
-        </div>
+        {/* Show empty state if no published articles exist */}
+        {!loading && totalPublishedArticles === 0 ? (
+          <EmptyKnowledgeBase />
+        ) : (
+          <>
+            {/* Search */}
+            <div className="flex gap-2 max-w-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={`Search ${selectedCategory ? selectedCategory.name : "articles"}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="pl-9"
+                />
+              </div>
+              <Button onClick={handleSearch}>Search</Button>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Categories Sidebar */}
-          <Card className="lg:col-span-1 h-fit">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Categories</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[400px]">
-                <div className="p-4 pt-0 space-y-1">
-                  <button
-                    onClick={() => handleCategoryClick(null)}
-                    className={`flex items-center gap-2 p-2 rounded-lg transition-colors w-full text-left ${
-                      !categorySlug ? "bg-primary/10 text-primary" : "hover:bg-muted"
-                    }`}
-                  >
-                    <Book className="h-4 w-4" />
-                    <span className="text-sm">All Categories</span>
-                  </button>
-                  {categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => handleCategoryClick(category.slug)}
-                      className={`flex items-center gap-2 p-2 rounded-lg transition-colors w-full text-left ${
-                        categorySlug === category.slug
-                          ? "bg-primary/10 text-primary"
-                          : "hover:bg-muted"
-                      }`}
-                    >
-                      <Book className="h-4 w-4" />
-                      <span className="text-sm">{category.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-
-          {/* Articles List */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {selectedCategory ? `${selectedCategory.name} Articles` : "Browse Categories"}
-                </CardTitle>
-                <CardDescription>
-                  {selectedCategory
-                    ? `${articles.length} article${articles.length !== 1 ? "s" : ""} available`
-                    : "Select a category to view articles"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading...</div>
-                ) : selectedCategory ? (
-                  articles.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No articles found in this category
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {articles.map((article) => (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Categories Sidebar */}
+              <Card className="lg:col-span-1 h-fit">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Categories</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[400px]">
+                    <div className="p-4 pt-0 space-y-1">
+                      <button
+                        onClick={() => handleCategoryClick(null)}
+                        className={`flex items-center justify-between gap-2 p-2 rounded-lg transition-colors w-full text-left ${
+                          !categorySlug ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Book className="h-4 w-4" />
+                          <span className="text-sm">All Categories</span>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {totalPublishedArticles}
+                        </Badge>
+                      </button>
+                      {categories.filter(c => (c.articleCount || 0) > 0).map((category) => (
                         <button
-                          key={article.id}
-                          onClick={() => handleArticleClick(article)}
-                          className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors text-left"
+                          key={category.id}
+                          onClick={() => handleCategoryClick(category.slug)}
+                          className={`flex items-center justify-between gap-2 p-2 rounded-lg transition-colors w-full text-left ${
+                            categorySlug === category.slug
+                              ? "bg-primary/10 text-primary"
+                              : "hover:bg-muted"
+                          }`}
                         >
-                          <div className="flex items-start gap-3">
-                            <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
-                            <div>
-                              <p className="font-medium">{article.title}</p>
-                              {article.excerpt && (
-                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                  {article.excerpt}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-3 mt-2">
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Eye className="h-3 w-3" />
-                                  {article.view_count}
-                                </span>
-                                {article.is_featured && (
-                                  <Badge variant="secondary" className="text-xs">Featured</Badge>
-                                )}
-                              </div>
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <Book className="h-4 w-4" />
+                            <span className="text-sm">{category.name}</span>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                          <Badge variant="secondary" className="text-xs">
+                            {category.articleCount || 0}
+                          </Badge>
                         </button>
                       ))}
                     </div>
-                  )
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {categories.map((category) => (
-                      <button
-                        key={category.id}
-                        onClick={() => handleCategoryClick(category.slug)}
-                        className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted transition-colors text-left"
-                      >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                          <Book className="h-5 w-5 text-primary" />
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Articles List */}
+              <div className="lg:col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      {selectedCategory ? `${selectedCategory.name} Articles` : "Browse Categories"}
+                    </CardTitle>
+                    <CardDescription>
+                      {selectedCategory
+                        ? `${articles.length} article${articles.length !== 1 ? "s" : ""} available`
+                        : "Select a category to view articles"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                    ) : selectedCategory ? (
+                      articles.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          No articles found in this category
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium">{category.name}</p>
-                          {category.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-1">
-                              {category.description}
-                            </p>
-                          )}
+                      ) : (
+                        <div className="space-y-2">
+                          {articles.map((article) => (
+                            <button
+                              key={article.id}
+                              onClick={() => handleArticleClick(article)}
+                              className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors text-left"
+                            >
+                              <div className="flex items-start gap-3">
+                                <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
+                                <div>
+                                  <p className="font-medium">{article.title}</p>
+                                  {article.excerpt && (
+                                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                      {article.excerpt}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-3 mt-2">
+                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                      <Eye className="h-3 w-3" />
+                                      {article.view_count}
+                                    </span>
+                                    {article.is_featured && (
+                                      <Badge variant="secondary" className="text-xs">Featured</Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                            </button>
+                          ))}
                         </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                      )
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {categories.filter(c => (c.articleCount || 0) > 0).map((category) => (
+                          <button
+                            key={category.id}
+                            onClick={() => handleCategoryClick(category.slug)}
+                            className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted transition-colors text-left"
+                          >
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                              <Book className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{category.name}</p>
+                                <Badge variant="secondary" className="text-xs">
+                                  {category.articleCount}
+                                </Badge>
+                              </div>
+                              {category.description && (
+                                <p className="text-sm text-muted-foreground line-clamp-1">
+                                  {category.description}
+                                </p>
+                              )}
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </AppLayout>
   );
