@@ -13,13 +13,13 @@ import {
   Target, 
   FileText, 
   Settings,
-  Calendar,
   Save,
   Loader2,
   Clock,
   CheckCircle2,
   TrendingUp,
   BookOpen,
+  BarChart3,
 } from "lucide-react";
 import { useTabState } from "@/hooks/useTabState";
 import { useReleaseLifecycle, ReleaseStatus } from "@/hooks/useReleaseLifecycle";
@@ -28,6 +28,7 @@ import { AIReadinessCard } from "@/components/enablement/AIReadinessCard";
 import { MilestoneTimeline } from "@/components/enablement/MilestoneTimeline";
 import { AggregatedReleaseNotes } from "@/components/enablement/AggregatedReleaseNotes";
 import { ReleaseManagerChat } from "@/components/enablement/ReleaseManagerChat";
+import { CoverageAnalysisCard } from "@/components/enablement/CoverageAnalysisCard";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -120,10 +121,14 @@ export default function ReleaseCommandCenterPage() {
           value={tabState.activeTab} 
           onValueChange={(value) => setTabState({ activeTab: value })}
         >
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="coverage" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Coverage
             </TabsTrigger>
             <TabsTrigger value="milestones" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -276,6 +281,11 @@ export default function ReleaseCommandCenterPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Coverage Tab */}
+          <TabsContent value="coverage" className="mt-6">
+            <CoverageAnalysisCard />
           </TabsContent>
 
           {/* Milestones Tab */}
