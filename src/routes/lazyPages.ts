@@ -78,13 +78,11 @@ export const DemoConversionPage = lazy(() => import('@/pages/demo/DemoConversion
 
 // Enablement pages
 export const EnablementHubPage = lazy(() => import('@/pages/enablement/EnablementHubPage'));
-export const ApplicationDocsGeneratorPage = lazy(() => import('@/pages/enablement/ApplicationDocsGeneratorPage'));
-export const FeatureCatalogPage = lazy(() => import('@/pages/enablement/FeatureCatalogPage'));
-export const FeatureDatabasePage = lazy(() => import('@/pages/enablement/FeatureDatabasePage'));
-export const TemplateLibraryPage = lazy(() => import('@/pages/enablement/TemplateLibraryPage'));
+// Deprecated: ApplicationDocsGeneratorPage, FeatureCatalogPage, FeatureDatabasePage, TemplateLibraryPage
+// These routes now redirect to consolidated pages (see App.tsx)
 export const EnablementAnalyticsPage = lazy(() => import('@/pages/enablement/EnablementAnalyticsPage'));
 export const SCORMGeneratorPage = lazy(() => import('@/pages/enablement/SCORMGeneratorPage'));
-export const ReleaseCalendarPage = lazy(() => import('@/pages/enablement/ReleaseCalendarPage'));
+// Deprecated: ReleaseCalendarPage - now redirects to /enablement/release-center
 export const EnablementSettingsPage = lazy(() => import('@/pages/enablement/EnablementSettingsPage'));
 export const EnablementAIToolsPage = lazy(() => import('@/pages/enablement/EnablementAIToolsPage'));
 export const EnablementGuidePage = lazy(() => import('@/pages/enablement/EnablementGuidePage'));
@@ -106,7 +104,7 @@ export const RouteRegistryPage = lazy(() => import('@/pages/enablement/RouteRegi
 export const ClientProvisioningGuidePage = lazy(() => import('@/pages/enablement/ClientProvisioningGuidePage'));
 export const ClientProvisioningTestingPage = lazy(() => import('@/pages/enablement/ClientProvisioningTestingPage'));
 export const ManualPublishingPage = lazy(() => import('@/pages/enablement/ManualPublishingPage'));
-export const ContentLifecyclePage = lazy(() => import('@/pages/enablement/ContentLifecyclePage'));
+// Deprecated: ContentLifecyclePage - now redirects to /enablement/release-center
 export const ManualsIndexPage = lazy(() => import('@/pages/enablement/ManualsIndexPage'));
 export const ProductCapabilitiesPage = lazy(() => import('@/pages/enablement/ProductCapabilitiesPage'));
 export const QuickStartGuidesPage = lazy(() => import('@/pages/enablement/QuickStartGuidesPage'));
