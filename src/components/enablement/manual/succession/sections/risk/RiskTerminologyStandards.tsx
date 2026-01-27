@@ -86,7 +86,7 @@ export function RiskTerminologyStandards() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <BookOpen className="h-5 w-5 text-primary" />
-            Core Risk Terminology (Oracle HCM Pattern)
+            Core Risk Terminology (Oracle HCM / SAP SuccessFactors Pattern)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -106,9 +106,11 @@ export function RiskTerminologyStandards() {
                 <TableCell>
                   <strong>Probability</strong> that an employee will voluntarily leave the organization. 
                   Assessed at the individual employee level based on behavioral signals and market conditions.
+                  This is the industry-standard term (Oracle HCM, SAP SF) for what is commonly called "flight risk."
                 </TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
-                  flight_risk_assessments.risk_level
+                  flight_risk_assessments.risk_level<br />
+                  <span className="text-primary">(enum: low | medium | high | critical)</span>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -116,12 +118,17 @@ export function RiskTerminologyStandards() {
                   <Badge className="bg-amber-500/20 text-amber-700 dark:text-amber-400">Impact of Loss</Badge>
                 </TableCell>
                 <TableCell>
-                  <strong>Business consequence</strong> if the employee departs. Assessed based on role criticality, 
-                  replacement difficulty, institutional knowledge, and successor readiness.
+                  <strong>Business consequence</strong> if the employee departs. Assessed at the <em>position</em> level 
+                  based on role criticality, replacement difficulty, and successor readiness. 
+                  <span className="block mt-1 text-sm text-muted-foreground italic">
+                    Note: Current implementation derives impact from position criticality. Employee-level impact assessment 
+                    is a planned enhancement for Oracle HCM parity.
+                  </span>
                 </TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
                   succession_plans.position_criticality<br />
-                  key_position_risks.criticality_level
+                  key_position_risks.criticality_level<br />
+                  <span className="text-primary">(enum: most_critical | critical | important)</span>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -129,11 +136,12 @@ export function RiskTerminologyStandards() {
                   <Badge className="bg-purple-500/20 text-purple-700 dark:text-purple-400">Retention Risk</Badge>
                 </TableCell>
                 <TableCell>
-                  <strong>Combined assessment</strong> of Risk of Loss × Impact of Loss. Used to prioritize 
-                  retention interventions and succession planning urgency.
+                  <strong>Combined assessment</strong> of Risk of Loss × Impact of Loss (via replacement difficulty). 
+                  Used to prioritize retention interventions and succession planning urgency.
                 </TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
-                  Calculated via RetentionRiskMatrix.tsx
+                  Calculated via RetentionRiskMatrix.tsx<br />
+                  <span className="text-primary">(result: high | moderate | low)</span>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -145,7 +153,21 @@ export function RiskTerminologyStandards() {
                   considering retirement, flight risk, and external factors.
                 </TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
-                  key_position_risks.vacancy_risk
+                  key_position_risks.vacancy_risk<br />
+                  <span className="text-primary">(enum: low | medium | high)</span>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <Badge className="bg-slate-500/20 text-slate-700 dark:text-slate-400">Replacement Difficulty</Badge>
+                </TableCell>
+                <TableCell>
+                  Assessment of how challenging it would be to fill a position externally, based on 
+                  market availability, specialized skills, and time-to-hire expectations.
+                </TableCell>
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  succession_plans.replacement_difficulty<br />
+                  <span className="text-primary">(enum: difficult | moderate | easy)</span>
                 </TableCell>
               </TableRow>
             </TableBody>

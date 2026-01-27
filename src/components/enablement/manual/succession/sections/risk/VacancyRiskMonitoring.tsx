@@ -107,7 +107,8 @@ export function VacancyRiskMonitoring() {
         <Info className="h-4 w-4" />
         <AlertTitle>Cross-Reference: Chapter 6.3</AlertTitle>
         <AlertDescription>
-          For detailed field reference of the <code>key_position_risks</code> table (17 fields) 
+          For detailed field reference of the <code>key_position_risks</code> table (17 fields including i18n fields: 
+          <code>impact_if_vacant_en</code>, <code>risk_notes_en</code>) 
           and configuration procedures, see <strong>Section 6.3: Position Risk Assessment</strong>.
           This section focuses on operational monitoring workflows.
         </AlertDescription>

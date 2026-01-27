@@ -25,31 +25,36 @@ export function AIAssistedRiskPrediction() {
   const signalCategories = [
     { 
       category: 'Performance Signals', 
-      signals: ['Performance rating trend', 'Goal achievement rate', 'Competency assessment scores'],
+      signals: ['perf_rating_trend', 'goal_achievement_rate', 'competency_score'],
+      descriptions: ['Rating change over 3 cycles', 'Completed/total goals', 'Competency assessment average'],
       weight: '30%',
       freshness: '90 days'
     },
     { 
       category: 'Engagement Signals', 
-      signals: ['Survey engagement score', 'Participation rates', 'Recognition frequency'],
+      signals: ['engagement_score', 'survey_participation', 'recognition_count'],
+      descriptions: ['Latest engagement survey score', 'Survey response rate', 'Recognition frequency'],
       weight: '25%',
       freshness: '30 days'
     },
     { 
       category: 'Career Signals', 
-      signals: ['Time in role', 'Promotion history', 'Lateral moves', 'Skills development'],
+      signals: ['time_in_role_months', 'promotion_history', 'lateral_moves', 'skills_growth'],
+      descriptions: ['Months in current position', 'Promotions in last 5 years', 'Role changes', 'New skills acquired'],
       weight: '20%',
       freshness: '180 days'
     },
     { 
       category: 'Compensation Signals', 
-      signals: ['Compa-ratio', 'Market position', 'Equity vesting schedule'],
+      signals: ['compa_ratio', 'market_position', 'equity_vesting'],
+      descriptions: ['Salary / midpoint ratio', 'Percentile in market data', 'Unvested equity timeline'],
       weight: '15%',
       freshness: 'Annual'
     },
     { 
       category: 'Tenure Signals', 
-      signals: ['Years of service', 'Tenure milestones', 'Project completion timing'],
+      signals: ['tenure_years', 'tenure_milestone', 'project_end_date'],
+      descriptions: ['Years of service', 'Approaching milestone (5yr, 10yr)', 'Current project completion'],
       weight: '10%',
       freshness: '30 days'
     },
@@ -103,9 +108,10 @@ export function AIAssistedRiskPrediction() {
             <TableHeader>
               <TableRow>
                 <TableHead>Category</TableHead>
-                <TableHead>Example Signals</TableHead>
+                <TableHead>Signal Codes</TableHead>
+                <TableHead>Description</TableHead>
                 <TableHead>Weight</TableHead>
-                <TableHead>Data Freshness</TableHead>
+                <TableHead>Freshness</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -115,7 +121,14 @@ export function AIAssistedRiskPrediction() {
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {cat.signals.map((s, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">{s}</Badge>
+                        <Badge key={i} variant="outline" className="text-xs font-mono">{s}</Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-xs text-muted-foreground space-y-0.5">
+                      {cat.descriptions.map((d, i) => (
+                        <div key={i}>{d}</div>
                       ))}
                     </div>
                   </TableCell>

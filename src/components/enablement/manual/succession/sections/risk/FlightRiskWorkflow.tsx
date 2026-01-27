@@ -29,7 +29,7 @@ export function FlightRiskWorkflow() {
     { name: 'company_id', required: true, type: 'UUID', description: 'Company scope for multi-tenant isolation' },
     { name: 'employee_id', required: true, type: 'UUID', description: 'Reference to profiles.id (employee being assessed)' },
     { name: 'risk_level', required: true, type: 'enum', description: 'Current risk classification', defaultValue: 'medium', validation: 'low | medium | high | critical' },
-    { name: 'risk_factors', required: false, type: 'text[]', description: 'Array of selected risk factor strings from standard list' },
+    { name: 'risk_factors', required: false, type: 'jsonb', description: 'JSONB array of selected risk factor strings from standard list', defaultValue: "'[]'::jsonb" },
     { name: 'retention_actions', required: false, type: 'text', description: 'Free-text field for planned or completed retention interventions' },
     { name: 'assessed_by', required: false, type: 'UUID', description: 'User who performed the assessment (profiles.id)' },
     { name: 'assessment_date', required: true, type: 'date', description: 'Date when assessment was performed' },

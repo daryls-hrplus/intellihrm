@@ -105,6 +105,9 @@ export function FlightRiskTab({ companyId }: FlightRiskTabProps) {
       return;
     }
 
+    // Get current user for assessed_by tracking
+    const { data: { user } } = await supabase.auth.getUser();
+
     const payload = {
       ...formData,
       company_id: companyId,
@@ -112,7 +115,8 @@ export function FlightRiskTab({ companyId }: FlightRiskTabProps) {
       retention_actions: formData.retention_actions || null,
       next_review_date: formData.next_review_date || null,
       notes: formData.notes || null,
-      is_current: true
+      is_current: true,
+      assessed_by: user?.id || null, // Capture assessor for audit trail
     };
 
     if (editingRisk) {
@@ -231,7 +235,7 @@ export function FlightRiskTab({ companyId }: FlightRiskTabProps) {
       </div>
 
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Flight Risk Assessments</h3>
+        <h3 className="text-lg font-semibold">Risk of Loss Assessments</h3>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button size="sm"><Plus className="h-4 w-4 mr-1" /> New Assessment</Button>
@@ -253,14 +257,14 @@ export function FlightRiskTab({ companyId }: FlightRiskTabProps) {
                 </Select>
               </div>
               <div>
-                <Label>Risk Level</Label>
+                <Label>Risk of Loss</Label>
                 <Select value={formData.risk_level} onValueChange={(v) => setFormData({...formData, risk_level: v})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="low">Low (&lt;25% probability)</SelectItem>
+                    <SelectItem value="medium">Medium (25-50%)</SelectItem>
+                    <SelectItem value="high">High (50-75%)</SelectItem>
+                    <SelectItem value="critical">Critical (&gt;75%)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
