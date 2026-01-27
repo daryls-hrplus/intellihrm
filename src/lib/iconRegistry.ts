@@ -75,7 +75,7 @@ import {
   // Company Property icons
   Package, Clipboard,
   // Enablement icons
-  Rocket, Map as MapIcon, MousePointer, CalendarClock,
+  Rocket, Map as MapIcon, MousePointer, CalendarClock, Radar,
   type LucideIcon,
 } from "lucide-react";
 
@@ -277,6 +277,7 @@ export const iconRegistry: Record<string, LucideIcon> = {
   FolderTree,
   CalendarClock,
   MousePointer,
+  Radar,
 };
 
 /**
