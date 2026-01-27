@@ -14,35 +14,13 @@ import {
   FileText,
   Sparkles,
   ArrowRight,
-  Calendar,
-  Users,
-  Clock,
-  Shield,
-  Heart,
-  UserPlus,
-  DollarSign,
-  Target,
-  GraduationCap,
-  Package,
-  Briefcase,
-  TrendingUp,
-  ClipboardList,
   Video,
   FileQuestion,
   Lightbulb,
-  UserCircle,
-  UserCog,
+  ClipboardList,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
-
-interface KBCategory {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  icon: string | null;
-}
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface KBArticle {
   id: string;
@@ -54,45 +32,26 @@ interface KBArticle {
   view_count: number;
 }
 
-const categoryIcons: Record<string, React.ElementType> = {
-  "hr-hub": Briefcase,
-  "ess": UserCircle,
-  "mss": UserCog,
-  "workforce": Users,
-  "time-attendance": Clock,
-  "leave-management": Calendar,
-  "payroll-compensation": DollarSign,
-  "benefits": Heart,
-  "performance-management": Target,
-  "training-learning": GraduationCap,
-  "succession-planning": TrendingUp,
-  "recruitment": UserPlus,
-  "health-safety": Shield,
-  "employee-relations": Users,
-  "company-property": Package,
-  "policies-compliance": FileText,
-  "admin-security": Shield,
-};
-
 export default function HelpCenterPage() {
-  const [categories, setCategories] = useState<KBCategory[]>([]);
   const [featuredArticles, setFeaturedArticles] = useState<KBArticle[]>([]);
+  const [articleCount, setArticleCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<KBArticle[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const { navigateToList, navigateToRecord } = useWorkspaceNavigation();
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    const [categoriesRes, articlesRes] = await Promise.all([
-      supabase.from("kb_categories").select("*").eq("is_active", true).order("display_order"),
+    const [articlesRes, countRes] = await Promise.all([
       supabase.from("kb_articles").select("*").eq("is_published", true).eq("is_featured", true).limit(5),
+      supabase.from("kb_articles").select("id", { count: "exact", head: true }).eq("is_published", true),
     ]);
 
-    if (categoriesRes.data) setCategories(categoriesRes.data);
     if (articlesRes.data) setFeaturedArticles(articlesRes.data);
+    if (countRes.count) setArticleCount(countRes.count);
   };
 
   const handleSearch = async () => {
@@ -113,23 +72,65 @@ export default function HelpCenterPage() {
     setIsSearching(false);
   };
 
-  const quickLinks = [
-    { title: "Knowledge Base", description: "Browse all help articles", icon: Book, href: "/help/knowledge-base" },
-    { title: "AI Assistant", description: "Get instant help from our AI", icon: Sparkles, href: "/help/chat" },
-    { title: "Submit a Ticket", description: "Report an issue or request", icon: Ticket, href: "/help/tickets/new" },
-    { title: "My Tickets", description: "View your support tickets", icon: MessageSquare, href: "/help/tickets" },
-  ];
-
-  const additionalResources = [
-    { title: "FAQs", description: "Frequently asked questions", icon: FileQuestion, href: "/help/knowledge-base?category=policies-compliance" },
-    { title: "Getting Started", description: "New user guides", icon: Lightbulb, href: "/help/knowledge-base?category=workforce" },
-    { title: "Video Tutorials", description: "Step-by-step video guides", icon: Video, href: "/help/knowledge-base?category=training-learning" },
-    { title: "Release Notes", description: "Latest updates and features", icon: ClipboardList, href: "/help/knowledge-base?category=admin-security" },
-  ];
-
-  const getCategoryIcon = (slug: string) => {
-    return categoryIcons[slug] || Book;
+  const handleNavigate = (route: string, title: string) => {
+    navigateToList({
+      route,
+      title,
+      moduleCode: "help",
+    });
   };
+
+  const handleArticleClick = (article: KBArticle) => {
+    navigateToRecord({
+      route: `/help/article/${article.slug}`,
+      title: article.title,
+      subtitle: "Article",
+      moduleCode: "help",
+      contextType: "kb_article",
+      contextId: article.id,
+      icon: FileText,
+    });
+  };
+
+  const resourceCategories = [
+    { 
+      title: "Knowledge Base", 
+      description: "Browse all help articles", 
+      icon: Book, 
+      href: "/help/kb",
+      badge: articleCount > 0 ? `${articleCount} articles` : undefined,
+    },
+    { 
+      title: "Video Tutorials", 
+      description: "Step-by-step video guides", 
+      icon: Video, 
+      href: "/help/kb?category=training-learning",
+    },
+    { 
+      title: "Getting Started", 
+      description: "New user guides and onboarding", 
+      icon: Lightbulb, 
+      href: "/help/kb?category=getting-started",
+    },
+    { 
+      title: "FAQs", 
+      description: "Frequently asked questions", 
+      icon: FileQuestion, 
+      href: "/help/kb?category=policies-compliance",
+    },
+    { 
+      title: "Release Notes", 
+      description: "Latest updates and features", 
+      icon: ClipboardList, 
+      href: "/help/kb?category=admin-security",
+    },
+    { 
+      title: "My Tickets", 
+      description: "View your support tickets", 
+      icon: MessageSquare, 
+      href: "/help/tickets",
+    },
+  ];
 
   return (
     <AppLayout>
@@ -181,10 +182,10 @@ export default function HelpCenterPage() {
             <CardContent>
               <div className="space-y-2">
                 {searchResults.map((article) => (
-                  <Link
+                  <button
                     key={article.id}
-                    to={`/help/article/${article.slug}`}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors"
+                    onClick={() => handleArticleClick(article)}
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors w-full text-left"
                   >
                     <div className="flex items-center gap-3">
                       <FileText className="h-5 w-5 text-muted-foreground" />
@@ -196,181 +197,166 @@ export default function HelpCenterPage() {
                       </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </Link>
+                  </button>
                 ))}
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Quick Links */}
+        {/* Primary Actions - AI Chat + Submit Ticket */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* AI Assistant Card */}
+          <Card 
+            className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border-primary/20 hover:shadow-lg transition-shadow cursor-pointer group"
+            onClick={() => handleNavigate("/help/chat", "AI Assistant")}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                  <Sparkles className="h-7 w-7 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">AI Assistant</h3>
+                  <p className="text-muted-foreground mt-1">
+                    Get instant answers to your questions from our intelligent assistant
+                  </p>
+                  <Button variant="link" className="px-0 mt-2 group-hover:gap-2 transition-all">
+                    Start Chat <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Submit Ticket Card */}
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer group"
+            onClick={() => handleNavigate("/help/tickets/new", "Submit Ticket")}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-secondary group-hover:bg-secondary/80 transition-colors">
+                  <Ticket className="h-7 w-7 text-secondary-foreground" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">Submit a Ticket</h3>
+                  <p className="text-muted-foreground mt-1">
+                    Report an issue or request help from our support team
+                  </p>
+                  <Button variant="link" className="px-0 mt-2 group-hover:gap-2 transition-all">
+                    Create Ticket <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Help Resources */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Quick Access</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickLinks.map((link) => (
-              <Link key={link.href} to={link.href}>
-                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                        <link.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">{link.title}</h3>
-                        <p className="text-sm text-muted-foreground">{link.description}</p>
-                      </div>
+          <h2 className="text-xl font-semibold mb-4">Help Resources</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {resourceCategories.map((resource) => (
+              <Card 
+                key={resource.title}
+                className="hover:shadow-md transition-shadow cursor-pointer group"
+                onClick={() => handleNavigate(resource.href, resource.title)}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                      <resource.icon className="h-5 w-5 text-primary" />
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold group-hover:text-primary transition-colors">{resource.title}</h3>
+                        {resource.badge && (
+                          <Badge variant="secondary" className="text-xs">{resource.badge}</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{resource.description}</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
 
-        {/* Additional Resources */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Additional Resources</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {additionalResources.map((link) => (
-              <Link key={link.title} to={link.href}>
-                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary/50 group-hover:bg-secondary transition-colors">
-                        <link.icon className="h-5 w-5 text-secondary-foreground" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">{link.title}</h3>
-                        <p className="text-sm text-muted-foreground">{link.description}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content */}
+        {/* Bottom Section: Popular Articles + Need More Help */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Categories */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Browse by Module</CardTitle>
-                <CardDescription>Find help articles organized by HRIS module</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {categories.length === 0 ? (
-                  <p className="text-center py-8 text-muted-foreground">
-                    No categories available yet. Check back soon!
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {categories.map((category) => {
-                      const IconComponent = getCategoryIcon(category.slug);
-                      return (
-                        <Link
-                          key={category.id}
-                          to={`/help/knowledge-base?category=${category.slug}`}
-                          className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted transition-colors"
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <IconComponent className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium">{category.name}</p>
-                            {category.description && (
-                              <p className="text-sm text-muted-foreground line-clamp-1">{category.description}</p>
-                            )}
-                          </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Featured Articles & AI Chat */}
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Popular Articles</CardTitle>
-                <CardDescription>Most viewed help content</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {featuredArticles.length === 0 ? (
-                  <p className="text-center py-4 text-muted-foreground text-sm">
-                    No featured articles yet
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {featuredArticles.map((article) => (
-                      <Link
-                        key={article.id}
-                        to={`/help/article/${article.slug}`}
-                        className="block p-3 rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <p className="font-medium text-sm hover:text-primary">{article.title}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {article.view_count} views
-                          </Badge>
+          {/* Popular Articles */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Popular Articles</CardTitle>
+              <CardDescription>Most viewed help content</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {featuredArticles.length === 0 ? (
+                <p className="text-center py-4 text-muted-foreground text-sm">
+                  No featured articles yet
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {featuredArticles.map((article) => (
+                    <button
+                      key={article.id}
+                      onClick={() => handleArticleClick(article)}
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors w-full text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium hover:text-primary">{article.title}</p>
+                          {article.excerpt && (
+                            <p className="text-sm text-muted-foreground line-clamp-1">{article.excerpt}</p>
+                          )}
                         </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* AI Chat CTA */}
-            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Need Quick Help?</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Chat with our AI assistant for instant answers
-                    </p>
-                    <Link to="/help/chat">
-                      <Button variant="link" className="px-0 mt-2">
-                        Start Chat <ArrowRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </Link>
-                  </div>
+                      </div>
+                      <Badge variant="secondary" className="text-xs shrink-0">
+                        {article.view_count} views
+                      </Badge>
+                    </button>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </CardContent>
+          </Card>
 
-            {/* Contact Support */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                    <Ticket className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Still Need Help?</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Submit a support ticket and our team will assist you
-                    </p>
-                    <Link to="/help/tickets/new">
-                      <Button variant="outline" size="sm" className="mt-3">
-                        Submit Ticket
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Still Need Help */}
+          <Card className="h-fit">
+            <CardHeader>
+              <CardTitle>Still Need Help?</CardTitle>
+              <CardDescription>Can't find what you're looking for?</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                className="w-full justify-start gap-2" 
+                onClick={() => handleNavigate("/help/chat", "AI Assistant")}
+              >
+                <Sparkles className="h-4 w-4" />
+                Chat with AI
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start gap-2"
+                onClick={() => handleNavigate("/help/tickets/new", "Submit Ticket")}
+              >
+                <Ticket className="h-4 w-4" />
+                Submit a Ticket
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start gap-2"
+                onClick={() => handleNavigate("/help/tickets", "My Tickets")}
+              >
+                <MessageSquare className="h-4 w-4" />
+                View My Tickets
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppLayout>

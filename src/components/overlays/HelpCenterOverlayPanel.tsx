@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -22,39 +22,16 @@ import {
   FileText,
   Sparkles,
   ArrowRight,
-  Calendar,
-  Users,
-  Clock,
-  Shield,
-  Heart,
-  UserPlus,
-  DollarSign,
-  Target,
-  GraduationCap,
-  Package,
-  Briefcase,
-  TrendingUp,
-  ClipboardList,
   Video,
   FileQuestion,
   Lightbulb,
-  UserCircle,
-  UserCog,
+  ClipboardList,
   Maximize2,
-  X,
 } from "lucide-react";
 
 interface HelpCenterOverlayPanelProps {
   isOpen: boolean;
   onClose: () => void;
-}
-
-interface KBCategory {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  icon: string | null;
 }
 
 interface KBArticle {
@@ -67,29 +44,8 @@ interface KBArticle {
   view_count: number;
 }
 
-const categoryIcons: Record<string, React.ElementType> = {
-  "hr-hub": Briefcase,
-  "ess": UserCircle,
-  "mss": UserCog,
-  "workforce": Users,
-  "time-attendance": Clock,
-  "leave-management": Calendar,
-  "payroll-compensation": DollarSign,
-  "benefits": Heart,
-  "performance-management": Target,
-  "training-learning": GraduationCap,
-  "succession-planning": TrendingUp,
-  "recruitment": UserPlus,
-  "health-safety": Shield,
-  "employee-relations": Users,
-  "company-property": Package,
-  "policies-compliance": FileText,
-  "admin-security": Shield,
-};
-
 export function HelpCenterOverlayPanel({ isOpen, onClose }: HelpCenterOverlayPanelProps) {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState<KBCategory[]>([]);
   const [featuredArticles, setFeaturedArticles] = useState<KBArticle[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<KBArticle[]>([]);
@@ -102,13 +58,14 @@ export function HelpCenterOverlayPanel({ isOpen, onClose }: HelpCenterOverlayPan
   }, [isOpen]);
 
   const fetchData = async () => {
-    const [categoriesRes, articlesRes] = await Promise.all([
-      supabase.from("kb_categories").select("*").eq("is_active", true).order("display_order"),
-      supabase.from("kb_articles").select("*").eq("is_published", true).eq("is_featured", true).limit(5),
-    ]);
+    const { data } = await supabase
+      .from("kb_articles")
+      .select("*")
+      .eq("is_published", true)
+      .eq("is_featured", true)
+      .limit(5);
 
-    if (categoriesRes.data) setCategories(categoriesRes.data);
-    if (articlesRes.data) setFeaturedArticles(articlesRes.data);
+    if (data) setFeaturedArticles(data);
   };
 
   const handleSearch = async () => {
@@ -140,15 +97,18 @@ export function HelpCenterOverlayPanel({ isOpen, onClose }: HelpCenterOverlayPan
   };
 
   const quickLinks = [
-    { title: "Knowledge Base", description: "Browse all help articles", icon: Book, href: "/help/knowledge-base" },
+    { title: "Knowledge Base", description: "Browse all help articles", icon: Book, href: "/help/kb" },
     { title: "AI Assistant", description: "Get instant help from our AI", icon: Sparkles, href: "/help/chat" },
     { title: "Submit a Ticket", description: "Report an issue or request", icon: Ticket, href: "/help/tickets/new" },
     { title: "My Tickets", description: "View your support tickets", icon: MessageSquare, href: "/help/tickets" },
   ];
 
-  const getCategoryIcon = (slug: string) => {
-    return categoryIcons[slug] || Book;
-  };
+  const resourceLinks = [
+    { title: "Video Tutorials", icon: Video, href: "/help/kb?category=training-learning" },
+    { title: "Getting Started", icon: Lightbulb, href: "/help/kb?category=getting-started" },
+    { title: "FAQs", icon: FileQuestion, href: "/help/kb?category=policies-compliance" },
+    { title: "Release Notes", icon: ClipboardList, href: "/help/kb?category=admin-security" },
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -219,6 +179,46 @@ export function HelpCenterOverlayPanel({ isOpen, onClose }: HelpCenterOverlayPan
               </Card>
             )}
 
+            {/* Primary Actions */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleLinkClick("/help/chat")}
+                className="text-left"
+              >
+                <Card className="h-full bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:shadow-md transition-shadow cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm group-hover:text-primary transition-colors">AI Assistant</h4>
+                        <p className="text-xs text-muted-foreground">Get instant answers</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </button>
+              <button
+                onClick={() => handleLinkClick("/help/tickets/new")}
+                className="text-left"
+              >
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary group-hover:bg-secondary/80 transition-colors">
+                        <Ticket className="h-5 w-5 text-secondary-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm group-hover:text-primary transition-colors">Submit Ticket</h4>
+                        <p className="text-xs text-muted-foreground">Report an issue</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </button>
+            </div>
+
             {/* Quick Links */}
             <div>
               <h3 className="text-sm font-semibold mb-3">Quick Access</h3>
@@ -247,46 +247,24 @@ export function HelpCenterOverlayPanel({ isOpen, onClose }: HelpCenterOverlayPan
               </div>
             </div>
 
-            {/* Categories */}
+            {/* Resource Links */}
             <div>
-              <h3 className="text-sm font-semibold mb-3">Browse by Module</h3>
-              {categories.length === 0 ? (
-                <p className="text-center py-4 text-muted-foreground text-sm">
-                  No categories available yet
-                </p>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  {categories.slice(0, 8).map((category) => {
-                    const IconComponent = getCategoryIcon(category.slug);
-                    return (
-                      <button
-                        key={category.id}
-                        onClick={() => handleLinkClick(`/help/knowledge-base?category=${category.slug}`)}
-                        className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors text-left"
-                      >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                          <IconComponent className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{category.name}</p>
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-              {categories.length > 8 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full mt-2"
-                  onClick={() => handleLinkClick("/help/knowledge-base")}
-                >
-                  View all categories
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
-              )}
+              <h3 className="text-sm font-semibold mb-3">Resources</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {resourceLinks.map((link) => (
+                  <button
+                    key={link.href}
+                    onClick={() => handleLinkClick(link.href)}
+                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors text-left"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                      <link.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="font-medium text-sm">{link.title}</p>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 ml-auto" />
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Popular Articles */}
@@ -316,30 +294,6 @@ export function HelpCenterOverlayPanel({ isOpen, onClose }: HelpCenterOverlayPan
                 </Card>
               </div>
             )}
-
-            {/* AI Chat CTA */}
-            <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-sm">Need Quick Help?</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Chat with our AI assistant for instant answers
-                    </p>
-                  </div>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleLinkClick("/help/chat")}
-                  >
-                    Start Chat
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </ScrollArea>
       </DialogContent>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { markdownToHtml } from "@/lib/utils/markdown";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 interface KBCategory {
   id: string;
@@ -41,6 +42,7 @@ interface KBArticle {
 export default function KnowledgeBasePage() {
   const [searchParams] = useSearchParams();
   const categorySlug = searchParams.get("category");
+  const { navigateToList } = useWorkspaceNavigation();
 
   const [categories, setCategories] = useState<KBCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<KBCategory | null>(null);
@@ -134,6 +136,22 @@ export default function KnowledgeBasePage() {
     }
   };
 
+  const handleBackToHelpCenter = () => {
+    navigateToList({
+      route: "/help",
+      title: "Help Center",
+      moduleCode: "help",
+    });
+  };
+
+  const handleCategoryClick = (categorySlug: string | null) => {
+    navigateToList({
+      route: categorySlug ? `/help/kb?category=${categorySlug}` : "/help/kb",
+      title: categorySlug ? categories.find(c => c.slug === categorySlug)?.name || "Knowledge Base" : "Knowledge Base",
+      moduleCode: "help",
+    });
+  };
+
   // Memoize the HTML content conversion
   const articleHtml = useMemo(() => {
     if (!selectedArticle) return '';
@@ -208,12 +226,10 @@ export default function KnowledgeBasePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/help">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Help Center
-              </Button>
-            </Link>
+            <Button variant="ghost" size="sm" onClick={handleBackToHelpCenter}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Help Center
+            </Button>
             <div>
               <h1 className="text-2xl font-bold">
                 {selectedCategory ? selectedCategory.name : "Knowledge Base"}
@@ -249,20 +265,20 @@ export default function KnowledgeBasePage() {
             <CardContent className="p-0">
               <ScrollArea className="h-[400px]">
                 <div className="p-4 pt-0 space-y-1">
-                  <Link
-                    to="/help/knowledge-base"
-                    className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                  <button
+                    onClick={() => handleCategoryClick(null)}
+                    className={`flex items-center gap-2 p-2 rounded-lg transition-colors w-full text-left ${
                       !categorySlug ? "bg-primary/10 text-primary" : "hover:bg-muted"
                     }`}
                   >
                     <Book className="h-4 w-4" />
                     <span className="text-sm">All Categories</span>
-                  </Link>
+                  </button>
                   {categories.map((category) => (
-                    <Link
+                    <button
                       key={category.id}
-                      to={`/help/knowledge-base?category=${category.slug}`}
-                      className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                      onClick={() => handleCategoryClick(category.slug)}
+                      className={`flex items-center gap-2 p-2 rounded-lg transition-colors w-full text-left ${
                         categorySlug === category.slug
                           ? "bg-primary/10 text-primary"
                           : "hover:bg-muted"
@@ -270,7 +286,7 @@ export default function KnowledgeBasePage() {
                     >
                       <Book className="h-4 w-4" />
                       <span className="text-sm">{category.name}</span>
-                    </Link>
+                    </button>
                   ))}
                 </div>
               </ScrollArea>
@@ -334,10 +350,10 @@ export default function KnowledgeBasePage() {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {categories.map((category) => (
-                      <Link
+                      <button
                         key={category.id}
-                        to={`/help/knowledge-base?category=${category.slug}`}
-                        className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted transition-colors"
+                        onClick={() => handleCategoryClick(category.slug)}
+                        className="flex items-center gap-3 p-4 rounded-lg border hover:bg-muted transition-colors text-left"
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                           <Book className="h-5 w-5 text-primary" />
@@ -351,7 +367,7 @@ export default function KnowledgeBasePage() {
                           )}
                         </div>
                         <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 )}
