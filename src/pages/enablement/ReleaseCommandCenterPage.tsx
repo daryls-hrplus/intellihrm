@@ -20,6 +20,7 @@ import {
   TrendingUp,
   BookOpen,
   BarChart3,
+  Kanban,
 } from "lucide-react";
 import { useTabState } from "@/hooks/useTabState";
 import { useReleaseLifecycle, ReleaseStatus } from "@/hooks/useReleaseLifecycle";
@@ -29,6 +30,7 @@ import { MilestoneTimeline } from "@/components/enablement/MilestoneTimeline";
 import { AggregatedReleaseNotes } from "@/components/enablement/AggregatedReleaseNotes";
 import { ReleaseManagerChat } from "@/components/enablement/ReleaseManagerChat";
 import { CoverageAnalysisCard } from "@/components/enablement/CoverageAnalysisCard";
+import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -121,7 +123,7 @@ export default function ReleaseCommandCenterPage() {
           value={tabState.activeTab} 
           onValueChange={(value) => setTabState({ activeTab: value })}
         >
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               Overview
@@ -129,6 +131,10 @@ export default function ReleaseCommandCenterPage() {
             <TabsTrigger value="coverage" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Coverage
+            </TabsTrigger>
+            <TabsTrigger value="workflow" className="flex items-center gap-2">
+              <Kanban className="h-4 w-4" />
+              Workflow
             </TabsTrigger>
             <TabsTrigger value="milestones" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -286,6 +292,11 @@ export default function ReleaseCommandCenterPage() {
           {/* Coverage Tab */}
           <TabsContent value="coverage" className="mt-6">
             <CoverageAnalysisCard />
+          </TabsContent>
+
+          {/* Workflow Tab */}
+          <TabsContent value="workflow" className="mt-6">
+            <ContentWorkflowBoard />
           </TabsContent>
 
           {/* Milestones Tab */}

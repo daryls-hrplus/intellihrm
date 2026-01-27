@@ -14,6 +14,9 @@ interface ReleaseManagerRequest {
     | 'identify_gaps'
     | 'plan_milestones'
     | 'summarize_status'
+    | 'workflow_status'
+    | 'suggest_priorities'
+    | 'bottleneck_analysis'
     | 'chat';
   message?: string;
   context?: {
@@ -346,6 +349,138 @@ serve(async (req) => {
         });
       }
 
+      case 'workflow_status': {
+        const { data: contentStatus } = await supabase
+          .from('enablement_content_status')
+          .select('workflow_status, priority, module_code');
+
+        const byStatus: Record<string, number> = {
+          development_backlog: 0,
+          in_development: 0,
+          testing_review: 0,
+          documentation: 0,
+          ready_for_enablement: 0,
+          published: 0,
+          maintenance: 0,
+        };
+
+        (contentStatus || []).forEach(item => {
+          if (byStatus[item.workflow_status] !== undefined) {
+            byStatus[item.workflow_status]++;
+          }
+        });
+
+        const total = Object.values(byStatus).reduce((a, b) => a + b, 0);
+        const inProgress = byStatus.in_development + byStatus.testing_review + byStatus.documentation;
+        const blocked = byStatus.development_backlog;
+        const completed = byStatus.published + byStatus.maintenance;
+
+        const response = `**Workflow Status Summary**\n\n` +
+          `**Total Items:** ${total}\n\n` +
+          `| Stage | Count |\n|-------|-------|\n` +
+          Object.entries(byStatus).map(([k, v]) => 
+            `| ${k.replace(/_/g, ' ')} | ${v} |`
+          ).join('\n') +
+          `\n\n**Progress:**\n` +
+          `- Backlog: ${blocked}\n` +
+          `- In Progress: ${inProgress}\n` +
+          `- Completed: ${completed}\n` +
+          `- Completion Rate: ${total > 0 ? Math.round((completed / total) * 100) : 0}%`;
+
+        return new Response(JSON.stringify({ 
+          workflow: byStatus,
+          metrics: { total, inProgress, blocked, completed },
+          response,
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      case 'suggest_priorities': {
+        const { data: contentStatus } = await supabase
+          .from('enablement_content_status')
+          .select('*')
+          .neq('workflow_status', 'published')
+          .neq('workflow_status', 'maintenance')
+          .order('updated_at', { ascending: true })
+          .limit(20);
+
+        const staleItems = (contentStatus || []).filter(item => {
+          const updatedAt = new Date(item.updated_at);
+          const daysSinceUpdate = Math.floor((Date.now() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));
+          return daysSinceUpdate > 7;
+        });
+
+        const criticalItems = (contentStatus || []).filter(i => i.priority === 'critical');
+        const blockedItems = (contentStatus || []).filter(i => i.workflow_status === 'development_backlog');
+
+        const response = `**Priority Recommendations**\n\n` +
+          `**Critical Items (${criticalItems.length}):**\n` +
+          (criticalItems.length > 0 
+            ? criticalItems.slice(0, 5).map(i => `- ${i.module_code}/${i.feature_code}`).join('\n')
+            : '- None') +
+          `\n\n**Stale Items (no updates in 7+ days):** ${staleItems.length}\n` +
+          (staleItems.length > 0 
+            ? staleItems.slice(0, 5).map(i => `- ${i.module_code}/${i.feature_code} (${i.workflow_status})`).join('\n')
+            : '- None') +
+          `\n\n**Blocked in Backlog:** ${blockedItems.length}\n` +
+          `\n**Recommendation:** Focus on moving critical items and unblocking the ${blockedItems.length} backlog items.`;
+
+        return new Response(JSON.stringify({ 
+          critical: criticalItems.length,
+          stale: staleItems.length,
+          blocked: blockedItems.length,
+          response,
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      case 'bottleneck_analysis': {
+        const { data: contentStatus } = await supabase
+          .from('enablement_content_status')
+          .select('workflow_status, module_code, priority, updated_at');
+
+        const byStatus: Record<string, number> = {};
+        const byModule: Record<string, number> = {};
+
+        (contentStatus || []).forEach(item => {
+          byStatus[item.workflow_status] = (byStatus[item.workflow_status] || 0) + 1;
+          if (item.workflow_status !== 'published' && item.workflow_status !== 'maintenance') {
+            byModule[item.module_code] = (byModule[item.module_code] || 0) + 1;
+          }
+        });
+
+        // Find bottleneck stage (highest count excluding published/maintenance)
+        const activeStages = Object.entries(byStatus)
+          .filter(([k]) => k !== 'published' && k !== 'maintenance')
+          .sort((a, b) => b[1] - a[1]);
+
+        const bottleneckStage = activeStages[0];
+        const bottleneckModules = Object.entries(byModule).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+        const response = `**Bottleneck Analysis**\n\n` +
+          `**Stage with most items:** ${bottleneckStage ? `${bottleneckStage[0].replace(/_/g, ' ')} (${bottleneckStage[1]} items)` : 'None'}\n\n` +
+          `**Modules with most pending work:**\n` +
+          bottleneckModules.map(([mod, count]) => `- ${mod}: ${count} items`).join('\n') +
+          `\n\n**Recommendations:**\n` +
+          (bottleneckStage && bottleneckStage[1] > 50 
+            ? `- The "${bottleneckStage[0].replace(/_/g, ' ')}" stage has ${bottleneckStage[1]} items. Consider batch processing or additional resources.\n`
+            : '') +
+          (bottleneckModules.length > 0 
+            ? `- Focus on ${bottleneckModules[0][0]} module (${bottleneckModules[0][1]} pending items).\n`
+            : '') +
+          `- Review stale items with "Suggest Priorities" action.`;
+
+        return new Response(JSON.stringify({ 
+          bottleneckStage: bottleneckStage ? bottleneckStage[0] : null,
+          moduleBreakdown: Object.fromEntries(bottleneckModules),
+          response,
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       case 'chat':
       default: {
         // General chat - provide helpful responses based on message
@@ -360,13 +495,20 @@ serve(async (req) => {
           response = 'Milestones help track your release progress. Common milestones include Alpha, Beta, RC (Release Candidate), and GA (General Availability). You can manage them in the Milestones tab.';
         } else if (lowerMessage.includes('changelog') || lowerMessage.includes('notes')) {
           response = 'Release notes are automatically aggregated from each manual\'s changelog when you publish. Click "Generate Changelog" to create a unified changelog document.';
+        } else if (lowerMessage.includes('workflow') || lowerMessage.includes('board')) {
+          response = 'The Workflow tab shows all content items across 7 stages: Backlog → Development → Testing → Documentation → Ready → Published → Maintenance. Use "Workflow Status" for a summary, "Suggest Priorities" for actionable items, or "Bottleneck Analysis" to find blockers.';
         } else {
           response = 'I can help you with:\n\n' +
+            '**Release Management:**\n' +
             '- **Assess Readiness**: Check if documentation is ready for release\n' +
             '- **Generate Changelog**: Create aggregated release notes\n' +
             '- **Identify Gaps**: Find incomplete documentation\n' +
             '- **Version Recommendations**: Get version increment suggestions\n' +
             '- **Milestone Planning**: Plan your release schedule\n\n' +
+            '**Workflow Management:**\n' +
+            '- **Workflow Status**: See content counts by stage\n' +
+            '- **Suggest Priorities**: Find critical and stale items\n' +
+            '- **Bottleneck Analysis**: Identify workflow blockers\n\n' +
             'What would you like to do?';
         }
 
