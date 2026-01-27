@@ -4,9 +4,34 @@ import { FileText, CheckCircle } from 'lucide-react';
 
 const VERSION_HISTORY = [
   {
+    version: '1.1.0',
+    date: '2026-01-27',
+    status: 'current',
+    changes: [
+      'Chapter 11 expanded from 5 placeholder sections to 10 comprehensive sections',
+      'Added 100+ documented issues with Issue ID convention (CFG-XXX, NBX-XXX, etc.)',
+      'Added 4-phase diagnostic methodology (Identify → Diagnose → Resolve → Prevent)',
+      'Added symptom-to-section quick reference matrix',
+      'Added Configuration Issues section (11.2) with 12 detailed resolution guides',
+      'Added Nine-Box & Talent Assessment Issues section (11.3) with diagnostic checklist',
+      'Added Readiness Assessment Issues section (11.4) with score calculation reference',
+      'Added Talent Pool & Succession Plan Issues section (11.5) with status lifecycle',
+      'Added Workflow & Approval Issues section (11.6) with transaction type reference',
+      'Added Data Quality & Migration Issues section (11.7) with validation checklist',
+      'Added Security & Permission Issues section (11.8) with access control matrix',
+      'Added AI & Automation Issues section (11.9) with data requirements reference',
+      'Added Escalation Procedures section (11.10) with 4-tier support model and 20+ FAQs',
+      'Chapter 7 Risk terminology aligned with Oracle HCM/SAP SuccessFactors standards',
+      'Added database CHECK constraints for position_criticality and replacement_difficulty enums',
+      'Fixed SuccessionAnalytics.tsx impact_level visualization bug',
+      'Added assessed_by capture to FlightRiskTab.tsx for audit compliance',
+      'Updated glossary with Risk of Loss, Impact of Loss, Attrition Risk terms'
+    ]
+  },
+  {
     version: '1.0.0',
     date: '2026-01-26',
-    status: 'current',
+    status: 'previous',
     changes: [
       'Initial release of Succession Planning Administrator Manual',
       '11 comprehensive parts covering all succession planning capabilities',
