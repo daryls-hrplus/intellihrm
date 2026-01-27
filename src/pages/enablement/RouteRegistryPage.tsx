@@ -33,7 +33,8 @@ import {
   ExternalLink,
   Wrench,
   Code2,
-  FileSearch
+  FileSearch,
+  HeartPulse,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouteResolver } from "@/hooks/useRouteResolver";
@@ -50,6 +51,7 @@ import { ProductCapabilitiesValidation } from "@/components/enablement/route-reg
 import { CodeRegistryPanel } from "@/components/enablement/route-registry/CodeRegistryPanel";
 import { OrphanManagementPanel } from "@/components/enablement/route-registry/OrphanManagementPanel";
 import { ContentCurrencyPanel } from "@/components/enablement/route-registry/ContentCurrencyPanel";
+import { DocumentationHealthPanel } from "@/components/enablement/route-registry/DocumentationHealthPanel";
 import { DocumentType } from "@/types/documentValidation";
 import { cn } from "@/lib/utils";
 import { useTabState } from "@/hooks/useTabState";
@@ -344,6 +346,10 @@ export default function RouteRegistryPage() {
               <CheckCircle2 className="h-4 w-4" />
               Validation
             </TabsTrigger>
+            <TabsTrigger value="doc-health" className="gap-2">
+              <HeartPulse className="h-4 w-4" />
+              Doc Health
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6 space-y-6">
@@ -450,6 +456,10 @@ export default function RouteRegistryPage() {
 
           <TabsContent value="orphans" className="mt-6">
             <OrphanManagementPanel />
+          </TabsContent>
+
+          <TabsContent value="doc-health" className="mt-6">
+            <DocumentationHealthPanel />
           </TabsContent>
 
           <TabsContent value="unsynced" className="mt-6">
