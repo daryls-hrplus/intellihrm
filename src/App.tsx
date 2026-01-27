@@ -586,6 +586,7 @@ const App = () => (
 
             {/* Enablement Routes */}
             <Route path="/enablement" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementHubPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/create" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ContentCreationStudioPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/docs-generator" element={<Navigate to="/enablement/create" replace />} />
             <Route path="/enablement/feature-catalog" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
             <Route path="/enablement/feature-database" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
