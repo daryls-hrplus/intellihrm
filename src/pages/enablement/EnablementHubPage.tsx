@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -25,25 +25,25 @@ import {
   BarChart3,
   Map,
   Upload,
-  Library,
   Brain,
   HelpCircle,
   FolderTree,
   ClipboardCheck,
-  RefreshCw,
   Network,
   Users,
   Target,
   Shield,
-  CalendarClock,
   ChevronDown,
   Eye,
   EyeOff,
   Route,
+  Clock,
+  Heart,
+  Radar,
+  Grid3X3,
+  TrendingUp,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
-import { ReleaseManager } from "@/components/enablement/ReleaseManager";
-import { ReleaseWorkflowDashboard } from "@/components/enablement/ReleaseWorkflowDashboard";
 import { FeatureRegistrySyncDialog } from "@/components/enablement/FeatureRegistrySyncDialog";
 import { NewFeaturesIndicator } from "@/components/enablement/NewFeaturesIndicator";
 import { EnablementWelcomeBanner } from "@/components/enablement/EnablementWelcomeBanner";
@@ -52,6 +52,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTabState } from "@/hooks/useTabState";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
+import { MANUAL_CONFIGS } from "@/hooks/useManualPublishing";
 
 export default function EnablementHubPage() {
   const { t } = useTranslation();
@@ -203,23 +204,25 @@ export default function EnablementHubPage() {
     },
   ], []);
 
-  // ADVANCED SECTIONS - Hidden by default
+  // Icon map for dynamic manual rendering - using LucideIcon type
+  const manualIconMap: Record<string, typeof Shield> = {
+    'admin-security': Shield,
+    'workforce': Users,
+    'hr-hub': HelpCircle,
+    'appraisals': BookOpen,
+    'goals': Target,
+    'time-attendance': Clock,
+    'benefits': Heart,
+    'feedback-360': Radar,
+    'succession': Grid3X3,
+    'career-development': TrendingUp,
+  };
+
+  // ADVANCED SECTIONS - Consolidated into 5 logical groups
   const advancedSections: ModuleSection[] = useMemo(() => [
+    // GROUP 1: Content & AI Tools
     {
-      titleKey: "Marketing & Sales",
-      items: [
-        {
-          title: "Product Capabilities Document",
-          description: "Comprehensive 18-module capabilities guide with PDF export",
-          href: "/enablement/product-capabilities",
-          icon: FileText,
-          color: "bg-primary/10 text-primary",
-          badge: "New",
-        },
-      ],
-    },
-    {
-      titleKey: "AI Automation",
+      titleKey: "Content & AI Tools",
       items: [
         {
           title: "AI Automation Tools",
@@ -235,11 +238,6 @@ export default function EnablementHubPage() {
           icon: HelpCircle,
           color: "bg-emerald-500/10 text-emerald-500",
         },
-      ],
-    },
-    {
-      titleKey: "Content Management",
-      items: [
         {
           title: "Enablement Artifacts",
           description: "Single source of truth for all content",
@@ -248,40 +246,28 @@ export default function EnablementHubPage() {
           color: "bg-primary/10 text-primary",
         },
         {
-          title: "Feature Catalog",
-          description: "Browse all modules and features",
-          href: "/enablement/feature-catalog",
-          icon: FolderTree,
-          color: "bg-violet-500/10 text-violet-500",
-        },
-        {
-          title: "Content Lifecycle",
-          description: "Track review schedules and expiring content",
-          href: "/enablement/content-lifecycle",
-          icon: CalendarClock,
-          color: "bg-amber-500/10 text-amber-500",
+          title: "Product Capabilities Document",
+          description: "Comprehensive 18-module capabilities guide with PDF export",
+          href: "/enablement/product-capabilities",
+          icon: FileText,
+          color: "bg-primary/10 text-primary",
+          badge: "Sales",
         },
       ],
     },
+    // GROUP 2: Administrator Manuals - Dynamic from MANUAL_CONFIGS
     {
-      titleKey: "Release Management (Legacy)",
-      items: [
-        {
-          title: "Release Versions",
-          description: "Manage release versions and bundling",
-          href: "/enablement?tab=releases",
-          icon: Rocket,
-          color: "bg-pink-500/10 text-pink-500",
-        },
-        {
-          title: "Release Calendar",
-          description: "View release timeline",
-          href: "/enablement/release-calendar",
-          icon: Calendar,
-          color: "bg-cyan-500/10 text-cyan-500",
-        },
-      ],
+      titleKey: "Administrator Manuals (All 10)",
+      items: MANUAL_CONFIGS.map(manual => ({
+        title: manual.name.replace(' - Administrator Guide', '').replace(' Manual', ''),
+        description: `${manual.sectionsCount} sections`,
+        href: manual.href,
+        icon: manualIconMap[manual.id] ?? BookOpen,
+        color: manual.color,
+        badge: `${manual.sectionsCount}`,
+      })),
     },
+    // GROUP 3: External Integrations
     {
       titleKey: "External Integrations",
       items: [
@@ -322,53 +308,9 @@ export default function EnablementHubPage() {
         },
       ],
     },
+    // GROUP 4: Implementation & Governance
     {
-      titleKey: "Administrator Manuals (Individual)",
-      items: [
-        {
-          title: "Admin & Security Guide",
-          description: "Administration and security configuration",
-          href: "/enablement/manuals/admin-security",
-          icon: Shield,
-          color: "bg-red-500/10 text-red-600",
-          badge: "55 Sections",
-        },
-        {
-          title: "Workforce Guide",
-          description: "Workforce module configuration",
-          href: "/enablement/manuals/workforce",
-          icon: Users,
-          color: "bg-blue-500/10 text-blue-600",
-          badge: "80 Sections",
-        },
-        {
-          title: "HR Hub Guide",
-          description: "HR Hub configuration",
-          href: "/enablement/manuals/hr-hub",
-          icon: HelpCircle,
-          color: "bg-purple-500/10 text-purple-600",
-          badge: "32 Sections",
-        },
-        {
-          title: "Performance Appraisal Guide",
-          description: "Performance Appraisal configuration",
-          href: "/enablement/manuals/appraisals",
-          icon: BookOpen,
-          color: "bg-primary/10 text-primary",
-          badge: "48 Sections",
-        },
-        {
-          title: "Goals Manual",
-          description: "Goals Management configuration",
-          href: "/enablement/manuals/goals",
-          icon: Target,
-          color: "bg-green-500/10 text-green-600",
-          badge: "24 Sections",
-        },
-      ],
-    },
-    {
-      titleKey: "Implementation Tools",
+      titleKey: "Implementation & Governance",
       items: [
         {
           title: "Provisioning Guide",
@@ -399,8 +341,17 @@ export default function EnablementHubPage() {
           color: "bg-orange-500/10 text-orange-500",
           badge: "SSOT",
         },
+        {
+          title: "Platform Standards",
+          description: "5 enterprise patterns including Navigation, Color Semantics, and Accessibility",
+          href: "/enablement/standards",
+          icon: Eye,
+          color: "bg-primary/10 text-primary",
+          badge: "2 Published",
+        },
       ],
     },
+    // GROUP 5: Analytics & Settings
     {
       titleKey: "Analytics & Settings",
       items: [
@@ -424,19 +375,6 @@ export default function EnablementHubPage() {
           href: "/enablement/settings",
           icon: Settings,
           color: "bg-slate-500/10 text-slate-500",
-        },
-      ],
-    },
-    {
-      titleKey: "Governance & Standards",
-      items: [
-        {
-          title: "Platform Standards",
-          description: "5 enterprise patterns including Navigation, Color Semantics, and Accessibility",
-          href: "/enablement/standards",
-          icon: Eye,
-          color: "bg-primary/10 text-primary",
-          badge: "2 Published",
         },
       ],
     },
@@ -587,10 +525,6 @@ export default function EnablementHubPage() {
               <Kanban className="h-4 w-4" />
               Workflow
             </TabsTrigger>
-            <TabsTrigger value="releases" className="gap-2">
-              <Rocket className="h-4 w-4" />
-              Releases
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
@@ -616,11 +550,6 @@ export default function EnablementHubPage() {
 
           <TabsContent value="workflow">
             <ContentWorkflowBoard releaseId={activeRelease?.id} />
-          </TabsContent>
-
-          <TabsContent value="releases" className="space-y-6">
-            <ReleaseWorkflowDashboard />
-            <ReleaseManager />
           </TabsContent>
         </Tabs>
 

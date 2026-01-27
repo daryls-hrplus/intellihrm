@@ -1,18 +1,16 @@
 import { lazy, Suspense } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { EnablementAccessGuard } from '@/components/auth/EnablementAccessGuard';
 import { LoadingFallback } from './RouteConfig';
 
 // Lazy load enablement pages
 const EnablementHubPage = lazy(() => import('@/pages/enablement/EnablementHubPage'));
-const ApplicationDocsGeneratorPage = lazy(() => import('@/pages/enablement/ApplicationDocsGeneratorPage'));
-const FeatureCatalogPage = lazy(() => import('@/pages/enablement/FeatureCatalogPage'));
-const FeatureDatabasePage = lazy(() => import('@/pages/enablement/FeatureDatabasePage'));
-const TemplateLibraryPage = lazy(() => import('@/pages/enablement/TemplateLibraryPage'));
+const ContentCreationStudioPage = lazy(() => import('@/pages/enablement/ContentCreationStudioPage'));
+const FeatureAuditDashboard = lazy(() => import('@/pages/enablement/FeatureAuditDashboard'));
 const EnablementAnalyticsPage = lazy(() => import('@/pages/enablement/EnablementAnalyticsPage'));
 const SCORMGeneratorPage = lazy(() => import('@/pages/enablement/SCORMGeneratorPage'));
-const ReleaseCalendarPage = lazy(() => import('@/pages/enablement/ReleaseCalendarPage'));
+const ReleaseCommandCenterPage = lazy(() => import('@/pages/enablement/ReleaseCommandCenterPage'));
 const EnablementSettingsPage = lazy(() => import('@/pages/enablement/EnablementSettingsPage'));
 const EnablementAIToolsPage = lazy(() => import('@/pages/enablement/EnablementAIToolsPage'));
 const EnablementGuidePage = lazy(() => import('@/pages/enablement/EnablementGuidePage'));
@@ -20,7 +18,6 @@ const EnablementArtifactsPage = lazy(() => import('@/pages/enablement/Enablement
 const ArtifactEditorPage = lazy(() => import('@/pages/enablement/ArtifactEditorPage'));
 const ArtifactDetailPage = lazy(() => import('@/pages/enablement/ArtifactDetailPage'));
 const ToursManagementPage = lazy(() => import('@/pages/enablement/ToursManagementPage'));
-const FeatureAuditDashboard = lazy(() => import('@/pages/enablement/FeatureAuditDashboard'));
 const ImplementationDetailPage = lazy(() => import('@/pages/enablement/ImplementationDetailPage'));
 const AppraisalsManualPage = lazy(() => import('@/pages/enablement/AppraisalsManualPage'));
 const AdminSecurityManualPage = lazy(() => import('@/pages/enablement/AdminSecurityManualPage'));
@@ -34,7 +31,6 @@ const ManualsIndexPage = lazy(() => import('@/pages/enablement/ManualsIndexPage'
 const ClientProvisioningGuidePage = lazy(() => import('@/pages/enablement/ClientProvisioningGuidePage'));
 const ClientProvisioningTestingPage = lazy(() => import('@/pages/enablement/ClientProvisioningTestingPage'));
 const ManualPublishingPage = lazy(() => import('@/pages/enablement/ManualPublishingPage'));
-const ContentLifecyclePage = lazy(() => import('@/pages/enablement/ContentLifecyclePage'));
 const RouteRegistryPage = lazy(() => import('@/pages/enablement/RouteRegistryPage'));
 const QuickStartGuidesPage = lazy(() => import('@/pages/enablement/QuickStartGuidesPage'));
 const QuickStartAdminPage = lazy(() => import('@/pages/enablement/QuickStartAdminPage'));
@@ -43,7 +39,6 @@ const ModulesIndexPage = lazy(() => import('@/pages/enablement/ModulesIndexPage'
 const ModuleDocumentationPage = lazy(() => import('@/pages/enablement/ModuleDocumentationPage'));
 const LnDQuickStartPage = lazy(() => import('@/pages/enablement/LnDQuickStartPage'));
 const CareerDevelopmentManualPage = lazy(() => import('@/pages/enablement/CareerDevelopmentManualPage'));
-const ContentCreationStudioPage = lazy(() => import('@/pages/enablement/ContentCreationStudioPage'));
 const SuccessionManualPage = lazy(() => import('@/pages/enablement/SuccessionManualPage'));
 
 // Wrapper for enablement routes with guards
@@ -62,23 +57,51 @@ function EnablementRoute({ children }: { children: React.ReactNode }) {
 export function EnablementRoutes() {
   return (
     <>
+      {/* Core Hub */}
       <Route path="/enablement" element={<EnablementRoute><EnablementHubPage /></EnablementRoute>} />
-      <Route path="/enablement/docs-generator" element={<EnablementRoute><ApplicationDocsGeneratorPage /></EnablementRoute>} />
-      <Route path="/enablement/feature-catalog" element={<EnablementRoute><FeatureCatalogPage /></EnablementRoute>} />
-      <Route path="/enablement/feature-database" element={<EnablementRoute><FeatureDatabasePage /></EnablementRoute>} />
-      <Route path="/enablement/template-library" element={<EnablementRoute><TemplateLibraryPage /></EnablementRoute>} />
+      
+      {/* Consolidated Content Creation Studio */}
+      <Route path="/enablement/create" element={<EnablementRoute><ContentCreationStudioPage /></EnablementRoute>} />
+      
+      {/* Redirects for deprecated pages → Content Creation Studio */}
+      <Route path="/enablement/docs-generator" element={<Navigate to="/enablement/create" replace />} />
+      <Route path="/enablement/template-library" element={<Navigate to="/enablement/create?activeTab=templates" replace />} />
+      
+      {/* Feature Audit (consolidated) */}
+      <Route path="/enablement/audit" element={<EnablementRoute><FeatureAuditDashboard /></EnablementRoute>} />
+      
+      {/* Redirects for deprecated pages → Feature Audit */}
+      <Route path="/enablement/feature-catalog" element={<Navigate to="/enablement/audit" replace />} />
+      <Route path="/enablement/feature-database" element={<Navigate to="/enablement/audit" replace />} />
+      
+      {/* Unified Release Command Center */}
+      <Route path="/enablement/release-center" element={<EnablementRoute><ReleaseCommandCenterPage /></EnablementRoute>} />
+      
+      {/* Redirects for deprecated pages → Release Command Center */}
+      <Route path="/enablement/release-calendar" element={<Navigate to="/enablement/release-center?activeTab=milestones" replace />} />
+      <Route path="/enablement/content-lifecycle" element={<Navigate to="/enablement/release-center" replace />} />
+      
+      {/* Analytics & Settings */}
       <Route path="/enablement/analytics" element={<EnablementRoute><EnablementAnalyticsPage /></EnablementRoute>} />
-      <Route path="/enablement/scorm-generator" element={<EnablementRoute><SCORMGeneratorPage /></EnablementRoute>} />
-      <Route path="/enablement/release-calendar" element={<EnablementRoute><ReleaseCalendarPage /></EnablementRoute>} />
       <Route path="/enablement/settings" element={<EnablementRoute><EnablementSettingsPage /></EnablementRoute>} />
+      
+      {/* AI Tools & Guide (still accessible, but also in Studio) */}
       <Route path="/enablement/ai-tools" element={<EnablementRoute><EnablementAIToolsPage /></EnablementRoute>} />
       <Route path="/enablement/guide" element={<EnablementRoute><EnablementGuidePage /></EnablementRoute>} />
+      
+      {/* External Integrations */}
+      <Route path="/enablement/scorm-generator" element={<EnablementRoute><SCORMGeneratorPage /></EnablementRoute>} />
+      <Route path="/enablement/tours" element={<EnablementRoute><ToursManagementPage /></EnablementRoute>} />
+      
+      {/* Artifacts */}
       <Route path="/enablement/artifacts" element={<EnablementRoute><EnablementArtifactsPage /></EnablementRoute>} />
       <Route path="/enablement/artifacts/:id/edit" element={<EnablementRoute><ArtifactEditorPage /></EnablementRoute>} />
       <Route path="/enablement/artifacts/:id" element={<EnablementRoute><ArtifactDetailPage /></EnablementRoute>} />
-      <Route path="/enablement/audit" element={<EnablementRoute><FeatureAuditDashboard /></EnablementRoute>} />
+      
+      {/* Implementation */}
       <Route path="/enablement/implementation/:featureId" element={<EnablementRoute><ImplementationDetailPage /></EnablementRoute>} />
-      <Route path="/enablement/tours" element={<EnablementRoute><ToursManagementPage /></EnablementRoute>} />
+      
+      {/* Administrator Manuals (all 10) */}
       <Route path="/enablement/manuals" element={<EnablementRoute><ManualsIndexPage /></EnablementRoute>} />
       <Route path="/enablement/manuals/appraisals" element={<EnablementRoute><AppraisalsManualPage /></EnablementRoute>} />
       <Route path="/enablement/manuals/admin-security" element={<EnablementRoute><AdminSecurityManualPage /></EnablementRoute>} />
@@ -89,19 +112,29 @@ export function EnablementRoutes() {
       <Route path="/enablement/manuals/time-attendance" element={<EnablementRoute><TimeAttendanceManualPage /></EnablementRoute>} />
       <Route path="/enablement/manuals/feedback-360" element={<EnablementRoute><Feedback360ManualPage /></EnablementRoute>} />
       <Route path="/enablement/manuals/career-development" element={<EnablementRoute><CareerDevelopmentManualPage /></EnablementRoute>} />
+      <Route path="/enablement/manuals/succession" element={<EnablementRoute><SuccessionManualPage /></EnablementRoute>} />
+      
+      {/* Client Provisioning */}
       <Route path="/enablement/client-provisioning" element={<EnablementRoute><ClientProvisioningGuidePage /></EnablementRoute>} />
       <Route path="/enablement/client-provisioning/testing" element={<EnablementRoute><ClientProvisioningTestingPage /></EnablementRoute>} />
+      
+      {/* Publishing */}
       <Route path="/enablement/manual-publishing" element={<EnablementRoute><ManualPublishingPage /></EnablementRoute>} />
-      <Route path="/enablement/content-lifecycle" element={<EnablementRoute><ContentLifecyclePage /></EnablementRoute>} />
+      
+      {/* Route Registry */}
       <Route path="/enablement/route-registry" element={<EnablementRoute><RouteRegistryPage /></EnablementRoute>} />
+      
+      {/* Quick Start Guides */}
       <Route path="/enablement/quickstarts/admin" element={<EnablementRoute><QuickStartAdminPage /></EnablementRoute>} />
       <Route path="/enablement/quickstarts" element={<EnablementRoute><QuickStartGuidesPage /></EnablementRoute>} />
       <Route path="/enablement/quickstart/learning-development" element={<EnablementRoute><LnDQuickStartPage /></EnablementRoute>} />
+      
+      {/* Implementation Checklists */}
       <Route path="/enablement/checklists" element={<EnablementRoute><ImplementationChecklistsPage /></EnablementRoute>} />
+      
+      {/* Module Documentation */}
       <Route path="/enablement/modules" element={<EnablementRoute><ModulesIndexPage /></EnablementRoute>} />
       <Route path="/enablement/modules/:moduleId" element={<EnablementRoute><ModuleDocumentationPage /></EnablementRoute>} />
-      <Route path="/enablement/create" element={<EnablementRoute><ContentCreationStudioPage /></EnablementRoute>} />
-      <Route path="/enablement/manuals/succession" element={<EnablementRoute><SuccessionManualPage /></EnablementRoute>} />
     </>
   );
 }

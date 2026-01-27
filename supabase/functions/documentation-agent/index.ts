@@ -13,6 +13,7 @@ interface DocumentationAgentRequest {
     | 'generate_manual_section'
     | 'generate_kb_article'
     | 'generate_quickstart'
+    | 'generate_checklist'
     | 'assess_coverage'
     | 'sync_release'
     | 'bulk_generate';
@@ -23,6 +24,7 @@ interface DocumentationAgentRequest {
     sectionTitle?: string;
     targetAudience?: string[];
     releaseId?: string;
+    checklistType?: 'implementation' | 'testing' | 'go-live';
   };
 }
 
@@ -514,6 +516,121 @@ The article should help users understand how to use this feature effectively.`,
               completed,
               completionRate,
             }
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case 'generate_checklist': {
+        if (!context.moduleCode) {
+          return new Response(
+            JSON.stringify({ error: "moduleCode is required for checklist generation" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Get module details
+        const { data: module } = await supabase
+          .from("application_modules")
+          .select("*")
+          .eq("module_code", context.moduleCode)
+          .single();
+
+        if (!module) {
+          return new Response(
+            JSON.stringify({ error: "Module not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Get features for this module
+        const { data: features } = await supabase
+          .from("application_features")
+          .select("feature_code, feature_name, description")
+          .eq("module_id", module.id)
+          .eq("is_active", true);
+
+        const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+        if (!LOVABLE_API_KEY) {
+          return new Response(
+            JSON.stringify({ error: "AI configuration missing" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const checklistType = context.checklistType || 'implementation';
+
+        const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [
+              {
+                role: "system",
+                content: `You are an implementation consultant for HRplus Cerebra HRIS. Generate comprehensive ${checklistType} checklists for HR software modules.
+
+Output JSON with:
+{
+  "title": "Checklist title",
+  "description": "Brief description",
+  "prerequisites": ["list of prerequisites"],
+  "phases": [
+    {
+      "name": "Phase name",
+      "items": [
+        { "task": "Task description", "responsible": "Role", "estimated_hours": number, "critical": boolean }
+      ]
+    }
+  ],
+  "post_implementation": ["list of follow-up tasks"],
+  "success_criteria": ["list of success metrics"]
+}`
+              },
+              {
+                role: "user",
+                content: `Generate a ${checklistType} checklist for the ${module.module_name} module.
+
+Module Description: ${module.description || 'N/A'}
+
+Key Features (${features?.length || 0}):
+${(features || []).slice(0, 15).map(f => `- ${f.feature_name}: ${f.description || 'N/A'}`).join('\n')}
+
+The checklist should cover all aspects of ${checklistType === 'implementation' ? 'setting up and configuring' : checklistType === 'testing' ? 'testing and validating' : 'going live with'} this module.`,
+              },
+            ],
+          }),
+        });
+
+        if (!aiResponse.ok) {
+          return new Response(
+            JSON.stringify({ error: "AI generation failed" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const aiData = await aiResponse.json();
+        const content = aiData.choices?.[0]?.message?.content || "";
+
+        let checklistData;
+        try {
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            checklistData = JSON.parse(jsonMatch[0]);
+          }
+        } catch {
+          checklistData = { title: `${module.module_name} ${checklistType} Checklist`, phases: [], prerequisites: [] };
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            checklist: checklistData,
+            module_code: context.moduleCode,
+            checklist_type: checklistType,
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
