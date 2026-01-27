@@ -21,11 +21,18 @@ export function KeyPositionIdentification() {
   const jobKeyPositionFields: FieldDefinition[] = [
     { name: 'id', required: true, type: 'UUID', description: 'Primary key for job record', validation: 'System-assigned' },
     { name: 'company_id', required: true, type: 'UUID', description: 'Reference to company', validation: 'Must be valid company' },
-    { name: 'title', required: true, type: 'Text', description: 'Job title', validation: 'Required, max 200 chars' },
-    { name: 'job_code', required: false, type: 'Text', description: 'Unique job identifier code', validation: 'Unique within company' },
+    { name: 'name', required: true, type: 'Text', description: 'Job name/title', validation: 'Required, max 200 chars' },
+    { name: 'code', required: false, type: 'Text', description: 'Unique job identifier code', validation: 'Unique within company' },
+    { name: 'description', required: false, type: 'Text', description: 'Detailed job description' },
     { name: 'is_key_position', required: true, type: 'Boolean', description: 'Flag indicating position is key/critical for succession', defaultValue: 'false' },
     { name: 'job_family_id', required: false, type: 'UUID', description: 'Reference to job family grouping' },
-    { name: 'level', required: false, type: 'Integer', description: 'Job level/grade in hierarchy' },
+    { name: 'job_level', required: false, type: 'Integer', description: 'Job level/grade in hierarchy' },
+    { name: 'job_grade', required: false, type: 'Text', description: 'Job grade/band classification' },
+    { name: 'job_class', required: false, type: 'Text', description: 'Job classification category' },
+    { name: 'critical_level', required: false, type: 'Text', description: 'Job criticality level', validation: 'low, medium, high, critical' },
+    { name: 'reporting_unit_id', required: false, type: 'UUID', description: 'Reference to reporting unit' },
+    { name: 'start_date', required: false, type: 'Date', description: 'Job effective start date' },
+    { name: 'end_date', required: false, type: 'Date', description: 'Job effective end date' },
     { name: 'is_active', required: true, type: 'Boolean', description: 'Whether job is currently active', defaultValue: 'true' },
     { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },
     { name: 'updated_at', required: true, type: 'Timestamp', description: 'Last modification timestamp', defaultValue: 'now()' }
@@ -332,6 +339,114 @@ export function KeyPositionIdentification() {
 
       {/* Business Rules */}
       <BusinessRules rules={businessRules} />
+
+      {/* Remove Key Position */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Key className="h-5 w-5 text-primary" />
+            Remove Key Position
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            To remove a position's key designation, follow this procedure.
+          </p>
+
+          <StepByStep 
+            title=""
+            steps={[
+              {
+                title: 'Navigate to Key Positions Tab',
+                description: 'Access the key positions management interface.',
+                substeps: ['Go to Performance → Succession → Key Positions'],
+                expectedResult: 'Key Positions list is displayed'
+              },
+              {
+                title: 'Locate the Key Position',
+                description: 'Find the position to remove from key status.',
+                substeps: ['Use search or filters to find the position', 'Click the position row to expand details'],
+                expectedResult: 'Position details are visible'
+              },
+              {
+                title: 'Remove Key Position Designation',
+                description: 'Click the remove action to unmark the position.',
+                substeps: ['Click "Remove Key Position" or the unlink icon', 'Confirm the removal in the dialog'],
+                expectedResult: 'Confirmation dialog appears'
+              },
+              {
+                title: 'Confirm Removal',
+                description: 'System removes the key position designation.',
+                substeps: ['Click "Confirm" to proceed', 'Position is removed from the Key Positions list'],
+                expectedResult: 'Position is no longer marked as key; underlying job has is_key_position = false'
+              }
+            ]} 
+          />
+
+          <div className="p-3 border-l-4 border-amber-500 bg-amber-50 dark:bg-amber-950/30 rounded-r-lg">
+            <p className="text-sm text-foreground flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Technical Note:</strong> Removing a key position does not delete the position 
+                or job record. It simply updates the <code className="bg-muted mx-1 px-1 rounded text-xs">jobs.is_key_position</code> flag 
+                to <code className="bg-muted mx-1 px-1 rounded text-xs">false</code>, which removes the position from the 
+                Key Positions view. Any existing succession plans for this position remain intact 
+                but should be reviewed.
+              </span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Key Positions Dashboard */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Building className="h-5 w-5 text-primary" />
+            Key Positions Dashboard
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            The Key Positions tab displays summary statistics at the top of the view, providing 
+            quick insights into your organization's key position coverage.
+          </p>
+
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="p-4 border rounded-lg text-center">
+              <div className="text-2xl font-bold text-primary">18</div>
+              <div className="text-xs text-muted-foreground font-medium mt-1">Total Key Positions</div>
+              <p className="text-[10px] text-muted-foreground mt-1">Count of positions marked as key</p>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <div className="text-2xl font-bold text-green-600">12</div>
+              <div className="text-xs text-muted-foreground font-medium mt-1">Covered Positions</div>
+              <p className="text-[10px] text-muted-foreground mt-1">With at least one active candidate</p>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <div className="text-2xl font-bold text-red-600">3</div>
+              <div className="text-xs text-muted-foreground font-medium mt-1">At-Risk Positions</div>
+              <p className="text-[10px] text-muted-foreground mt-1">High vacancy or retirement risk</p>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <div className="text-2xl font-bold text-amber-600">67%</div>
+              <div className="text-xs text-muted-foreground font-medium mt-1">Coverage Percentage</div>
+              <p className="text-[10px] text-muted-foreground mt-1">Ratio of covered to total</p>
+            </div>
+          </div>
+
+          <div className="p-3 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/30 rounded-r-lg">
+            <p className="text-sm text-foreground flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Usage:</strong> Use these metrics to quickly assess succession planning 
+                health and identify areas requiring attention. Drill down by clicking any metric 
+                to filter the list below.
+              </span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Best Practices */}
       <Card className="border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20">
