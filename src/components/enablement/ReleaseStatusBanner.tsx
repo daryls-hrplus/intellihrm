@@ -122,8 +122,8 @@ export function ReleaseStatusBanner({
             <div className="text-right">
               <div className="text-xs text-muted-foreground">Readiness</div>
               <div className={`text-lg font-bold ${
-                lifecycle.last_readiness_score >= 80 ? 'text-green-600' :
-                lifecycle.last_readiness_score >= 60 ? 'text-amber-600' : 'text-red-600'
+                lifecycle.last_readiness_score >= 80 ? 'text-[hsl(var(--semantic-success-text))]' :
+                lifecycle.last_readiness_score >= 60 ? 'text-[hsl(var(--semantic-warning-text))]' : 'text-[hsl(var(--semantic-error-text))]'
               }`}>
                 {lifecycle.last_readiness_score}%
               </div>

@@ -62,19 +62,19 @@ export function AIReadinessCard() {
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
-      case 'A': return 'bg-green-500/10 text-green-700 border-green-500/30';
-      case 'B': return 'bg-blue-500/10 text-blue-700 border-blue-500/30';
-      case 'C': return 'bg-amber-500/10 text-amber-700 border-amber-500/30';
-      case 'D': return 'bg-orange-500/10 text-orange-700 border-orange-500/30';
-      case 'F': return 'bg-red-500/10 text-red-700 border-red-500/30';
+      case 'A': return 'bg-[hsl(var(--semantic-success-bg))] text-[hsl(var(--semantic-success-text))] border-[hsl(var(--semantic-success-border))]';
+      case 'B': return 'bg-[hsl(var(--semantic-info-bg))] text-[hsl(var(--semantic-info-text))] border-[hsl(var(--semantic-info-border))]';
+      case 'C': return 'bg-[hsl(var(--semantic-warning-bg))] text-[hsl(var(--semantic-warning-text))] border-[hsl(var(--semantic-warning-border))]';
+      case 'D': return 'bg-[hsl(var(--semantic-warning-bg))] text-[hsl(var(--semantic-warning-text))] border-[hsl(var(--semantic-warning-border))]';
+      case 'F': return 'bg-[hsl(var(--semantic-error-bg))] text-[hsl(var(--semantic-error-text))] border-[hsl(var(--semantic-error-border))]';
       default: return 'bg-muted text-muted-foreground';
     }
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-amber-600';
-    return 'text-red-600';
+    if (score >= 80) return 'text-[hsl(var(--semantic-success-text))]';
+    if (score >= 60) return 'text-[hsl(var(--semantic-warning-text))]';
+    return 'text-[hsl(var(--semantic-error-text))]';
   };
 
   if (isLoading) {
@@ -140,12 +140,12 @@ export function AIReadinessCard() {
                 </Badge>
                 <div className="text-sm text-muted-foreground mt-2">
                   {assessment.readyForRelease ? (
-                    <span className="flex items-center gap-1 text-green-600">
+                    <span className="flex items-center gap-1 text-[hsl(var(--semantic-success-text))]">
                       <CheckCircle2 className="h-4 w-4" />
                       Ready for release
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-amber-600">
+                    <span className="flex items-center gap-1 text-[hsl(var(--semantic-warning-text))]">
                       <AlertCircle className="h-4 w-4" />
                       Not ready yet
                     </span>
@@ -204,14 +204,14 @@ export function AIReadinessCard() {
             {/* Blockers */}
             {assessment.blockers.length > 0 && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 font-medium text-red-600">
+                <div className="flex items-center gap-2 font-medium text-[hsl(var(--semantic-error-text))]">
                   <AlertTriangle className="h-4 w-4" />
                   Blockers ({assessment.blockers.length})
                 </div>
                 <ul className="space-y-1 text-sm">
                   {assessment.blockers.map((blocker, index) => (
-                    <li key={index} className="flex items-start gap-2 p-2 rounded bg-red-50 text-red-700">
-                      <span className="text-red-400">•</span>
+                    <li key={index} className="flex items-start gap-2 p-2 rounded bg-[hsl(var(--semantic-error-bg))] text-[hsl(var(--semantic-error-text))]">
+                      <span className="opacity-60">•</span>
                       {blocker}
                     </li>
                   ))}
@@ -222,14 +222,14 @@ export function AIReadinessCard() {
             {/* Warnings */}
             {assessment.warnings.length > 0 && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 font-medium text-amber-600">
+                <div className="flex items-center gap-2 font-medium text-[hsl(var(--semantic-warning-text))]">
                   <AlertCircle className="h-4 w-4" />
                   Warnings ({assessment.warnings.length})
                 </div>
                 <ul className="space-y-1 text-sm">
                   {assessment.warnings.map((warning, index) => (
-                    <li key={index} className="flex items-start gap-2 p-2 rounded bg-amber-50 text-amber-700">
-                      <span className="text-amber-400">•</span>
+                    <li key={index} className="flex items-start gap-2 p-2 rounded bg-[hsl(var(--semantic-warning-bg))] text-[hsl(var(--semantic-warning-text))]">
+                      <span className="opacity-60">•</span>
                       {warning}
                     </li>
                   ))}
