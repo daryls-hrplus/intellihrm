@@ -53,7 +53,7 @@ export function ManualCard({ manual, onClick }: ManualCardProps) {
         {/* Footer */}
         <div className="flex items-center justify-between">
           <Badge variant="secondary" className="font-medium">
-            {manual.sections} Sections
+            {manual.chapters} Chapters
           </Badge>
           <Button variant="ghost" size="sm" className="gap-1 group-hover:text-primary">
             View Manual

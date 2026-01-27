@@ -7,7 +7,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
   type ActDefinition,
-  getActSectionCount,
+  getActChapterCount,
 } from "@/constants/manualsStructure";
 import { ManualCard } from "./ManualCard";
 
@@ -25,7 +25,7 @@ export function ManualsActSection({
   onManualClick,
 }: ManualsActSectionProps) {
   const IconComponent = act.icon;
-  const sectionCount = getActSectionCount(act);
+  const chapterCount = getActChapterCount(act);
 
   return (
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
@@ -61,7 +61,7 @@ export function ManualsActSection({
                       {act.actLabel}
                     </Badge>
                     <Badge variant="secondary" className="text-xs">
-                      {sectionCount} sections
+                      {chapterCount} chapters
                     </Badge>
                     <Badge variant="secondary" className="text-xs">
                       {act.manuals.length} {act.manuals.length === 1 ? "guide" : "guides"}
