@@ -1,6 +1,6 @@
 // Career Development Administrator Manual - Structure Definition
 // Comprehensive documentation for 10+ database tables, 6 UI pages
-// Following Workday Career Hub architecture patterns
+// Following industry-standard Career Hub architecture patterns
 
 export interface CareerDevSection {
   id: string;
@@ -25,7 +25,7 @@ export interface CareerDevGlossaryTerm {
 }
 
 // =============================================================================
-// MANUAL STRUCTURE - 10 Chapters Following Workday Career Hub Pattern
+// MANUAL STRUCTURE - 10 Chapters Following Industry-Standard Career Hub Pattern
 // =============================================================================
 
 export const CAREER_DEV_MANUAL_STRUCTURE: CareerDevSection[] = [
@@ -66,7 +66,7 @@ export const CAREER_DEV_MANUAL_STRUCTURE: CareerDevSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-implementation',
-          benchmark: 'Workday Career Hub terminology alignment'
+          benchmark: 'Industry-standard Career Hub terminology alignment'
         }
       },
       {
@@ -94,7 +94,7 @@ export const CAREER_DEV_MANUAL_STRUCTURE: CareerDevSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-implementation',
-          benchmark: 'Enterprise-grade data model following Workday patterns'
+          benchmark: 'Enterprise-grade data model following industry patterns'
         }
       },
       {
@@ -391,7 +391,7 @@ export const CAREER_DEV_MANUAL_STRUCTURE: CareerDevSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-configuration',
-          benchmark: 'Workday IDP hierarchical model'
+          benchmark: 'Industry-standard IDP hierarchical model'
         }
       },
       {

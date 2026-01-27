@@ -46,7 +46,7 @@ export function CareerDevOverviewSection() {
           <CardContent className="space-y-4">
             <p>
               The <strong>Career Development Module</strong> provides a comprehensive platform for managing employee career 
-              progression, individual development plans (IDPs), and mentorship programs. Following the Workday Career Hub 
+              progression, individual development plans (IDPs), and mentorship programs. Following industry-standard Career Hub 
               architecture, this standalone module serves ALL employees—not just succession candidates—enabling organization-wide 
               career visibility and development.
             </p>
@@ -134,7 +134,7 @@ export function CareerDevOverviewSection() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>Industry Alignment:</strong> This module follows the Workday Career Hub architecture where Career Development 
+            <strong>Industry Alignment:</strong> This module follows industry-standard Career Hub architecture where Career Development 
             is a standalone module serving all employees. Succession Planning integration is handled via cross-module references 
             (see Chapter 6).
           </AlertDescription>

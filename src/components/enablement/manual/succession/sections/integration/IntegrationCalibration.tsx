@@ -76,7 +76,7 @@ export function IntegrationCalibration() {
         <div>
           <h3 className="text-xl font-semibold">9.13 Calibration Meeting Integration</h3>
           <p className="text-sm text-muted-foreground">
-            Talent review sessions that update Nine-Box and succession data (SAP/Workday pattern)
+            Talent review sessions that update Nine-Box and succession data (Enterprise Pattern)
           </p>
         </div>
       </div>

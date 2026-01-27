@@ -221,7 +221,7 @@ export function ReadinessFormSelection() {
           </div>
 
           <IndustryCallout>
-            <strong>SAP SuccessFactors Pattern:</strong> Enterprise implementations typically maintain 
+            <strong>Enterprise Pattern:</strong> Enterprise implementations typically maintain 
             3-5 form variants: Executive, Senior Manager, Manager, Professional, and Universal Fallback. 
             This balances assessment depth with administrative overhead.
           </IndustryCallout>

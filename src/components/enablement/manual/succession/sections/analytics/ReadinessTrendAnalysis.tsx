@@ -43,7 +43,7 @@ export function ReadinessTrendAnalysis() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                Time-to-Readiness Benchmarks (Visier/Workday)
+                Time-to-Readiness Benchmarks (Industry Standard)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -216,10 +216,10 @@ export function ReadinessTrendAnalysis() {
             <AlertTitle>Industry Alignment</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li><strong>Visier:</strong> Time-to-Readiness as key succession velocity metric</li>
-                <li><strong>Workday:</strong> Development impact correlation analysis</li>
-                <li><strong>SAP SuccessFactors:</strong> Readiness trajectory with AI prediction</li>
-                <li><strong>Oracle HCM:</strong> Talent review integration for trend analysis</li>
+                <li><strong>Industry Standard:</strong> Time-to-Readiness as key succession velocity metric</li>
+                <li><strong>Industry Standard:</strong> Development impact correlation analysis</li>
+                <li><strong>Industry Standard:</strong> Readiness trajectory with AI prediction</li>
+                <li><strong>Industry Standard:</strong> Talent review integration for trend analysis</li>
               </ul>
             </AlertDescription>
           </Alert>

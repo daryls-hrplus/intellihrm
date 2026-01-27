@@ -76,7 +76,7 @@ export function ReadinessExecutiveWorkflow() {
           </FeatureCardGrid>
 
           <IndustryCallout>
-            <strong>SAP SuccessFactors Pattern:</strong> Executive layer is typically enabled for 
+            <strong>Enterprise Pattern:</strong> Executive layer is typically enabled for 
             top 50-100 critical positions in an organization, not for all succession plans. This 
             balances executive time investment with strategic value.
           </IndustryCallout>

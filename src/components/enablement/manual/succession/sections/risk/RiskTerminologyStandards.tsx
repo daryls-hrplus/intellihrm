@@ -14,7 +14,7 @@ import {
 
 export function RiskTerminologyStandards() {
   const objectives = [
-    'Apply industry-standard risk terminology (Oracle HCM, SAP SuccessFactors)',
+    'Apply industry-standard risk terminology',
     'Distinguish between Risk of Loss, Impact of Loss, and Retention Risk',
     'Use the four-level risk classification system consistently',
     'Understand standard risk factors and their urgency categories'
@@ -86,7 +86,7 @@ export function RiskTerminologyStandards() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <BookOpen className="h-5 w-5 text-primary" />
-            Core Risk Terminology (Oracle HCM / SAP SuccessFactors Pattern)
+            Core Risk Terminology (Industry Standard)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -106,7 +106,7 @@ export function RiskTerminologyStandards() {
                 <TableCell>
                   <strong>Probability</strong> that an employee will voluntarily leave the organization. 
                   Assessed at the individual employee level based on behavioral signals and market conditions.
-                  This is the industry-standard term (Oracle HCM, SAP SF) for what is commonly called "flight risk."
+                  This is the industry-standard term for what is commonly called "flight risk."
                 </TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
                   flight_risk_assessments.risk_level<br />
@@ -122,7 +122,7 @@ export function RiskTerminologyStandards() {
                   based on role criticality, replacement difficulty, and successor readiness. 
                   <span className="block mt-1 text-sm text-muted-foreground italic">
                     Note: Current implementation derives impact from position criticality. Employee-level impact assessment 
-                    is a planned enhancement for Oracle HCM parity.
+                    is a planned enhancement for full industry parity.
                   </span>
                 </TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
@@ -276,7 +276,7 @@ export function RiskTerminologyStandards() {
           <p className="text-sm text-muted-foreground">
             The Retention Risk Matrix combines Position Criticality (Impact of Loss) with Replacement 
             Difficulty to calculate the overall retention risk level. This dual-axis approach follows 
-            the Oracle HCM and SAP SuccessFactors patterns.
+            industry-standard patterns.
           </p>
 
           {/* Matrix Table */}
@@ -346,10 +346,10 @@ export function RiskTerminologyStandards() {
         <AlertTitle>Industry Standards Reference</AlertTitle>
         <AlertDescription>
           <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-            <li><strong>Oracle HCM Cloud:</strong> Risk of Loss + Impact of Loss dual-axis model</li>
-            <li><strong>SAP SuccessFactors:</strong> Retention Risk Matrix for triage prioritization</li>
-            <li><strong>Workday:</strong> Four-level risk classification (Critical, High, Medium, Low)</li>
-            <li><strong>Visier:</strong> Turnover probability scoring with confidence intervals</li>
+            <li><strong>Industry Standard:</strong> Risk of Loss + Impact of Loss dual-axis model</li>
+            <li><strong>Industry Standard:</strong> Retention Risk Matrix for triage prioritization</li>
+            <li><strong>Industry Standard:</strong> Four-level risk classification (Critical, High, Medium, Low)</li>
+            <li><strong>Industry Standard:</strong> Turnover probability scoring with confidence intervals</li>
             <li><strong>SHRM:</strong> Standard flight risk indicators and intervention frameworks</li>
           </ul>
         </AlertDescription>

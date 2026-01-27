@@ -444,12 +444,12 @@ export function FoundationAssessorTypes() {
                 <tr className="border-b">
                   <td className="py-2 px-3 font-medium">Start with Manager as only required type</td>
                   <td className="py-2 px-3 text-muted-foreground">Reduces assessment burden while ensuring core input</td>
-                  <td className="py-2 px-3 text-muted-foreground">SAP SuccessFactors</td>
+                  <td className="py-2 px-3 text-muted-foreground">Industry Best Practice</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-medium">Enable HR for calibration purposes</td>
                   <td className="py-2 px-3 text-muted-foreground">HR provides cross-organizational perspective</td>
-                  <td className="py-2 px-3 text-muted-foreground">Workday Best Practices</td>
+                  <td className="py-2 px-3 text-muted-foreground">Industry Best Practice</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-medium">Reserve Executive review for C-suite succession</td>

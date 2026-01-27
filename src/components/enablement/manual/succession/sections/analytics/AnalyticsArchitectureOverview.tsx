@@ -42,7 +42,7 @@ export function AnalyticsArchitectureOverview() {
           <div className="prose prose-sm max-w-none">
             <h4 className="text-base font-semibold">Data Flow Architecture</h4>
             <p className="text-muted-foreground">
-              Succession analytics aggregates data from multiple source modules following the Workday Analytics Hub pattern. 
+              Succession analytics aggregates data from multiple source modules following an enterprise Analytics Hub pattern. 
               Data flows through a unified signal processing layer before reaching visualization components.
             </p>
           </div>
@@ -256,10 +256,10 @@ export function AnalyticsArchitectureOverview() {
             <AlertTitle>Industry Alignment</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li><strong>Workday:</strong> Analytics Hub pattern with role-based data access</li>
-                <li><strong>SAP SuccessFactors:</strong> Real-time succession metrics dashboard</li>
-                <li><strong>Oracle HCM:</strong> Talent Review integration with workforce analytics</li>
-                <li><strong>Visier:</strong> Predictive analytics and trend visualization</li>
+                <li><strong>Industry Standard:</strong> Analytics Hub pattern with role-based data access</li>
+                <li><strong>Industry Standard:</strong> Real-time succession metrics dashboard</li>
+                <li><strong>Industry Standard:</strong> Talent Review integration with workforce analytics</li>
+                <li><strong>Industry Standard:</strong> Predictive analytics and trend visualization</li>
               </ul>
             </AlertDescription>
           </Alert>

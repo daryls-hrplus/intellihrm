@@ -276,7 +276,7 @@ export function IntegrationArchitectureOverview() {
       </TipCallout>
 
       <InfoCallout>
-        The integration architecture follows SAP SuccessFactors and Workday patterns for multi-source 
+        The integration architecture follows enterprise patterns for multi-source 
         performance management, ensuring enterprise-grade interoperability and data governance.
       </InfoCallout>
     </section>

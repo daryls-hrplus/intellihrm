@@ -284,7 +284,7 @@ export function GovernanceDataSubjectRights() {
         <AlertTitle className="text-blue-800 dark:text-blue-200">Industry Standard: GDPR Chapters III-IV</AlertTitle>
         <AlertDescription className="text-blue-700 dark:text-blue-300">
           This section implements data subject rights per GDPR Articles 15-22 and aligns with enterprise HRMS governance 
-          standards (Workday, SAP SuccessFactors) for handling employee data requests.
+          standards for handling employee data requests.
         </AlertDescription>
       </Alert>
 
@@ -295,7 +295,7 @@ export function GovernanceDataSubjectRights() {
         <AlertDescription className="text-green-700 dark:text-green-300">
           <p className="mb-2">
             The <code className="text-xs bg-green-100 dark:bg-green-900 px-1 rounded">feedback_dsar_requests</code> table 
-            is fully implemented and ready for data storage. Per enterprise HRMS standards (Workday, SAP SuccessFactors), 
+            is fully implemented and ready for data storage. Per enterprise HRMS standards, 
             DSAR workflows are typically managed via dedicated GRC platforms (OneTrust, ServiceNow, TrustArc) rather than 
             embedded module UIs.
           </p>

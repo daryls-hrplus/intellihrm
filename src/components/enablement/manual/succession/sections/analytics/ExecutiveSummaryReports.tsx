@@ -43,7 +43,7 @@ export function ExecutiveSummaryReports() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Standard Report Types (Oracle/Workday Pattern)
+                Standard Report Types (Enterprise Pattern)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -211,8 +211,8 @@ export function ExecutiveSummaryReports() {
             <AlertTitle>Industry Alignment</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li><strong>Oracle HCM:</strong> Quarterly pipeline review cadence</li>
-                <li><strong>Workday:</strong> Board-level succession dashboards</li>
+                <li><strong>Industry Standard:</strong> Quarterly pipeline review cadence</li>
+                <li><strong>Industry Standard:</strong> Board-level succession dashboards</li>
                 <li><strong>SEC/NYSE:</strong> CEO succession disclosure requirements</li>
                 <li><strong>ISS/Glass Lewis:</strong> Proxy advisory board succession expectations</li>
               </ul>
