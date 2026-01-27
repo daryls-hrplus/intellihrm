@@ -18,9 +18,9 @@ import {
   type FunctionalArea,
   MANUALS_BY_ACT,
   getFilteredActsWithManuals,
-  getFilteredSectionCount,
+  getFilteredChapterCount,
   getFilteredManualCount,
-  getTotalSections,
+  getTotalChapters,
   getAllManuals,
 } from "@/constants/manualsStructure";
 
@@ -37,9 +37,9 @@ export default function ManualsIndexPage() {
   const { activeFunctionalArea, expandedActs } = tabState;
   
   const filteredActs = getFilteredActsWithManuals(activeFunctionalArea);
-  const filteredSections = getFilteredSectionCount(activeFunctionalArea);
+  const filteredChapters = getFilteredChapterCount(activeFunctionalArea);
   const filteredManuals = getFilteredManualCount(activeFunctionalArea);
-  const totalSections = getTotalSections();
+  const totalChapters = getTotalChapters();
   const totalManuals = getAllManuals().length;
 
   const handleFilterChange = (filter: FunctionalArea | "all") => {
@@ -100,10 +100,10 @@ export default function ManualsIndexPage() {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-2xl font-bold">
-                {isFiltered ? filteredSections : totalSections}
+                {isFiltered ? filteredChapters : totalChapters}
               </p>
               <p className="text-sm text-muted-foreground">
-                {isFiltered ? "Filtered Sections" : "Total Sections"}
+                {isFiltered ? "Filtered Chapters" : "Total Chapters"}
               </p>
             </div>
             <div className="text-right">
@@ -124,9 +124,9 @@ export default function ManualsIndexPage() {
               <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="font-medium">Complete Administrator Documentation</p>
+                <p className="font-medium">Complete Administrator Documentation</p>
                   <p className="text-sm text-muted-foreground">
-                    {totalSections} sections covering all administrative functions across {totalManuals} comprehensive guides
+                    {totalChapters} chapters covering all administrative functions across {totalManuals} comprehensive guides
                   </p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ export default function ManualsIndexPage() {
             <span>Showing</span>
             <Badge variant="secondary">{filteredManuals} guides</Badge>
             <span>with</span>
-            <Badge variant="secondary">{filteredSections} sections</Badge>
+            <Badge variant="secondary">{filteredChapters} chapters</Badge>
             <span>in</span>
             <Badge variant="secondary">{filteredActs.length} lifecycle stages</Badge>
           </div>

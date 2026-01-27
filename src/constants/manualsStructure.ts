@@ -64,6 +64,7 @@ export interface ManualDefinition {
   description: string;
   icon: LucideIcon;
   sections: number;
+  chapters: number;
   href: string;
   version: string;
   functionalAreas: FunctionalArea[];
@@ -120,6 +121,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Complete guide to administration, security configuration, user management, and system settings",
         icon: Shield,
         sections: 55,
+        chapters: 8,
         href: "/enablement/manuals/admin-security",
         version: "2.4",
         functionalAreas: ["platform", "core-hr"],
@@ -132,6 +134,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "HR Hub configuration including policies, documents, knowledge base, and employee communications",
         icon: HelpCircle,
         sections: 32,
+        chapters: 8,
         href: "/enablement/manuals/hr-hub",
         version: "2.4",
         functionalAreas: ["core-hr", "platform"],
@@ -168,6 +171,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Comprehensive workforce management including org structure, positions, departments, and employee lifecycle",
         icon: Users,
         sections: 80,
+        chapters: 8,
         href: "/enablement/manuals/workforce",
         version: "2.4",
         functionalAreas: ["core-hr"],
@@ -204,6 +208,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Complete guide to time tracking, shifts, schedules, overtime, and attendance management",
         icon: Clock,
         sections: 65,
+        chapters: 8,
         href: "/enablement/manuals/time-attendance",
         version: "2.4",
         functionalAreas: ["time-leave"],
@@ -240,6 +245,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Complete benefits management including plans, enrollment, claims, life events, and analytics",
         icon: Heart,
         sections: 45,
+        chapters: 8,
         href: "/enablement/manuals/benefits",
         version: "2.4",
         functionalAreas: ["compensation"],
@@ -278,6 +284,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Performance appraisal configuration including cycles, templates, workflows, and calibration",
         icon: BookOpen,
         sections: 48,
+        chapters: 8,
         href: "/enablement/manuals/appraisals",
         version: "2.4",
         functionalAreas: ["talent"],
@@ -290,6 +297,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Goals management configuration including goal frameworks, cascading, tracking, and alignment",
         icon: Target,
         sections: 24,
+        chapters: 6,
         href: "/enablement/manuals/goals",
         version: "2.4",
         functionalAreas: ["talent"],
@@ -302,6 +310,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Multi-rater feedback system including cycles, anonymity, rater management, AI insights, and development themes",
         icon: Radar,
         sections: 59,
+        chapters: 8,
         href: "/enablement/manuals/feedback-360",
         version: "2.5",
         functionalAreas: ["talent"],
@@ -314,6 +323,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Comprehensive succession planning including 9-box assessments, talent pools, readiness frameworks, and career paths",
         icon: Grid3X3,
         sections: 55,
+        chapters: 11,
         href: "/enablement/manuals/succession",
         version: "1.0",
         functionalAreas: ["talent"],
@@ -326,6 +336,7 @@ export const MANUALS_BY_ACT: ActDefinition[] = [
         description: "Career paths, individual development plans (IDPs), mentorship programs, and AI-driven development recommendations",
         icon: TrendingUp,
         sections: 52,
+        chapters: 10,
         href: "/enablement/manuals/career-development",
         version: "1.0",
         functionalAreas: ["talent"],
@@ -345,8 +356,16 @@ export function getTotalSections(): number {
   return getAllManuals().reduce((acc, m) => acc + m.sections, 0);
 }
 
+export function getTotalChapters(): number {
+  return getAllManuals().reduce((acc, m) => acc + m.chapters, 0);
+}
+
 export function getActSectionCount(act: ActDefinition): number {
   return act.manuals.reduce((acc, m) => acc + m.sections, 0);
+}
+
+export function getActChapterCount(act: ActDefinition): number {
+  return act.manuals.reduce((acc, m) => acc + m.chapters, 0);
 }
 
 export function filterManualsByFunctionalArea(area: FunctionalArea | "all"): ManualDefinition[] {
@@ -365,6 +384,10 @@ export function getFilteredActsWithManuals(area: FunctionalArea | "all"): ActDef
 
 export function getFilteredSectionCount(area: FunctionalArea | "all"): number {
   return filterManualsByFunctionalArea(area).reduce((acc, m) => acc + m.sections, 0);
+}
+
+export function getFilteredChapterCount(area: FunctionalArea | "all"): number {
+  return filterManualsByFunctionalArea(area).reduce((acc, m) => acc + m.chapters, 0);
 }
 
 export function getFilteredManualCount(area: FunctionalArea | "all"): number {
