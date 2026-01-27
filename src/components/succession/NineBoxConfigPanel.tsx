@@ -548,7 +548,7 @@ function MappingCard({
   return (
     <div className="flex items-center justify-between p-2 border rounded text-sm">
       <div>
-        <p className="font-medium">{mapping.signal_definition?.name || 'Unknown'}</p>
+        <p className="font-medium">{mapping.signal_definition?.signal_name || 'Unknown'}</p>
         <div className="flex items-center gap-2 mt-1">
           <Badge 
             variant="secondary" 

@@ -64,11 +64,11 @@ export function SignalRadarChart({
   const chartData = signals
     .filter((s) => s.signal_value !== null)
     .map((signal) => ({
-      signal: signal.signal_definition?.name || "Unknown",
+      signal: signal.signal_definition?.signal_name || "Unknown",
       value: signal.signal_value || 0,
       fullMark: 100,
       confidence: signal.confidence_score || 0,
-      category: signal.signal_definition?.signal_category || "general",
+      category: signal.signal_definition?.category || "general",
     }));
 
   const CustomTooltip = ({ active, payload }: any) => {

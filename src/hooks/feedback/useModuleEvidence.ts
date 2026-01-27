@@ -23,9 +23,9 @@ export interface ModuleEvidenceCard {
     bias_risk_level: string;
     evidence_summary: Record<string, unknown>;
     signal_definition?: {
-      code: string;
-      name: string;
-      signal_category: string;
+      signal_code: string;
+      signal_name: string;
+      category: string;
     };
   };
 }
@@ -55,7 +55,7 @@ export function useModuleEvidence(employeeId?: string, moduleType?: string) {
             confidence_score,
             bias_risk_level,
             evidence_summary,
-            signal_definition:talent_signal_definitions(code, name, signal_category)
+            signal_definition:talent_signal_definitions(signal_code, signal_name, category)
           )
         `)
         .order('created_at', { ascending: false });

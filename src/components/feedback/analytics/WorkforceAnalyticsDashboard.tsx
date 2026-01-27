@@ -49,7 +49,7 @@ export function WorkforceAnalyticsDashboard({ companyId }: WorkforceAnalyticsDas
     queryFn: async () => {
       const { data, error } = await supabase
         .from('talent_signal_definitions')
-        .select('id, name, signal_category')
+        .select('id, signal_name, category')
         .or(`company_id.is.null,company_id.eq.${companyId}`)
         .eq('is_active', true);
       if (error) throw error;
@@ -81,11 +81,11 @@ export function WorkforceAnalyticsDashboard({ companyId }: WorkforceAnalyticsDas
 
   // Prepare radar data for signal categories
   const radarData = signalDefinitions?.reduce((acc, def) => {
-    const categoryAggregates = orgAggregates?.filter(a => a.signal_type === def.name);
+    const categoryAggregates = orgAggregates?.filter(a => a.signal_type === def.signal_name);
     if (categoryAggregates && categoryAggregates.length > 0) {
       const avg = categoryAggregates.reduce((sum, a) => sum + (a.avg_score || 0), 0) / categoryAggregates.length;
       acc.push({
-        signal: def.name,
+        signal: def.signal_name,
         value: avg,
         fullMark: 5,
       });

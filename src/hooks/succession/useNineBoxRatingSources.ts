@@ -217,7 +217,7 @@ export function useCalculateRatings(employeeId?: string, companyId?: string) {
       }
 
       const technicalSignals = signals.filter((s: any) => 
-        ['technical', 'customer_focus'].includes(s.signal_definition?.signal_category)
+        ['technical', 'customer_focus'].includes(s.signal_definition?.category)
       );
       if (technicalSignals.length > 0) {
         const avgTechnical = technicalSignals.reduce((sum: number, s: any) => sum + (s.normalized_score || 0), 0) / technicalSignals.length;
@@ -251,7 +251,7 @@ export function useCalculateRatings(employeeId?: string, companyId?: string) {
       }
 
       const leadershipSignals = signals.filter((s: any) => 
-        ['leadership', 'people_leadership', 'strategic_thinking', 'influence'].includes(s.signal_definition?.signal_category)
+        ['leadership', 'people_leadership', 'strategic_thinking', 'influence'].includes(s.signal_definition?.category)
       );
       if (leadershipSignals.length > 0) {
         const avgLeadership = leadershipSignals.reduce((sum: number, s: any) => sum + (s.normalized_score || 0), 0) / leadershipSignals.length;
@@ -267,7 +267,7 @@ export function useCalculateRatings(employeeId?: string, companyId?: string) {
       }
 
       const valuesSignals = signals.filter((s: any) => 
-        ['values', 'adaptability'].includes(s.signal_definition?.signal_category)
+        ['values', 'adaptability'].includes(s.signal_definition?.category)
       );
       if (valuesSignals.length > 0) {
         const avgValues = valuesSignals.reduce((sum: number, s: any) => sum + (s.normalized_score || 0), 0) / valuesSignals.length;

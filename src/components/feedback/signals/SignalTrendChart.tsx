@@ -73,10 +73,10 @@ export function SignalTrendChart({
 
   // Transform data for line chart
   const chartData = history.map((snapshot) => ({
-    date: format(parseISO(snapshot.computed_at), "MMM yyyy"),
-    fullDate: snapshot.computed_at,
+    date: format(parseISO(snapshot.captured_at), "MMM yyyy"),
+    fullDate: snapshot.captured_at,
     value: snapshot.signal_value || 0,
-    signal: snapshot.signal_definition?.name || "Unknown",
+    signal: snapshot.signal_definition?.signal_name || "Unknown",
     confidence: snapshot.confidence_score || 0,
     version: snapshot.snapshot_version,
   }));
@@ -114,8 +114,8 @@ export function SignalTrendChart({
           <SelectContent>
             <SelectItem value="all">All Signals</SelectItem>
             {definitions.map((def) => (
-              <SelectItem key={def.id} value={def.code}>
-                {def.name}
+              <SelectItem key={def.id} value={def.signal_code}>
+                {def.signal_name}
               </SelectItem>
             ))}
           </SelectContent>
