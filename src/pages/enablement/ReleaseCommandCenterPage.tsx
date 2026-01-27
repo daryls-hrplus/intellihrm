@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Rocket, 
@@ -21,9 +22,13 @@ import {
   BookOpen,
   BarChart3,
   Kanban,
+  Upload,
+  AlertCircle,
 } from "lucide-react";
 import { useTabState } from "@/hooks/useTabState";
 import { useReleaseLifecycle, ReleaseStatus } from "@/hooks/useReleaseLifecycle";
+import { useManualPublishing, MANUAL_CONFIGS } from "@/hooks/useManualPublishing";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { ReleaseStatusBanner } from "@/components/enablement/ReleaseStatusBanner";
 import { AIReadinessCard } from "@/components/enablement/AIReadinessCard";
 import { MilestoneTimeline } from "@/components/enablement/MilestoneTimeline";
@@ -31,17 +36,74 @@ import { AggregatedReleaseNotes } from "@/components/enablement/AggregatedReleas
 import { ReleaseManagerChat } from "@/components/enablement/ReleaseManagerChat";
 import { CoverageAnalysisCard } from "@/components/enablement/CoverageAnalysisCard";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
+import { ManualPublishCard } from "@/components/kb/ManualPublishCard";
+import { PublishWizard } from "@/components/kb/PublishWizard";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export default function ReleaseCommandCenterPage() {
+  const { navigateToRecord } = useWorkspaceNavigation();
   const [tabState, setTabState] = useTabState({
     defaultState: {
       activeTab: "overview",
+      publishingFilter: "all",
+      wizardOpen: false,
+      selectedManualId: null as string | null,
     },
     syncToUrl: ["activeTab"],
   });
+
+  // Publishing tab data
+  const { getManualStatus } = useManualPublishing();
+  
+  const selectedManual = tabState.selectedManualId 
+    ? MANUAL_CONFIGS.find(m => m.id === tabState.selectedManualId) || null 
+    : null;
+
+  // Calculate publishing stats
+  const publishingStats = MANUAL_CONFIGS.reduce(
+    (acc, manual) => {
+      const status = getManualStatus(manual.id);
+      if (!status.isPublished) acc.notPublished++;
+      else if (status.needsSync) acc.needsSync++;
+      else acc.published++;
+      return acc;
+    },
+    { notPublished: 0, published: 0, needsSync: 0 }
+  );
+
+  // Filter manuals by tab
+  const filteredManuals = MANUAL_CONFIGS.filter(manual => {
+    const status = getManualStatus(manual.id);
+    if (tabState.publishingFilter === "all") return true;
+    if (tabState.publishingFilter === "not-published") return !status.isPublished;
+    if (tabState.publishingFilter === "needs-sync") return status.isPublished && status.needsSync;
+    if (tabState.publishingFilter === "published") return status.isPublished && !status.needsSync;
+    return true;
+  });
+
+  const handlePublish = (manualId: string) => {
+    const manual = MANUAL_CONFIGS.find(m => m.id === manualId);
+    if (manual) {
+      setTabState({ selectedManualId: manual.id, wizardOpen: true });
+    }
+  };
+
+  const handlePreview = (manualId: string) => {
+    const config = MANUAL_CONFIGS.find(m => m.id === manualId);
+    if (config) {
+      navigateToRecord({
+        route: config.href,
+        title: config.name,
+        subtitle: "Manual",
+        moduleCode: "enablement",
+        contextType: "manual",
+        contextId: config.id,
+        icon: BookOpen,
+      });
+    }
+  };
 
   const { 
     lifecycle, 
@@ -123,7 +185,7 @@ export default function ReleaseCommandCenterPage() {
           value={tabState.activeTab} 
           onValueChange={(value) => setTabState({ activeTab: value })}
         >
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               Overview
@@ -135,6 +197,10 @@ export default function ReleaseCommandCenterPage() {
             <TabsTrigger value="workflow" className="flex items-center gap-2">
               <Kanban className="h-4 w-4" />
               Workflow
+            </TabsTrigger>
+            <TabsTrigger value="publishing" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Publishing
             </TabsTrigger>
             <TabsTrigger value="milestones" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -297,6 +363,148 @@ export default function ReleaseCommandCenterPage() {
           {/* Workflow Tab */}
           <TabsContent value="workflow" className="mt-6">
             <ContentWorkflowBoard />
+          </TabsContent>
+
+          {/* Publishing Tab */}
+          <TabsContent value="publishing" className="mt-6 space-y-6">
+            {/* Publishing Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Upload className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{MANUAL_CONFIGS.length}</p>
+                      <p className="text-xs text-muted-foreground">Total Manuals</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-green-500/10">
+                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{publishingStats.published}</p>
+                      <p className="text-xs text-muted-foreground">Published</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-amber-500/10">
+                      <AlertCircle className="h-5 w-5 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{publishingStats.needsSync}</p>
+                      <p className="text-xs text-muted-foreground">Needs Sync</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-slate-500/10">
+                      <Clock className="h-5 w-5 text-slate-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{publishingStats.notPublished}</p>
+                      <p className="text-xs text-muted-foreground">Not Published</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Publishing Filters */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={tabState.publishingFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTabState({ publishingFilter: "all" })}
+              >
+                All Manuals
+                <Badge variant="secondary" className="ml-2">{MANUAL_CONFIGS.length}</Badge>
+              </Button>
+              <Button
+                variant={tabState.publishingFilter === "not-published" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTabState({ publishingFilter: "not-published" })}
+              >
+                Not Published
+                {publishingStats.notPublished > 0 && (
+                  <Badge variant="secondary" className="ml-2">{publishingStats.notPublished}</Badge>
+                )}
+              </Button>
+              <Button
+                variant={tabState.publishingFilter === "needs-sync" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTabState({ publishingFilter: "needs-sync" })}
+              >
+                Needs Sync
+                {publishingStats.needsSync > 0 && (
+                  <Badge variant="outline" className="ml-2 border-amber-500 text-amber-600">
+                    {publishingStats.needsSync}
+                  </Badge>
+                )}
+              </Button>
+              <Button
+                variant={tabState.publishingFilter === "published" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTabState({ publishingFilter: "published" })}
+              >
+                Published
+                {publishingStats.published > 0 && (
+                  <Badge variant="secondary" className="ml-2">{publishingStats.published}</Badge>
+                )}
+              </Button>
+            </div>
+
+            {/* Manual List */}
+            <div className="space-y-4">
+              {filteredManuals.map(manual => (
+                <ManualPublishCard
+                  key={manual.id}
+                  manual={manual}
+                  status={getManualStatus(manual.id)}
+                  onPublish={() => handlePublish(manual.id)}
+                  onSync={() => handlePublish(manual.id)}
+                  onViewHistory={() => {}}
+                  onPreview={() => handlePreview(manual.id)}
+                />
+              ))}
+              
+              {filteredManuals.length === 0 && (
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    No manuals match the current filter.
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Publish Wizard */}
+            {selectedManual && (
+              <PublishWizard
+                open={tabState.wizardOpen}
+                onOpenChange={(open) => setTabState({ wizardOpen: open })}
+                manualId={selectedManual.id}
+                manualName={selectedManual.name}
+                sourceVersion={selectedManual.version}
+                currentPublishedVersion={getManualStatus(selectedManual.id).publishedVersion || undefined}
+                sectionsCount={selectedManual.sectionsCount}
+                onPublishComplete={() => {
+                  setTabState({ wizardOpen: false, selectedManualId: null });
+                }}
+              />
+            )}
           </TabsContent>
 
           {/* Milestones Tab */}

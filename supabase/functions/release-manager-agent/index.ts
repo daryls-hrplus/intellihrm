@@ -17,6 +17,8 @@ interface ReleaseManagerRequest {
     | 'workflow_status'
     | 'suggest_priorities'
     | 'bottleneck_analysis'
+    | 'publishing_status'
+    | 'bulk_publish_recommendation'
     | 'chat';
   message?: string;
   context?: {
@@ -481,6 +483,117 @@ serve(async (req) => {
         });
       }
 
+      case 'publishing_status': {
+        // Query published manuals status
+        const { data: publishedManuals } = await supabase
+          .from('kb_published_manuals')
+          .select('manual_id, manual_name, published_version, source_version, sections_published, published_at, status')
+          .eq('status', 'current')
+          .order('published_at', { ascending: false });
+
+        // Hardcoded manual configs for comparison (same as frontend)
+        const MANUAL_CONFIGS = [
+          { id: 'admin-security', name: 'Admin & Security', sectionsCount: 55 },
+          { id: 'workforce', name: 'Workforce', sectionsCount: 80 },
+          { id: 'hr-hub', name: 'HR Hub', sectionsCount: 32 },
+          { id: 'appraisals', name: 'Performance Appraisal', sectionsCount: 48 },
+          { id: 'goals', name: 'Goals', sectionsCount: 24 },
+          { id: 'time-attendance', name: 'Time & Attendance', sectionsCount: 65 },
+          { id: 'benefits', name: 'Benefits', sectionsCount: 45 },
+          { id: 'feedback-360', name: '360 Feedback', sectionsCount: 59 },
+          { id: 'succession', name: 'Succession Planning', sectionsCount: 55 },
+          { id: 'career-development', name: 'Career Development', sectionsCount: 52 },
+        ];
+
+        const publishedIds = new Set((publishedManuals || []).map(m => m.manual_id));
+        const notPublished = MANUAL_CONFIGS.filter(m => !publishedIds.has(m.id));
+        const needsSync = (publishedManuals || []).filter(m => {
+          const config = MANUAL_CONFIGS.find(c => c.id === m.manual_id);
+          return config && m.source_version !== '1.0.0'; // Simplified sync check
+        });
+
+        const response = `**Publishing Status Summary**\n\n` +
+          `**Total Manuals:** ${MANUAL_CONFIGS.length}\n` +
+          `**Published:** ${publishedManuals?.length || 0}\n` +
+          `**Not Published:** ${notPublished.length}\n` +
+          `**Needs Sync:** ${needsSync.length}\n\n` +
+          (notPublished.length > 0 
+            ? `**Not Published:**\n${notPublished.map(m => `- ${m.name}`).join('\n')}\n\n` 
+            : '') +
+          (publishedManuals && publishedManuals.length > 0 
+            ? `**Recently Published:**\n${publishedManuals.slice(0, 5).map(m => `- ${m.manual_name} (v${m.published_version})`).join('\n')}` 
+            : 'No manuals have been published yet.');
+
+        return new Response(JSON.stringify({ 
+          published: publishedManuals?.length || 0,
+          notPublished: notPublished.length,
+          needsSync: needsSync.length,
+          details: { publishedManuals, notPublished },
+          response,
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      case 'bulk_publish_recommendation': {
+        // Analyze which manuals are ready for publishing
+        const { data: contentStatus } = await supabase
+          .from('enablement_content_status')
+          .select('module_code, workflow_status, documentation_status');
+
+        const { data: publishedManuals } = await supabase
+          .from('kb_published_manuals')
+          .select('manual_id')
+          .eq('status', 'current');
+
+        const MANUAL_CONFIGS = [
+          { id: 'admin-security', name: 'Admin & Security', moduleCode: 'admin' },
+          { id: 'workforce', name: 'Workforce', moduleCode: 'workforce' },
+          { id: 'hr-hub', name: 'HR Hub', moduleCode: 'hr-hub' },
+          { id: 'appraisals', name: 'Performance Appraisal', moduleCode: 'performance' },
+          { id: 'goals', name: 'Goals', moduleCode: 'performance' },
+          { id: 'time-attendance', name: 'Time & Attendance', moduleCode: 'time-attendance' },
+          { id: 'benefits', name: 'Benefits', moduleCode: 'benefits' },
+          { id: 'feedback-360', name: '360 Feedback', moduleCode: 'performance' },
+          { id: 'succession', name: 'Succession Planning', moduleCode: 'succession' },
+          { id: 'career-development', name: 'Career Development', moduleCode: 'succession' },
+        ];
+
+        const publishedIds = new Set((publishedManuals || []).map(m => m.manual_id));
+        const notPublished = MANUAL_CONFIGS.filter(m => !publishedIds.has(m.id));
+
+        // Find manuals with good documentation coverage
+        const readyToPublish = notPublished.filter(manual => {
+          // Check if related module has documented content
+          const moduleContent = (contentStatus || []).filter(
+            c => c.module_code === manual.moduleCode && c.documentation_status === 'complete'
+          );
+          return moduleContent.length > 0;
+        });
+
+        const response = `**Bulk Publish Recommendations**\n\n` +
+          `**Manuals Not Yet Published:** ${notPublished.length}\n` +
+          `**Recommended for Immediate Publish:** ${readyToPublish.length}\n\n` +
+          (readyToPublish.length > 0 
+            ? `**Ready to Publish:**\n${readyToPublish.map(m => `- ✅ ${m.name}`).join('\n')}\n\n`
+            : '') +
+          (notPublished.length > readyToPublish.length
+            ? `**Needs More Work:**\n${notPublished.filter(m => !readyToPublish.find(r => r.id === m.id)).map(m => `- ⚠️ ${m.name}`).join('\n')}\n\n`
+            : '') +
+          `**Recommendation:** ${readyToPublish.length > 0 
+            ? `Start with publishing ${readyToPublish[0]?.name || 'the first manual'}, then proceed with others.`
+            : 'Focus on completing documentation for at least one module before publishing.'}`;
+
+        return new Response(JSON.stringify({ 
+          notPublished: notPublished.length,
+          readyToPublish: readyToPublish.length,
+          recommendations: readyToPublish,
+          response,
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       case 'chat':
       default: {
         // General chat - provide helpful responses based on message
@@ -497,6 +610,8 @@ serve(async (req) => {
           response = 'Release notes are automatically aggregated from each manual\'s changelog when you publish. Click "Generate Changelog" to create a unified changelog document.';
         } else if (lowerMessage.includes('workflow') || lowerMessage.includes('board')) {
           response = 'The Workflow tab shows all content items across 7 stages: Backlog → Development → Testing → Documentation → Ready → Published → Maintenance. Use "Workflow Status" for a summary, "Suggest Priorities" for actionable items, or "Bottleneck Analysis" to find blockers.';
+        } else if (lowerMessage.includes('publish') || lowerMessage.includes('help center')) {
+          response = 'Use the Publishing tab to publish manuals to the Help Center. Click "Publishing Status" to see what\'s published, or "Bulk Publish" for recommendations on which manuals to publish first.';
         } else {
           response = 'I can help you with:\n\n' +
             '**Release Management:**\n' +
@@ -509,6 +624,9 @@ serve(async (req) => {
             '- **Workflow Status**: See content counts by stage\n' +
             '- **Suggest Priorities**: Find critical and stale items\n' +
             '- **Bottleneck Analysis**: Identify workflow blockers\n\n' +
+            '**Publishing:**\n' +
+            '- **Publishing Status**: See which manuals are published\n' +
+            '- **Bulk Publish**: Get recommendations for what to publish\n\n' +
             'What would you like to do?';
         }
 

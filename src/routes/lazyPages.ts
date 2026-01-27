@@ -91,7 +91,7 @@ export const EnablementArtifactsPage = lazy(() => import('@/pages/enablement/Ena
 export const ArtifactEditorPage = lazy(() => import('@/pages/enablement/ArtifactEditorPage'));
 export const ArtifactDetailPage = lazy(() => import('@/pages/enablement/ArtifactDetailPage'));
 export const ToursManagementPage = lazy(() => import('@/pages/enablement/ToursManagementPage'));
-export const FeatureAuditDashboard = lazy(() => import('@/pages/enablement/FeatureAuditDashboard'));
+// Deprecated: FeatureAuditDashboard - now redirects to /enablement/release-center?activeTab=coverage
 export const ImplementationDetailPage = lazy(() => import('@/pages/enablement/ImplementationDetailPage'));
 export const AppraisalsManualPage = lazy(() => import('@/pages/enablement/AppraisalsManualPage'));
 export const AdminSecurityManualPage = lazy(() => import('@/pages/enablement/AdminSecurityManualPage'));

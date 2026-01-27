@@ -587,8 +587,9 @@ const App = () => (
             {/* Enablement Routes */}
             <Route path="/enablement" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementHubPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/docs-generator" element={<Navigate to="/enablement/create" replace />} />
-            <Route path="/enablement/feature-catalog" element={<Navigate to="/enablement/audit" replace />} />
-            <Route path="/enablement/feature-database" element={<Navigate to="/enablement/audit" replace />} />
+            <Route path="/enablement/feature-catalog" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
+            <Route path="/enablement/feature-database" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
+            <Route path="/enablement/audit" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
             <Route path="/enablement/template-library" element={<Navigate to="/enablement/create?activeTab=templates" replace />} />
             <Route path="/enablement/analytics" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementAnalyticsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/scorm-generator" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.SCORMGeneratorPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
@@ -600,7 +601,7 @@ const App = () => (
             <Route path="/enablement/artifacts/:id" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ArtifactDetailPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/artifacts/:id/edit" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ArtifactEditorPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/tours-management" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ToursManagementPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
-            <Route path="/enablement/feature-audit" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.FeatureAuditDashboard /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/feature-audit" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
             <Route path="/enablement/implementation/:moduleCode" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ImplementationDetailPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ManualsIndexPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals/appraisals" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.AppraisalsManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />

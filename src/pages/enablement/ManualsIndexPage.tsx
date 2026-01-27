@@ -130,14 +130,6 @@ export default function ManualsIndexPage() {
                   </p>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePublishClick}
-              >
-                Publish to Help Center
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -199,10 +191,14 @@ export default function ManualsIndexPage() {
               <Button
                 variant="outline"
                 className="justify-start"
-                onClick={handlePublishClick}
+                onClick={() => navigateToList({
+                  route: "/enablement/release-center?activeTab=publishing",
+                  title: "Release Command Center",
+                  moduleCode: "enablement",
+                })}
               >
                 <ArrowRight className="h-4 w-4 mr-2" />
-                Publish to Help Center
+                Manage Publishing
               </Button>
               <Button
                 variant="outline"
