@@ -46,12 +46,24 @@ export default function HelpCenterPage() {
 
   const fetchData = async () => {
     const [articlesRes, countRes] = await Promise.all([
-      supabase.from("kb_articles").select("*").eq("is_published", true).eq("is_featured", true).limit(5),
-      supabase.from("kb_articles").select("id", { count: "exact", head: true }).eq("is_published", true),
+      // Only get featured articles that are published FROM manuals
+      supabase
+        .from("kb_articles")
+        .select("*")
+        .eq("is_published", true)
+        .eq("is_featured", true)
+        .not("source_manual_id", "is", null)
+        .limit(5),
+      // Only count articles published FROM manuals
+      supabase
+        .from("kb_articles")
+        .select("id", { count: "exact", head: true })
+        .eq("is_published", true)
+        .not("source_manual_id", "is", null),
     ]);
 
     if (articlesRes.data) setFeaturedArticles(articlesRes.data);
-    if (countRes.count) setArticleCount(countRes.count);
+    if (countRes.count !== null) setArticleCount(countRes.count);
   };
 
   const handleSearch = async () => {
@@ -65,6 +77,7 @@ export default function HelpCenterPage() {
       .from("kb_articles")
       .select("*")
       .eq("is_published", true)
+      .not("source_manual_id", "is", null) // Only manual-published content
       .or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`)
       .limit(10);
 
@@ -116,7 +129,7 @@ export default function HelpCenterPage() {
       title: "FAQs", 
       description: "Frequently asked questions", 
       icon: FileQuestion, 
-      href: "/help/kb?category=policies-compliance",
+      href: "/help/kb?category=hr-hub",
     },
     { 
       title: "Release Notes", 
@@ -295,9 +308,12 @@ export default function HelpCenterPage() {
             </CardHeader>
             <CardContent>
               {featuredArticles.length === 0 ? (
-                <p className="text-center py-4 text-muted-foreground text-sm">
-                  No featured articles yet
-                </p>
+                <div className="text-center py-8">
+                  <Book className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground text-sm">
+                    No articles published yet. Content will appear here once published from the Enablement Center.
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {featuredArticles.map((article) => (
