@@ -1111,72 +1111,137 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 10: REPORTING & ANALYTICS (~30 min)
+  // PART 10: REPORTING & ANALYTICS (~45 min)
+  // Industry-aligned analytics following SAP SuccessFactors, Workday, Oracle HCM patterns
   // ==========================================================================
   {
     id: 'part-10',
     sectionNumber: '10',
     title: 'Reporting & Analytics',
-    description: 'Dashboard metrics, bench strength reports, flight risk analysis, and Nine-Box distribution.',
+    description: 'Industry-aligned succession analytics including coverage metrics, flight risk, Nine-Box distribution, pipeline velocity, and AI-powered insights.',
     contentLevel: 'reference',
-    estimatedReadTime: 30,
+    estimatedReadTime: 45,
     targetRoles: ['Admin', 'HR Partner', 'Executive'],
     subsections: [
       {
         id: 'sec-10-1',
         sectionNumber: '10.1',
-        title: 'Succession Dashboard Metrics',
-        description: 'Key metrics: coverage ratio, readiness distribution, pipeline health, diversity',
+        title: 'Analytics Architecture Overview',
+        description: 'Data flow, integration points, refresh cycles, permission matrix',
         contentLevel: 'reference',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HR Partner'],
-        industryContext: {
-          frequency: 'Real-time',
-          timing: 'Ongoing monitoring',
-          benchmark: 'Executive-ready succession health scorecard'
-        }
+        estimatedReadTime: 4,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: { frequency: 'Reference', timing: 'Initial setup', benchmark: 'Workday Analytics Hub pattern' }
       },
       {
         id: 'sec-10-2',
         sectionNumber: '10.2',
-        title: 'Bench Strength Reports',
-        description: 'Coverage analysis by department, job family, and criticality level',
+        title: 'Succession Health Scorecard',
+        description: 'Coverage ratio, ready-now rate, bench strength ratio, Pipeline Health Index',
         contentLevel: 'reference',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Monthly/quarterly',
-          timing: 'Planning cycles',
-          benchmark: 'Identify coverage gaps for targeted development'
-        }
+        estimatedReadTime: 5,
+        targetRoles: ['Admin', 'HR Partner', 'Executive'],
+        industryContext: { frequency: 'Monthly', timing: 'Dashboard review', benchmark: 'SAP SuccessFactors KPI definitions' }
       },
       {
         id: 'sec-10-3',
         sectionNumber: '10.3',
-        title: 'Flight Risk Reports',
-        description: 'Risk heatmaps, retention action tracking, and prediction accuracy metrics',
+        title: 'Bench Strength Analysis',
+        description: 'Coverage score algorithm, readiness weighting, position coverage thresholds',
         contentLevel: 'reference',
         estimatedReadTime: 5,
-        targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Weekly/monthly',
-          timing: 'Ongoing',
-          benchmark: 'Proactive retention intervention effectiveness'
-        }
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: { frequency: 'Per position', timing: 'Ongoing', benchmark: 'SHRM bench strength ratio of 2-3 per critical position' }
       },
       {
         id: 'sec-10-4',
         sectionNumber: '10.4',
-        title: 'Nine-Box Distribution Reports',
-        description: 'Talent distribution, movement trends, and calibration variance analysis',
+        title: 'Flight Risk & Retention Reporting',
+        description: 'Risk of Loss, Impact of Loss, Retention Risk Matrix, risk factors',
         contentLevel: 'reference',
         estimatedReadTime: 5,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: { frequency: 'Per assessment', timing: 'Ongoing', benchmark: 'Oracle HCM dual-axis Risk/Impact model' }
+      },
+      {
+        id: 'sec-10-5',
+        sectionNumber: '10.5',
+        title: 'Nine-Box Distribution & Movement',
+        description: 'McKinsey grid labels, distribution benchmarks, movement analysis, calibration variance',
+        contentLevel: 'reference',
+        estimatedReadTime: 4,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: { frequency: 'Per cycle', timing: 'Post-calibration', benchmark: 'SAP/Workday 10-15% top-right distribution target' }
+      },
+      {
+        id: 'sec-10-6',
+        sectionNumber: '10.6',
+        title: 'Talent Pipeline Metrics',
+        description: 'Pool-to-succession conversion, graduation rate, stagnation rate, pipeline velocity',
+        contentLevel: 'reference',
+        estimatedReadTime: 4,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: { frequency: 'Monthly', timing: 'Pipeline review', benchmark: 'Workday Pipeline Velocity <24 months' }
+      },
+      {
+        id: 'sec-10-7',
+        sectionNumber: '10.7',
+        title: 'Readiness Trend Analysis',
+        description: 'Time-to-readiness, score progression, development impact correlation, AI trajectory forecasting',
+        contentLevel: 'reference',
+        estimatedReadTime: 4,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: { frequency: 'Per cycle', timing: 'Assessment review', benchmark: 'Visier Time-to-Readiness benchmarks' }
+      },
+      {
+        id: 'sec-10-8',
+        sectionNumber: '10.8',
+        title: 'Diversity & Inclusion Analytics',
+        description: 'Pipeline representation, demographic distribution, pool-to-promotion equity, ESG alignment',
+        contentLevel: 'reference',
+        estimatedReadTime: 4,
+        targetRoles: ['Admin', 'HR Partner', 'Executive'],
+        industryContext: { frequency: 'Quarterly/Annual', timing: 'ESG reporting', benchmark: 'SHRM DEI pipeline metrics' }
+      },
+      {
+        id: 'sec-10-9',
+        sectionNumber: '10.9',
+        title: 'Executive Summary Reports',
+        description: 'Monthly scorecard, quarterly review, board-level summary, emergency vacancy protocol',
+        contentLevel: 'reference',
+        estimatedReadTime: 4,
+        targetRoles: ['Admin', 'Executive'],
+        industryContext: { frequency: 'Per schedule', timing: 'Reporting cycles', benchmark: 'Oracle/Workday executive reporting patterns' }
+      },
+      {
+        id: 'sec-10-10',
+        sectionNumber: '10.10',
+        title: 'AI-Powered Insights',
+        description: 'AI Report Builder, predictive analytics, natural language queries, governance',
+        contentLevel: 'reference',
+        estimatedReadTime: 4,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: { frequency: 'On-demand', timing: 'Analysis', benchmark: 'Visier predictive analytics patterns' }
+      },
+      {
+        id: 'sec-10-11',
+        sectionNumber: '10.11',
+        title: 'Report Configuration & Scheduling',
+        description: 'Custom reports, automated delivery, access control, versioning and audit',
+        contentLevel: 'reference',
+        estimatedReadTime: 3,
         targetRoles: ['Admin'],
-        industryContext: {
-          frequency: 'Per assessment cycle',
-          timing: 'Post-calibration',
-          benchmark: 'Healthy distribution: 10-15% in top-right quadrant'
-        }
+        industryContext: { frequency: 'Setup', timing: 'Initial configuration', benchmark: 'SOC 2 compliant audit trails' }
+      },
+      {
+        id: 'sec-10-12',
+        sectionNumber: '10.12',
+        title: 'Analytics Troubleshooting',
+        description: 'Data quality issues, calculation discrepancies, cache timing, escalation',
+        contentLevel: 'reference',
+        estimatedReadTime: 3,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: { frequency: 'As needed', timing: 'Issue resolution', benchmark: 'Self-service diagnostic checklist' }
       }
     ]
   },
