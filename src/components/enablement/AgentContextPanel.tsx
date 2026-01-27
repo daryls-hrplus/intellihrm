@@ -74,9 +74,9 @@ export function AgentContextPanel({
                 <SelectValue placeholder="All modules" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All modules</SelectItem>
+                <SelectItem value="__all__">All modules</SelectItem>
                 {modules.map((mod) => (
-                  <SelectItem key={mod.id} value={mod.module_code}>
+                  <SelectItem key={mod.id} value={mod.module_code || mod.id}>
                     {mod.module_name}
                   </SelectItem>
                 ))}
@@ -91,9 +91,9 @@ export function AgentContextPanel({
                 <SelectValue placeholder="Select a feature" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No specific feature</SelectItem>
+                <SelectItem value="__none__">No specific feature</SelectItem>
                 {filteredFeatures.slice(0, 50).map((feat) => (
-                  <SelectItem key={feat.id} value={feat.feature_code}>
+                  <SelectItem key={feat.id} value={feat.feature_code || feat.id}>
                     {feat.feature_name}
                   </SelectItem>
                 ))}
