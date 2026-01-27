@@ -1,249 +1,345 @@
 
-# Rebrand HRplus to Intelli HRM + TOC Text Wrapping Fix
-
-## Overview
-This plan addresses two requirements:
-1. **Rebrand**: Replace all references to "HRplus" with "Intelli HRM" across the database and UI
-2. **Fix TOC Wrapping**: Ensure text in the Table of Contents sidebar wraps properly instead of being truncated
+# Succession Manual Chapter 9: Integration & Cross-Module Features
+## Comprehensive Update Plan
 
 ---
 
-## Scope Analysis
+## Current State Analysis
 
-### UI Files (24 files with HRplus references)
-| File | Occurrences | Context |
-|------|-------------|---------|
-| Manual sections (Succession, 360 Feedback, Benefits) | ~15 files | Documentation text references |
-| `EnablementAccessGuard.tsx` | 2 | Variable names (backward compat) |
-| `useTenantContext.ts` | 3 | Type comments and alias |
-| `CalendarSync.tsx` | 1 | iCal PRODID |
-| `UIColorSemanticsGuidePage.tsx` | 1 | Documentation text |
-| `WorkspaceNavigationStandardPage.tsx` | 1 | Documentation text |
-| `PermissionTemplatesTab.tsx` | 1 | Display label (already shows "Intelli HRM Internal Only") |
-
-### Edge Functions (10+ functions)
-| Function | Context |
-|----------|---------|
-| `send-ess-notification` | Email sender: "HRplus Cerebra" |
-| `weekly-permissions-report` | Email sender: "HRplus Security" |
-| `send-employee-response-notification` | Email sender: "HRplus Cerebra" |
-| `send-scenario-notification` | Email sender: "HRplus Cerebra" |
-| `send-sla-weekly-report` | Email sender: "HRplus Help Desk" |
-| `convert-demo-to-production` | Welcome emails + URLs |
-| `generate-voiceover-script` | AI system prompt |
-
-### Database Constraints (3 constraints)
-| Table | Constraint | Current Value |
-|-------|-----------|---------------|
-| `company_groups` | `tenant_type_check` | `'hrplus_internal'` |
-| `roles` | `tenant_visibility_check` | `'hrplus_internal'` |
-| `companies` | `tenant_type_check` | `'hrplus_internal'` |
-
-### Database Data
-| Table | Column | Issue |
-|-------|--------|-------|
-| `master_skills_library` | `source` | Contains "HRplus Deep Pack" |
-
-### Database Functions
-| Function | Issue |
-|----------|-------|
-| `is_hrplus_internal_user()` | Function name and query contains `hrplus_internal` |
+**Findings from Deep Dive:**
+- Chapter 9 is currently a **placeholder** with 6 generic section titles and no substantive content
+- The system has **extensive integration capabilities** not documented:
+  - `appraisal_integration_rules` table (28 fields) for configurable cross-module triggers
+  - `appraisal_integration_log` table (21 fields) for execution audit trails
+  - `appraisal-integration-orchestrator` edge function for automated execution
+  - `talent-risk-analyzer` edge function for flight risk intelligence
+  - `feedback-signal-processor` edge function for 360 feedback signals
+  - `nine_box_signal_mappings` (9 fields), `nine_box_rating_sources` (10 fields)
+  - `talent_signal_snapshots` (22 fields), `talent_signal_definitions` (15 fields)
+  - `org_signal_aggregates` (13 fields) for organizational intelligence
+  - HR Hub workflow integration via `company_transaction_workflow_settings`
 
 ---
 
-## Implementation Plan
+## Revised Chapter Structure (12 Sections)
 
-### Phase 1: Database Schema Changes
+Following the 360 Feedback Integration chapter pattern (8 sections), this expansion ensures industry-standard coverage:
 
-**1.1 Update CHECK constraints to accept both old and new values (backward compatibility)**
+| Section | Title | Read Time | Content Level |
+|---------|-------|-----------|---------------|
+| 9.1 | Integration Architecture Overview | 12 min | Concept |
+| 9.2 | Integration Rules Engine | 15 min | Reference |
+| 9.3 | Performance Appraisal Integration | 15 min | Procedure |
+| 9.4 | 360 Feedback Integration | 12 min | Procedure |
+| 9.5 | Talent Signal Processing | 15 min | Reference |
+| 9.6 | Nine-Box Automatic Updates | 12 min | Procedure |
+| 9.7 | Learning & Development Integration | 10 min | Procedure |
+| 9.8 | Workforce & Position Integration | 12 min | Procedure |
+| 9.9 | Compensation Integration | 10 min | Procedure |
+| 9.10 | HR Hub Workflow Integration | 12 min | Procedure |
+| 9.11 | Integration Execution & Audit | 10 min | Reference |
+| 9.12 | Troubleshooting Integrations | 10 min | Reference |
 
-```sql
--- Allow both values during transition
-ALTER TABLE company_groups 
-DROP CONSTRAINT company_groups_tenant_type_check,
-ADD CONSTRAINT company_groups_tenant_type_check 
-CHECK (tenant_type IN ('hrplus_internal', 'intellihrm_internal', 'client'));
+**Total: ~135 minutes** (expanded from 60 min placeholder)
 
-ALTER TABLE roles 
-DROP CONSTRAINT roles_tenant_visibility_check,
-ADD CONSTRAINT roles_tenant_visibility_check 
-CHECK (tenant_visibility IN ('all', 'hrplus_internal', 'intellihrm_internal', 'client'));
+---
 
-ALTER TABLE companies 
-DROP CONSTRAINT companies_tenant_type_check,
-ADD CONSTRAINT companies_tenant_type_check 
-CHECK (tenant_type IN ('hrplus_internal', 'intellihrm_internal', 'client', 'demo'));
+## Section Content Details
+
+### 9.1 Integration Architecture Overview (~12 min)
+
+**Content:**
+- Event-driven integration topology diagram
+- Inbound data flows (Workforce, Performance, 360, Competencies → Succession)
+- Outbound data flows (Succession → Nine-Box, IDP, L&D, Compensation, Notifications)
+- Consent gates and policy enforcement points
+- Integration timing and synchronization patterns
+
+**Components:**
+- `LearningObjectives` - 4 objectives
+- `InfoCallout` - Event-driven architecture explanation
+- Integration topology diagram (Outbound/Inbound flows)
+- Source/Target tables reference grid
+
+---
+
+### 9.2 Integration Rules Engine (~15 min)
+
+**Content:**
+- `appraisal_integration_rules` table reference (28 fields)
+- Trigger events: `appraisal_finalized`, `category_assigned`, `score_threshold`, `cycle_completed`
+- Condition types: `category`, `score_range`, `trend_direction`, `readiness_threshold`
+- Target modules: `nine_box`, `succession`, `idp`, `pip`, `compensation`, `training`
+- Action types and configuration
+- Execution order and priority
+- Auto-execute vs. approval-required workflows
+
+**Components:**
+- `FieldReferenceTable` - 28 fields from `appraisal_integration_rules`
+- `StepByStep` - Creating an integration rule
+- `BusinessRules` - Rule evaluation logic
+- `WarningCallout` - Order of execution importance
+
+---
+
+### 9.3 Performance Appraisal Integration (~15 min)
+
+**Content:**
+- Appraisal score contribution to Nine-Box Performance axis
+- Category-to-readiness level mapping
+- `appraisal-integration-orchestrator` edge function reference
+- Trigger data structure (participant_id, scores, category)
+- Automatic succession candidate updates from performance category
+- Score thresholds for readiness band progression
+
+**Components:**
+- Data flow diagram (Appraisal → Nine-Box/Succession)
+- `FieldReferenceTable` - Trigger data fields
+- Readiness mapping table (category_code → readiness_level)
+- `TipCallout` - Calibration impact on succession
+
+---
+
+### 9.4 360 Feedback Integration (~12 min)
+
+**Content:**
+- 360 signals feeding potential assessment axis
+- `feedback-signal-processor` edge function reference
+- Signal categories: leadership, collaboration, influence, strategic_thinking
+- Confidence scoring and bias risk adjustment
+- K-anonymity threshold for signal generation
+- Development themes → IDP goal creation
+
+**Components:**
+- `FieldReferenceTable` - Signal processing fields
+- Signal category mapping table
+- `WarningCallout` - Minimum response threshold (5)
+- Cross-reference to 360 Feedback Manual Chapter 7
+
+---
+
+### 9.5 Talent Signal Processing (~15 min)
+
+**Content:**
+- `talent_signal_definitions` table reference (15 fields)
+- `talent_signal_snapshots` table reference (22 fields)
+- `nine_box_signal_mappings` table reference (9 fields)
+- Signal-to-axis contribution logic
+- Normalized score calculation (0-1 → 1-3 rating)
+- Bias multiplier application
+- Confidence thresholds for inclusion
+
+**Components:**
+- `FieldReferenceTable` - Signal definitions (15 fields)
+- `FieldReferenceTable` - Signal snapshots (22 fields)
+- Signal processing formula diagram
+- `InfoCallout` - is_current flag lifecycle
+
+---
+
+### 9.6 Nine-Box Automatic Updates (~12 min)
+
+**Content:**
+- `nine_box_rating_sources` integration
+- Performance axis: Appraisal (50%), Goals (30%), Competency (20%)
+- Potential axis: Leadership signals (40%), Assessment (40%), Values (20%)
+- `executeNineBoxAction` function reference
+- is_current flag management (archive old, create new)
+- Evidence source auto-capture
+
+**Components:**
+- Axis weight configuration table
+- `StepByStep` - Configuring automatic Nine-Box updates
+- `BusinessRules` - Update vs. create logic
+- `TipCallout` - AI-suggested ratings visibility
+
+---
+
+### 9.7 Learning & Development Integration (~10 min)
+
+**Content:**
+- Gap-to-training course mapping
+- `competency_course_mappings` table integration
+- `training_requests` auto-generation (source_type: 'succession')
+- Learning path enrollment for succession candidates
+- Development plan activity tracking
+- `executeTrainingAction` function reference
+
+**Components:**
+- Data flow diagram (Succession Gap → L&D)
+- `FieldReferenceTable` - Training request fields
+- `StepByStep` - Configuring auto-enrollment rules
+- Cross-reference to L&D Manual
+
+---
+
+### 9.8 Workforce & Position Integration (~12 min)
+
+**Content:**
+- `jobs.is_key_position` flag synchronization
+- Position criticality assessment integration
+- `key_position_risks` table sync with workforce changes
+- Org structure changes → succession plan alerts
+- Headcount planning integration points
+- Position lifecycle events (fill, vacancy, transfer)
+
+**Components:**
+- Position data flow diagram
+- Event types table (position events → succession triggers)
+- `WarningCallout` - Position removal cascades
+- Cross-reference to Workforce Manual 9.9
+
+---
+
+### 9.9 Compensation Integration (~10 min)
+
+**Content:**
+- Retention bonus triggers for flight risk candidates
+- High-potential compensation planning flags
+- `executeCompensationAction` function reference
+- Market adjustment recommendations
+- Succession candidate compa-ratio monitoring
+- Integration rule examples for compensation flags
+
+**Components:**
+- `FieldReferenceTable` - Compensation flag fields
+- Retention trigger matrix
+- `InfoCallout` - Compensation as retention lever
+- `TipCallout` - Annual compensation cycle alignment
+
+---
+
+### 9.10 HR Hub Workflow Integration (~12 min)
+
+**Content:**
+- `company_transaction_workflow_settings` table reference
+- Succession transaction types:
+  - `PERF_SUCCESSION_APPROVAL` - Plan creation/updates
+  - `SUCC_READINESS_APPROVAL` - Readiness assessment completion
+  - `TALENT_POOL_NOMINATION` - Talent pool nominations
+- Workflow template linking
+- Pending approvals queue navigation
+- Bulk approval procedures
+
+**Components:**
+- Transaction types table
+- `StepByStep` - Enabling succession workflows
+- `StepByStep` - Processing pending approvals
+- Workflow template reference (SUCCESSION_READINESS_APPROVAL)
+
+---
+
+### 9.11 Integration Execution & Audit (~10 min)
+
+**Content:**
+- `appraisal_integration_log` table reference (21 fields)
+- Execution states: pending, success, failed, requires_approval
+- Approval workflow for flagged actions
+- Error handling and retry logic
+- Audit trail for SOC 2 compliance
+- Failed integration monitoring
+
+**Components:**
+- `FieldReferenceTable` - Integration log (21 fields)
+- Status lifecycle diagram
+- `WarningCallout` - Failed integration alerts
+- `TipCallout` - Regular log review cadence
+
+---
+
+### 9.12 Troubleshooting Integrations (~10 min)
+
+**Content:**
+- Common integration failures
+- "No rules matched" diagnosis
+- "Target record not found" resolution
+- Circular dependency prevention
+- Integration timing conflicts
+- Escalation procedures
+
+**Components:**
+- Troubleshooting table (Issue/Cause/Resolution)
+- Diagnostic checklist
+- Integration health check procedure
+- Support escalation path
+
+---
+
+## Implementation Approach
+
+### Files to Create
+
+```text
+src/components/enablement/manual/succession/sections/integration/
+├── index.ts
+├── IntegrationArchitectureOverview.tsx
+├── IntegrationRulesEngine.tsx
+├── IntegrationPerformanceAppraisal.tsx
+├── Integration360Feedback.tsx
+├── IntegrationTalentSignals.tsx
+├── IntegrationNineBoxUpdates.tsx
+├── IntegrationLearningDevelopment.tsx
+├── IntegrationWorkforcePosition.tsx
+├── IntegrationCompensation.tsx
+├── IntegrationHRHub.tsx
+├── IntegrationExecutionAudit.tsx
+└── IntegrationTroubleshooting.tsx
 ```
 
-**1.2 Migrate existing data**
+### Files to Modify
 
-```sql
--- Update existing records
-UPDATE company_groups 
-SET tenant_type = 'intellihrm_internal' 
-WHERE tenant_type = 'hrplus_internal';
+| File | Changes |
+|------|---------|
+| `src/types/successionManual.ts` | Replace Part 9 structure (6 → 12 sections) |
+| `src/components/enablement/manual/succession/SuccessionIntegrationSection.tsx` | Replace placeholder with modular section imports |
 
-UPDATE roles 
-SET tenant_visibility = 'intellihrm_internal' 
-WHERE tenant_visibility = 'hrplus_internal';
+### Type Definition Update
 
-UPDATE companies 
-SET tenant_type = 'intellihrm_internal' 
-WHERE tenant_type = 'hrplus_internal';
-
--- Update skills library source
-UPDATE master_skills_library 
-SET source = 'Intelli HRM Deep Pack' 
-WHERE source = 'HRplus Deep Pack';
-```
-
-**1.3 Create new function and deprecate old one**
-
-```sql
--- Create new function with updated name
-CREATE OR REPLACE FUNCTION public.is_intellihrm_internal_user()
-RETURNS BOOLEAN
-LANGUAGE sql
-SECURITY DEFINER
-STABLE
-AS $$
-  SELECT EXISTS (
-    SELECT 1 
-    FROM profiles p
-    JOIN companies c ON p.company_id = c.id
-    LEFT JOIN company_groups cg ON c.group_id = cg.id
-    WHERE p.id = auth.uid()
-    AND cg.tenant_type = 'intellihrm_internal'
-  );
-$$;
-
--- Keep old function as alias for backward compatibility
-CREATE OR REPLACE FUNCTION public.is_hrplus_internal_user()
-RETURNS BOOLEAN
-LANGUAGE sql
-SECURITY DEFINER
-STABLE
-AS $$
-  SELECT is_intellihrm_internal_user();
-$$;
-```
-
-**1.4 Remove old constraint values after migration**
-
-```sql
--- Final cleanup - remove old values from constraints
-ALTER TABLE company_groups 
-DROP CONSTRAINT company_groups_tenant_type_check,
-ADD CONSTRAINT company_groups_tenant_type_check 
-CHECK (tenant_type IN ('intellihrm_internal', 'client'));
-
-ALTER TABLE roles 
-DROP CONSTRAINT roles_tenant_visibility_check,
-ADD CONSTRAINT roles_tenant_visibility_check 
-CHECK (tenant_visibility IN ('all', 'intellihrm_internal', 'client'));
-
-ALTER TABLE companies 
-DROP CONSTRAINT companies_tenant_type_check,
-ADD CONSTRAINT companies_tenant_type_check 
-CHECK (tenant_type IN ('intellihrm_internal', 'client', 'demo'));
-```
+Update Part 9 in `SUCCESSION_MANUAL_STRUCTURE` with 12 detailed subsections including:
+- Full `industryContext` metadata for each section
+- Accurate `estimatedReadTime` totaling ~135 minutes
+- Proper `targetRoles` assignments
+- `contentLevel` categorization (concept/procedure/reference)
 
 ---
 
-### Phase 2: Edge Functions Updates
+## Industry Alignment Validation
 
-Update email sender names in all affected functions:
+| Integration | SAP SuccessFactors | Workday | Intelli HRM |
+|-------------|-------------------|---------|-------------|
+| Appraisal → Nine-Box | Yes | Yes | **Yes** |
+| 360 → Potential Axis | Yes | Yes | **Yes** |
+| Gaps → L&D | Yes | Yes | **Yes** |
+| Workforce Position Sync | Yes | Yes | **Yes** |
+| Compensation Flags | Yes | Yes | **Yes** |
+| HR Hub Workflows | Yes | Yes | **Yes** |
+| Signal Processing | Partial | Yes | **Yes** |
+| Audit Trail | Yes | Yes | **Yes** |
 
-| Function | Change |
-|----------|--------|
-| `send-ess-notification` | `"HRplus Cerebra"` → `"Intelli HRM"` |
-| `weekly-permissions-report` | `"HRplus Security"` → `"Intelli HRM Security"` |
-| `send-employee-response-notification` | `"HRplus Cerebra"` → `"Intelli HRM"` |
-| `send-scenario-notification` | `"HRplus Cerebra"` → `"Intelli HRM"` |
-| `send-sla-weekly-report` | `"HRplus Help Desk"` → `"Intelli HRM Help Desk"` |
-| `convert-demo-to-production` | All HRplus references → Intelli HRM |
-| `generate-voiceover-script` | AI prompt references |
-
----
-
-### Phase 3: UI Component Updates
-
-**3.1 Core Hook Updates**
-- `useTenantContext.ts`: Update comments, keep `isHRPlusInternal` as deprecated alias
-
-**3.2 Documentation/Manual Text Updates (~20 files)**
-
-Replace text references in:
-- Succession Manual sections
-- 360 Feedback Manual sections
-- Benefits Manual sections
-- UI Color Semantics Guide
-- Workspace Navigation Standard page
-
-**3.3 Calendar Integration**
-- `CalendarSync.tsx`: Update iCal PRODID from `HRPlus` to `IntelliHRM`
+All major enterprise integration patterns are covered.
 
 ---
 
-### Phase 4: TOC Text Wrapping Fix
+## Estimated Implementation
 
-**Problem**: Section 8.4 "Mentorship for Succession Candidates" is truncated in the TOC sidebar.
+| Deliverable | Files | Lines |
+|-------------|-------|-------|
+| 12 Section Components | 13 | ~3,600 |
+| Index Export | 1 | ~20 |
+| Type Definitions Update | 1 | ~180 |
+| Parent Section Update | 1 | ~40 |
 
-**Solution**: Remove `truncate` class and allow text to wrap naturally.
-
-**File**: `src/pages/enablement/SuccessionManualPage.tsx`
-
-**Change** (line 338):
-```tsx
-// Before
-<span className="truncate">{sub.sectionNumber} {sub.title}</span>
-
-// After  
-<span className="break-words">{sub.sectionNumber} {sub.title}</span>
-```
-
-**Additional Change** (line 312):
-```tsx
-// Before
-<span className="flex-1 truncate">{section.sectionNumber}. {section.title}</span>
-
-// After
-<span className="flex-1 break-words">{section.sectionNumber}. {section.title}</span>
-```
+**Total: ~3,840 lines across 16 files**
 
 ---
 
-## Files to Modify
+## Quality Criteria
 
-### Database (1 migration)
-- New SQL migration with all schema changes
-
-### Edge Functions (~10 files)
-- `send-ess-notification/index.ts`
-- `weekly-permissions-report/index.ts`
-- `send-employee-response-notification/index.ts`
-- `send-scenario-notification/index.ts`
-- `send-sla-weekly-report/index.ts`
-- `convert-demo-to-production/index.ts`
-- `generate-voiceover-script/index.ts`
-- And others with HRplus references
-
-### UI Components (~25 files)
-- `src/hooks/useTenantContext.ts`
-- `src/components/appraisals/CalendarSync.tsx`
-- `src/pages/enablement/UIColorSemanticsGuidePage.tsx`
-- `src/pages/enablement/WorkspaceNavigationStandardPage.tsx`
-- `src/pages/enablement/SuccessionManualPage.tsx` (TOC fix)
-- ~20 manual section components
-
----
-
-## Validation Checklist
-
-- [ ] Database constraints accept `intellihrm_internal`
-- [ ] Existing data migrated from `hrplus_internal`
-- [ ] `is_intellihrm_internal_user()` function created
-- [ ] All edge functions use "Intelli HRM" branding
-- [ ] UI documentation text updated
-- [ ] TOC subsections wrap properly without truncation
-- [ ] Backward compatibility maintained via aliases
+Each section will include:
+- `LearningObjectives` component (4-6 objectives)
+- `FieldReferenceTable` for database table documentation
+- `StepByStep` for procedural content
+- `BusinessRules` for governance constraints
+- Appropriate callouts (`InfoCallout`, `WarningCallout`, `TipCallout`)
+- Cross-references to related manual chapters
+- Industry benchmark context
