@@ -19,6 +19,7 @@ type AgentAction =
   | 'suggest_next_actions'
   | 'batch_generate'
   | 'preview_section_regeneration'
+  | 'validate_documentation'
   | 'chat';
 
 type Persona = 'ess' | 'mss' | 'hr' | 'admin' | 'all';
@@ -394,6 +395,44 @@ serve(async (req) => {
           (recommendations.length <= 1 ? 20 : Math.max(0, 20 - recommendations.length * 5))
         ));
 
+        // Get documentation health summary (orphaned/unmapped check)
+        let documentationHealth = {
+          orphanedReferences: 0,
+          unmappedSections: 0,
+          healthStatus: 'healthy' as 'healthy' | 'warning' | 'critical'
+        };
+
+        try {
+          // Quick orphan check
+          const { data: manualSections } = await supabase
+            .from("manual_sections")
+            .select("source_feature_codes")
+            .not("source_feature_codes", "is", null);
+
+          const validCodes = new Set((features || []).map(f => f.feature_code));
+          let orphanedCount = 0;
+          for (const section of manualSections || []) {
+            const codes = (section.source_feature_codes as string[]) || [];
+            const hasOrphans = codes.some(code => !validCodes.has(code));
+            if (hasOrphans) orphanedCount++;
+          }
+
+          const { count: unmappedCount } = await supabase
+            .from("manual_sections")
+            .select("id", { count: 'exact', head: true })
+            .or("source_feature_codes.is.null,source_feature_codes.eq.{}");
+
+          documentationHealth.orphanedReferences = orphanedCount;
+          documentationHealth.unmappedSections = unmappedCount || 0;
+          if (orphanedCount > 5) {
+            documentationHealth.healthStatus = 'critical';
+          } else if (orphanedCount > 0 || (unmappedCount || 0) > 10) {
+            documentationHealth.healthStatus = 'warning';
+          }
+        } catch (e) {
+          console.error("Documentation health check failed:", e);
+        }
+
         const analysis: ContextAnalysis = {
           totalFeatures,
           documented,
@@ -406,7 +445,11 @@ serve(async (req) => {
         };
 
         return new Response(
-          JSON.stringify({ success: true, analysis }),
+          JSON.stringify({ 
+            success: true, 
+            analysis,
+            documentationHealth
+          }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -835,6 +878,35 @@ Generate a formal SOP JSON structure:
           .filter(m => !modulesWithQuickstart.has(m.module_code))
           .map(m => ({ module_code: m.module_code, module_name: m.module_name }));
 
+        // ORPHAN DETECTION: Documentation referencing non-existent features
+        const featureCodeSet = new Set((features || []).map(f => f.feature_code));
+        const { data: manualSections } = await supabase
+          .from("manual_sections")
+          .select("id, section_number, title, source_feature_codes, manual_definitions!inner(manual_code)");
+
+        const orphanedDocumentation: Array<{
+          section_number: string;
+          section_title: string;
+          manual_code: string;
+          orphaned_codes: string[];
+          action_required: string;
+        }> = [];
+
+        for (const section of manualSections || []) {
+          const codes = (section.source_feature_codes as string[]) || [];
+          const orphans = codes.filter(code => !featureCodeSet.has(code));
+
+          if (orphans.length > 0) {
+            orphanedDocumentation.push({
+              section_number: section.section_number || '',
+              section_title: section.title || '',
+              manual_code: (section.manual_definitions as any)?.manual_code || '',
+              orphaned_codes: orphans,
+              action_required: 'Remove invalid codes or add features to registry'
+            });
+          }
+        }
+
         return new Response(
           JSON.stringify({
             success: true,
@@ -843,12 +915,14 @@ Generate a formal SOP JSON structure:
               noKBArticle: gaps.noKBArticle.slice(0, 20),
               noQuickStart: gaps.noQuickStart,
               noSOP: gaps.noSOP.slice(0, 20),
+              orphanedDocumentation: orphanedDocumentation.slice(0, 20),
             },
             summary: {
               undocumentedFeatures: gaps.noDocumentation.length,
               missingKBArticles: gaps.noKBArticle.length,
               missingQuickStarts: gaps.noQuickStart.length,
               missingSOPs: gaps.noSOP.length,
+              orphanedDocumentation: orphanedDocumentation.length,
             },
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -1110,6 +1184,109 @@ Format as clean markdown that can be rendered in a React component.`;
               lastGeneratedAt: section.last_generated_at,
               currentVersion: (section.manual_definitions as any)?.current_version || "1.0",
             },
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // ==================== VALIDATE DOCUMENTATION (BI-DIRECTIONAL) ====================
+      case 'validate_documentation': {
+        // 1. Get all feature codes from application_features
+        const { data: dbFeatures, error: featuresError } = await supabase
+          .from("application_features")
+          .select("feature_code, feature_name, application_modules!inner(module_code)")
+          .eq("is_active", true);
+
+        if (featuresError) throw featuresError;
+
+        const validFeatureCodes = new Set(dbFeatures?.map(f => f.feature_code) || []);
+
+        // 2. Get all manual sections with feature code mappings
+        const { data: manualSections, error: sectionsError } = await supabase
+          .from("manual_sections")
+          .select(`
+            id, section_number, title, source_feature_codes, markdown_content,
+            manual_definitions!inner(manual_code, title)
+          `)
+          .not("source_feature_codes", "is", null);
+
+        if (sectionsError) throw sectionsError;
+
+        // 3. Find orphaned references (in docs but not in DB)
+        const orphanedDocumentation: Array<{
+          section_id: string;
+          section_number: string;
+          section_title: string;
+          manual_code: string;
+          orphaned_codes: string[];
+          valid_codes: string[];
+          severity: 'critical' | 'warning';
+        }> = [];
+        const validMappings: Array<{ section_number: string; feature_codes: string[] }> = [];
+
+        for (const section of manualSections || []) {
+          const codes = (section.source_feature_codes as string[]) || [];
+          if (codes.length === 0) continue;
+
+          const orphanedCodes = codes.filter(code => !validFeatureCodes.has(code));
+          const validCodes = codes.filter(code => validFeatureCodes.has(code));
+
+          if (orphanedCodes.length > 0) {
+            orphanedDocumentation.push({
+              section_id: section.id,
+              section_number: section.section_number || '',
+              section_title: section.title || '',
+              manual_code: (section.manual_definitions as any)?.manual_code || '',
+              orphaned_codes: orphanedCodes,
+              valid_codes: validCodes,
+              severity: orphanedCodes.length === codes.length ? 'critical' : 'warning'
+            });
+          } else {
+            validMappings.push({
+              section_number: section.section_number || '',
+              feature_codes: validCodes
+            });
+          }
+        }
+
+        // 4. Find sections with no feature mapping at all
+        const { data: unmappedSections, error: unmappedError } = await supabase
+          .from("manual_sections")
+          .select("id, section_number, title, manual_definitions!inner(manual_code)")
+          .or("source_feature_codes.is.null,source_feature_codes.eq.{}");
+
+        if (unmappedError) throw unmappedError;
+
+        // 5. Calculate health score
+        const orphanedCount = orphanedDocumentation.length;
+        const unmappedCount = unmappedSections?.length || 0;
+        const validCount = validMappings.length;
+
+        // Health score calculation
+        const orphanPenalty = Math.min(50, orphanedCount * 10);
+        const unmappedPenalty = Math.min(30, unmappedCount * 2);
+        const validBonus = validCount > 0 ? Math.min(20, validCount) : 0;
+        const healthScore = Math.max(0, 100 - orphanPenalty - unmappedPenalty + validBonus);
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            validation: {
+              totalSections: manualSections?.length || 0,
+              validMappings: validCount,
+              orphanedDocumentation: orphanedDocumentation.slice(0, 20),
+              unmappedSections: (unmappedSections || []).slice(0, 20).map(s => ({
+                section_id: s.id,
+                section_number: s.section_number || '',
+                title: s.title || '',
+                manual_code: (s.manual_definitions as any)?.manual_code || ''
+              })),
+              summary: {
+                orphanedCount,
+                unmappedCount,
+                healthScore: Math.round(healthScore)
+              }
+            }
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );

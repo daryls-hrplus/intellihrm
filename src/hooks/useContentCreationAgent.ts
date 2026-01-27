@@ -80,6 +80,46 @@ export interface GapAnalysis {
   noKBArticle: Array<{ feature_code: string; feature_name: string }>;
   noQuickStart: Array<{ module_code: string; module_name: string }>;
   noSOP: Array<{ feature_code: string; feature_name: string }>;
+  orphanedDocumentation?: Array<{
+    section_number: string;
+    section_title: string;
+    manual_code: string;
+    orphaned_codes: string[];
+    action_required: string;
+  }>;
+}
+
+export interface GapSummary {
+  undocumentedFeatures: number;
+  missingKBArticles: number;
+  missingQuickStarts: number;
+  missingSOPs: number;
+  orphanedDocumentation: number;
+}
+
+export interface DocumentationValidationResult {
+  totalSections: number;
+  validMappings: number;
+  orphanedDocumentation: Array<{
+    section_id: string;
+    section_number: string;
+    section_title: string;
+    manual_code: string;
+    orphaned_codes: string[];
+    valid_codes: string[];
+    severity: 'critical' | 'warning';
+  }>;
+  unmappedSections: Array<{
+    section_id: string;
+    section_number: string;
+    title: string;
+    manual_code: string;
+  }>;
+  summary: {
+    orphanedCount: number;
+    unmappedCount: number;
+    healthScore: number;
+  };
 }
 
 export interface ActionSuggestion {
@@ -272,15 +312,20 @@ export function useContentCreationAgent() {
     }
   }, [invokeAgent]);
 
-  // Identify gaps
-  const identifyGaps = useCallback(async (): Promise<GapAnalysis | null> => {
+  // Identify gaps (now includes orphaned documentation)
+  const identifyGaps = useCallback(async (): Promise<{ gaps: GapAnalysis; summary: GapSummary } | null> => {
     setIsLoading(true);
     setCurrentAction('identify_gaps');
     try {
       const data = await invokeAgent('identify_gaps', {});
       if (data?.gaps) {
-        toast.success(`Found ${data.summary?.undocumentedFeatures || 0} undocumented features`);
-        return data.gaps;
+        const orphanedCount = data.summary?.orphanedDocumentation || 0;
+        if (orphanedCount > 0) {
+          toast.warning(`Found ${orphanedCount} orphaned documentation section(s)`);
+        } else {
+          toast.success(`Found ${data.summary?.undocumentedFeatures || 0} undocumented features`);
+        }
+        return { gaps: data.gaps, summary: data.summary };
       }
       return null;
     } catch (error) {
@@ -292,7 +337,30 @@ export function useContentCreationAgent() {
     }
   }, [invokeAgent]);
 
-  // Suggest next actions
+  // Validate documentation (bi-directional check)
+  const validateDocumentation = useCallback(async (): Promise<DocumentationValidationResult | null> => {
+    setIsLoading(true);
+    setCurrentAction('validate_documentation');
+    try {
+      const data = await invokeAgent('validate_documentation', {});
+      if (data?.validation) {
+        const { orphanedCount, unmappedCount, healthScore } = data.validation.summary;
+        if (orphanedCount > 0) {
+          toast.warning(`Documentation health: ${healthScore}% - ${orphanedCount} orphaned reference(s) found`);
+        } else {
+          toast.success(`Documentation health: ${healthScore}%`);
+        }
+        return data.validation;
+      }
+      return null;
+    } catch (error) {
+      toast.error("Failed to validate documentation");
+      return null;
+    } finally {
+      setIsLoading(false);
+      setCurrentAction(null);
+    }
+  }, [invokeAgent]);
   const suggestNextActions = useCallback(async (): Promise<ActionSuggestion[]> => {
     setIsLoading(true);
     setCurrentAction('suggest_next_actions');
@@ -407,6 +475,7 @@ export function useContentCreationAgent() {
     // Analysis Actions
     analyzeContext,
     identifyGaps,
+    validateDocumentation,
     suggestNextActions,
 
     // Generation Actions
