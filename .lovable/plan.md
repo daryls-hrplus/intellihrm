@@ -1,275 +1,242 @@
 
-# Unified Version & Release Management System with AI Release Manager Agent
+# Release Command Center Integration & Documentation Sync
 
-## Executive Summary
+## Summary
 
-This plan consolidates the fragmented Release Management and Version Lifecycle concerns into a single, simplified **Release Command Center** with an AI-powered **Release Manager Agent**. The approach follows enterprise patterns from SAP SuccessFactors (bi-annual release model), Workday (release readiness), and ServiceNow (feature flag lifecycle).
-
----
-
-## Current State Analysis
-
-### Fragmented Components (Complexity Issue)
-
-| Current Component | Location | Function | Problem |
-|-------------------|----------|----------|---------|
-| `ReleaseManager.tsx` | Enablement Hub | Create releases, generate notes | Feature-release focus, not documentation |
-| `ReleaseWorkflowDashboard.tsx` | Enablement Hub | Content pipeline by release | Complex 8-stage workflow |
-| `ReleaseCalendarPage.tsx` | Standalone page | Simple timeline view | Disconnected from lifecycle |
-| `ContentLifecyclePage.tsx` | Standalone page | Review/expiry tracking | KB-focused, not manual-focused |
-| Manual Version History | 8+ component files | Individual manual versions | No central control |
-| `ManualPublishService.ts` | Publishing | Version increment logic | No freeze awareness |
-
-### Industry Gap
-
-Enterprise documentation systems (Workday, SAP) use a **single release lifecycle model** where:
-1. All documentation is tied to a **product release** (e.g., "2025.1 Spring Release")
-2. Version freeze is automatic during preview periods
-3. AI assists with release readiness scoring and notes generation
+This plan addresses four critical issues:
+1. Confirming manual publishing still works (and integrating version freeze)
+2. Creating documentation for the Release Command Center
+3. Expanding scope to include all content types (Quick Starts, Checklists, Module Docs)
+4. Moving Release Management out of hidden advanced features
 
 ---
 
-## Solution Architecture
+## Part 1: Move Release Management to Primary Navigation
 
-### New Unified Hub: Release Command Center
+### File: `src/pages/enablement/EnablementHubPage.tsx`
 
-Replace scattered release management with a single destination:
+**Change 1:** Add Release Command Center to `primarySections` (visible by default)
 
-```
-/enablement/release-center
-│
-├── Overview Tab (Dashboard)
-│   ├── Current Release Status Card
-│   ├── Version Lifecycle State (Pre-Release / GA / Maintenance)
-│   ├── Content Readiness Score (AI-generated)
-│   └── Quick Actions
-│
-├── Releases Tab (Simplified)
-│   ├── Active Release
-│   ├── Upcoming Releases
-│   └── Release Archive
-│
-├── Milestones Tab
-│   ├── Release Milestones Timeline
-│   ├── Milestone Checklist
-│   └── AI Readiness Assessment
-│
-├── Release Notes Tab
-│   ├── Aggregated Changelog
-│   ├── Export Options
-│   └── AI Generation
-│
-└── Settings Tab
-    ├── Version Freeze Toggle
-    ├── GA Release Date
-    └── Notification Preferences
-```
-
----
-
-## AI Release Manager Agent
-
-### Purpose
-An intelligent agent that helps manage the release lifecycle by:
-1. Assessing content readiness across all manuals
-2. Identifying gaps in documentation coverage
-3. Generating aggregated release notes
-4. Recommending version increments
-5. Alerting on stale or incomplete content
-
-### Edge Function: `release-manager-agent`
+Add a new section after "Publish" in the primary sections:
 
 ```typescript
-interface ReleaseManagerRequest {
-  action: 
-    | 'assess_readiness'      // Score all manuals for release readiness
-    | 'generate_changelog'    // Aggregate all changes for release notes
-    | 'recommend_version'     // Suggest version increment type
-    | 'identify_gaps'         // Find incomplete or stale documentation
-    | 'plan_milestones'       // Suggest milestone dates
-    | 'summarize_status';     // Executive summary of release state
+{
+  titleKey: "Release Management",
+  items: [
+    {
+      title: "Release Command Center",
+      description: "Version lifecycle, milestones, and AI release manager",
+      href: "/enablement/release-center",
+      icon: Rocket,
+      color: "bg-primary/10 text-primary",
+      badge: "Pre-Release", // Dynamic from lifecycle
+    },
+  ],
+},
+```
+
+**Change 2:** Remove "Release Management" from `advancedSections`
+
+Remove the entire "Release Management" section (lines 274-299) from `advancedSections`. Keep "Release Versions" and "Release Calendar" as deprecated links in advanced for backward compatibility, or remove entirely.
+
+---
+
+## Part 2: Wire Version Freeze to Publishing
+
+### File: `src/hooks/useReleaseLifecycle.ts`
+
+Export helper functions for use in publishing:
+
+```typescript
+export function useVersionFreezeStatus() {
+  const { lifecycle, isPreRelease } = useReleaseLifecycle();
   
-  releaseId?: string;
-  context?: {
-    manuals?: string[];
-    targetDate?: string;
-    currentVersion?: string;
+  return {
+    isVersionFrozen: lifecycle?.version_freeze_enabled && isPreRelease,
+    baseVersion: lifecycle?.base_version || '1.0.0',
+    releaseStatus: lifecycle?.release_status || 'pre-release',
   };
 }
+```
 
-interface ReadinessResult {
-  overallScore: number;  // 0-100
-  grade: 'A' | 'B' | 'C' | 'D' | 'F';
-  manuals: Array<{
-    manualId: string;
-    name: string;
-    readinessScore: number;
-    issues: string[];
-    recommendations: string[];
-  }>;
-  blockers: string[];
-  warnings: string[];
-  readyForRelease: boolean;
+### File: `src/components/kb/SmartVersionSelector.tsx`
+
+Add version freeze awareness:
+
+```typescript
+interface SmartVersionSelectorProps {
+  // ... existing props
+  versionFreezeEnabled?: boolean;
+  isPreRelease?: boolean;
 }
+
+// In visibleOptions filter:
+const visibleOptions = options.filter(opt => {
+  // ... existing logic
+  
+  // When version freeze is enabled and in pre-release:
+  if (versionFreezeEnabled && isPreRelease) {
+    // Only show initial (first publish) and patch (updates)
+    if (opt.value === 'major' || opt.value === 'minor') {
+      return false; // Hide major/minor during freeze
+    }
+  }
+  
+  return true;
+});
 ```
 
-### Agent Capabilities
+### File: `src/components/kb/PublishWizard.tsx`
 
-| Action | Description | AI Output |
-|--------|-------------|-----------|
-| **assess_readiness** | Analyzes all manual content completeness | Readiness score, blockers, recommendations |
-| **generate_changelog** | Aggregates version history across manuals | Markdown changelog for release notes |
-| **recommend_version** | Based on changes scope, recommends increment | "Patch (1.0.1)" or "Minor (1.1.0)" with reasoning |
-| **identify_gaps** | Scans for incomplete sections, missing screenshots | Gap report with prioritized fix list |
-| **plan_milestones** | Given target GA date, suggests milestone schedule | Alpha, Beta, RC1, RC2, GA dates |
-| **summarize_status** | Executive summary for stakeholders | Plain-English release status |
+Add version freeze banner and pass props to SmartVersionSelector:
 
----
+```typescript
+import { useVersionFreezeStatus } from "@/hooks/useReleaseLifecycle";
 
-## Database Schema
+// In component:
+const { isVersionFrozen, releaseStatus } = useVersionFreezeStatus();
 
-### New Table: `enablement_release_lifecycle`
+// In Step 2 (version), before SmartVersionSelector:
+{isVersionFrozen && (
+  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+    <div className="flex items-center gap-2">
+      <Clock className="h-4 w-4 text-amber-600" />
+      <span className="font-medium text-amber-700">Pre-Release Mode</span>
+    </div>
+    <p className="text-sm text-amber-600 mt-1">
+      Version freeze is active. All updates will remain at v1.0.x until GA release.
+    </p>
+  </div>
+)}
 
-```sql
-CREATE TABLE public.enablement_release_lifecycle (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id uuid REFERENCES public.companies(id) ON DELETE CASCADE,
-  
-  -- Release Status
-  release_status text NOT NULL DEFAULT 'pre-release' 
-    CHECK (release_status IN ('pre-release', 'preview', 'ga-released', 'maintenance')),
-  current_release_id uuid REFERENCES public.enablement_releases(id),
-  
-  -- Version Control
-  version_freeze_enabled boolean NOT NULL DEFAULT true,
-  base_version text NOT NULL DEFAULT '1.0.0',
-  
-  -- Milestones
-  target_ga_date date,
-  milestones jsonb DEFAULT '[]'::jsonb,
-  
-  -- AI Assessments (cached)
-  last_readiness_score integer,
-  last_readiness_assessment jsonb,
-  last_assessment_at timestamptz,
-  
-  -- Audit
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  updated_by uuid REFERENCES auth.users(id),
-  
-  UNIQUE(company_id)
-);
-
--- Milestone Structure (JSONB)
--- [
---   { "id": "...", "name": "Alpha", "targetDate": "2026-02-01", "completed": true },
---   { "id": "...", "name": "Beta", "targetDate": "2026-02-15", "completed": false },
---   { "id": "...", "name": "GA", "targetDate": "2026-03-01", "completed": false }
--- ]
-```
-
-### Update Table: `enablement_releases`
-
-Add fields for enhanced tracking:
-
-```sql
-ALTER TABLE public.enablement_releases ADD COLUMN IF NOT EXISTS
-  release_type text DEFAULT 'product' 
-    CHECK (release_type IN ('product', 'documentation', 'hotfix'));
-
-ALTER TABLE public.enablement_releases ADD COLUMN IF NOT EXISTS
-  is_active boolean DEFAULT false;
-
-ALTER TABLE public.enablement_releases ADD COLUMN IF NOT EXISTS
-  readiness_score integer;
-
-ALTER TABLE public.enablement_releases ADD COLUMN IF NOT EXISTS
-  ai_changelog text;
+// Pass to SmartVersionSelector:
+<SmartVersionSelector
+  // ... existing props
+  versionFreezeEnabled={isVersionFrozen}
+  isPreRelease={releaseStatus === 'pre-release'}
+/>
 ```
 
 ---
 
-## UI Components
+## Part 3: Expand Content Type Coverage
 
-### 1. Release Command Center Page
+### Database Update: Add content type tracking
 
-**File:** `src/pages/enablement/ReleaseCommandCenterPage.tsx`
+The AI readiness assessment should cover all content types. Update the `release-manager-agent` edge function to query:
 
-Single-page hub replacing scattered release management:
+1. **Administrator Manuals** (existing) — via `MANUAL_CONFIGS` or database
+2. **Quick Start Guides** — via `enablement_quickstart_templates` table
+3. **Implementation Checklists** — currently hardcoded in `ImplementationChecklistsPage.tsx`
+4. **Module Documentation** — via `application_modules` table
 
-- **Header**: Current release name, status badge, days to GA
-- **Tabs**: Overview | Releases | Milestones | Release Notes | Settings
-- **AI Assistant Button**: Opens AI Release Manager chat panel
+### File: `supabase/functions/release-manager-agent/index.ts`
 
-### 2. Release Status Banner
+Update `assess_readiness` action to include all content types:
 
-**File:** `src/components/enablement/ReleaseStatusBanner.tsx`
+```typescript
+// Assess all content types
+const contentTypes = [
+  { type: 'manuals', label: 'Administrator Manuals' },
+  { type: 'quickstarts', label: 'Quick Start Guides' },
+  { type: 'checklists', label: 'Implementation Checklists' },
+  { type: 'module-docs', label: 'Module Documentation' },
+];
 
-Compact banner showing release status at top of Enablement pages:
+// For Quick Start Guides:
+const { data: quickstarts } = await supabase
+  .from('enablement_quickstart_templates')
+  .select('module_code, status')
+  .eq('status', 'published');
 
-```tsx
-<ReleaseStatusBanner>
-  <Badge variant="outline" className="bg-amber-50 text-amber-600">
-    Pre-Release v1.0
-  </Badge>
-  <span>Target GA: March 1, 2026</span>
-  <span>Readiness: 85%</span>
-</ReleaseStatusBanner>
+// Include in AI prompt context
 ```
 
-### 3. AI Readiness Assessment Card
+### File: `src/components/enablement/AIReadinessCard.tsx`
 
-**File:** `src/components/enablement/AIReadinessCard.tsx`
+Update to show all content types:
 
-Shows AI-generated readiness score with drill-down:
-
-- Overall score (A-F grade)
-- Per-manual scores
-- Blockers and recommendations
-- "Assess Now" button to trigger fresh analysis
-
-### 4. Milestone Timeline
-
-**File:** `src/components/enablement/MilestoneTimeline.tsx`
-
-Visual timeline of release milestones with:
-- Progress indicators
-- Automated checklist items
-- AI-suggested dates
-
-### 5. Aggregated Release Notes
-
-**File:** `src/components/enablement/AggregatedReleaseNotes.tsx`
-
-Combines version history from all manuals into unified release notes:
-- Grouped by module
-- Export to Markdown/PDF/Word
-- AI generation for prose summary
+```typescript
+// Add content type breakdown
+<div className="grid grid-cols-2 gap-4 mt-4">
+  <div className="p-3 bg-muted rounded-lg">
+    <p className="text-sm text-muted-foreground">Manuals</p>
+    <p className="font-medium">10/10 complete</p>
+  </div>
+  <div className="p-3 bg-muted rounded-lg">
+    <p className="text-sm text-muted-foreground">Quick Starts</p>
+    <p className="font-medium">8/18 published</p>
+  </div>
+  <div className="p-3 bg-muted rounded-lg">
+    <p className="text-sm text-muted-foreground">Checklists</p>
+    <p className="font-medium">5/5 complete</p>
+  </div>
+  <div className="p-3 bg-muted rounded-lg">
+    <p className="text-sm text-muted-foreground">Module Docs</p>
+    <p className="font-medium">18/18 indexed</p>
+  </div>
+</div>
+```
 
 ---
 
-## Simplified Workflow
+## Part 4: Add Release Status Badge to Manual Cards
 
-### Before (Complex)
+### File: `src/components/enablement/manuals/ManualCard.tsx`
 
-```
-User clicks "Publish to Help Center"
-  → Selects version type (initial/major/minor/patch)
-  → No awareness of release lifecycle
-  → Version increments independently
+Add release status indicator:
+
+```typescript
+import { useReleaseLifecycle } from "@/hooks/useReleaseLifecycle";
+import { ReleaseStatusBadge } from "../ReleaseStatusBadge";
+
+// In component:
+const { isPreRelease, isGAReleased } = useReleaseLifecycle();
+
+// In card header, next to version badge:
+<ReleaseStatusBadge />
 ```
 
-### After (Unified)
+### File: `src/components/kb/ManualPublishCard.tsx`
 
+Add release status indicator:
+
+```typescript
+import { useReleaseLifecycle } from "@/hooks/useReleaseLifecycle";
+
+// In component:
+const { lifecycle } = useReleaseLifecycle();
+
+// In card header:
+<Badge 
+  variant="outline" 
+  className={
+    lifecycle?.release_status === 'pre-release' 
+      ? "bg-amber-50 text-amber-600 border-amber-200" 
+      : "bg-green-50 text-green-600 border-green-200"
+  }
+>
+  {lifecycle?.release_status === 'pre-release' ? 'Pre-Release' : 'GA Released'}
+</Badge>
 ```
-1. Admin sets release lifecycle status (Pre-Release / Preview / GA)
-2. Version freeze auto-enabled during Pre-Release
-3. All manual updates contribute to current release
-4. AI assesses readiness as content is published
-5. At GA, all manuals transition to released state
-6. Release notes auto-generated from aggregated changelogs
-```
+
+---
+
+## Part 5: Create Documentation
+
+### New File: `src/pages/enablement/ReleaseCommandCenterGuidePage.tsx`
+
+Create a documentation page explaining:
+1. What is the Release Command Center
+2. Version Lifecycle States (Pre-Release → Preview → GA → Maintenance)
+3. How Version Freeze works
+4. Milestones management
+5. AI Readiness Assessment
+6. Release Notes aggregation
+
+### Update: `src/pages/enablement/EnablementGuidePage.tsx`
+
+Add a section linking to Release Command Center documentation.
 
 ---
 
@@ -277,172 +244,84 @@ User clicks "Publish to Help Center"
 
 | File | Purpose |
 |------|---------|
-| `src/pages/enablement/ReleaseCommandCenterPage.tsx` | Main hub page |
-| `src/hooks/useReleaseLifecycle.ts` | State management hook |
-| `src/components/enablement/ReleaseStatusBanner.tsx` | Status banner |
-| `src/components/enablement/AIReadinessCard.tsx` | AI assessment display |
-| `src/components/enablement/MilestoneTimeline.tsx` | Visual milestone tracker |
-| `src/components/enablement/AggregatedReleaseNotes.tsx` | Changelog aggregator |
-| `src/components/enablement/ReleaseManagerChat.tsx` | AI agent chat panel |
-| `supabase/functions/release-manager-agent/index.ts` | AI agent edge function |
+| `src/pages/enablement/ReleaseCommandCenterGuidePage.tsx` | User guide for Release Command Center |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/pages/enablement/EnablementHubPage.tsx` | Add Release Status Banner, update Release Management links |
-| `src/components/kb/SmartVersionSelector.tsx` | Add version freeze awareness |
-| `src/components/kb/PublishWizard.tsx` | Show release context, freeze status |
+| `src/pages/enablement/EnablementHubPage.tsx` | Move Release Management to primary sections |
+| `src/components/kb/SmartVersionSelector.tsx` | Add version freeze props |
+| `src/components/kb/PublishWizard.tsx` | Add freeze banner, pass props |
+| `src/hooks/useReleaseLifecycle.ts` | Export `useVersionFreezeStatus` helper |
 | `src/components/enablement/manuals/ManualCard.tsx` | Add release status badge |
-| `src/routes/lazyPages.ts` | Add ReleaseCommandCenterPage |
-| `src/App.tsx` | Add route for /enablement/release-center |
-| `src/lib/iconRegistry.ts` | Add Milestone, RocketLaunch icons |
-
-## Files to Deprecate/Remove
-
-| File | Action |
-|------|--------|
-| `src/pages/enablement/ReleaseCalendarPage.tsx` | Migrate to Release Command Center |
-| `src/components/enablement/ReleaseManager.tsx` | Migrate to Release Command Center |
-| `src/components/enablement/ReleaseWorkflowDashboard.tsx` | Keep as secondary view, simplify |
+| `src/components/kb/ManualPublishCard.tsx` | Add release status badge |
+| `src/components/enablement/AIReadinessCard.tsx` | Expand to show all content types |
+| `supabase/functions/release-manager-agent/index.ts` | Include Quick Starts, Checklists in assessment |
+| `src/routes/lazyPages.ts` | Add ReleaseCommandCenterGuidePage |
+| `src/App.tsx` | Add route for guide page |
 
 ---
 
-## Navigation Updates
+## Summary
 
-### Enablement Hub Accordion (Simplified)
+| Issue | Solution |
+|-------|----------|
+| Manual publishing still works? | ✅ Yes, unchanged — but now enhanced with version freeze |
+| Documentation exists? | 📝 Creating user guide for Release Command Center |
+| Includes all content types? | 🔄 Expanding to cover Quick Starts, Checklists, Module Docs |
+| Release Management hidden? | ✅ Moving to primary sections (visible by default) |
 
-**Before:**
+---
+
+## Visual: Content Sync Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                    RELEASE COMMAND CENTER                       │
+│                                                                 │
+│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
+│   │ Version      │  │ Milestones   │  │ AI Readiness        │ │
+│   │ Lifecycle    │  │ Timeline     │  │ Assessment          │ │
+│   └──────┬───────┘  └──────────────┘  └──────────┬───────────┘ │
+│          │                                        │             │
+│          ▼                                        ▼             │
+│   ┌──────────────────────────────────────────────────────────┐ │
+│   │                  CONTENT COVERAGE                         │ │
+│   │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────┐ │ │
+│   │  │ Manuals   │ │Quick Starts│ │ Checklists │ │ Module │ │ │
+│   │  │ 10/10     │ │ 8/18       │ │ 5/5        │ │ Docs   │ │ │
+│   │  └────────────┘ └────────────┘ └────────────┘ └────────┘ │ │
+│   └──────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│   ┌──────────────────────────────────────────────────────────┐ │
+│   │                 VERSION FREEZE                            │ │
+│   │                                                           │ │
+│   │  When enabled: All publishes → v1.0.x (patch only)       │ │
+│   │  SmartVersionSelector hides Major/Minor options          │ │
+│   │                                                           │ │
+│   └──────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    MANUAL PUBLISHING PAGE                       │
+│                  (Unchanged — still works!)                     │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Publish Wizard                                           │   │
+│  │                                                          │   │
+│  │ Step 1: Select Sections                                  │   │
+│  │ Step 2: Version Config  ◄── Version Freeze Applied       │   │
+│  │ Step 3: Target Category                                  │   │
+│  │ Step 4: Confirm & Publish                                │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      HELP CENTER                                │
+│                                                                 │
+│  KB Articles created with source_manual_id → version tracked   │
+└─────────────────────────────────────────────────────────────────┘
 ```
-Release Management
-├── Release Versions → /enablement?tab=releases
-└── Release Calendar → /enablement/release-calendar
-```
-
-**After:**
-```
-Release Management
-└── Release Command Center → /enablement/release-center
-    (Combines versions, calendar, lifecycle, notes)
-```
-
-### Quick Access Card on Hub Dashboard
-
-```tsx
-<Card className="border-2 border-primary/20">
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      <Rocket className="h-5 w-5" />
-      Release Command Center
-      <Badge variant="outline" className="ml-auto">Pre-Release v1.0</Badge>
-    </CardTitle>
-    <CardDescription>
-      Manage version lifecycle, milestones, and release notes
-    </CardDescription>
-  </CardHeader>
-  <CardContent>
-    <div className="flex gap-2">
-      <Button>Open Command Center</Button>
-      <Button variant="outline">Ask AI</Button>
-    </div>
-  </CardContent>
-</Card>
-```
-
----
-
-## AI Agent User Experience
-
-### Chat-Style Interface
-
-The AI Release Manager appears as a slide-out panel accessible from:
-1. Release Command Center page
-2. AI button in the Enablement Hub header
-3. "Ask AI" quick actions throughout the module
-
-### Example Interactions
-
-**User:** "Is the documentation ready for release?"
-
-**AI Agent:**
-> **Release Readiness Assessment: 78% (B Grade)**
->
-> ✅ **Ready Manuals (6/10)**
-> - Admin & Security: 100%
-> - Workforce: 95%
-> - Appraisals: 92%
-> - Goals: 88%
-> - HR Hub: 85%
-> - Succession: 82%
->
-> ⚠️ **Needs Attention (4/10)**
-> - 360 Feedback: 72% - Missing troubleshooting chapter
-> - Career Development: 68% - 3 sections incomplete
-> - Time & Attendance: 65% - Screenshots needed
-> - Benefits: 60% - Content review overdue
->
-> **Blockers:**
-> 1. 360 Feedback troubleshooting chapter incomplete
-> 2. Benefits manual has 2 expired content flags
->
-> **Recommendation:** Address blockers before GA. Estimated effort: 8-12 hours.
-
----
-
-## Implementation Phases
-
-### Phase 1: Foundation (This Sprint)
-1. Create `enablement_release_lifecycle` table
-2. Create `useReleaseLifecycle.ts` hook
-3. Build `ReleaseCommandCenterPage.tsx` with Overview and Settings tabs
-4. Add Release Status Banner to Enablement Hub
-5. Integrate with existing version reset (v1.0)
-
-### Phase 2: AI Agent (Next Sprint)
-1. Create `release-manager-agent` edge function
-2. Build `AIReadinessCard.tsx` component
-3. Implement `ReleaseManagerChat.tsx` panel
-4. Add readiness assessment capability
-
-### Phase 3: Milestones & Notes (Following Sprint)
-1. Build `MilestoneTimeline.tsx` component
-2. Create `AggregatedReleaseNotes.tsx` component
-3. Add export functionality (Markdown, PDF, DOCX)
-4. Implement AI changelog generation
-
-### Phase 4: Cleanup (Final Sprint)
-1. Deprecate old release management components
-2. Update all navigation references
-3. Migration guide for any database records
-
----
-
-## Industry Alignment
-
-| Feature | SAP SuccessFactors | Workday | HRplus (Proposed) |
-|---------|-------------------|---------|-------------------|
-| Release Cadence | Bi-annual | Continuous | Configurable |
-| Version Freeze | Automatic during preview | Manual | Automatic with toggle |
-| Readiness Score | Innovation Alerts | Tenant Preview | AI-assessed |
-| Release Notes | WhatsNew Portal | Community | Aggregated + AI |
-| Milestone Tracking | Release Calendar | Deployment Dashboard | Visual Timeline |
-
----
-
-## Success Metrics
-
-1. **Simplified Navigation**: 1 destination vs 4 scattered components
-2. **AI Assistance**: Automated readiness scoring reduces manual review time by 50%
-3. **Version Control**: Zero accidental version increments during freeze
-4. **Release Visibility**: All stakeholders see consistent status across all manuals
-5. **Documentation Quality**: AI identifies gaps before release
-
----
-
-## Technical Notes
-
-- All components use existing design system (shadcn/ui)
-- State persisted via `useTabState` pattern
-- AI agent uses Lovable AI (Gemini Flash) via existing gateway
-- Release lifecycle data cached in database for performance
-- Export uses existing `jspdf` and `docx` libraries
