@@ -586,13 +586,13 @@ const App = () => (
 
             {/* Enablement Routes */}
             <Route path="/enablement" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementHubPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
-            <Route path="/enablement/docs-generator" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ApplicationDocsGeneratorPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
-            <Route path="/enablement/feature-catalog" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.FeatureCatalogPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
-            <Route path="/enablement/feature-database" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.FeatureDatabasePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
-            <Route path="/enablement/template-library" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.TemplateLibraryPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/docs-generator" element={<Navigate to="/enablement/create" replace />} />
+            <Route path="/enablement/feature-catalog" element={<Navigate to="/enablement/audit" replace />} />
+            <Route path="/enablement/feature-database" element={<Navigate to="/enablement/audit" replace />} />
+            <Route path="/enablement/template-library" element={<Navigate to="/enablement/create?activeTab=templates" replace />} />
             <Route path="/enablement/analytics" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementAnalyticsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/scorm-generator" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.SCORMGeneratorPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
-            <Route path="/enablement/release-calendar" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ReleaseCalendarPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/release-calendar" element={<Navigate to="/enablement/release-center?activeTab=milestones" replace />} />
             <Route path="/enablement/settings" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementSettingsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/ai-tools" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementAIToolsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/guide" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementGuidePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
@@ -617,7 +617,7 @@ const App = () => (
             <Route path="/enablement/manuals/client-provisioning/testing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ClientProvisioningTestingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals/publishing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ManualPublishingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manual-publishing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ManualPublishingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
-            <Route path="/enablement/content-lifecycle" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ContentLifecyclePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/content-lifecycle" element={<Navigate to="/enablement/release-center" replace />} />
             <Route path="/enablement/route-registry" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.RouteRegistryPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/product-capabilities" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ProductCapabilitiesPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/ui-color-semantics" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.UIColorSemanticsGuidePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />

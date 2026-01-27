@@ -216,8 +216,8 @@ export default function FeatureAuditDashboard() {
               Track feature coverage, workflow status, and documentation gaps
             </p>
           </div>
-          <Button onClick={() => navigate("/enablement/feature-database")}>
-            View Feature Database
+          <Button onClick={() => navigate("/enablement/audit")}>
+            Refresh Audit
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>

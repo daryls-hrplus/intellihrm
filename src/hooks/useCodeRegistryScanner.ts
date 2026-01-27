@@ -107,7 +107,7 @@ const CODE_ROUTES: Omit<CodeRegistryEntry, 'featureCode'>[] = [
   { pageName: "EnablementHubPage", routePath: "/enablement", moduleCode: "enablement", hasProtection: true, requiredRoles: [], protectedModuleCode: null, sourceFile: "App.tsx" },
   { pageName: "RouteRegistryPage", routePath: "/enablement/route-registry", moduleCode: "enablement", hasProtection: true, requiredRoles: [], protectedModuleCode: null, sourceFile: "App.tsx" },
   { pageName: "ProductCapabilitiesPage", routePath: "/enablement/product-capabilities", moduleCode: "enablement", hasProtection: true, requiredRoles: [], protectedModuleCode: null, sourceFile: "App.tsx" },
-  { pageName: "FeatureCatalogPage", routePath: "/enablement/feature-catalog", moduleCode: "enablement", hasProtection: true, requiredRoles: [], protectedModuleCode: null, sourceFile: "App.tsx" },
+  // Deprecated: FeatureCatalogPage - now redirects to /enablement/audit
   
   // AI routes
   { pageName: "AIHubPage", routePath: "/ai", moduleCode: "ai", hasProtection: true, requiredRoles: [], protectedModuleCode: null, sourceFile: "App.tsx" },

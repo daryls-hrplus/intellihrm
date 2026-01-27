@@ -188,8 +188,8 @@ export default function ManualsIndexPage() {
                 variant="outline"
                 className="justify-start"
                 onClick={() => navigateToList({
-                  route: "/enablement/docs-generator",
-                  title: "Generate Documentation",
+                  route: "/enablement/create",
+                  title: "Content Creation Studio",
                   moduleCode: "enablement",
                 })}
               >
