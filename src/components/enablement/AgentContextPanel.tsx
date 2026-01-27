@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import { ContextAnalysis } from "@/hooks/useContentCreationAgent";
 import { ApplicationModule, ApplicationFeature } from "@/hooks/useApplicationFeatures";
+import { ManualDefinition, ManualSection } from "@/hooks/useManualGeneration";
+import { ChapterInfo } from "@/hooks/useChapterGeneration";
+import { ManualContentSelector } from "./ManualContentSelector";
 import { cn } from "@/lib/utils";
 import { markdownToHtml } from "@/lib/utils/markdown";
 
@@ -34,6 +37,24 @@ interface AgentContextPanelProps {
   previewTitle?: string;
   onSaveContent?: () => void;
   onCopyContent?: () => void;
+  // Manual content selection props
+  manuals?: ManualDefinition[];
+  chapters?: ChapterInfo[];
+  sectionsForChapter?: ManualSection[];
+  selectedSection?: ManualSection | null;
+  selectedManualId?: string;
+  selectedChapter?: string;
+  selectedSectionId?: string;
+  onManualChange?: (manualId: string) => void;
+  onChapterChange?: (chapterNumber: string) => void;
+  onSectionChange?: (sectionId: string) => void;
+  onPreviewChanges?: () => void;
+  onRegenerateSection?: () => void;
+  onRegenerateChapter?: () => void;
+  isLoadingManuals?: boolean;
+  isLoadingSections?: boolean;
+  isGeneratingPreview?: boolean;
+  isApplyingChanges?: boolean;
 }
 
 export function AgentContextPanel({
@@ -50,6 +71,24 @@ export function AgentContextPanel({
   previewTitle,
   onSaveContent,
   onCopyContent,
+  // Manual content selection props
+  manuals = [],
+  chapters = [],
+  sectionsForChapter = [],
+  selectedSection = null,
+  selectedManualId = "",
+  selectedChapter = "",
+  selectedSectionId = "",
+  onManualChange,
+  onChapterChange,
+  onSectionChange,
+  onPreviewChanges,
+  onRegenerateSection,
+  onRegenerateChapter,
+  isLoadingManuals = false,
+  isLoadingSections = false,
+  isGeneratingPreview = false,
+  isApplyingChanges = false,
 }: AgentContextPanelProps) {
   // Filter features by selected module
   const filteredFeatures = selectedModule
@@ -102,6 +141,29 @@ export function AgentContextPanel({
           </div>
         </CardContent>
       </Card>
+
+      {/* Manual Content Selector */}
+      {onManualChange && onChapterChange && onSectionChange && onPreviewChanges && onRegenerateSection && onRegenerateChapter && (
+        <ManualContentSelector
+          manuals={manuals}
+          chapters={chapters}
+          sectionsForChapter={sectionsForChapter}
+          selectedSection={selectedSection}
+          selectedManualId={selectedManualId}
+          selectedChapter={selectedChapter}
+          selectedSectionId={selectedSectionId}
+          onManualChange={onManualChange}
+          onChapterChange={onChapterChange}
+          onSectionChange={onSectionChange}
+          onPreviewChanges={onPreviewChanges}
+          onRegenerateSection={onRegenerateSection}
+          onRegenerateChapter={onRegenerateChapter}
+          isLoadingManuals={isLoadingManuals}
+          isLoadingSections={isLoadingSections}
+          isGeneratingPreview={isGeneratingPreview}
+          isApplying={isApplyingChanges}
+        />
+      )}
 
       {/* Coverage Stats */}
       <Card>

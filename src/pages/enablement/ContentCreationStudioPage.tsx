@@ -16,9 +16,11 @@ import { useTabState } from "@/hooks/useTabState";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { useApplicationModules, useApplicationFeatures } from "@/hooks/useApplicationFeatures";
 import { useContentCreationAgent, GeneratedArtifact } from "@/hooks/useContentCreationAgent";
+import { useManualSectionPreview } from "@/hooks/useManualSectionPreview";
 import { ContentCreationAgentChat } from "@/components/enablement/ContentCreationAgentChat";
 import { AgentContextPanel } from "@/components/enablement/AgentContextPanel";
 import { GeneratedArtifactList } from "@/components/enablement/GeneratedArtifactCard";
+import { ContentDiffPreview } from "@/components/enablement/ContentDiffPreview";
 import { toast } from "sonner";
 import {
   ResizableHandle,
@@ -44,6 +46,31 @@ export default function ContentCreationStudioPage() {
   const [previewTitle, setPreviewTitle] = useState<string>("");
   const [selectedArtifactId, setSelectedArtifactId] = useState<string>("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isDiffPreviewOpen, setIsDiffPreviewOpen] = useState(false);
+
+  // Manual section preview hook
+  const {
+    manuals,
+    chapters,
+    sectionsForChapter,
+    selectedSection,
+    selectedManualId,
+    selectedChapter,
+    selectedSectionId,
+    isLoadingManuals,
+    isLoadingSections,
+    isGeneratingPreview,
+    isApplying,
+    previewResult,
+    setSelectedManualId,
+    setSelectedChapter,
+    setSelectedSectionId,
+    generatePreview,
+    applyChanges,
+    regenerateSection,
+    regenerateChapter,
+    clearPreview,
+  } = useManualSectionPreview();
 
   const {
     isLoading,
@@ -174,6 +201,20 @@ export default function ContentCreationStudioPage() {
     toast.success("Copied to clipboard");
   };
 
+  // Handle preview changes for manual sections
+  const handlePreviewChanges = async () => {
+    const result = await generatePreview();
+    if (result) {
+      setIsDiffPreviewOpen(true);
+    }
+  };
+
+  // Handle apply changes from diff preview
+  const handleApplyChanges = async () => {
+    await applyChanges();
+    setIsDiffPreviewOpen(false);
+  };
+
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -258,6 +299,24 @@ export default function ContentCreationStudioPage() {
                     previewTitle={previewTitle}
                     onSaveContent={selectedArtifactId ? handleSaveContent : undefined}
                     onCopyContent={previewContent ? handleCopyContent : undefined}
+                    // Manual content selection props
+                    manuals={manuals}
+                    chapters={chapters}
+                    sectionsForChapter={sectionsForChapter}
+                    selectedSection={selectedSection}
+                    selectedManualId={selectedManualId}
+                    selectedChapter={selectedChapter}
+                    selectedSectionId={selectedSectionId}
+                    onManualChange={setSelectedManualId}
+                    onChapterChange={setSelectedChapter}
+                    onSectionChange={setSelectedSectionId}
+                    onPreviewChanges={handlePreviewChanges}
+                    onRegenerateSection={regenerateSection}
+                    onRegenerateChapter={regenerateChapter}
+                    isLoadingManuals={isLoadingManuals}
+                    isLoadingSections={isLoadingSections}
+                    isGeneratingPreview={isGeneratingPreview}
+                    isApplyingChanges={isApplying}
                   />
                 </ScrollArea>
               </div>
@@ -299,6 +358,23 @@ export default function ContentCreationStudioPage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Diff Preview Dialog */}
+        {previewResult && (
+          <ContentDiffPreview
+            isOpen={isDiffPreviewOpen}
+            onClose={() => {
+              setIsDiffPreviewOpen(false);
+              clearPreview();
+            }}
+            sectionTitle={previewResult.sectionInfo.title}
+            sectionNumber={previewResult.sectionInfo.sectionNumber}
+            currentContent={previewResult.currentContent}
+            proposedContent={previewResult.proposedContent}
+            onApply={handleApplyChanges}
+            isApplying={isApplying}
+          />
         )}
       </div>
     </AppLayout>
