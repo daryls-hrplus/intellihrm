@@ -1,635 +1,460 @@
 
-
-# Succession Manual Chapter 9: Comprehensive Audit Report (Revised)
-## Documentation vs. Database Schema vs. UI vs. Industry Standards
+# Succession Manual Chapter 10: Industry-Aligned Reporting & Analytics
+## Comprehensive Audit & Implementation Plan
 
 ---
 
 ## Executive Summary
 
-This revised plan addresses the comprehensive audit of Succession Manual Chapter 9 with a key clarification: **Where field names differ between documentation and database, the database schema will be updated to match industry-standard naming conventions documented in the manual.**
-
-This approach ensures:
-- Consistency with SAP SuccessFactors, Workday, and Oracle HCM naming patterns
-- Self-documenting code with descriptive field names
-- Long-term maintainability
+This revised plan addresses the comprehensive Chapter 10 implementation with full industry alignment to SAP SuccessFactors, Workday, and Oracle HCM naming conventions and KPI standards. The current placeholder structure (4 generic sections) will be transformed into a 12-section comprehensive analytics manual following established documentation patterns from Chapter 9 and the 360 Feedback analytics documentation.
 
 ---
 
-## Audit Results Overview
+## Industry Standards Alignment Audit
 
-| Category | Status | Gaps Found | Resolution Direction |
-|----------|--------|------------|---------------------|
-| Database Schema Accuracy | Partial Match | 23 field discrepancies | **Update DB to match docs** |
-| Edge Function Coverage | Good | 4 undocumented modules | Update documentation |
-| UI Component Alignment | Good | 2 missing cross-references | Update documentation |
-| Industry Standard Alignment | Partial | 5 enhancement opportunities | Add new sections |
+### KPI Terminology Corrections
 
----
+| Original Term | Industry Standard Term | Source |
+|---------------|----------------------|--------|
+| Coverage Metrics | **Succession Coverage Ratio** | Visier, SAP SF, SHRM |
+| Ready Now Count | **Ready-Now Successor Rate** | Workday, Oracle HCM |
+| Candidate Count | **Bench Depth** | Visier, SHRM |
+| Flight Risk Score | **Risk of Loss** | Oracle HCM |
+| N/A | **Impact of Loss** | Oracle HCM, SAP SF |
+| N/A | **Time-to-Readiness** | Workday, Visier |
+| N/A | **Internal Hire Rate** | SHRM, Visier |
+| N/A | **Career Path Ratio** | Visier |
+| Pool Health | **Pipeline Velocity** | Workday |
+| N/A | **Bench Strength Ratio** | Visier, SHRM |
+| N/A | **Successor Turnover Risk** | Visier |
 
-## Part 1: Database Schema Changes (Industry Standard Naming)
+### Missing Industry-Standard Metrics to Add
 
-### 1.1 talent_signal_definitions Table
+1. **Bench Strength Ratio**: Number of ready successors / Total headcount (benchmark: 3+ per critical position)
+2. **Time-to-Fill for Critical Positions**: Measures succession efficiency
+3. **Internal vs. External Leadership Fills**: Development program effectiveness
+4. **Successor Turnover Risk**: Flight risk specifically for identified successors
+5. **Career Path Ratio**: Career moves / Number of employees
+6. **Development Activity Completion Rate**: Training/IDP completion for successors
+7. **Promotions from Non-Senior Roles**: Pipeline depth indicator
+8. **Diversity in Succession Pipelines**: DEI compliance metric
 
-**Current Database vs. Industry Standard Documentation:**
+### Retention Risk Matrix Terminology (Oracle HCM Pattern)
 
-| Current DB Field | Industry Standard Name | Action |
-|------------------|----------------------|--------|
-| `code` | `signal_code` | **Rename column** |
-| `name` | `signal_name` | **Rename column** |
-| `signal_category` | `category` | **Rename column** |
-| `aggregation_method` | `calculation_method` | **Rename column** |
-| `name_en` | `signal_name_en` | **Rename for consistency** |
-
-**Fields to Add (documented but missing):**
-| Field | Type | Purpose |
-|-------|------|---------|
-| `weight_default` | `numeric(5,2)` | Default weight for signal in calculations |
-| `source_module` | `text` | Source module identifier (performance, 360, competency) |
-
-**SQL Migration:**
-```sql
--- Rename columns to industry standard names
-ALTER TABLE talent_signal_definitions RENAME COLUMN code TO signal_code;
-ALTER TABLE talent_signal_definitions RENAME COLUMN name TO signal_name;
-ALTER TABLE talent_signal_definitions RENAME COLUMN name_en TO signal_name_en;
-ALTER TABLE talent_signal_definitions RENAME COLUMN signal_category TO category;
-ALTER TABLE talent_signal_definitions RENAME COLUMN aggregation_method TO calculation_method;
-
--- Add missing fields
-ALTER TABLE talent_signal_definitions ADD COLUMN weight_default numeric(5,2) DEFAULT 1.0;
-ALTER TABLE talent_signal_definitions ADD COLUMN source_module text;
-
--- Update existing edge function references
-COMMENT ON TABLE talent_signal_definitions IS 'Talent signal definitions with industry-standard field naming';
-```
-
-**Updated Complete Schema (17 fields):**
-```
-id, company_id, signal_code, signal_name, signal_name_en, description, 
-category, source_module, calculation_method, weight_default, 
-confidence_threshold, bias_risk_factors, is_system_defined, is_active, 
-display_order, created_at, updated_at
-```
+The existing `RetentionRiskMatrix.tsx` component correctly implements the industry-standard dual-axis model:
+- **Position Criticality**: Most Critical → Critical → Important
+- **Replacement Difficulty**: Difficult → Moderate → Easy
+- **Retention Risk Level**: High → Moderate → Low
 
 ---
 
-### 1.2 talent_signal_snapshots Table
+## Database Schema Coverage
 
-**Current Database vs. Industry Standard Documentation:**
+### Tables Requiring Full Documentation (7 tables, ~110 fields)
 
-| Current DB Field | Industry Standard Name | Action |
-|------------------|----------------------|--------|
-| `raw_score` | `raw_value` | **Rename column** |
-| `computed_at` | `captured_at` | **Rename column** |
-| `valid_until` | `expires_at` | **Rename column** |
-| `valid_from` | `effective_from` | **Rename for clarity** |
-| `source_type` | `source_record_type` | **Rename column** |
+| Table | Field Count | Current Doc | Target |
+|-------|-------------|-------------|--------|
+| `flight_risk_assessments` | 13 | 0% | 100% |
+| `nine_box_assessments` | 14 | 0% | 100% |
+| `key_position_risks` | 17 | 0% | 100% |
+| `succession_plans` | 23 | Partial | 100% |
+| `succession_candidates` | 20 | Partial | 100% |
+| `talent_pools` | 13 | 0% | 100% |
+| `talent_pool_members` | 11 | 0% | 100% |
 
-**Fields to Add (documented but missing):**
-| Field | Type | Purpose |
-|-------|------|---------|
-| `data_freshness_days` | `integer` | Computed age of data in days |
-| `source_record_id` | `uuid` | Specific source record reference |
+---
 
-**SQL Migration:**
-```sql
--- Rename columns to industry standard names
-ALTER TABLE talent_signal_snapshots RENAME COLUMN raw_score TO raw_value;
-ALTER TABLE talent_signal_snapshots RENAME COLUMN computed_at TO captured_at;
-ALTER TABLE talent_signal_snapshots RENAME COLUMN valid_until TO expires_at;
-ALTER TABLE talent_signal_snapshots RENAME COLUMN valid_from TO effective_from;
-ALTER TABLE talent_signal_snapshots RENAME COLUMN source_type TO source_record_type;
+## Revised Chapter Structure (12 Sections)
 
--- Add missing fields
-ALTER TABLE talent_signal_snapshots ADD COLUMN data_freshness_days integer 
-  GENERATED ALWAYS AS (EXTRACT(DAY FROM (now() - captured_at))::integer) STORED;
-ALTER TABLE talent_signal_snapshots ADD COLUMN source_record_id uuid;
+### Part 10: Reporting & Analytics (~45 min read)
 
--- Add index for source record lookups
-CREATE INDEX idx_signal_snapshots_source ON talent_signal_snapshots(source_record_type, source_record_id);
-```
-
-**Updated Complete Schema (24 fields):**
-```
-id, employee_id, company_id, signal_definition_id, source_cycle_id, 
-source_record_type, source_record_id, snapshot_version, signal_value, 
-raw_value, normalized_score, confidence_score, bias_risk_level, 
-bias_factors, evidence_count, evidence_summary, rater_breakdown, 
-data_freshness_days, effective_from, expires_at, is_current, 
-captured_at, created_at, created_by
+```text
+10. Reporting & Analytics
+├── 10.1 Analytics Architecture Overview
+│   └── Data sources, integration points, refresh cycles, permission matrix
+├── 10.2 Succession Health Scorecard (Dashboard Metrics)
+│   └── Coverage ratio, bench depth, ready-now rate, pipeline health index
+├── 10.3 Bench Strength Analysis
+│   └── Coverage algorithm, bench strength ratio, readiness distribution, position depth chart
+├── 10.4 Flight Risk & Retention Reporting
+│   └── Risk of loss scoring, impact of loss, retention action tracking, retention risk matrix
+├── 10.5 Nine-Box Distribution & Movement Reports
+│   └── Grid distribution, calibration variance, movement analysis, talent velocity
+├── 10.6 Talent Pipeline Metrics
+│   └── Pool-to-successor conversion, graduation rate, stagnation rate, pipeline velocity
+├── 10.7 Readiness Trend Analysis
+│   └── Time-to-readiness, score progression, development impact, trajectory forecasting
+├── 10.8 Diversity & Inclusion Analytics
+│   └── Pipeline representation, demographic distribution, DEI gap identification
+├── 10.9 Executive Summary Reports
+│   └── Quarterly reviews, board-level dashboards, emergency vacancy reports, export formats
+├── 10.10 AI-Powered Insights
+│   └── AI report builder, predictive analytics, natural language queries
+├── 10.11 Report Configuration & Scheduling
+│   └── Custom reports, automated delivery, access control, report versioning
+└── 10.12 Analytics Troubleshooting
+    └── Data quality, calculation discrepancies, refresh issues, common fixes
 ```
 
 ---
 
-### 1.3 nine_box_signal_mappings Table
+## Section-by-Section Technical Specification
 
-**Current Database vs. Industry Standard Documentation:**
+### Section 10.1: Analytics Architecture Overview
 
-| Current DB Field | Industry Standard Name | Action |
-|------------------|----------------------|--------|
-| `minimum_confidence` | `min_confidence` | **Rename column** |
+**Content:**
+- Data flow diagram from source modules to analytics dashboard
+- Refresh cycle schedule (real-time vs. batch)
+- Permission matrix for analytics access
+- Integration with `SuccessionAnalyticsPage.tsx`
 
-**Fields to Add (documented but missing):**
-| Field | Type | Purpose |
-|-------|------|---------|
-| `bias_multiplier` | `numeric(3,2)` | Multiplier for bias adjustment |
+**UI Components Referenced:**
+- `SuccessionAnalyticsPage.tsx`
+- `SuccessionAnalytics.tsx` (5-tab structure: Overview, Mentorship, Flight Risk, Career Development, Bench Strength)
 
-**SQL Migration:**
-```sql
--- Rename column to industry standard
-ALTER TABLE nine_box_signal_mappings RENAME COLUMN minimum_confidence TO min_confidence;
+**Industry Alignment:** Workday Analytics Hub pattern
 
--- Add missing field
-ALTER TABLE nine_box_signal_mappings ADD COLUMN bias_multiplier numeric(3,2) DEFAULT 1.0;
+---
+
+### Section 10.2: Succession Health Scorecard
+
+**Industry-Standard KPIs to Document:**
+
+| KPI | Calculation | Industry Benchmark |
+|-----|-------------|-------------------|
+| Succession Coverage Ratio | Plans with Candidates / Key Positions | 80%+ |
+| Ready-Now Successor Rate | Ready Now / Total Candidates | 15-25% |
+| Bench Strength Ratio | Ready Successors / Critical Positions | 2-3+ per position |
+| Average Successors per Position | Total Candidates / Active Plans | 2.0+ |
+| Pipeline Health Index | Weighted avg (coverage 40%, readiness 30%, risk 30%) | 70%+ |
+
+**Field References (succession_plans - 23 fields):**
+```
+id, company_id, position_id, plan_name, plan_name_en, description, 
+description_en, risk_level, priority, status, target_date, notes, 
+notes_en, created_by, is_active, start_date, end_date, created_at, 
+updated_at, position_criticality, replacement_difficulty, 
+calculated_risk_level, availability_reason_id
 ```
 
-**Updated Complete Schema (11 fields):**
-```
-id, company_id, signal_definition_id, contributes_to, weight, 
-min_confidence, bias_multiplier, is_active, created_at, updated_at
-```
-
 ---
 
-### 1.4 appraisal_integration_rules Table
+### Section 10.3: Bench Strength Analysis
 
-**No column renames needed** - Documentation matches database field names.
-
-**Documentation Update Required:**
-- Update field count from "20 fields" to "28 fields"
-- Add documentation for these 8 missing fields:
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `updated_at` | `timestamptz` | Last update timestamp |
-| `created_by` | `uuid` | User who created rule |
-| `rating_level_codes` | `text[]` | Rating codes for conditions |
-| `action_priority` | `integer` | Priority for execution order |
-| `action_is_mandatory` | `boolean` | Whether action is mandatory |
-| `action_message` | `text` | Custom message for action |
-| `requires_hr_override` | `boolean` | HR override requirement |
-| `condition_threshold` | `numeric` | Numeric threshold value |
-
----
-
-### 1.5 appraisal_integration_log Table
-
-**No column renames needed** - Documentation matches database field names.
-
-**Documentation Update Required:**
-- Add documentation for these 4 missing fields:
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `action_config` | `jsonb` | Action configuration at execution time |
-| `executed_by` | `uuid` | User who executed the action |
-| `approved_by` | `uuid` | User who approved the action |
-| `rejection_reason` | `text` | Reason if action was rejected |
-
----
-
-### 1.6 compensation_review_flags Table
-
-**Column Renames Required:**
-
-| Current DB Field | Industry Standard Name | Action |
-|------------------|----------------------|--------|
-| `source_participant_id` | `source_reference_id` | **Rename column** |
-
-**SQL Migration:**
-```sql
--- Rename to industry standard
-ALTER TABLE compensation_review_flags RENAME COLUMN source_participant_id TO source_reference_id;
-
--- Add missing field documented in manual
-ALTER TABLE compensation_review_flags ADD COLUMN flag_type text;
-```
-
-**Documentation Update Required:**
-Add these 11 missing fields to Section 9.9:
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `source_cycle_id` | `uuid` | Source cycle reference |
-| `performance_category_code` | `text` | Performance category |
-| `performance_score` | `numeric` | Numeric performance score |
-| `recommended_percentage` | `numeric` | Recommended adjustment % |
-| `justification` | `text` | Business justification |
-| `reviewed_at` | `timestamptz` | Review timestamp |
-| `reviewed_by` | `uuid` | Reviewer user |
-| `review_notes` | `text` | Review notes |
-| `processed_at` | `timestamptz` | Processing timestamp |
-| `processed_by` | `uuid` | Processor user |
-| `outcome_notes` | `text` | Final outcome notes |
-
----
-
-## Part 2: Edge Function Updates
-
-### 2.1 Code Changes for Renamed Fields
-
-The following edge functions need updates to reference the new field names:
-
-| Edge Function | Files to Update | Changes |
-|---------------|-----------------|---------|
-| `feedback-signal-processor` | `index.ts` | `code` → `signal_code`, `name` → `signal_name` |
-| `talent-risk-analyzer` | `index.ts` | `raw_score` → `raw_value`, `computed_at` → `captured_at` |
-| `appraisal-integration-orchestrator` | Signal queries | Field name updates |
-
-### 2.2 Undocumented Target Modules
-
-Add documentation for these 4 target modules in Section 9.2:
-
-| Target Module | Description | Action Types |
-|---------------|-------------|--------------|
-| `workforce_analytics` | Triggers performance index calculations | `calculate_index`, `update_metrics` |
-| `notifications` | Creates user notifications | `create_notification`, `send_alert` |
-| `reminders` | Creates HR reminder tasks | `create_reminder`, `schedule_task` |
-| `development` | Generates development themes from 360 | `generate_themes`, `create_goals` |
-
-### 2.3 Undocumented Action Types
-
-| Module | Undocumented Action | Description |
-|--------|---------------------|-------------|
-| `training` | `add_to_path` | Add employee to learning path |
-| `development` | `generate_themes` | AI-generate development themes |
-| `notifications` | `create_notification` | Create in-app notification |
-| `reminders` | `create_reminder` | Create HR reminder task |
-
----
-
-## Part 3: Documentation-Only Updates
-
-### 3.1 IntegrationTalentSignals.tsx Updates
-
-**FieldReferenceTable - Signal Definitions (17 fields):**
+**Coverage Score Algorithm (from BenchStrengthTab.tsx):**
 ```typescript
-const signalDefinitionFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier', defaultValue: 'Auto-generated' },
-  { name: 'company_id', required: false, type: 'uuid', description: 'Company scope (null for system signals)' },
-  { name: 'signal_code', required: true, type: 'text', description: 'Unique signal code (e.g., leadership_consistency)', validation: 'snake_case, max 50 chars' },
-  { name: 'signal_name', required: true, type: 'text', description: 'Display name for signal' },
-  { name: 'signal_name_en', required: false, type: 'text', description: 'English translation of signal name' },
-  { name: 'description', required: false, type: 'text', description: 'Detailed signal description' },
-  { name: 'category', required: true, type: 'enum', description: 'Signal category', validation: 'leadership | teamwork | technical | values | general' },
-  { name: 'source_module', required: false, type: 'text', description: 'Primary data source module', validation: 'performance | feedback_360 | competency | goals' },
-  { name: 'calculation_method', required: true, type: 'enum', description: 'Score aggregation method', validation: 'weighted_average | simple_average | median | max | min' },
-  { name: 'weight_default', required: false, type: 'numeric(5,2)', description: 'Default weight in calculations', defaultValue: '1.0' },
-  { name: 'confidence_threshold', required: true, type: 'numeric(3,2)', description: 'Minimum confidence for signal validity', defaultValue: '0.6' },
-  { name: 'bias_risk_factors', required: false, type: 'text[]', description: 'Known bias risk factors for this signal' },
-  { name: 'is_system_defined', required: true, type: 'boolean', description: 'System-provided vs. company-defined', defaultValue: 'false' },
-  { name: 'is_active', required: true, type: 'boolean', description: 'Active status for calculations', defaultValue: 'true' },
-  { name: 'display_order', required: false, type: 'integer', description: 'UI display ordering' },
-  { name: 'created_at', required: true, type: 'timestamptz', description: 'Record creation timestamp', defaultValue: 'now()' },
-  { name: 'updated_at', required: true, type: 'timestamptz', description: 'Last update timestamp', defaultValue: 'now()' },
-];
-```
-
-**FieldReferenceTable - Signal Snapshots (24 fields):**
-```typescript
-const signalSnapshotFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier' },
-  { name: 'employee_id', required: true, type: 'uuid', description: 'Target employee reference' },
-  { name: 'company_id', required: true, type: 'uuid', description: 'Company scope' },
-  { name: 'signal_definition_id', required: true, type: 'uuid', description: 'Reference to signal definition' },
-  { name: 'source_cycle_id', required: false, type: 'uuid', description: 'Source cycle (appraisal, 360, etc.)' },
-  { name: 'source_record_type', required: true, type: 'text', description: 'Type of source record', validation: 'appraisal | feedback_360 | competency_assessment | goal' },
-  { name: 'source_record_id', required: false, type: 'uuid', description: 'Specific source record reference' },
-  { name: 'snapshot_version', required: true, type: 'integer', description: 'Version number for this snapshot', defaultValue: '1' },
-  { name: 'signal_value', required: false, type: 'numeric(5,2)', description: 'Final computed signal value (0-100 scale)' },
-  { name: 'raw_value', required: false, type: 'numeric(5,2)', description: 'Raw score before normalization' },
-  { name: 'normalized_score', required: false, type: 'numeric(5,4)', description: 'Normalized score (0-1 scale)' },
-  { name: 'confidence_score', required: false, type: 'numeric(3,2)', description: 'Confidence level (0-1 scale)' },
-  { name: 'bias_risk_level', required: true, type: 'enum', description: 'Assessed bias risk', defaultValue: 'low', validation: 'low | medium | high' },
-  { name: 'bias_factors', required: false, type: 'text[]', description: 'Detected bias factors' },
-  { name: 'evidence_count', required: true, type: 'integer', description: 'Number of evidence sources', defaultValue: '0' },
-  { name: 'evidence_summary', required: false, type: 'jsonb', description: 'Summary of evidence (response_count, rater_group_count, score_range)' },
-  { name: 'rater_breakdown', required: false, type: 'jsonb', description: 'Breakdown by rater category (avg, count per category)' },
-  { name: 'data_freshness_days', required: false, type: 'integer', description: 'Days since data capture (computed)', defaultValue: 'Computed' },
-  { name: 'effective_from', required: true, type: 'timestamptz', description: 'Start of validity period' },
-  { name: 'expires_at', required: false, type: 'timestamptz', description: 'End of validity period (null = current)' },
-  { name: 'is_current', required: true, type: 'boolean', description: 'Current snapshot flag', defaultValue: 'true' },
-  { name: 'captured_at', required: true, type: 'timestamptz', description: 'When signal was computed' },
-  { name: 'created_at', required: true, type: 'timestamptz', description: 'Record creation timestamp' },
-  { name: 'created_by', required: false, type: 'uuid', description: 'User or system that created snapshot' },
-];
-```
-
----
-
-### 3.2 IntegrationRulesEngine.tsx Updates
-
-**FieldReferenceTable - Integration Rules (28 fields):**
-Add these 8 missing fields to existing table:
-
-```typescript
-// Add to existing integrationRuleFields array
-{ name: 'updated_at', required: true, type: 'timestamptz', description: 'Last update timestamp', defaultValue: 'now()' },
-{ name: 'created_by', required: false, type: 'uuid', description: 'User who created the rule' },
-{ name: 'rating_level_codes', required: false, type: 'text[]', description: 'Rating level codes for condition matching', validation: 'Array of valid rating codes' },
-{ name: 'action_priority', required: false, type: 'integer', description: 'Priority for action execution ordering', defaultValue: '100' },
-{ name: 'action_is_mandatory', required: true, type: 'boolean', description: 'Whether action completion is mandatory', defaultValue: 'false' },
-{ name: 'action_message', required: false, type: 'text', description: 'Custom message displayed with action' },
-{ name: 'requires_hr_override', required: true, type: 'boolean', description: 'Requires HR override to skip', defaultValue: 'false' },
-{ name: 'condition_threshold', required: false, type: 'numeric', description: 'Numeric threshold for condition evaluation' },
-```
-
-**Add Target Module Reference Table:**
-```typescript
-const targetModuleReference = [
-  { module: 'nine_box', description: 'Update Nine-Box placement', actions: 'update_placement, create_assessment, recalculate' },
-  { module: 'succession', description: 'Update succession candidate status', actions: 'update_readiness, add_candidate, flag_for_review' },
-  { module: 'idp', description: 'Create or update development plans', actions: 'create_goal, link_gap, recommend_action' },
-  { module: 'pip', description: 'Performance improvement plan triggers', actions: 'create_pip, add_milestone, escalate' },
-  { module: 'compensation', description: 'Create compensation review flags', actions: 'create_flag, recommend_adjustment, freeze_action' },
-  { module: 'training', description: 'Learning & development actions', actions: 'auto_enroll, create_request, recommend, add_to_path' },
-  { module: 'workforce_analytics', description: 'Update performance metrics', actions: 'calculate_index, update_metrics' },
-  { module: 'notifications', description: 'User notification triggers', actions: 'create_notification, send_alert' },
-  { module: 'reminders', description: 'HR reminder task creation', actions: 'create_reminder, schedule_task' },
-  { module: 'development', description: 'Development theme generation', actions: 'generate_themes, create_goals' },
-];
-```
-
----
-
-### 3.3 IntegrationExecutionAudit.tsx Updates
-
-**Add 4 Missing Fields:**
-```typescript
-// Add to existing integrationLogFields array
-{ name: 'action_config', required: false, type: 'jsonb', description: 'Action configuration snapshot at execution time' },
-{ name: 'executed_by', required: false, type: 'uuid', description: 'User who executed the action (null for auto-execute)' },
-{ name: 'approved_by', required: false, type: 'uuid', description: 'User who approved the action (if requires_approval)' },
-{ name: 'rejection_reason', required: false, type: 'text', description: 'Reason provided if action was rejected' },
-```
-
----
-
-### 3.4 IntegrationCompensation.tsx Updates
-
-**Complete Rewrite - 23 Fields:**
-```typescript
-const compensationFlagFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier' },
-  { name: 'employee_id', required: true, type: 'uuid', description: 'Target employee reference' },
-  { name: 'company_id', required: true, type: 'uuid', description: 'Company scope' },
-  { name: 'flag_type', required: true, type: 'text', description: 'Type of compensation flag', validation: 'retention | adjustment | freeze | bonus' },
-  { name: 'source_type', required: true, type: 'text', description: 'Source of the flag', validation: 'appraisal | succession | nine_box | manual' },
-  { name: 'source_reference_id', required: false, type: 'uuid', description: 'Reference to source record' },
-  { name: 'source_cycle_id', required: false, type: 'uuid', description: 'Source cycle reference' },
-  { name: 'performance_category_code', required: false, type: 'text', description: 'Performance category from appraisal' },
-  { name: 'performance_score', required: false, type: 'numeric(5,2)', description: 'Numeric performance score' },
-  { name: 'recommended_action', required: false, type: 'text', description: 'Recommended compensation action' },
-  { name: 'recommended_percentage', required: false, type: 'numeric(5,2)', description: 'Recommended adjustment percentage' },
-  { name: 'justification', required: false, type: 'text', description: 'Business justification for recommendation' },
-  { name: 'priority', required: true, type: 'enum', description: 'Flag priority level', defaultValue: 'medium', validation: 'low | medium | high | critical' },
-  { name: 'status', required: true, type: 'enum', description: 'Current flag status', defaultValue: 'pending', validation: 'pending | reviewed | processed | dismissed' },
-  { name: 'notes', required: false, type: 'text', description: 'Additional notes' },
-  { name: 'reviewed_at', required: false, type: 'timestamptz', description: 'When flag was reviewed' },
-  { name: 'reviewed_by', required: false, type: 'uuid', description: 'User who reviewed the flag' },
-  { name: 'review_notes', required: false, type: 'text', description: 'Notes from review' },
-  { name: 'processed_at', required: false, type: 'timestamptz', description: 'When flag was processed' },
-  { name: 'processed_by', required: false, type: 'uuid', description: 'User who processed the flag' },
-  { name: 'outcome_notes', required: false, type: 'text', description: 'Final outcome notes' },
-  { name: 'expires_at', required: false, type: 'timestamptz', description: 'Flag expiration date' },
-  { name: 'created_at', required: true, type: 'timestamptz', description: 'Record creation timestamp' },
-  { name: 'updated_at', required: true, type: 'timestamptz', description: 'Last update timestamp' },
-];
-```
-
----
-
-## Part 4: TypeScript Type Updates
-
-### 4.1 Update src/types/talentSignals.ts
-
-```typescript
-// Update TalentSignalDefinition interface
-export interface TalentSignalDefinition {
-  id: string;
-  company_id: string | null;
-  signal_code: string;  // Renamed from 'code'
-  signal_name: string;  // Renamed from 'name'
-  signal_name_en: string | null;  // Renamed from 'name_en'
-  description: string | null;
-  category: SignalCategory;  // Renamed from 'signal_category'
-  source_module: string | null;  // NEW
-  calculation_method: AggregationMethod;  // Renamed from 'aggregation_method'
-  weight_default: number;  // NEW
-  confidence_threshold: number;
-  bias_risk_factors: string[];
-  is_system_defined: boolean;
-  is_active: boolean;
-  display_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-// Update TalentSignalSnapshot interface
-export interface TalentSignalSnapshot {
-  id: string;
-  employee_id: string;
-  company_id: string;
-  signal_definition_id: string;
-  source_cycle_id: string | null;
-  source_record_type: string;  // Renamed from 'source_type'
-  source_record_id: string | null;  // NEW
-  snapshot_version: number;
-  signal_value: number | null;
-  raw_value: number | null;  // Renamed from 'raw_score'
-  normalized_score: number | null;
-  confidence_score: number | null;
-  bias_risk_level: BiasRiskLevel;
-  bias_factors: string[];
-  evidence_count: number;
-  evidence_summary: {
-    response_count: number;
-    rater_group_count: number;
-    score_range: { min: number; max: number };
-  };
-  rater_breakdown: Record<string, { avg: number; count: number }>;
-  data_freshness_days: number;  // NEW (computed)
-  effective_from: string;  // Renamed from 'valid_from'
-  expires_at: string | null;  // Renamed from 'valid_until'
-  is_current: boolean;
-  captured_at: string;  // Renamed from 'computed_at'
-  created_at: string;
-  created_by: string | null;
-  signal_definition?: TalentSignalDefinition;
+function calculateCoverageScore(position: PositionCoverage): number {
+  // Ready now = 40 points per candidate (max 80)
+  // Ready 1-2 years = 20 points per candidate (max 40)
+  // Ready 3+ years = 10 points per candidate (max 20)
+  return Math.min(100, 
+    Math.min(80, ready_now * 40) + 
+    Math.min(40, ready_1_2 * 20) + 
+    Math.min(20, ready_3_plus * 10)
+  );
 }
 ```
 
-### 4.2 Update src/hooks/feedback/useTalentSignals.ts
+**Coverage Thresholds (Industry Standard):**
+| Score | Level | Color | Action |
+|-------|-------|-------|--------|
+| 80-100 | Strong | Green | Maintain |
+| 50-79 | Moderate | Yellow | Develop pipeline |
+| 20-49 | Weak | Orange | Accelerate development |
+| 0-19 | Critical | Red | Immediate action |
 
-Update all query field references to match new column names.
+**Bench Depth Metrics:**
+| Metric | Description | Benchmark |
+|--------|-------------|-----------|
+| Single-Successor Risk | Positions with only 1 successor | <10% of key positions |
+| No-Successor Positions | Plans without any candidates | 0% target |
+| Strong Bench | Positions with 2+ ready successors | 80%+ of key positions |
 
----
-
-## Part 5: Industry Alignment Enhancements (New Sections)
-
-### 5.1 Section 9.13: Calibration Meeting Integration
-
-**Purpose:** Document how talent review/calibration meetings trigger Nine-Box and succession updates.
-
-**Content:**
-- Calibration session workflow
-- Cross-calibration adjustments
-- Nine-Box grid updates from calibration
-- Succession candidate re-ranking
-- Meeting outcome capture
-
-**Industry Alignment:** SAP SuccessFactors Calibration, Workday Talent Review
-
----
-
-### 5.2 Section 9.14: Internal Recruitment Integration
-
-**Purpose:** Document succession candidate fast-tracking for internal postings.
-
-**Content:**
-- Internal job posting visibility for succession candidates
-- Candidate fast-tracking workflow
-- Readiness-to-requisition matching
-- Hiring manager succession visibility
-- Offer impact on succession plans
-
-**Industry Alignment:** Workday Internal Mobility, Oracle Recruiting Cloud
+**Field References (succession_candidates - 20 fields):**
+```
+id, plan_id, employee_id, readiness_level, readiness_timeline, 
+strengths, development_areas, ranking, status, notes, nominated_by, 
+created_at, updated_at, performance_risk_id, is_promotion_blocked, 
+block_reason, last_risk_check_at, latest_readiness_score, 
+latest_readiness_band, readiness_assessed_at
+```
 
 ---
 
-### 5.3 Section 9.15: Integration API & Webhooks
+### Section 10.4: Flight Risk & Retention Reporting
 
-**Purpose:** Document external system integration capabilities.
+**Industry Terminology (Oracle HCM Pattern):**
+
+| Term | Definition |
+|------|------------|
+| **Risk of Loss** | Probability an employee will leave (flight risk level) |
+| **Impact of Loss** | Business consequence if employee departs |
+| **Retention Risk** | Combined risk/impact assessment |
+
+**Risk Level Distribution:**
+| Level | Description | Priority |
+|-------|-------------|----------|
+| Critical | Likely to leave within 30 days | Immediate intervention |
+| High | Actively looking, 3-6 month risk | Priority retention plan |
+| Medium | Disengaged, 6-12 month risk | Development focus |
+| Low | Stable, no immediate concern | Monitor quarterly |
+
+**Standard Risk Factors (JSONB):**
+- Low engagement scores
+- Compensation below market
+- Limited growth opportunities
+- Passed over for promotion
+- Recent negative feedback
+- Work-life balance issues
+- External offer received
+- Manager relationship issues
+
+**Retention Risk Matrix Fields (from RetentionRiskMatrix.tsx):**
+| Criticality \ Difficulty | Difficult | Moderate | Easy |
+|--------------------------|-----------|----------|------|
+| Most Critical | High (3) | High (2) | Moderate (3) |
+| Critical | High (1) | Moderate (2) | Low (3) |
+| Important | Moderate (1) | Low (2) | Low (1) |
+
+**Field References (flight_risk_assessments - 13 fields):**
+```
+id, company_id, employee_id, risk_level, risk_factors, 
+retention_actions, assessed_by, assessment_date, next_review_date, 
+notes, is_current, created_at, updated_at
+```
+
+---
+
+### Section 10.5: Nine-Box Distribution & Movement Reports
+
+**Nine-Box Grid Labels (McKinsey Model):**
+| Position (Perf, Pot) | Industry Label | Action |
+|----------------------|----------------|--------|
+| 3,3 | Future Stars | Accelerate development, stretch assignments |
+| 2,3 | Growth Employees | Invest in development |
+| 1,3 | Enigmas | Investigate blockers |
+| 3,2 | High Performers | Recognize, retain |
+| 2,2 | Core Players | Maintain engagement |
+| 1,2 | Dilemmas | Performance coaching |
+| 3,1 | Solid Contributors | Role optimization |
+| 2,1 | Average Performers | Skill development |
+| 1,1 | At Risk | PIP or exit |
+
+**Healthy Distribution Benchmarks (SAP/Workday):**
+| Quadrant | Target % |
+|----------|----------|
+| Top-right (3,3) | 10-15% |
+| Core (2,2) | 40-50% |
+| Bottom-left (1,1) | <5% |
+
+**Movement Analysis Metrics:**
+- **Upward Movement Rate**: % moving to higher potential/performance
+- **Calibration Variance**: Deviation between assessors
+- **Assessment Currency**: % with current (is_current=true) assessment
+
+**Field References (nine_box_assessments - 14 fields):**
+```
+id, company_id, employee_id, assessed_by, assessment_date, 
+performance_rating, potential_rating, performance_notes, 
+potential_notes, overall_notes, assessment_period, is_current, 
+created_at, updated_at
+```
+
+---
+
+### Section 10.6: Talent Pipeline Metrics
+
+**Key Metrics (Industry Standard):**
+| Metric | Calculation | Benchmark |
+|--------|-------------|-----------|
+| Pool → Succession Conversion | Graduated to Succession / Ever Active | 20-30% |
+| Ready-Now Rate | Ready Now Band / Active Members | 15-25% |
+| Stagnation Rate | No status change 12+ months / Active | <15% |
+| Attrition from Pool | Departed / Total Members | <8% |
+| Pipeline Velocity | Avg time nomination → graduation | <24 months |
+| Graduation Rate | Graduated to successor / Total graduated | Track |
+
+**Pool Status Lifecycle:**
+```
+nominated → approved → active → [graduated | removed]
+                    ↓
+                  rejected
+```
+
+**Field References (talent_pools - 13 fields):**
+```
+id, company_id, name, code, description, pool_type, criteria, 
+is_active, start_date, end_date, created_by, created_at, updated_at
+```
+
+**Field References (talent_pool_members - 11 fields):**
+```
+id, pool_id, employee_id, added_by, reason, status, start_date, 
+end_date, development_notes, created_at, updated_at
+```
+
+---
+
+### Section 10.7: Readiness Trend Analysis
+
+**Time-to-Readiness Metrics (Visier/Workday):**
+| Band | Expected Timeline | Development Focus |
+|------|------------------|-------------------|
+| Ready Now | Immediate | Retain, exposure |
+| Ready 1-2 Years | 12-24 months | Stretch assignments |
+| Ready 3+ Years | 24-36 months | Foundational development |
+| Developing | 36+ months | Long-term pipeline |
+
+**Trend Analysis Features:**
+- Score progression over assessment cycles
+- Development activity impact correlation
+- Readiness band movement patterns
+- AI trajectory forecasting
+
+**Data Sources:**
+- `readiness_assessment_responses` (historical scores)
+- `readiness_assessment_events` (cycle tracking)
+- `succession_development_plans` (activity completion)
+
+---
+
+### Section 10.8: Diversity & Inclusion Analytics
+
+**DEI Metrics for Succession (SHRM/Visier):**
+| Metric | Description |
+|--------|-------------|
+| Pipeline Representation | % of underrepresented groups in succession pools |
+| Leadership Pipeline Diversity | Diversity of ready-now successors vs. total workforce |
+| Pool-to-Promotion Equity | Conversion rate by demographic group |
+| Diversity Gap | Difference between pipeline and target representation |
+
+**Industry Requirement:** Organizations increasingly track diversity in succession as part of ESG reporting and board oversight (SAP SuccessFactors Talent Intelligence, Workday People Analytics).
+
+---
+
+### Section 10.9: Executive Summary Reports
+
+**Standard Report Types (Oracle/Workday Pattern):**
+| Report | Frequency | Audience |
+|--------|-----------|----------|
+| Succession Health Scorecard | Monthly | HR Leadership |
+| Quarterly Pipeline Review | Quarterly | Executive Team |
+| Board-Level Summary | Annual | Board of Directors |
+| Emergency Vacancy Report | On-demand | Crisis response |
+
+**Export Formats:**
+- PDF with executive summary
+- Excel with detailed data (pivot-ready)
+- PowerPoint for presentations
+
+**Key Metrics for Board Reporting:**
+- Succession coverage ratio (vs. target)
+- Ready-now rate for C-suite
+- Diversity in leadership pipeline
+- Flight risk for critical positions
+- Year-over-year progress
+
+---
+
+### Section 10.10: AI-Powered Insights
+
+**AI Report Builder Integration:**
+- `AIModuleReportBuilder` component with `moduleName="succession"`
+- Banded reports (qualitative analysis)
+- BI reports (quantitative dashboards)
+
+**Predictive Analytics (Visier Pattern):**
+- Succession risk prediction
+- Readiness trajectory forecasting
+- Hidden high-potential identification
+- Attrition risk for successors
+
+**Natural Language Query Examples:**
+- "Which critical positions have no ready-now successors?"
+- "What is our succession coverage trend over the last 3 years?"
+- "Show me successors with high flight risk"
+
+---
+
+### Section 10.11: Report Configuration & Scheduling
 
 **Content:**
-- Webhook event types
-- API endpoints for external systems
-- Authentication and security
-- Event payload structures
-- Error handling and retries
+- Custom report builder configuration
+- Scheduled delivery (email, dashboard refresh)
+- Access control by role (Admin, HR Partner, Executive)
+- Report versioning and audit trail
 
-**Industry Alignment:** Modern API-first architecture pattern
+---
+
+### Section 10.12: Analytics Troubleshooting
+
+**Common Issues & Resolutions:**
+| Issue | Cause | Resolution |
+|-------|-------|------------|
+| Missing candidates in coverage | `status != 'active'` | Verify candidate status filter |
+| Incorrect Nine-Box count | `is_current = false` | Filter for current assessments |
+| Flight risk not updating | Assessment date stale | Create new assessment |
+| Coverage score mismatch | Readiness level mapping | Review readiness tier configuration |
+| Diversity data incomplete | Profile demographics missing | Update employee profiles |
+| Benchmark not displaying | Sample size below threshold | Verify minimum 10 participants |
+| Trend data missing | Requires 2+ cycles | Ensure historical data exists |
+
+---
+
+## File Structure
+
+### Files to Create (12 new files)
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `AnalyticsArchitectureOverview.tsx` | `sections/analytics/` | Section 10.1 |
+| `SuccessionHealthScorecard.tsx` | `sections/analytics/` | Section 10.2 |
+| `BenchStrengthAnalysis.tsx` | `sections/analytics/` | Section 10.3 |
+| `FlightRiskRetentionReporting.tsx` | `sections/analytics/` | Section 10.4 |
+| `NineBoxDistributionReports.tsx` | `sections/analytics/` | Section 10.5 |
+| `TalentPipelineMetrics.tsx` | `sections/analytics/` | Section 10.6 |
+| `ReadinessTrendAnalysis.tsx` | `sections/analytics/` | Section 10.7 |
+| `DiversityInclusionAnalytics.tsx` | `sections/analytics/` | Section 10.8 |
+| `ExecutiveSummaryReports.tsx` | `sections/analytics/` | Section 10.9 |
+| `AIPoweredInsights.tsx` | `sections/analytics/` | Section 10.10 |
+| `ReportConfigurationScheduling.tsx` | `sections/analytics/` | Section 10.11 |
+| `AnalyticsTroubleshooting.tsx` | `sections/analytics/` | Section 10.12 |
+| `index.ts` | `sections/analytics/` | Exports |
+
+### Files to Modify
+
+| File | Change |
+|------|--------|
+| `SuccessionAnalyticsSection.tsx` | Replace placeholder with modular imports |
+| `src/types/successionManual.ts` | Update TOC with 12 subsections |
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Database Schema Updates (Priority: Critical)
+### Phase 1: Structure & Foundation (1 hour)
+- Create `src/components/enablement/manual/succession/sections/analytics/` directory
+- Create `index.ts` with all exports
+- Update `SuccessionAnalyticsSection.tsx` to import modular sections
+- Update `successionManual.ts` TOC structure
 
-**SQL Migrations:**
+### Phase 2: Core Analytics (10.1-10.5) (4-5 hours)
+- `AnalyticsArchitectureOverview.tsx` - Data flow and permissions
+- `SuccessionHealthScorecard.tsx` - Industry KPIs with benchmarks
+- `BenchStrengthAnalysis.tsx` - Coverage algorithm documentation
+- `FlightRiskRetentionReporting.tsx` - Oracle HCM pattern terminology
+- `NineBoxDistributionReports.tsx` - McKinsey grid labels and movement
 
-```sql
--- Migration 1: talent_signal_definitions column renames
-ALTER TABLE talent_signal_definitions RENAME COLUMN code TO signal_code;
-ALTER TABLE talent_signal_definitions RENAME COLUMN name TO signal_name;
-ALTER TABLE talent_signal_definitions RENAME COLUMN name_en TO signal_name_en;
-ALTER TABLE talent_signal_definitions RENAME COLUMN signal_category TO category;
-ALTER TABLE talent_signal_definitions RENAME COLUMN aggregation_method TO calculation_method;
-ALTER TABLE talent_signal_definitions ADD COLUMN IF NOT EXISTS weight_default numeric(5,2) DEFAULT 1.0;
-ALTER TABLE talent_signal_definitions ADD COLUMN IF NOT EXISTS source_module text;
+### Phase 3: Advanced Analytics (10.6-10.9) (3-4 hours)
+- `TalentPipelineMetrics.tsx` - Pipeline velocity and conversion
+- `ReadinessTrendAnalysis.tsx` - Time-to-readiness patterns
+- `DiversityInclusionAnalytics.tsx` - DEI metrics and ESG alignment
+- `ExecutiveSummaryReports.tsx` - Board-level reporting
 
--- Migration 2: talent_signal_snapshots column renames
-ALTER TABLE talent_signal_snapshots RENAME COLUMN raw_score TO raw_value;
-ALTER TABLE talent_signal_snapshots RENAME COLUMN computed_at TO captured_at;
-ALTER TABLE talent_signal_snapshots RENAME COLUMN valid_until TO expires_at;
-ALTER TABLE talent_signal_snapshots RENAME COLUMN valid_from TO effective_from;
-ALTER TABLE talent_signal_snapshots RENAME COLUMN source_type TO source_record_type;
-ALTER TABLE talent_signal_snapshots ADD COLUMN IF NOT EXISTS source_record_id uuid;
-
--- Migration 3: nine_box_signal_mappings column renames
-ALTER TABLE nine_box_signal_mappings RENAME COLUMN minimum_confidence TO min_confidence;
-ALTER TABLE nine_box_signal_mappings ADD COLUMN IF NOT EXISTS bias_multiplier numeric(3,2) DEFAULT 1.0;
-
--- Migration 4: compensation_review_flags updates
-ALTER TABLE compensation_review_flags RENAME COLUMN source_participant_id TO source_reference_id;
-ALTER TABLE compensation_review_flags ADD COLUMN IF NOT EXISTS flag_type text;
-```
-
-| Table | Column Renames | New Columns |
-|-------|----------------|-------------|
-| `talent_signal_definitions` | 5 | 2 |
-| `talent_signal_snapshots` | 5 | 1 |
-| `nine_box_signal_mappings` | 1 | 1 |
-| `compensation_review_flags` | 1 | 1 |
-
----
-
-### Phase 2: Edge Function Updates (Priority: Critical)
-
-| Edge Function | Changes Required |
-|---------------|------------------|
-| `feedback-signal-processor` | Update field references for signal definitions and snapshots |
-| `talent-risk-analyzer` | Update snapshot field references |
-| `appraisal-integration-orchestrator` | Update signal query field names |
-
----
-
-### Phase 3: TypeScript Updates (Priority: High)
-
-| File | Changes |
-|------|---------|
-| `src/types/talentSignals.ts` | Update interfaces with new field names |
-| `src/hooks/feedback/useTalentSignals.ts` | Update query field references |
-| Any components using signal data | Update field access patterns |
-
----
-
-### Phase 4: Documentation Updates (Priority: High)
-
-| File | Changes | Lines |
-|------|---------|-------|
-| `IntegrationTalentSignals.tsx` | Complete field table rewrites (17 + 24 fields) | ~250 |
-| `IntegrationRulesEngine.tsx` | Add 8 fields + 10 target modules | ~120 |
-| `IntegrationExecutionAudit.tsx` | Add 4 fields | ~40 |
-| `IntegrationCompensation.tsx` | Complete rewrite (23 fields) | ~150 |
-| `IntegrationLearningDevelopment.tsx` | Add `add_to_path` action | ~20 |
-
----
-
-### Phase 5: New Sections (Priority: Medium)
-
-| File | Purpose | Lines |
-|------|---------|-------|
-| `IntegrationCalibration.tsx` | Calibration meeting integration | ~250 |
-| `IntegrationRecruitment.tsx` | Internal recruitment integration | ~200 |
-| `IntegrationAPI.tsx` | API/Webhook documentation | ~200 |
-| `src/types/successionManual.ts` | Add 3 new section definitions | ~50 |
-
----
-
-## Files to Modify Summary
-
-| File | Change Type | Priority |
-|------|-------------|----------|
-| Database migrations | Schema changes | Critical |
-| `supabase/functions/feedback-signal-processor/index.ts` | Field name updates | Critical |
-| `supabase/functions/talent-risk-analyzer/index.ts` | Field name updates | Critical |
-| `supabase/functions/appraisal-integration-orchestrator/index.ts` | Field name updates | Critical |
-| `src/types/talentSignals.ts` | Interface updates | High |
-| `src/hooks/feedback/useTalentSignals.ts` | Query updates | High |
-| `src/components/enablement/manual/succession/sections/integration/IntegrationTalentSignals.tsx` | Field tables | High |
-| `src/components/enablement/manual/succession/sections/integration/IntegrationRulesEngine.tsx` | Field tables + modules | High |
-| `src/components/enablement/manual/succession/sections/integration/IntegrationExecutionAudit.tsx` | Field additions | High |
-| `src/components/enablement/manual/succession/sections/integration/IntegrationCompensation.tsx` | Complete rewrite | High |
-| `src/components/enablement/manual/succession/sections/integration/IntegrationLearningDevelopment.tsx` | Action addition | Medium |
-| `src/components/enablement/manual/succession/sections/integration/IntegrationCalibration.tsx` | New file | Medium |
-| `src/components/enablement/manual/succession/sections/integration/IntegrationRecruitment.tsx` | New file | Medium |
-| `src/components/enablement/manual/succession/sections/integration/IntegrationAPI.tsx` | New file | Medium |
-| `src/types/successionManual.ts` | Structure update | Medium |
-
----
-
-## Estimated Effort
-
-| Phase | Files | Effort |
-|-------|-------|--------|
-| Phase 1: DB Schema | 4 migrations | 1-2 hours |
-| Phase 2: Edge Functions | 3 files | 2-3 hours |
-| Phase 3: TypeScript | 2 files | 1-2 hours |
-| Phase 4: Documentation | 5 files | 3-4 hours |
-| Phase 5: New Sections | 4 files | 3-4 hours |
-| **Total** | **18 files** | **10-15 hours** |
+### Phase 4: AI & Configuration (10.10-10.12) (2-3 hours)
+- `AIPoweredInsights.tsx` - AI report builder and predictive analytics
+- `ReportConfigurationScheduling.tsx` - Access control and scheduling
+- `AnalyticsTroubleshooting.tsx` - Common issues and resolutions
 
 ---
 
@@ -637,9 +462,35 @@ ALTER TABLE compensation_review_flags ADD COLUMN IF NOT EXISTS flag_type text;
 
 | Metric | Current | Target |
 |--------|---------|--------|
-| Schema field accuracy | ~70% | 100% |
-| Field naming consistency | ~60% | 100% (industry standard) |
-| Edge function coverage | ~75% | 100% |
-| Industry standard alignment | ~80% | 95% |
-| Field reference tables complete | 6/12 | 15/15 |
+| Documented sections | 4 (placeholders) | 12 (comprehensive) |
+| Field references | 0 | 7 tables (~110 fields) |
+| Algorithm documentation | 0 | 4 (coverage, risk matrix, distribution, pipeline) |
+| Industry-standard KPIs | 0 | 15+ metrics |
+| Industry terminology alignment | 0% | 100% |
+| UI component coverage | 0% | 100% |
+| Troubleshooting guides | 0 | 10+ common issues |
+
+---
+
+## Estimated Effort
+
+| Phase | Files | Lines | Time |
+|-------|-------|-------|------|
+| Phase 1: Structure | 3 | ~150 | 1 hour |
+| Phase 2: Core Analytics | 5 | ~1,800 | 4-5 hours |
+| Phase 3: Advanced Analytics | 4 | ~1,400 | 3-4 hours |
+| Phase 4: AI & Config | 3 | ~900 | 2-3 hours |
+| **Total** | **15** | **~4,250** | **10-13 hours** |
+
+---
+
+## Industry Alignment Summary
+
+| Standard | Alignment Area |
+|----------|---------------|
+| **SAP SuccessFactors** | Succession Coverage Ratio, Bench Strength Ratio, Nine-Box calibration |
+| **Workday** | Pipeline Velocity, Time-to-Readiness, Career Path Ratio |
+| **Oracle HCM** | Risk of Loss, Impact of Loss, Retention Risk Matrix, Talent Review |
+| **SHRM/Visier** | Ready-Now Rate, Internal Hire Rate, DEI Pipeline Metrics |
+| **ISO 30414** | Human Capital Reporting metrics for succession |
 
