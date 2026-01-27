@@ -19,12 +19,14 @@ export type AggregationMethod =
 export interface TalentSignalDefinition {
   id: string;
   company_id: string | null;
-  code: string;
-  name: string;
-  name_en: string | null;
+  signal_code: string;
+  signal_name: string;
+  signal_name_en: string | null;
   description: string | null;
-  signal_category: SignalCategory;
-  aggregation_method: AggregationMethod;
+  category: SignalCategory;
+  source_module: string | null;
+  calculation_method: AggregationMethod;
+  weight_default: number;
   confidence_threshold: number;
   bias_risk_factors: string[];
   is_system_defined: boolean;
@@ -56,10 +58,11 @@ export interface TalentSignalSnapshot {
   company_id: string;
   signal_definition_id: string;
   source_cycle_id: string | null;
-  source_type: string;
+  source_record_type: string;
+  source_record_id: string | null;
   snapshot_version: number;
   signal_value: number | null;
-  raw_score: number | null;
+  raw_value: number | null;
   normalized_score: number | null;
   confidence_score: number | null;
   bias_risk_level: BiasRiskLevel;
@@ -71,10 +74,11 @@ export interface TalentSignalSnapshot {
     score_range: { min: number; max: number };
   };
   rater_breakdown: Record<string, { avg: number; count: number }>;
-  valid_from: string;
-  valid_until: string | null;
+  data_freshness_days?: number;
+  effective_from: string;
+  expires_at: string | null;
   is_current: boolean;
-  computed_at: string;
+  captured_at: string;
   created_at: string;
   created_by: string | null;
   signal_definition?: TalentSignalDefinition;

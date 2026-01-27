@@ -17,10 +17,10 @@ interface SignalSnapshot {
   evidence_count: number;
   evidence_summary: any;
   rater_breakdown: any;
-  computed_at: string;
+  captured_at: string;
   signal_definition?: {
-    name: string;
-    signal_category: string;
+    signal_name: string;
+    category: string;
   };
 }
 
@@ -50,11 +50,11 @@ export function EvidenceLineageViewer({ employeeId, signalId }: EvidenceLineageV
         .from('talent_signal_snapshots')
         .select(`
           *,
-          signal_definition:signal_definition_id(name, signal_category)
+          signal_definition:signal_definition_id(signal_name, category)
         `)
         .eq('employee_id', employeeId)
         .eq('is_current', true)
-        .order('computed_at', { ascending: false });
+        .order('captured_at', { ascending: false });
       if (error) throw error;
       return (data || []) as unknown as SignalSnapshot[];
     },
@@ -158,10 +158,10 @@ export function EvidenceLineageViewer({ employeeId, signalId }: EvidenceLineageV
                     <div className="flex items-start justify-between">
                       <div>
                         <CardTitle className="text-sm">
-                          {snapshot.signal_definition?.name || 'Unknown Signal'}
+                          {snapshot.signal_definition?.signal_name || 'Unknown Signal'}
                         </CardTitle>
                         <Badge variant="outline" className="mt-1 text-xs">
-                          {snapshot.signal_definition?.signal_category}
+                          {snapshot.signal_definition?.category}
                         </Badge>
                       </div>
                       <div className="text-right">

@@ -11575,6 +11575,7 @@ export type Database = {
           created_at: string
           employee_id: string
           expires_at: string | null
+          flag_type: string | null
           id: string
           justification: string | null
           outcome_notes: string | null
@@ -11589,7 +11590,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           source_cycle_id: string | null
-          source_participant_id: string | null
+          source_reference_id: string | null
           source_type: string
           status: string
           updated_at: string
@@ -11599,6 +11600,7 @@ export type Database = {
           created_at?: string
           employee_id: string
           expires_at?: string | null
+          flag_type?: string | null
           id?: string
           justification?: string | null
           outcome_notes?: string | null
@@ -11613,7 +11615,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           source_cycle_id?: string | null
-          source_participant_id?: string | null
+          source_reference_id?: string | null
           source_type?: string
           status?: string
           updated_at?: string
@@ -11623,6 +11625,7 @@ export type Database = {
           created_at?: string
           employee_id?: string
           expires_at?: string | null
+          flag_type?: string | null
           id?: string
           justification?: string | null
           outcome_notes?: string | null
@@ -11637,7 +11640,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           source_cycle_id?: string | null
-          source_participant_id?: string | null
+          source_reference_id?: string | null
           source_type?: string
           status?: string
           updated_at?: string
@@ -11701,7 +11704,7 @@ export type Database = {
           },
           {
             foreignKeyName: "compensation_review_flags_source_participant_id_fkey"
-            columns: ["source_participant_id"]
+            columns: ["source_reference_id"]
             isOneToOne: false
             referencedRelation: "appraisal_participants"
             referencedColumns: ["id"]
@@ -50084,34 +50087,37 @@ export type Database = {
       }
       nine_box_signal_mappings: {
         Row: {
+          bias_multiplier: number | null
           company_id: string | null
           contributes_to: string | null
           created_at: string | null
           id: string
           is_active: boolean | null
-          minimum_confidence: number | null
+          min_confidence: number | null
           signal_definition_id: string | null
           updated_at: string | null
           weight: number | null
         }
         Insert: {
+          bias_multiplier?: number | null
           company_id?: string | null
           contributes_to?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
-          minimum_confidence?: number | null
+          min_confidence?: number | null
           signal_definition_id?: string | null
           updated_at?: string | null
           weight?: number | null
         }
         Update: {
+          bias_multiplier?: number | null
           company_id?: string | null
           contributes_to?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
-          minimum_confidence?: number | null
+          min_confidence?: number | null
           signal_definition_id?: string | null
           updated_at?: string | null
           weight?: number | null
@@ -69995,9 +70001,9 @@ export type Database = {
       }
       talent_signal_definitions: {
         Row: {
-          aggregation_method: string | null
           bias_risk_factors: Json | null
-          code: string
+          calculation_method: string | null
+          category: string
           company_id: string | null
           confidence_threshold: number | null
           created_at: string | null
@@ -70006,15 +70012,17 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_system_defined: boolean | null
-          name: string
-          name_en: string | null
-          signal_category: string
+          signal_code: string
+          signal_name: string
+          signal_name_en: string | null
+          source_module: string | null
           updated_at: string | null
+          weight_default: number | null
         }
         Insert: {
-          aggregation_method?: string | null
           bias_risk_factors?: Json | null
-          code: string
+          calculation_method?: string | null
+          category?: string
           company_id?: string | null
           confidence_threshold?: number | null
           created_at?: string | null
@@ -70023,15 +70031,17 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_system_defined?: boolean | null
-          name: string
-          name_en?: string | null
-          signal_category?: string
+          signal_code: string
+          signal_name: string
+          signal_name_en?: string | null
+          source_module?: string | null
           updated_at?: string | null
+          weight_default?: number | null
         }
         Update: {
-          aggregation_method?: string | null
           bias_risk_factors?: Json | null
-          code?: string
+          calculation_method?: string | null
+          category?: string
           company_id?: string | null
           confidence_threshold?: number | null
           created_at?: string | null
@@ -70040,10 +70050,12 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_system_defined?: boolean | null
-          name?: string
-          name_en?: string | null
-          signal_category?: string
+          signal_code?: string
+          signal_name?: string
+          signal_name_en?: string | null
+          source_module?: string | null
           updated_at?: string | null
+          weight_default?: number | null
         }
         Relationships: [
           {
@@ -70122,74 +70134,77 @@ export type Database = {
         Row: {
           bias_factors: Json | null
           bias_risk_level: string | null
+          captured_at: string | null
           company_id: string | null
-          computed_at: string | null
           confidence_score: number | null
           created_at: string | null
           created_by: string | null
+          effective_from: string | null
           employee_id: string | null
           evidence_count: number | null
           evidence_summary: Json | null
+          expires_at: string | null
           id: string
           is_current: boolean | null
           normalized_score: number | null
           rater_breakdown: Json | null
-          raw_score: number | null
+          raw_value: number | null
           signal_definition_id: string | null
           signal_value: number | null
           snapshot_version: number | null
           source_cycle_id: string | null
-          source_type: string
-          valid_from: string | null
-          valid_until: string | null
+          source_record_id: string | null
+          source_record_type: string
         }
         Insert: {
           bias_factors?: Json | null
           bias_risk_level?: string | null
+          captured_at?: string | null
           company_id?: string | null
-          computed_at?: string | null
           confidence_score?: number | null
           created_at?: string | null
           created_by?: string | null
+          effective_from?: string | null
           employee_id?: string | null
           evidence_count?: number | null
           evidence_summary?: Json | null
+          expires_at?: string | null
           id?: string
           is_current?: boolean | null
           normalized_score?: number | null
           rater_breakdown?: Json | null
-          raw_score?: number | null
+          raw_value?: number | null
           signal_definition_id?: string | null
           signal_value?: number | null
           snapshot_version?: number | null
           source_cycle_id?: string | null
-          source_type: string
-          valid_from?: string | null
-          valid_until?: string | null
+          source_record_id?: string | null
+          source_record_type: string
         }
         Update: {
           bias_factors?: Json | null
           bias_risk_level?: string | null
+          captured_at?: string | null
           company_id?: string | null
-          computed_at?: string | null
           confidence_score?: number | null
           created_at?: string | null
           created_by?: string | null
+          effective_from?: string | null
           employee_id?: string | null
           evidence_count?: number | null
           evidence_summary?: Json | null
+          expires_at?: string | null
           id?: string
           is_current?: boolean | null
           normalized_score?: number | null
           rater_breakdown?: Json | null
-          raw_score?: number | null
+          raw_value?: number | null
           signal_definition_id?: string | null
           signal_value?: number | null
           snapshot_version?: number | null
           source_cycle_id?: string | null
-          source_type?: string
-          valid_from?: string | null
-          valid_until?: string | null
+          source_record_id?: string | null
+          source_record_type?: string
         }
         Relationships: [
           {

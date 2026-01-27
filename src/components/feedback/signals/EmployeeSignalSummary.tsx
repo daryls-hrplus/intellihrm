@@ -86,7 +86,7 @@ export function EmployeeSignalSummary({
   // Group by category
   const byCategory: Record<string, typeof signals> = {};
   signals.forEach((signal) => {
-    const category = signal.signal_definition?.signal_category || "general";
+    const category = signal.signal_definition?.category || "general";
     if (!byCategory[category]) byCategory[category] = [];
     byCategory[category].push(signal);
   });
@@ -122,7 +122,7 @@ export function EmployeeSignalSummary({
           {signals.slice(0, 4).map((signal) => (
             <div key={signal.id} className="flex items-center justify-between gap-2">
               <span className="text-sm truncate flex-1">
-                {signal.signal_definition?.name || "Unknown Signal"}
+                {signal.signal_definition?.signal_name || "Unknown Signal"}
               </span>
               <div className="flex items-center gap-2">
                 <Progress
@@ -181,7 +181,7 @@ export function EmployeeSignalSummary({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">
-                        {signal.signal_definition?.name || "Unknown Signal"}
+                        {signal.signal_definition?.signal_name || "Unknown Signal"}
                       </span>
                       <SignalConfidenceIndicator
                         confidence={signal.confidence_score || 0}
@@ -220,7 +220,7 @@ export function EmployeeSignalSummary({
             <div className="flex flex-wrap gap-2">
               {strengths.map((signal) => (
                 <Badge key={signal.id} variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                  {signal.signal_definition?.name} ({signal.signal_value?.toFixed(0)})
+                  {signal.signal_definition?.signal_name} ({signal.signal_value?.toFixed(0)})
                 </Badge>
               ))}
             </div>
@@ -237,7 +237,7 @@ export function EmployeeSignalSummary({
             <div className="flex flex-wrap gap-2">
               {developmentAreas.map((signal) => (
                 <Badge key={signal.id} variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                  {signal.signal_definition?.name} ({signal.signal_value?.toFixed(0)})
+                  {signal.signal_definition?.signal_name} ({signal.signal_value?.toFixed(0)})
                 </Badge>
               ))}
             </div>

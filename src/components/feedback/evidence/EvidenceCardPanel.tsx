@@ -116,7 +116,7 @@ export function EvidenceCardPanel({
             {card.source_snapshot && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="font-medium">
-                  {card.source_snapshot.signal_definition?.name}
+                  {card.source_snapshot.signal_definition?.signal_name}
                 </span>
                 <span>•</span>
                 <span>

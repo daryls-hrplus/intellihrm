@@ -10,9 +10,9 @@ interface SignalData {
   confidence_score: number | null;
   bias_risk_level: string;
   signal_definition: {
-    code: string;
-    name: string;
-    signal_category: string;
+    signal_code: string;
+    signal_name: string;
+    category: string;
   } | null;
 }
 
@@ -141,7 +141,7 @@ export function RatingSourcesPanel({
                 <div className="space-y-2">
                   {signals.map((signal) => (
                     <div key={signal.id} className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">{signal.signal_definition?.name}</span>
+                      <span className="text-muted-foreground">{signal.signal_definition?.signal_name}</span>
                       <div className="flex items-center gap-2">
                         <span className={getConfidenceColor(signal.confidence_score || 0)}>
                           {((signal.confidence_score || 0) * 100).toFixed(0)}% conf
@@ -227,7 +227,7 @@ export function RatingSourcesPanel({
               <div className="space-y-2">
                 {signals.map((signal) => (
                   <div key={signal.id} className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">{signal.signal_definition?.name}</span>
+                    <span className="text-muted-foreground">{signal.signal_definition?.signal_name}</span>
                     <div className="flex items-center gap-2">
                       <span className={getConfidenceColor(signal.confidence_score || 0)}>
                         {((signal.confidence_score || 0) * 100).toFixed(0)}% conf

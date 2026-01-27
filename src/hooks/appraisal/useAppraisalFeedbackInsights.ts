@@ -29,7 +29,7 @@ export function useAppraisalFeedbackInsights(participantId?: string, employeeId?
         `)
         .eq('employee_id', employeeId)
         .eq('is_current', true)
-        .order('computed_at', { ascending: false });
+        .order('captured_at', { ascending: false });
 
       if (signalsError) throw signalsError;
 
@@ -163,7 +163,7 @@ function generateCoachingPrompts(signals: TalentSignalSnapshot[]): CoachingPromp
 
   signals.forEach((signal, index) => {
     const score = signal.normalized_score || signal.signal_value || 0;
-    const signalName = signal.signal_definition?.name || 'Unknown Signal';
+    const signalName = signal.signal_definition?.signal_name || 'Unknown Signal';
     
     // Strength prompts (high scores)
     if (score >= 4) {
@@ -172,7 +172,7 @@ function generateCoachingPrompts(signals: TalentSignalSnapshot[]): CoachingPromp
         category: 'strength',
         prompt_text: `Ask how they've developed their ${signalName.toLowerCase()} skills`,
         context: `${signalName} rated highly across raters`,
-        signal_code: signal.signal_definition?.code,
+        signal_code: signal.signal_definition?.signal_code,
       });
     }
     
@@ -183,7 +183,7 @@ function generateCoachingPrompts(signals: TalentSignalSnapshot[]): CoachingPromp
         category: 'development',
         prompt_text: `Explore what support would help with ${signalName.toLowerCase()}`,
         context: `${signalName} has room for growth`,
-        signal_code: signal.signal_definition?.code,
+        signal_code: signal.signal_definition?.signal_code,
       });
     }
 
@@ -198,7 +198,7 @@ function generateCoachingPrompts(signals: TalentSignalSnapshot[]): CoachingPromp
           category: 'blind_spot',
           prompt_text: `Discuss varying perceptions of ${signalName.toLowerCase()} across different groups`,
           context: 'Different rater groups have divergent views',
-          signal_code: signal.signal_definition?.code,
+          signal_code: signal.signal_definition?.signal_code,
         });
       }
     }
@@ -225,7 +225,7 @@ function generateInsightCautions(signals: TalentSignalSnapshot[]): InsightCautio
       cautions.push({
         type: 'low_sample',
         severity: signal.evidence_count < 2 ? 'critical' : 'warning',
-        message: `Low response count for ${signal.signal_definition?.name || 'this signal'}`,
+        message: `Low response count for ${signal.signal_definition?.signal_name || 'this signal'}`,
         details: `Only ${signal.evidence_count} response(s). Interpret with caution.`,
       });
     }
@@ -238,7 +238,7 @@ function generateInsightCautions(signals: TalentSignalSnapshot[]): InsightCautio
         cautions.push({
           type: 'high_variance',
           severity: 'warning',
-          message: `High score variance for ${signal.signal_definition?.name || 'this signal'}`,
+          message: `High score variance for ${signal.signal_definition?.signal_name || 'this signal'}`,
           details: `Scores ranged from ${summary.score_range.min} to ${summary.score_range.max}. Perceptions vary significantly.`,
         });
       }
@@ -249,7 +249,7 @@ function generateInsightCautions(signals: TalentSignalSnapshot[]): InsightCautio
       cautions.push({
         type: 'single_source',
         severity: 'info',
-        message: `Lower confidence for ${signal.signal_definition?.name || 'this signal'}`,
+        message: `Lower confidence for ${signal.signal_definition?.signal_name || 'this signal'}`,
         details: 'Limited data sources or recency may affect reliability.',
       });
     }

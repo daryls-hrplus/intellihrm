@@ -27,9 +27,9 @@ interface SignalSnapshot {
   confidence_score: number | null;
   bias_risk_level: string;
   signal_definition: {
-    code: string;
-    name: string;
-    signal_category: string;
+    signal_code: string;
+    signal_name: string;
+    category: string;
   } | null;
 }
 
@@ -194,7 +194,7 @@ export function NineBoxEvidencePanel({
 
     // Technical signals (weight: 0.2)
     const technicalSignals = signalData.filter(s => 
-      s.signal_definition?.signal_category === 'technical'
+      s.signal_definition?.category === 'technical'
     );
     if (technicalSignals.length > 0) {
       const avgTechnical = technicalSignals.reduce((sum, s) => sum + (s.normalized_score || 0), 0) / technicalSignals.length;
@@ -217,7 +217,7 @@ export function NineBoxEvidencePanel({
 
     // Leadership signals (weight: 0.4)
     const leadershipSignals = signalData.filter(s => 
-      ['leadership', 'people_leadership', 'strategic_thinking', 'influence'].includes(s.signal_definition?.signal_category || '')
+      ['leadership', 'people_leadership', 'strategic_thinking', 'influence'].includes(s.signal_definition?.category || '')
     );
     if (leadershipSignals.length > 0) {
       const avgLeadership = leadershipSignals.reduce((sum, s) => sum + (s.normalized_score || 0), 0) / leadershipSignals.length;
@@ -228,7 +228,7 @@ export function NineBoxEvidencePanel({
 
     // Values/adaptability signals (weight: 0.2)
     const valuesSignals = signalData.filter(s => 
-      ['values', 'adaptability'].includes(s.signal_definition?.signal_category || '')
+      ['values', 'adaptability'].includes(s.signal_definition?.category || '')
     );
     if (valuesSignals.length > 0) {
       const avgValues = valuesSignals.reduce((sum, s) => sum + (s.normalized_score || 0), 0) / valuesSignals.length;
@@ -287,7 +287,7 @@ export function NineBoxEvidencePanel({
   };
 
   const getSignalsByCategory = (category: string) => {
-    return signals.filter(s => s.signal_definition?.signal_category === category);
+    return signals.filter(s => s.signal_definition?.category === category);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -388,12 +388,12 @@ export function NineBoxEvidencePanel({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {signals.slice(0, 5).map((signal) => (
+                {signals.slice(0, 5).map((signal) => (
                     <div key={signal.id} className="flex items-center gap-3">
-                      {getCategoryIcon(signal.signal_definition?.signal_category || '')}
+                      {getCategoryIcon(signal.signal_definition?.category || '')}
                       <div className="flex-1">
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm font-medium">{signal.signal_definition?.name || 'Unknown'}</span>
+                          <span className="text-sm font-medium">{signal.signal_definition?.signal_name || 'Unknown'}</span>
                           <div className="flex items-center gap-2">
                             {getBiasRiskBadge(signal.bias_risk_level)}
                             <span className="text-sm text-muted-foreground">
@@ -436,7 +436,7 @@ export function NineBoxEvidencePanel({
             appraisalData={appraisal}
             goalsData={goals}
             signals={signals.filter(s => 
-              ['technical', 'customer_focus'].includes(s.signal_definition?.signal_category || '')
+              ['technical', 'customer_focus'].includes(s.signal_definition?.category || '')
             )}
           />
         </TabsContent>
@@ -448,7 +448,7 @@ export function NineBoxEvidencePanel({
             companyId={companyId}
             potentialAssessment={potentialAssessment}
             signals={signals.filter(s => 
-              ['leadership', 'values', 'adaptability'].includes(s.signal_definition?.signal_category || '')
+              ['leadership', 'values', 'adaptability'].includes(s.signal_definition?.category || '')
             )}
           />
           

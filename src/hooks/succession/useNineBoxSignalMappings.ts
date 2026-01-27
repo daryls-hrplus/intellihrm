@@ -8,14 +8,14 @@ export interface NineBoxSignalMapping {
   signal_definition_id: string;
   contributes_to: 'performance' | 'potential' | 'both';
   weight: number;
-  minimum_confidence: number;
+  min_confidence: number;
   is_active: boolean;
   created_at: string;
   signal_definition?: {
     id: string;
-    code: string;
-    name: string;
-    signal_category: string;
+    signal_code: string;
+    signal_name: string;
+    category: string;
   };
 }
 
@@ -62,7 +62,7 @@ export function useNineBoxSignalMappings(companyId?: string) {
         .from('nine_box_signal_mappings')
         .select(`
           *,
-          signal_definition:talent_signal_definitions(id, code, name, signal_category)
+          signal_definition:talent_signal_definitions(id, signal_code, signal_name, category)
         `)
         .eq('company_id', companyId)
         .eq('is_active', true);
@@ -92,7 +92,7 @@ export function useManageSignalMapping() {
             signal_definition_id: mapping.signal_definition_id,
             contributes_to: mapping.contributes_to,
             weight: mapping.weight,
-            minimum_confidence: mapping.minimum_confidence,
+            min_confidence: mapping.min_confidence,
             is_active: mapping.is_active,
           })
           .eq('id', mapping.id)
@@ -162,7 +162,7 @@ export function useAggregatedSignalScores(employeeId?: string, companyId?: strin
           normalized_score,
           confidence_score,
           bias_risk_level,
-          signal_definition:talent_signal_definitions(id, code, name, signal_category)
+          signal_definition:talent_signal_definitions(id, signal_code, signal_name, category)
         `)
         .eq('employee_id', employeeId)
         .eq('is_current', true);
@@ -177,7 +177,7 @@ export function useAggregatedSignalScores(employeeId?: string, companyId?: strin
       // Aggregate by axis
       const aggregateForAxis = (axis: 'performance' | 'potential'): AggregatedSignalScore | null => {
         const relevantSignals = signals.filter((s: any) => {
-          const category = s.signal_definition?.signal_category;
+          const category = s.signal_definition?.category;
           
           // Check custom mappings first
           if (mappings && mappings.length > 0) {
@@ -214,10 +214,10 @@ export function useAggregatedSignalScores(employeeId?: string, companyId?: strin
             if (mapping) {
               weight = mapping.weight;
               // Skip if confidence below minimum
-              if (confidence < (mapping.minimum_confidence || 0)) return;
+              if (confidence < (mapping.min_confidence || 0)) return;
             }
           } else {
-            const defaultMapping = DEFAULT_SIGNAL_MAPPINGS.find(m => m.signal_category === s.signal_definition?.signal_category);
+            const defaultMapping = DEFAULT_SIGNAL_MAPPINGS.find(m => m.signal_category === s.signal_definition?.category);
             if (defaultMapping) {
               weight = defaultMapping.weight;
             }
@@ -232,7 +232,7 @@ export function useAggregatedSignalScores(employeeId?: string, companyId?: strin
           totalConfidence += confidence;
 
           signalDetails.push({
-            name: s.signal_definition?.name || 'Unknown',
+            name: s.signal_definition?.signal_name || 'Unknown',
             score: adjustedScore,
             weight,
             confidence,
@@ -268,7 +268,7 @@ export function useInitializeDefaultMappings() {
       // Fetch all signal definitions
       const { data: definitions, error: defError } = await supabase
         .from('talent_signal_definitions')
-        .select('id, code, signal_category')
+        .select('id, signal_code, category')
         .eq('is_active', true);
 
       if (defError) throw defError;
@@ -276,7 +276,7 @@ export function useInitializeDefaultMappings() {
       // Create mappings for each definition based on defaults
       const mappingsToInsert = (definitions || [])
         .map(def => {
-          const defaultMapping = DEFAULT_SIGNAL_MAPPINGS.find(m => m.signal_category === def.signal_category);
+          const defaultMapping = DEFAULT_SIGNAL_MAPPINGS.find(m => m.signal_category === def.category);
           if (!defaultMapping) return null;
           
           return {
@@ -284,7 +284,7 @@ export function useInitializeDefaultMappings() {
             signal_definition_id: def.id,
             contributes_to: defaultMapping.contributes_to,
             weight: defaultMapping.weight,
-            minimum_confidence: 0.6,
+            min_confidence: 0.6,
             is_active: true,
           };
         })

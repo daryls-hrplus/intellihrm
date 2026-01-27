@@ -24,7 +24,7 @@ export function FeedbackSignalSummary({
 }: FeedbackSignalSummaryProps) {
   // Group signals by category
   const groupedSignals = signals.reduce((acc, signal) => {
-    const category = signal.signal_definition?.signal_category || 'general';
+    const category = signal.signal_definition?.category || 'general';
     if (!acc[category]) acc[category] = [];
     acc[category].push(signal);
     return acc;
@@ -116,7 +116,7 @@ export function FeedbackSignalSummary({
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">
-                        {signal.signal_definition?.name || 'Unknown Signal'}
+                        {signal.signal_definition?.signal_name || 'Unknown Signal'}
                       </span>
                       {signal.bias_risk_level !== 'low' && (
                         <Tooltip>
