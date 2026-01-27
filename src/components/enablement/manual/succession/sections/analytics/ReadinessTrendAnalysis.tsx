@@ -223,6 +223,49 @@ export function ReadinessTrendAnalysis() {
               </ul>
             </AlertDescription>
           </Alert>
+
+          {/* UI Component Reference */}
+          <Card className="bg-blue-500/10 border-blue-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <BarChart3 className="h-4 w-4" />
+                UI Component Reference
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Component</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Features</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-mono text-sm">ReadinessTrendChart.tsx</TableCell>
+                    <TableCell className="text-muted-foreground">Succession → Analytics → Readiness Trends tab</TableCell>
+                    <TableCell className="text-sm">
+                      <ul className="list-disc list-inside space-y-0.5">
+                        <li>Historical score progression (area chart)</li>
+                        <li>Band threshold reference lines (85, 70)</li>
+                        <li>Color-coded readiness band zones</li>
+                        <li>Individual candidate or aggregate company view</li>
+                        <li>Score change badge with trend indicator</li>
+                      </ul>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-sm">useReadinessTrendHistory.ts</TableCell>
+                    <TableCell className="text-muted-foreground">src/hooks/succession/</TableCell>
+                    <TableCell className="text-sm">
+                      Hook for fetching historical readiness_assessment_events by candidate or company
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
     </section>

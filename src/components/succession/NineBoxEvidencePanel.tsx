@@ -75,7 +75,7 @@ export function NineBoxEvidencePanel({
           normalized_score,
           confidence_score,
           bias_risk_level,
-          signal_definition:talent_signal_definitions(code, name, signal_category)
+          signal_definition:talent_signal_definitions(signal_code, signal_name, category)
         `)
         .eq('employee_id', employeeId)
         .eq('is_current', true);

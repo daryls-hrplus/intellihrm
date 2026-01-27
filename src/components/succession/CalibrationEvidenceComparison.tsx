@@ -85,7 +85,7 @@ export function CalibrationEvidenceComparison({
             signal_value,
             confidence_score,
             bias_risk_level,
-            talent_signal_definitions(signal_category)
+            talent_signal_definitions(category)
           `)
           .eq('employee_id', employeeId)
           .eq('is_current', true);
@@ -99,7 +99,7 @@ export function CalibrationEvidenceComparison({
 
         // Calculate leadership score
         const leadershipSignals = (signals || []).filter(
-          s => (s.talent_signal_definitions as any)?.signal_category === 'leadership'
+          s => (s.talent_signal_definitions as any)?.category === 'leadership'
         );
         const leadershipScore = leadershipSignals.length > 0
           ? leadershipSignals.reduce((sum, s) => sum + (s.signal_value || 0), 0) / leadershipSignals.length

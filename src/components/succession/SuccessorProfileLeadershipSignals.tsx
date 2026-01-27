@@ -42,20 +42,20 @@ export function SuccessorProfileLeadershipSignals({
           signal_value,
           normalized_score,
           confidence_score,
-          talent_signal_definitions(
-            name,
-            signal_category
-          )
+        talent_signal_definitions(
+          signal_name,
+          category
+        )
         `)
         .eq('employee_id', employeeId)
         .eq('is_current', true);
 
       if (data) {
         const leadershipSignals = data
-          .filter(s => (s.talent_signal_definitions as any)?.signal_category === 'leadership')
+          .filter(s => (s.talent_signal_definitions as any)?.category === 'leadership')
           .map(s => ({
             id: s.id,
-            name: (s.talent_signal_definitions as any)?.name || 'Unknown',
+            name: (s.talent_signal_definitions as any)?.signal_name || 'Unknown',
             score: s.signal_value || s.normalized_score || 0,
             confidence: s.confidence_score || 0,
             trend: 'stable' as const, // Would need historical data for trend

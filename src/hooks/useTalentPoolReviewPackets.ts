@@ -90,14 +90,14 @@ export function useTalentPoolReviewPackets() {
         .from('talent_signal_snapshots')
         .select(`
           *,
-          talent_signal_definitions(name, signal_category)
+          talent_signal_definitions(signal_name, category)
         `)
         .eq('employee_id', employeeId)
         .eq('is_current', true);
 
       // Calculate leadership indicators
       const leadershipSignals = (signals || []).filter(s => 
-        (s.talent_signal_definitions as any)?.signal_category === 'leadership'
+        (s.talent_signal_definitions as any)?.category === 'leadership'
       );
 
       const signalSummary: SignalSummary = calculateSignalSummary(signals || []);
@@ -203,7 +203,7 @@ function calculateSignalSummary(signals: any[]): SignalSummary {
   signals.forEach(signal => {
     const score = signal.signal_value || signal.normalized_score || 0;
     const confidence = signal.confidence_score || 0;
-    const name = (signal.talent_signal_definitions as any)?.name || 'Unknown';
+    const name = (signal.talent_signal_definitions as any)?.signal_name || 'Unknown';
 
     totalScore += score;
     totalConfidence += confidence;

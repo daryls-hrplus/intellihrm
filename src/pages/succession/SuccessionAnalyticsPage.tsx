@@ -132,6 +132,7 @@ export default function SuccessionAnalyticsPage() {
                 plans={plans}
                 keyPositions={keyPositions}
                 talentPools={talentPools}
+                companyId={selectedCompanyId}
               />
             ) : (
               <Card>
