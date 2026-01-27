@@ -21,8 +21,8 @@ import {
 } from '@/components/enablement/manual/components';
 
 const integrationRuleFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'UUID', description: 'Unique identifier for the integration rule', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
-  { name: 'company_id', required: true, type: 'UUID', description: 'Company owning this rule', defaultValue: '—', validation: 'Must reference valid companies.id' },
+  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier for the integration rule', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
+  { name: 'company_id', required: true, type: 'uuid', description: 'Company owning this rule', defaultValue: '—', validation: 'Must reference valid companies.id' },
   { name: 'name', required: true, type: 'text', description: 'Descriptive name for the rule', defaultValue: '—', validation: 'Max 200 characters' },
   { name: 'description', required: false, type: 'text', description: 'Detailed explanation of rule purpose', defaultValue: 'null', validation: '—' },
   { name: 'trigger_event', required: true, type: 'text', description: 'Event that activates this rule', defaultValue: '—', validation: 'See trigger events table' },
@@ -32,15 +32,23 @@ const integrationRuleFields: FieldDefinition[] = [
   { name: 'condition_value_max', required: false, type: 'numeric', description: 'Upper bound for range conditions', defaultValue: 'null', validation: 'Required when operator=between' },
   { name: 'condition_category_codes', required: false, type: 'text[]', description: 'Category codes for matching', defaultValue: '[]', validation: 'Array of valid category codes' },
   { name: 'condition_section', required: false, type: 'text', description: 'Appraisal section to evaluate', defaultValue: 'null', validation: 'competencies, goals, values, kras' },
-  { name: 'target_module', required: true, type: 'text', description: 'Module receiving the action', defaultValue: '—', validation: 'nine_box, succession, idp, pip, compensation, training' },
+  { name: 'condition_threshold', required: false, type: 'numeric', description: 'Numeric threshold for condition evaluation', defaultValue: 'null', validation: 'Depends on condition_type' },
+  { name: 'rating_level_codes', required: false, type: 'text[]', description: 'Rating level codes for condition matching', defaultValue: '[]', validation: 'Array of valid rating codes' },
+  { name: 'target_module', required: true, type: 'text', description: 'Module receiving the action', defaultValue: '—', validation: 'See target modules table' },
   { name: 'action_type', required: true, type: 'text', description: 'Action to perform', defaultValue: '—', validation: 'Varies by target_module' },
   { name: 'action_config', required: false, type: 'jsonb', description: 'Additional action parameters', defaultValue: '{}', validation: 'Structured JSON per action_type' },
+  { name: 'action_priority', required: false, type: 'integer', description: 'Priority for action execution ordering', defaultValue: '100', validation: 'Lower = higher priority' },
+  { name: 'action_is_mandatory', required: true, type: 'boolean', description: 'Whether action completion is mandatory', defaultValue: 'false', validation: '—' },
+  { name: 'action_message', required: false, type: 'text', description: 'Custom message displayed with action', defaultValue: 'null', validation: 'Max 500 characters' },
   { name: 'auto_execute', required: false, type: 'boolean', description: 'Execute immediately without approval', defaultValue: 'true', validation: '—' },
   { name: 'requires_approval', required: false, type: 'boolean', description: 'Requires HR approval before execution', defaultValue: 'false', validation: 'Recommended for high-impact actions' },
+  { name: 'requires_hr_override', required: true, type: 'boolean', description: 'Requires HR override to skip', defaultValue: 'false', validation: '—' },
   { name: 'approval_role', required: false, type: 'text', description: 'Role required for approval', defaultValue: 'null', validation: 'hr_admin, hr_manager, executive' },
   { name: 'execution_order', required: false, type: 'integer', description: 'Order in which rules are evaluated', defaultValue: '10', validation: 'Lower = earlier execution' },
   { name: 'is_active', required: false, type: 'boolean', description: 'Whether rule is currently enabled', defaultValue: 'true', validation: 'Toggle for testing' },
-  { name: 'created_at', required: true, type: 'timestamptz', description: 'Rule creation timestamp', defaultValue: 'now()', validation: 'Auto-set' }
+  { name: 'created_at', required: true, type: 'timestamptz', description: 'Rule creation timestamp', defaultValue: 'now()', validation: 'Auto-set' },
+  { name: 'updated_at', required: true, type: 'timestamptz', description: 'Last update timestamp', defaultValue: 'now()', validation: 'Auto-set on update' },
+  { name: 'created_by', required: false, type: 'uuid', description: 'User who created the rule', defaultValue: 'null', validation: 'References profiles.id' }
 ];
 
 const ruleSetupSteps: Step[] = [
@@ -161,12 +169,16 @@ export function IntegrationRulesEngine() {
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { module: 'nine_box', actions: ['update_performance', 'update_potential', 'refresh_assessment', 'create_evidence'], icon: '📊' },
-              { module: 'succession', actions: ['update_candidate_readiness', 'add_to_talent_pool', 'flag_for_review', 'refresh_plan'], icon: '👥' },
-              { module: 'training', actions: ['auto_enroll', 'create_request', 'recommend', 'close_gap'], icon: '🎓' },
-              { module: 'idp', actions: ['create_goal', 'link_competency', 'suggest_activity'], icon: '📋' },
-              { module: 'compensation', actions: ['create_merit_flag', 'retention_alert', 'market_review'], icon: '💰' },
-              { module: 'pip', actions: ['create_pip', 'escalate_review', 'notify_hr'], icon: '⚠️' }
+              { module: 'nine_box', actions: ['update_placement', 'create_assessment', 'recalculate', 'create_evidence'], icon: '📊' },
+              { module: 'succession', actions: ['update_readiness', 'add_candidate', 'flag_for_review', 'refresh_plan'], icon: '👥' },
+              { module: 'training', actions: ['auto_enroll', 'create_request', 'recommend', 'add_to_path'], icon: '🎓' },
+              { module: 'idp', actions: ['create_goal', 'link_gap', 'recommend_action'], icon: '📋' },
+              { module: 'compensation', actions: ['create_flag', 'recommend_adjustment', 'freeze_action'], icon: '💰' },
+              { module: 'pip', actions: ['create_pip', 'add_milestone', 'escalate'], icon: '⚠️' },
+              { module: 'workforce_analytics', actions: ['calculate_index', 'update_metrics'], icon: '📈' },
+              { module: 'notifications', actions: ['create_notification', 'send_alert'], icon: '🔔' },
+              { module: 'reminders', actions: ['create_reminder', 'schedule_task'], icon: '⏰' },
+              { module: 'development', actions: ['generate_themes', 'create_goals'], icon: '🎯' }
             ].map(mod => (
               <div key={mod.module} className="p-3 border rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
