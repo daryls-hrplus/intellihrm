@@ -834,71 +834,155 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
   },
 
   // ==========================================================================
-  // PART 7: RISK MANAGEMENT (~60 min)
+  // PART 7: RISK MANAGEMENT (~75 min)
   // ==========================================================================
   {
     id: 'part-7',
     sectionNumber: '7',
     title: 'Risk Management',
-    description: 'Flight risk assessment, retention strategies, vacancy risk analysis, and bench strength monitoring.',
+    description: 'Operational risk workflows, retention strategies, governance, AI-assisted prediction, and cross-module integration.',
     contentLevel: 'procedure',
-    estimatedReadTime: 60,
-    targetRoles: ['Admin', 'HR Partner'],
+    estimatedReadTime: 75,
+    targetRoles: ['Admin', 'HR Partner', 'Manager'],
     subsections: [
       {
         id: 'sec-7-1',
         sectionNumber: '7.1',
-        title: 'Flight Risk Assessment',
-        description: 'Configure flight risk indicators, scoring models, and AI-assisted risk prediction',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        title: 'Risk Management Overview',
+        description: 'Framework introduction, chapter scope, cross-module dependencies, and KPIs',
+        contentLevel: 'overview',
+        estimatedReadTime: 8,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Continuous monitoring',
-          timing: 'Ongoing',
-          benchmark: 'Early warning for proactive retention interventions'
+          frequency: 'Reference',
+          timing: 'Pre-operations',
+          benchmark: 'Configuration (Ch 6) vs. Operations (Ch 7) separation per SAP SuccessFactors pattern'
         }
       },
       {
         id: 'sec-7-2',
         sectionNumber: '7.2',
-        title: 'Retention Risk Matrix',
-        description: 'Cross-reference impact and probability for prioritized retention actions',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['Admin', 'Consultant'],
+        title: 'Risk Terminology & Standards',
+        description: 'Industry definitions (Risk of Loss, Impact of Loss, Retention Risk), four-level classification, standard risk factors',
+        contentLevel: 'concept',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner', 'Consultant'],
         industryContext: {
-          frequency: 'Monthly review',
-          timing: 'Ongoing',
-          benchmark: 'Impact × Probability prioritization matrix'
+          frequency: 'Reference',
+          timing: 'Pre-operations',
+          benchmark: 'Oracle HCM dual-axis model, SAP SuccessFactors retention matrix'
         }
       },
       {
         id: 'sec-7-3',
         sectionNumber: '7.3',
-        title: 'Key Position Vacancy Risk',
-        description: 'Assess vacancy risk factors: retirement, competitive offers, internal movement',
+        title: 'Employee Flight Risk Assessment Workflow',
+        description: 'Operational workflow for FlightRiskTab.tsx: detect, assess, document, action, and is_current lifecycle',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['Admin'],
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Quarterly',
-          timing: 'Succession planning cycle',
-          benchmark: 'Anticipate vacancies 12-24 months ahead'
+          frequency: 'Continuous',
+          timing: 'Ongoing operations',
+          benchmark: 'One active assessment per employee with historical retention'
         }
       },
       {
         id: 'sec-7-4',
         sectionNumber: '7.4',
-        title: 'Bench Strength Analysis',
-        description: 'Monitor coverage ratios, readiness distribution, and pipeline health metrics',
+        title: 'Retention Strategy & Action Planning',
+        description: 'Intervention categories (compensation, career, wellbeing), escalation matrix, action documentation',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner', 'Manager'],
+        industryContext: {
+          frequency: 'Per case',
+          timing: 'Post assessment',
+          benchmark: 'High/Critical require retention action within 48 hours'
+        }
+      },
+      {
+        id: 'sec-7-5',
+        sectionNumber: '7.5',
+        title: 'Position Vacancy Risk Monitoring',
+        description: 'Vacancy triggers (retirement, flight, market demand), KeyPositionsTab integration, early warning system',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
         targetRoles: ['Admin', 'HR Partner'],
         industryContext: {
-          frequency: 'Monthly dashboard',
+          frequency: 'Monthly/Quarterly',
           timing: 'Ongoing',
-          benchmark: '≥1.5 ready successors per key position is healthy'
+          benchmark: 'Anticipate vacancies 12-24 months ahead'
+        }
+      },
+      {
+        id: 'sec-7-6',
+        sectionNumber: '7.6',
+        title: 'Risk Review Cadence & Governance',
+        description: 'Review cycles by risk level, stakeholder roles, SLA compliance tracking, meeting templates',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner'],
+        industryContext: {
+          frequency: 'Per risk level',
+          timing: 'Scheduled',
+          benchmark: 'SHRM quarterly minimum, Critical bi-weekly'
+        }
+      },
+      {
+        id: 'sec-7-7',
+        sectionNumber: '7.7',
+        title: 'Risk Mitigation Playbooks',
+        description: 'Standard response templates by risk level, escalation matrix, success metrics',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner', 'Manager'],
+        industryContext: {
+          frequency: 'Per case',
+          timing: 'Response phase',
+          benchmark: 'Retention success rate ≥75% for Critical/High'
+        }
+      },
+      {
+        id: 'sec-7-8',
+        sectionNumber: '7.8',
+        title: 'AI-Assisted Risk Prediction',
+        description: 'Talent signal integration, confidence scoring, human override capability, model monitoring',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Continuous',
+          timing: 'Ongoing',
+          benchmark: 'ISO 42001 human-in-the-loop compliance'
+        }
+      },
+      {
+        id: 'sec-7-9',
+        sectionNumber: '7.9',
+        title: 'Cross-Module Risk Integration',
+        description: 'Data flow with Compensation, Performance, Learning, Succession; event-driven notifications',
+        contentLevel: 'concept',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Reference',
+          timing: 'Integration setup',
+          benchmark: 'Unified talent intelligence layer'
+        }
+      },
+      {
+        id: 'sec-7-10',
+        sectionNumber: '7.10',
+        title: 'Risk Management Troubleshooting',
+        description: 'Common issues (is_current conflicts, data quality), FAQs, data quality checklist',
+        contentLevel: 'reference',
+        estimatedReadTime: 7,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'As needed',
+          timing: 'Support',
+          benchmark: 'Audit-ready data quality'
         }
       }
     ]
