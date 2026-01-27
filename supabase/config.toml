@@ -449,3 +449,9 @@ verify_jwt = false
 
 [functions.release-manager-agent]
 verify_jwt = false
+
+[functions.content-creation-agent]
+verify_jwt = false
+
+[functions.documentation-agent]
+verify_jwt = false
