@@ -15,6 +15,9 @@ import {
   FileText,
   Target,
   TrendingUp,
+  Kanban,
+  AlertTriangle,
+  TrendingDown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { markdownToHtml } from "@/lib/utils/markdown";
@@ -33,6 +36,9 @@ const QUICK_ACTIONS = [
   { label: 'Identify Gaps', action: 'identify_gaps', icon: AlertCircle },
   { label: 'Summarize Status', action: 'summarize_status', icon: TrendingUp },
   { label: 'Recommend Version', action: 'recommend_version', icon: Target },
+  { label: 'Workflow Status', action: 'workflow_status', icon: Kanban },
+  { label: 'Suggest Priorities', action: 'suggest_priorities', icon: AlertTriangle },
+  { label: 'Bottleneck Analysis', action: 'bottleneck_analysis', icon: TrendingDown },
 ];
 
 export function ReleaseManagerChat() {

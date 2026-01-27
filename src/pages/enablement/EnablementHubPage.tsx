@@ -4,13 +4,10 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   LayoutDashboard,
-  Kanban,
-  Calendar,
   LayoutGrid,
   Video,
   MousePointer,
@@ -42,8 +39,8 @@ import {
   Radar,
   Grid3X3,
   TrendingUp,
+  Kanban,
 } from "lucide-react";
-import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { FeatureRegistrySyncDialog } from "@/components/enablement/FeatureRegistrySyncDialog";
 import { NewFeaturesIndicator } from "@/components/enablement/NewFeaturesIndicator";
 import { EnablementWelcomeBanner } from "@/components/enablement/EnablementWelcomeBanner";
@@ -158,25 +155,25 @@ export default function EnablementHubPage() {
         },
       ],
     },
-    {
-      titleKey: "Content Workflow",
-      items: [
-        {
-          title: "Workflow Board",
-          description: "Track content from draft to published",
-          href: "/enablement?tab=workflow",
-          icon: Kanban,
-          color: "bg-amber-500/10 text-amber-500",
-        },
-        {
-          title: "Feature Audit",
-          description: "Identify documentation gaps and coverage",
-          href: "/enablement/audit",
-          icon: ClipboardCheck,
-          color: "bg-emerald-500/10 text-emerald-500",
-        },
-      ],
-    },
+      {
+        titleKey: "Content Workflow",
+        items: [
+          {
+            title: "Content Workflow",
+            description: "Track content from draft to published",
+            href: "/enablement/release-center?activeTab=workflow",
+            icon: Kanban,
+            color: "bg-amber-500/10 text-amber-500",
+          },
+          {
+            title: "Feature Audit",
+            description: "Identify documentation gaps and coverage",
+            href: "/enablement/audit",
+            icon: ClipboardCheck,
+            color: "bg-emerald-500/10 text-emerald-500",
+          },
+        ],
+      },
     {
       titleKey: "Publish",
       items: [
@@ -429,10 +426,6 @@ export default function EnablementHubPage() {
           </div>
           <div className="flex gap-2">
             <NewFeaturesIndicator onSyncClick={() => setSyncDialogOpen(true)} />
-            <Button variant="outline" onClick={() => handleTabChange("workflow")}>
-              <Kanban className="h-4 w-4 mr-2" />
-              View Workflow
-            </Button>
             <Button onClick={handleNavigateToDocsGenerator}>
               <Sparkles className="h-4 w-4 mr-2" />
               Create Content
@@ -514,44 +507,27 @@ export default function EnablementHubPage() {
           </Card>
         )}
 
-        {/* Main Content - Tabs for workflow views, cards for navigation */}
-        <Tabs value={tabState.activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="dashboard" className="gap-2">
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="workflow" className="gap-2">
-              <Kanban className="h-4 w-4" />
-              Workflow
-            </TabsTrigger>
-          </TabsList>
+        {/* Main Content - Dashboard only (Workflow moved to Release Command Center) */}
+        <div className="space-y-6">
+          {/* Primary Sections */}
+          <GroupedModuleCards sections={primarySections} defaultOpen={true} />
 
-          <TabsContent value="dashboard" className="space-y-6">
-            {/* Primary Sections */}
-            <GroupedModuleCards sections={primarySections} defaultOpen={true} />
-
-            {/* Advanced Section Toggle */}
-            <Collapsible open={tabState.showAdvanced} onOpenChange={handleAdvancedToggle}>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full justify-between h-12 text-muted-foreground hover:text-foreground">
-                  <span className="flex items-center gap-2">
-                    {tabState.showAdvanced ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    {tabState.showAdvanced ? "Hide Advanced Features" : "Show Advanced Features"}
-                  </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${tabState.showAdvanced ? "rotate-180" : ""}`} />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-4">
-                <GroupedModuleCards sections={advancedSections} defaultOpen={false} showToggleButton />
-              </CollapsibleContent>
-            </Collapsible>
-          </TabsContent>
-
-          <TabsContent value="workflow">
-            <ContentWorkflowBoard releaseId={activeRelease?.id} />
-          </TabsContent>
-        </Tabs>
+          {/* Advanced Section Toggle */}
+          <Collapsible open={tabState.showAdvanced} onOpenChange={handleAdvancedToggle}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between h-12 text-muted-foreground hover:text-foreground">
+                <span className="flex items-center gap-2">
+                  {tabState.showAdvanced ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {tabState.showAdvanced ? "Hide Advanced Features" : "Show Advanced Features"}
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${tabState.showAdvanced ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-4">
+              <GroupedModuleCards sections={advancedSections} defaultOpen={false} showToggleButton />
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
 
         {/* Feature Registry Sync Dialog */}
         <FeatureRegistrySyncDialog
