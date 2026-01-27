@@ -8,11 +8,11 @@ import { LoadingFallback } from './RouteConfig';
 const EnablementHubPage = lazy(() => import('@/pages/enablement/EnablementHubPage'));
 const ContentCreationStudioPage = lazy(() => import('@/pages/enablement/ContentCreationStudioPage'));
 // Deprecated: FeatureAuditDashboard - now redirects to /enablement/release-center?activeTab=coverage
-const EnablementAnalyticsPage = lazy(() => import('@/pages/enablement/EnablementAnalyticsPage'));
+// Deprecated: EnablementAnalyticsPage - now redirects to Release Command Center overview
+// Deprecated: EnablementSettingsPage - now redirects to Release Command Center settings
+// Deprecated: EnablementAIToolsPage - now merged into Content Creation Studio
 const SCORMGeneratorPage = lazy(() => import('@/pages/enablement/SCORMGeneratorPage'));
 const ReleaseCommandCenterPage = lazy(() => import('@/pages/enablement/ReleaseCommandCenterPage'));
-const EnablementSettingsPage = lazy(() => import('@/pages/enablement/EnablementSettingsPage'));
-const EnablementAIToolsPage = lazy(() => import('@/pages/enablement/EnablementAIToolsPage'));
 const EnablementGuidePage = lazy(() => import('@/pages/enablement/EnablementGuidePage'));
 const EnablementArtifactsPage = lazy(() => import('@/pages/enablement/EnablementArtifactsPage'));
 const ArtifactEditorPage = lazy(() => import('@/pages/enablement/ArtifactEditorPage'));
@@ -81,12 +81,14 @@ export function EnablementRoutes() {
       <Route path="/enablement/release-calendar" element={<Navigate to="/enablement/release-center?activeTab=milestones" replace />} />
       <Route path="/enablement/content-lifecycle" element={<Navigate to="/enablement/release-center" replace />} />
       
-      {/* Analytics & Settings */}
-      <Route path="/enablement/analytics" element={<EnablementRoute><EnablementAnalyticsPage /></EnablementRoute>} />
-      <Route path="/enablement/settings" element={<EnablementRoute><EnablementSettingsPage /></EnablementRoute>} />
+      {/* Analytics & Settings - Redirect to Release Command Center */}
+      <Route path="/enablement/analytics" element={<Navigate to="/enablement/release-center?activeTab=overview" replace />} />
+      <Route path="/enablement/settings" element={<Navigate to="/enablement/release-center?activeTab=settings" replace />} />
       
-      {/* AI Tools & Guide (still accessible, but also in Studio) */}
-      <Route path="/enablement/ai-tools" element={<EnablementRoute><EnablementAIToolsPage /></EnablementRoute>} />
+      {/* AI Tools - Redirect to Content Creation Studio */}
+      <Route path="/enablement/ai-tools" element={<Navigate to="/enablement/create?activeTab=ai-tools" replace />} />
+      
+      {/* User Guide (still accessible for deep-dive) */}
       <Route path="/enablement/guide" element={<EnablementRoute><EnablementGuidePage /></EnablementRoute>} />
       
       {/* External Integrations */}
