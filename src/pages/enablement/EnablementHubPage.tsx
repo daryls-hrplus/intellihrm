@@ -16,6 +16,7 @@ import {
   FolderTree,
   ClipboardCheck,
   HelpCircle,
+  Database,
 } from "lucide-react";
 import { FeatureRegistrySyncDialog } from "@/components/enablement/FeatureRegistrySyncDialog";
 import { NewFeaturesIndicator } from "@/components/enablement/NewFeaturesIndicator";
@@ -142,6 +143,22 @@ export default function EnablementHubPage() {
           href: "/enablement/standards",
           icon: HelpCircle,
           color: "bg-slate-500/10 text-slate-500",
+        },
+        {
+          title: "Product Capabilities",
+          description: "25 modules, 1,675+ capabilities by employee lifecycle",
+          href: "/enablement/product-capabilities",
+          icon: FileText,
+          color: "bg-orange-500/10 text-orange-500",
+          badge: "1,675+ Capabilities",
+        },
+        {
+          title: "Feature Registry",
+          description: "Code-defined feature definitions and route mappings",
+          href: "/enablement/route-registry",
+          icon: Database,
+          color: "bg-indigo-500/10 text-indigo-500",
+          badge: "Developer Reference",
         },
       ],
     },
