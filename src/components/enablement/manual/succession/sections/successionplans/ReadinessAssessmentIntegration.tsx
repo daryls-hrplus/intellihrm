@@ -90,6 +90,52 @@ export function ReadinessAssessmentIntegration() {
         </CardContent>
       </Card>
 
+      {/* Condensed Readiness Assessment Events Reference */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ClipboardCheck className="h-5 w-5 text-primary" />
+            readiness_assessment_events Table (Condensed)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Key fields from the readiness assessment events table relevant to succession integration.
+          </p>
+
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-xs">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="p-2 text-left font-medium">Field</th>
+                  <th className="p-2 text-left font-medium">Type</th>
+                  <th className="p-2 text-left font-medium">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                <tr><td className="p-2 font-mono">id</td><td className="p-2">UUID</td><td className="p-2">Primary key</td></tr>
+                <tr><td className="p-2 font-mono">candidate_id</td><td className="p-2">UUID</td><td className="p-2">Link to succession candidate</td></tr>
+                <tr><td className="p-2 font-mono">assessment_date</td><td className="p-2">Date</td><td className="p-2">When assessment was conducted</td></tr>
+                <tr><td className="p-2 font-mono">overall_score</td><td className="p-2">Numeric</td><td className="p-2">Calculated readiness score (0-100)</td></tr>
+                <tr><td className="p-2 font-mono">readiness_band</td><td className="p-2">Text</td><td className="p-2">Mapped band (ready_now, ready_1_year, etc.)</td></tr>
+                <tr><td className="p-2 font-mono">status</td><td className="p-2">Text</td><td className="p-2">Assessment status (pending/completed)</td></tr>
+                <tr><td className="p-2 font-mono">assessed_by</td><td className="p-2">UUID</td><td className="p-2">User who completed assessment</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="p-3 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/30 rounded-r-lg">
+            <p className="text-sm text-foreground flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <span>
+                For complete field reference including all assessor response fields, weight calculations, 
+                and workflow integration, see <strong>Chapter 4: Readiness Assessment Workflow</strong>.
+              </span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Integration Flow */}
       <Card>
         <CardHeader>

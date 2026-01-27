@@ -37,7 +37,7 @@ export function SuccessionPlanCreation() {
     { name: 'calculated_risk_level', required: false, type: 'Text', description: 'System-calculated risk based on coverage and readiness' },
     { name: 'availability_reason_id', required: false, type: 'UUID', description: 'Reference to availability reason if vacancy expected' },
     { name: 'is_active', required: true, type: 'Boolean', description: 'Whether plan is currently active', defaultValue: 'true' },
-    { name: 'start_date', required: false, type: 'Date', description: 'When plan was activated' },
+    { name: 'start_date', required: true, type: 'Date', description: 'Plan start date. Defaults to current date if not specified.', defaultValue: 'CURRENT_DATE' },
     { name: 'end_date', required: false, type: 'Date', description: 'When plan was closed or completed' },
     { name: 'created_by', required: false, type: 'UUID', description: 'User who created the plan' },
     { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },

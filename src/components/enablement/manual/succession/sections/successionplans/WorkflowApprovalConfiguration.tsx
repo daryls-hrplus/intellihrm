@@ -34,6 +34,7 @@ export function WorkflowApprovalConfiguration() {
     { name: 'end_date', required: false, type: 'Date', description: 'Template effective end date' },
     { name: 'department_id', required: false, type: 'UUID', description: 'Scope to specific department' },
     { name: 'section_id', required: false, type: 'UUID', description: 'Scope to specific section' },
+    { name: 'created_by', required: true, type: 'UUID', description: 'User who created the template (system-populated)' },
     { name: 'created_at', required: true, type: 'Timestamp', description: 'Record creation timestamp', defaultValue: 'now()' },
     { name: 'updated_at', required: true, type: 'Timestamp', description: 'Last modification timestamp', defaultValue: 'now()' }
   ];

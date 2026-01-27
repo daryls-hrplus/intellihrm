@@ -367,6 +367,51 @@ export function CandidateNominationRanking() {
         </CardContent>
       </Card>
 
+      {/* Development Plan Inline Display */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Clock className="h-5 w-5 text-primary" />
+            Development Plan Inline Display
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Development plan progress is displayed inline on candidate cards within the 
+            Succession Plans tab, providing at-a-glance visibility without leaving the 
+            succession context.
+          </p>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="p-3 border rounded-lg">
+              <h5 className="font-medium text-sm mb-2">Progress Bar Display</h5>
+              <p className="text-xs text-muted-foreground">
+                Each candidate card shows a progress bar with completion percentage 
+                based on their linked Individual Development Plan (IDP).
+              </p>
+            </div>
+            <div className="p-3 border rounded-lg">
+              <h5 className="font-medium text-sm mb-2">IDP Module Navigation</h5>
+              <p className="text-xs text-muted-foreground">
+                Clicking the progress indicator navigates to the full development 
+                plan in the IDP module for detailed editing.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/30 rounded-r-lg">
+            <p className="text-sm text-foreground flex items-start gap-2">
+              <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <span>
+                <strong>Integration Note:</strong> Development plan CRUD operations are 
+                managed via the IDP module. The succession tab provides read-only visibility 
+                to track development progress against succession readiness goals.
+              </span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Leadership Signals Display */}
       <Card>
         <CardHeader>
