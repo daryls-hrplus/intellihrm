@@ -42,6 +42,7 @@ const ImplementationChecklistsPage = lazy(() => import('@/pages/enablement/Imple
 const ModulesIndexPage = lazy(() => import('@/pages/enablement/ModulesIndexPage'));
 const ModuleDocumentationPage = lazy(() => import('@/pages/enablement/ModuleDocumentationPage'));
 const LnDQuickStartPage = lazy(() => import('@/pages/enablement/LnDQuickStartPage'));
+const CareerDevelopmentManualPage = lazy(() => import('@/pages/enablement/CareerDevelopmentManualPage'));
 
 // Wrapper for enablement routes with guards
 function EnablementRoute({ children }: { children: React.ReactNode }) {
@@ -85,6 +86,7 @@ export function EnablementRoutes() {
       <Route path="/enablement/manuals/benefits" element={<EnablementRoute><BenefitsManualPage /></EnablementRoute>} />
       <Route path="/enablement/manuals/time-attendance" element={<EnablementRoute><TimeAttendanceManualPage /></EnablementRoute>} />
       <Route path="/enablement/manuals/feedback-360" element={<EnablementRoute><Feedback360ManualPage /></EnablementRoute>} />
+      <Route path="/enablement/manuals/career-development" element={<EnablementRoute><CareerDevelopmentManualPage /></EnablementRoute>} />
       <Route path="/enablement/client-provisioning" element={<EnablementRoute><ClientProvisioningGuidePage /></EnablementRoute>} />
       <Route path="/enablement/client-provisioning/testing" element={<EnablementRoute><ClientProvisioningTestingPage /></EnablementRoute>} />
       <Route path="/enablement/manual-publishing" element={<EnablementRoute><ManualPublishingPage /></EnablementRoute>} />

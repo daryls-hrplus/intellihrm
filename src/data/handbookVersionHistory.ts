@@ -72,6 +72,25 @@ export const SOURCE_REFERENCES: SourceManualReference[] = [
     routePath: '/enablement/manuals/appraisals'
   },
   {
+    id: 'career-development',
+    manualName: 'Career Development Administrator Manual',
+    version: 'v1.0.0',
+    lastUpdated: '2026-01-27',
+    phasesUsed: ['Phase 6 (Performance)', 'Phase 5 (Benefits & Training)'],
+    chaptersReferenced: [
+      'Chapter 1: System Overview',
+      'Chapter 2: Career Paths Configuration',
+      'Chapter 3: Mentorship Programs',
+      'Chapter 4: Individual Development Plans',
+      'Chapter 5: Development Themes & AI',
+      'Chapter 6: Cross-Module Integration',
+      'Chapter 7: Employee Self-Service',
+      'Chapter 8: Reporting & Analytics',
+      'Chapter 9: Troubleshooting & FAQs'
+    ],
+    routePath: '/enablement/manuals/career-development'
+  },
+  {
     id: 'admin-security',
     manualName: 'Admin & Security Manual',
     version: 'v1.3.0',
