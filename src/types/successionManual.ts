@@ -1,6 +1,6 @@
 // Succession Planning Administrator Manual - Structure Definition
 // Comprehensive documentation for 29+ database tables, 13 UI pages
-// Following industry standards: SAP SuccessFactors, Workday, SHRM patterns
+// Following industry standards: McKinsey, SHRM, ISO 30414, SOC 2 patterns
 
 export interface SuccessionSection {
   id: string;
@@ -94,7 +94,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-implementation',
-          benchmark: 'Enterprise-grade data model following SAP SuccessFactors patterns'
+          benchmark: 'Enterprise-grade data model following industry patterns'
         }
       },
       {
@@ -151,7 +151,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'One-time setup',
           timing: 'Pre-implementation',
-          benchmark: 'Multi-assessor validation for objective readiness evaluation (SAP SuccessFactors)'
+          benchmark: 'Multi-assessor validation for objective readiness evaluation'
         }
       },
       {
@@ -165,7 +165,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Post assessor types',
-          benchmark: 'Multi-rater consolidation following Workday patterns'
+          benchmark: 'Multi-rater consolidation following industry patterns'
         }
       },
       {
@@ -179,7 +179,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'One-time, annual review',
           timing: 'Pre-implementation',
-          benchmark: '5-band model aligned with SAP SuccessFactors and Workday patterns'
+          benchmark: '5-band model aligned with industry patterns'
         }
       },
       {
@@ -306,7 +306,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'One-time, annual review',
           timing: 'Post foundation setup',
-          benchmark: 'Multi-source input for objective assessment (SAP SuccessFactors pattern)'
+          benchmark: 'Multi-source input for objective assessment'
         }
       },
       {
@@ -320,7 +320,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'One-time, optimization quarterly',
           timing: 'Post rating sources',
-          benchmark: 'Signal-to-axis mapping with bias detection (Workday pattern)'
+          benchmark: 'Signal-to-axis mapping with bias detection'
         }
       },
       {
@@ -376,7 +376,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Per assessment cycle',
           timing: 'Post configuration',
-          benchmark: 'Current vs historical assessment tracking (SAP SuccessFactors pattern)'
+          benchmark: 'Current vs historical assessment tracking'
         }
       },
       {
@@ -419,7 +419,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-operations',
-          benchmark: 'Configuration (Ch 2) vs. Operations (Ch 4) separation per SAP SuccessFactors pattern'
+          benchmark: 'Configuration (Ch 2) vs. Operations (Ch 4) separation per industry standard'
         }
       },
       {
@@ -701,7 +701,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-operations',
-          benchmark: 'Workday/SAP SuccessFactors succession lifecycle patterns'
+          benchmark: 'Industry-standard succession lifecycle patterns'
         }
       },
       {
@@ -799,7 +799,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Per identified gap',
           timing: 'Post development plan creation',
-          benchmark: 'Cross-module integration following SAP SuccessFactors patterns'
+          benchmark: 'Cross-module integration following industry patterns'
         }
       },
       {
@@ -856,7 +856,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-operations',
-          benchmark: 'Configuration (Ch 6) vs. Operations (Ch 7) separation per SAP SuccessFactors pattern'
+          benchmark: 'Configuration (Ch 6) vs. Operations (Ch 7) separation per industry standard'
         }
       },
       {
@@ -870,7 +870,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-operations',
-          benchmark: 'Oracle HCM dual-axis model, SAP SuccessFactors retention matrix'
+          benchmark: 'Industry-standard dual-axis model, retention matrix'
         }
       },
       {
@@ -1011,7 +1011,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         industryContext: {
           frequency: 'Reference',
           timing: 'Pre-implementation',
-          benchmark: 'Workday Career Hub integration pattern - separate modules with clear touchpoints'
+          benchmark: 'Industry-standard career integration pattern - separate modules with clear touchpoints'
         }
       },
       {
@@ -1079,7 +1079,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'concept',
         estimatedReadTime: 12,
         targetRoles: ['Admin', 'Consultant'],
-        industryContext: { frequency: 'Reference', timing: 'Pre-integration', benchmark: 'Event-driven integration architecture (SAP/Workday pattern)' }
+        industryContext: { frequency: 'Reference', timing: 'Pre-integration', benchmark: 'Event-driven integration architecture' }
       },
       {
         id: 'sec-9-2',
@@ -1196,7 +1196,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
 
   // ==========================================================================
   // PART 10: REPORTING & ANALYTICS (~45 min)
-  // Industry-aligned analytics following SAP SuccessFactors, Workday, Oracle HCM patterns
+  // Industry-aligned analytics following McKinsey, SHRM, ISO 30414 patterns
   // ==========================================================================
   {
     id: 'part-10',
@@ -1215,7 +1215,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 4,
         targetRoles: ['Admin', 'Consultant'],
-        industryContext: { frequency: 'Reference', timing: 'Initial setup', benchmark: 'Workday Analytics Hub pattern' }
+        industryContext: { frequency: 'Reference', timing: 'Initial setup', benchmark: 'Industry-standard Analytics Hub pattern' }
       },
       {
         id: 'sec-10-2',
@@ -1225,7 +1225,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 5,
         targetRoles: ['Admin', 'HR Partner', 'Executive'],
-        industryContext: { frequency: 'Monthly', timing: 'Dashboard review', benchmark: 'SAP SuccessFactors KPI definitions' }
+        industryContext: { frequency: 'Monthly', timing: 'Dashboard review', benchmark: 'Industry-standard KPI definitions' }
       },
       {
         id: 'sec-10-3',
@@ -1245,7 +1245,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 5,
         targetRoles: ['Admin', 'HR Partner'],
-        industryContext: { frequency: 'Per assessment', timing: 'Ongoing', benchmark: 'Oracle HCM dual-axis Risk/Impact model' }
+        industryContext: { frequency: 'Per assessment', timing: 'Ongoing', benchmark: 'Industry-standard dual-axis Risk/Impact model' }
       },
       {
         id: 'sec-10-5',
@@ -1255,7 +1255,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 4,
         targetRoles: ['Admin', 'HR Partner'],
-        industryContext: { frequency: 'Per cycle', timing: 'Post-calibration', benchmark: 'SAP/Workday 10-15% top-right distribution target' }
+        industryContext: { frequency: 'Per cycle', timing: 'Post-calibration', benchmark: 'Industry-standard 10-15% top-right distribution target' }
       },
       {
         id: 'sec-10-6',
@@ -1265,7 +1265,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 4,
         targetRoles: ['Admin', 'HR Partner'],
-        industryContext: { frequency: 'Monthly', timing: 'Pipeline review', benchmark: 'Workday Pipeline Velocity <24 months' }
+        industryContext: { frequency: 'Monthly', timing: 'Pipeline review', benchmark: 'Industry-standard Pipeline Velocity <24 months' }
       },
       {
         id: 'sec-10-7',
@@ -1275,7 +1275,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 4,
         targetRoles: ['Admin', 'HR Partner'],
-        industryContext: { frequency: 'Per cycle', timing: 'Assessment review', benchmark: 'Visier Time-to-Readiness benchmarks' }
+        industryContext: { frequency: 'Per cycle', timing: 'Assessment review', benchmark: 'Industry-standard Time-to-Readiness benchmarks' }
       },
       {
         id: 'sec-10-8',
@@ -1295,7 +1295,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 4,
         targetRoles: ['Admin', 'Executive'],
-        industryContext: { frequency: 'Per schedule', timing: 'Reporting cycles', benchmark: 'Oracle/Workday executive reporting patterns' }
+        industryContext: { frequency: 'Per schedule', timing: 'Reporting cycles', benchmark: 'Industry-standard executive reporting patterns' }
       },
       {
         id: 'sec-10-10',
@@ -1305,7 +1305,7 @@ export const SUCCESSION_MANUAL_STRUCTURE: SuccessionSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 4,
         targetRoles: ['Admin', 'HR Partner'],
-        industryContext: { frequency: 'On-demand', timing: 'Analysis', benchmark: 'Visier predictive analytics patterns' }
+        industryContext: { frequency: 'On-demand', timing: 'Analysis', benchmark: 'Industry-standard predictive analytics patterns' }
       },
       {
         id: 'sec-10-11',

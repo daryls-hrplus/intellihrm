@@ -60,7 +60,7 @@ export function FlightRiskRetentionReporting() {
             <AlertTitle>Learning Objectives</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Understand Risk of Loss vs. Impact of Loss terminology (Oracle HCM pattern)</li>
+                <li>Understand Risk of Loss vs. Impact of Loss terminology (Industry Standard)</li>
                 <li>Learn the Retention Risk Matrix calculation</li>
                 <li>Configure standard risk factors and retention actions</li>
                 <li>Interpret flight risk distribution reports</li>
@@ -73,7 +73,7 @@ export function FlightRiskRetentionReporting() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Shield className="h-4 w-4" />
-                Industry Terminology (Oracle HCM Pattern)
+                Industry Terminology (Industry Standard)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -168,7 +168,7 @@ export function FlightRiskRetentionReporting() {
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
                 The Retention Risk Matrix combines Position Criticality and Replacement Difficulty to calculate 
-                an overall retention risk level. This follows the Oracle HCM dual-axis model.
+                an overall retention risk level. This follows the industry-standard dual-axis model.
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse text-sm">
@@ -297,10 +297,10 @@ export function FlightRiskRetentionReporting() {
             <AlertTitle>Industry Alignment</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li><strong>Oracle HCM:</strong> Risk of Loss × Impact of Loss dual-axis model</li>
-                <li><strong>SAP SuccessFactors:</strong> Retention risk matrix for prioritization</li>
-                <li><strong>Visier:</strong> Successor Turnover Risk as critical pipeline metric</li>
-                <li><strong>Workday:</strong> Proactive retention action tracking</li>
+                <li><strong>Industry Standard:</strong> Risk of Loss × Impact of Loss dual-axis model</li>
+                <li><strong>Industry Standard:</strong> Retention risk matrix for prioritization</li>
+                <li><strong>Industry Standard:</strong> Successor Turnover Risk as critical pipeline metric</li>
+                <li><strong>Industry Standard:</strong> Proactive retention action tracking</li>
               </ul>
             </AlertDescription>
           </Alert>

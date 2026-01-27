@@ -1,5 +1,5 @@
 // Succession Manual Chapter 10: Reporting & Analytics
-// Industry-aligned sections following SAP SuccessFactors, Workday, Oracle HCM patterns
+// Industry-aligned sections following enterprise talent management patterns
 
 export { AnalyticsArchitectureOverview } from './AnalyticsArchitectureOverview';
 export { SuccessionHealthScorecard } from './SuccessionHealthScorecard';

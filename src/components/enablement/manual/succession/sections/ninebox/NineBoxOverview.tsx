@@ -48,7 +48,7 @@ export function NineBoxOverview() {
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             The Nine-Box Grid is an industry-standard talent assessment framework developed by McKinsey & Company 
-            and widely adopted by SAP SuccessFactors, Workday, and leading organizations worldwide. It provides 
+            and widely adopted by leading organizations worldwide. It provides 
             a visual matrix for plotting employees based on two dimensions:
           </p>
 

@@ -120,19 +120,19 @@ export function TalentPipelineMetrics() {
                     <TableCell className="font-medium">Pool → Succession Conversion</TableCell>
                     <TableCell className="font-mono text-sm">(graduated_to_successor) / (ever_active) × 100</TableCell>
                     <TableCell><Badge variant="outline">20-30%</Badge></TableCell>
-                    <TableCell className="text-muted-foreground">Workday</TableCell>
+                    <TableCell className="text-muted-foreground">Industry Standard</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Ready-Now Rate</TableCell>
                     <TableCell className="font-mono text-sm">(ready_now_band) / (active_members) × 100</TableCell>
                     <TableCell><Badge variant="outline">15-25%</Badge></TableCell>
-                    <TableCell className="text-muted-foreground">SAP SF</TableCell>
+                    <TableCell className="text-muted-foreground">Industry Standard</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Stagnation Rate</TableCell>
                     <TableCell className="font-mono text-sm">(no_status_change_12mo) / (active) × 100</TableCell>
                     <TableCell><Badge variant="outline">&lt;15%</Badge></TableCell>
-                    <TableCell className="text-muted-foreground">Visier</TableCell>
+                    <TableCell className="text-muted-foreground">Industry Standard</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Attrition from Pool</TableCell>
@@ -144,7 +144,7 @@ export function TalentPipelineMetrics() {
                     <TableCell className="font-medium">Pipeline Velocity</TableCell>
                     <TableCell className="font-mono text-sm">AVG(graduation_date - nomination_date)</TableCell>
                     <TableCell><Badge variant="outline">&lt;24 months</Badge></TableCell>
-                    <TableCell className="text-muted-foreground">Workday</TableCell>
+                    <TableCell className="text-muted-foreground">Industry Standard</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="font-medium">Graduation Rate</TableCell>
@@ -219,9 +219,9 @@ export function TalentPipelineMetrics() {
             <AlertTitle>Industry Alignment</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li><strong>Workday:</strong> Pipeline Velocity as key talent mobility metric</li>
-                <li><strong>SAP SuccessFactors:</strong> Pool-to-Succession conversion tracking</li>
-                <li><strong>Visier:</strong> Stagnation detection for pipeline health</li>
+                <li><strong>Industry Standard:</strong> Pipeline Velocity as key talent mobility metric</li>
+                <li><strong>Industry Standard:</strong> Pool-to-Succession conversion tracking</li>
+                <li><strong>Industry Standard:</strong> Stagnation detection for pipeline health</li>
                 <li><strong>SHRM:</strong> Talent pool attrition benchmarks</li>
               </ul>
             </AlertDescription>
