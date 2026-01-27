@@ -275,6 +275,14 @@ export default function EnablementHubPage() {
       titleKey: "Release Management",
       items: [
         {
+          title: "Release Command Center",
+          description: "Unified version lifecycle, milestones, and AI release manager",
+          href: "/enablement/release-center",
+          icon: Rocket,
+          color: "bg-primary/10 text-primary",
+          badge: "New",
+        },
+        {
           title: "Release Versions",
           description: "Manage release versions and bundling",
           href: "/enablement?tab=releases",
