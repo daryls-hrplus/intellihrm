@@ -18,22 +18,26 @@ import {
 } from '@/components/enablement/manual/components';
 
 const integrationLogFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'UUID', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
-  { name: 'rule_id', required: false, type: 'UUID', description: 'Integration rule that triggered action', defaultValue: 'null', validation: 'References appraisal_integration_rules.id' },
-  { name: 'participant_id', required: false, type: 'UUID', description: 'Appraisal participant if applicable', defaultValue: 'null', validation: 'References appraisal_participants.id' },
-  { name: 'employee_id', required: true, type: 'UUID', description: 'Employee affected by action', defaultValue: '—', validation: 'References profiles.id' },
-  { name: 'company_id', required: true, type: 'UUID', description: 'Company context', defaultValue: '—', validation: 'References companies.id' },
+  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
+  { name: 'rule_id', required: false, type: 'uuid', description: 'Integration rule that triggered action', defaultValue: 'null', validation: 'References appraisal_integration_rules.id' },
+  { name: 'participant_id', required: false, type: 'uuid', description: 'Appraisal participant if applicable', defaultValue: 'null', validation: 'References appraisal_participants.id' },
+  { name: 'employee_id', required: true, type: 'uuid', description: 'Employee affected by action', defaultValue: '—', validation: 'References profiles.id' },
+  { name: 'company_id', required: true, type: 'uuid', description: 'Company context', defaultValue: '—', validation: 'References companies.id' },
   { name: 'trigger_event', required: true, type: 'text', description: 'Event that triggered execution', defaultValue: '—', validation: 'e.g., appraisal_finalized' },
   { name: 'trigger_data', required: false, type: 'jsonb', description: 'Data from trigger source', defaultValue: '{}', validation: 'Scores, categories, etc.' },
   { name: 'target_module', required: true, type: 'text', description: 'Module receiving action', defaultValue: '—', validation: 'nine_box, succession, training, etc.' },
   { name: 'action_type', required: true, type: 'text', description: 'Action performed', defaultValue: '—', validation: 'Depends on target_module' },
+  { name: 'action_config', required: false, type: 'jsonb', description: 'Action configuration snapshot at execution time', defaultValue: '{}', validation: 'Captured from rule' },
   { name: 'action_result', required: true, type: 'text', description: 'Execution outcome', defaultValue: 'pending', validation: 'pending, success, failed, cancelled' },
-  { name: 'target_record_id', required: false, type: 'UUID', description: 'Record created/modified', defaultValue: 'null', validation: 'e.g., nine_box_assessment.id' },
+  { name: 'target_record_id', required: false, type: 'uuid', description: 'Record created/modified', defaultValue: 'null', validation: 'e.g., nine_box_assessment.id' },
   { name: 'target_record_type', required: false, type: 'text', description: 'Type of target record', defaultValue: 'null', validation: 'Table name' },
   { name: 'error_message', required: false, type: 'text', description: 'Error details if failed', defaultValue: 'null', validation: '—' },
   { name: 'executed_at', required: false, type: 'timestamptz', description: 'When action executed', defaultValue: 'null', validation: 'Null until executed' },
+  { name: 'executed_by', required: false, type: 'uuid', description: 'User who executed the action (null for auto-execute)', defaultValue: 'null', validation: 'References profiles.id' },
   { name: 'requires_approval', required: false, type: 'boolean', description: 'Whether approval was needed', defaultValue: 'false', validation: '—' },
   { name: 'approved_at', required: false, type: 'timestamptz', description: 'When approval granted', defaultValue: 'null', validation: 'Null if auto-executed or pending' },
+  { name: 'approved_by', required: false, type: 'uuid', description: 'User who approved the action', defaultValue: 'null', validation: 'References profiles.id' },
+  { name: 'rejection_reason', required: false, type: 'text', description: 'Reason provided if action was rejected', defaultValue: 'null', validation: 'Required when cancelled' },
   { name: 'created_at', required: true, type: 'timestamptz', description: 'Log entry creation', defaultValue: 'now()', validation: 'Auto-set' }
 ];
 

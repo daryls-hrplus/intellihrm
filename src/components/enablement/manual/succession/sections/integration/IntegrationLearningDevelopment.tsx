@@ -236,10 +236,24 @@ export function IntegrationLearningDevelopment() {
             </div>
           </div>
 
+          <div className="p-4 border rounded-lg bg-purple-50 dark:bg-purple-950/20">
+            <h4 className="font-medium text-purple-800 dark:text-purple-200 mb-2">
+              Learning Path Enrollment Action
+            </h4>
+            <div className="text-xs space-y-1 font-mono">
+              <p>target_module: 'training'</p>
+              <p>action_type: 'add_to_path'</p>
+              <p>action_config: {"{ learning_path_id: 'path-uuid', priority: 'high' }"}</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Automatically enrolls succession candidates in structured learning paths based on their target role.
+            </p>
+          </div>
+
           <TipCallout>
             Configure integration rules to automatically enroll "Ready in 1-2 Years" candidates in 
-            appropriate leadership development paths. Use <code>action_config.learning_path_id</code> 
-            to specify the target path.
+            appropriate leadership development paths. Use <code>action_type: 'add_to_path'</code> with 
+            <code>action_config.learning_path_id</code> to specify the target path.
           </TipCallout>
         </CardContent>
       </Card>

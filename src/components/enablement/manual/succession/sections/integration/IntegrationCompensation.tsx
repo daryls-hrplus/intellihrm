@@ -15,17 +15,30 @@ import {
 } from '@/components/enablement/manual/components';
 
 const compensationFlagFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'UUID', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
-  { name: 'employee_id', required: true, type: 'UUID', description: 'Employee for review', defaultValue: '—', validation: 'References profiles.id' },
-  { name: 'company_id', required: true, type: 'UUID', description: 'Company context', defaultValue: '—', validation: 'References companies.id' },
-  { name: 'flag_type', required: true, type: 'text', description: 'Type of compensation flag', defaultValue: '—', validation: 'retention_risk, merit_review, market_adjustment, equity_review' },
-  { name: 'source_type', required: true, type: 'text', description: 'What triggered the flag', defaultValue: '—', validation: 'succession, appraisal, flight_risk, market_data' },
-  { name: 'source_reference_id', required: false, type: 'UUID', description: 'ID of source record', defaultValue: 'null', validation: 'e.g., succession_candidate.id' },
-  { name: 'priority', required: false, type: 'text', description: 'Flag priority level', defaultValue: 'normal', validation: 'low, normal, high, critical' },
-  { name: 'status', required: true, type: 'text', description: 'Current flag status', defaultValue: 'pending', validation: 'pending, approved, processed, rejected' },
-  { name: 'recommended_action', required: false, type: 'text', description: 'Suggested action', defaultValue: 'null', validation: 'e.g., 5% retention bonus' },
-  { name: 'notes', required: false, type: 'text', description: 'Additional context', defaultValue: 'null', validation: '—' },
-  { name: 'created_at', required: true, type: 'timestamptz', description: 'Flag creation time', defaultValue: 'now()', validation: 'Auto-set' }
+  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
+  { name: 'employee_id', required: true, type: 'uuid', description: 'Target employee reference', defaultValue: '—', validation: 'References profiles.id' },
+  { name: 'company_id', required: true, type: 'uuid', description: 'Company scope', defaultValue: '—', validation: 'References companies.id' },
+  { name: 'flag_type', required: true, type: 'text', description: 'Type of compensation flag', defaultValue: '—', validation: 'retention | adjustment | freeze | bonus' },
+  { name: 'source_type', required: true, type: 'text', description: 'Source of the flag', defaultValue: '—', validation: 'appraisal | succession | nine_box | manual' },
+  { name: 'source_reference_id', required: false, type: 'uuid', description: 'Reference to source record', defaultValue: 'null', validation: 'e.g., succession_candidate.id' },
+  { name: 'source_cycle_id', required: false, type: 'uuid', description: 'Source cycle reference', defaultValue: 'null', validation: 'References cycle table' },
+  { name: 'performance_category_code', required: false, type: 'text', description: 'Performance category from appraisal', defaultValue: 'null', validation: 'EE, ME, DE, etc.' },
+  { name: 'performance_score', required: false, type: 'numeric(5,2)', description: 'Numeric performance score', defaultValue: 'null', validation: '0-5 scale' },
+  { name: 'recommended_action', required: false, type: 'text', description: 'Recommended compensation action', defaultValue: 'null', validation: 'e.g., 5% retention bonus' },
+  { name: 'recommended_percentage', required: false, type: 'numeric(5,2)', description: 'Recommended adjustment percentage', defaultValue: 'null', validation: '0-100' },
+  { name: 'justification', required: false, type: 'text', description: 'Business justification for recommendation', defaultValue: 'null', validation: 'Max 2000 characters' },
+  { name: 'priority', required: true, type: 'enum', description: 'Flag priority level', defaultValue: 'medium', validation: 'low | medium | high | critical' },
+  { name: 'status', required: true, type: 'enum', description: 'Current flag status', defaultValue: 'pending', validation: 'pending | approved | processed | rejected' },
+  { name: 'notes', required: false, type: 'text', description: 'Additional notes', defaultValue: 'null', validation: '—' },
+  { name: 'reviewed_at', required: false, type: 'timestamptz', description: 'When flag was reviewed', defaultValue: 'null', validation: 'Set on review' },
+  { name: 'reviewed_by', required: false, type: 'uuid', description: 'User who reviewed the flag', defaultValue: 'null', validation: 'References profiles.id' },
+  { name: 'review_notes', required: false, type: 'text', description: 'Notes from review', defaultValue: 'null', validation: '—' },
+  { name: 'processed_at', required: false, type: 'timestamptz', description: 'When flag was processed', defaultValue: 'null', validation: 'Set on processing' },
+  { name: 'processed_by', required: false, type: 'uuid', description: 'User who processed the flag', defaultValue: 'null', validation: 'References profiles.id' },
+  { name: 'outcome_notes', required: false, type: 'text', description: 'Final outcome notes', defaultValue: 'null', validation: '—' },
+  { name: 'expires_at', required: false, type: 'timestamptz', description: 'Flag expiration date', defaultValue: 'null', validation: 'Based on cycle end' },
+  { name: 'created_at', required: true, type: 'timestamptz', description: 'Record creation timestamp', defaultValue: 'now()', validation: 'Auto-set' },
+  { name: 'updated_at', required: true, type: 'timestamptz', description: 'Last update timestamp', defaultValue: 'now()', validation: 'Auto-set on update' }
 ];
 
 const retentionTriggers = [
@@ -108,7 +121,7 @@ export function IntegrationCompensation() {
 
       <FieldReferenceTable 
         fields={compensationFlagFields} 
-        title="compensation_review_flags Table (Key Fields)" 
+        title="compensation_review_flags Table (25 Fields)" 
       />
 
       <Card>

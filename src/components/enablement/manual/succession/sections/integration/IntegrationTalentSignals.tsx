@@ -17,44 +17,63 @@ import {
 } from '@/components/enablement/manual/components';
 
 const signalDefinitionFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'UUID', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
-  { name: 'company_id', required: true, type: 'UUID', description: 'Company owning this signal definition', defaultValue: '—', validation: 'References companies.id' },
-  { name: 'signal_code', required: true, type: 'text', description: 'Unique code for the signal type', defaultValue: '—', validation: 'e.g., PERF_TREND, LEADERSHIP_360, GOAL_ACHIEVE' },
-  { name: 'signal_name', required: true, type: 'text', description: 'Display name for the signal', defaultValue: '—', validation: 'Max 100 characters' },
-  { name: 'description', required: false, type: 'text', description: 'Detailed explanation of signal meaning', defaultValue: 'null', validation: '—' },
-  { name: 'category', required: true, type: 'text', description: 'Signal category grouping', defaultValue: '—', validation: 'performance, potential, risk, development' },
-  { name: 'source_module', required: true, type: 'text', description: 'Module providing this signal', defaultValue: '—', validation: 'appraisals, 360_feedback, goals, competencies' },
-  { name: 'calculation_method', required: true, type: 'text', description: 'How signal value is computed', defaultValue: '—', validation: 'average, trend, threshold, composite' },
-  { name: 'weight_default', required: false, type: 'numeric', description: 'Default contribution weight', defaultValue: '1.0', validation: '0-10 scale' },
-  { name: 'confidence_threshold', required: false, type: 'numeric', description: 'Minimum confidence for inclusion', defaultValue: '0.5', validation: '0-1 scale' },
-  { name: 'is_active', required: false, type: 'boolean', description: 'Whether signal is currently used', defaultValue: 'true', validation: '—' }
+  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
+  { name: 'company_id', required: false, type: 'uuid', description: 'Company scope (null for system signals)', defaultValue: 'null', validation: 'References companies.id' },
+  { name: 'signal_code', required: true, type: 'text', description: 'Unique signal code (e.g., leadership_consistency)', defaultValue: '—', validation: 'snake_case, max 50 chars' },
+  { name: 'signal_name', required: true, type: 'text', description: 'Display name for signal', defaultValue: '—', validation: 'Max 100 characters' },
+  { name: 'signal_name_en', required: false, type: 'text', description: 'English translation of signal name', defaultValue: 'null', validation: '—' },
+  { name: 'description', required: false, type: 'text', description: 'Detailed signal description', defaultValue: 'null', validation: '—' },
+  { name: 'category', required: true, type: 'enum', description: 'Signal category', defaultValue: '—', validation: 'leadership | teamwork | technical | values | general' },
+  { name: 'source_module', required: false, type: 'text', description: 'Primary data source module', defaultValue: 'null', validation: 'performance | feedback_360 | competency | goals' },
+  { name: 'calculation_method', required: true, type: 'enum', description: 'Score aggregation method', defaultValue: '—', validation: 'weighted_average | simple_average | median | max | min' },
+  { name: 'weight_default', required: false, type: 'numeric(5,2)', description: 'Default weight in calculations', defaultValue: '1.0', validation: '0-10 scale' },
+  { name: 'confidence_threshold', required: true, type: 'numeric(3,2)', description: 'Minimum confidence for signal validity', defaultValue: '0.6', validation: '0-1 scale' },
+  { name: 'bias_risk_factors', required: false, type: 'text[]', description: 'Known bias risk factors for this signal', defaultValue: '[]', validation: 'Array of bias identifiers' },
+  { name: 'is_system_defined', required: true, type: 'boolean', description: 'System-provided vs. company-defined', defaultValue: 'false', validation: '—' },
+  { name: 'is_active', required: true, type: 'boolean', description: 'Active status for calculations', defaultValue: 'true', validation: '—' },
+  { name: 'display_order', required: false, type: 'integer', description: 'UI display ordering', defaultValue: '0', validation: 'Positive integer' },
+  { name: 'created_at', required: true, type: 'timestamptz', description: 'Record creation timestamp', defaultValue: 'now()', validation: 'Auto-set' },
+  { name: 'updated_at', required: true, type: 'timestamptz', description: 'Last update timestamp', defaultValue: 'now()', validation: 'Auto-set on update' }
 ];
 
 const snapshotFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'UUID', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
-  { name: 'employee_id', required: true, type: 'UUID', description: 'Employee this snapshot is for', defaultValue: '—', validation: 'References profiles.id' },
-  { name: 'company_id', required: true, type: 'UUID', description: 'Company context', defaultValue: '—', validation: 'References companies.id' },
-  { name: 'signal_definition_id', required: true, type: 'UUID', description: 'Which signal type', defaultValue: '—', validation: 'References talent_signal_definitions.id' },
-  { name: 'signal_value', required: true, type: 'numeric', description: 'Normalized signal score', defaultValue: '—', validation: '0-1 scale' },
-  { name: 'raw_value', required: false, type: 'numeric', description: 'Original unscaled value', defaultValue: 'null', validation: 'Depends on source' },
-  { name: 'confidence_score', required: false, type: 'numeric', description: 'Statistical confidence', defaultValue: 'null', validation: '0-1 scale' },
-  { name: 'data_freshness_days', required: false, type: 'integer', description: 'Age of source data', defaultValue: 'null', validation: 'Days since last update' },
-  { name: 'source_record_id', required: false, type: 'UUID', description: 'Reference to source record', defaultValue: 'null', validation: 'e.g., appraisal_participant.id' },
-  { name: 'source_record_type', required: false, type: 'text', description: 'Type of source record', defaultValue: 'null', validation: 'e.g., appraisal, 360_cycle' },
-  { name: 'is_current', required: false, type: 'boolean', description: 'Whether this is the active snapshot', defaultValue: 'true', validation: 'Only one current per employee/signal' },
-  { name: 'captured_at', required: true, type: 'timestamptz', description: 'When snapshot was created', defaultValue: 'now()', validation: 'Auto-set' },
-  { name: 'expires_at', required: false, type: 'timestamptz', description: 'When snapshot becomes stale', defaultValue: 'null', validation: 'Based on signal freshness rules' }
+  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
+  { name: 'employee_id', required: true, type: 'uuid', description: 'Target employee reference', defaultValue: '—', validation: 'References profiles.id' },
+  { name: 'company_id', required: true, type: 'uuid', description: 'Company scope', defaultValue: '—', validation: 'References companies.id' },
+  { name: 'signal_definition_id', required: true, type: 'uuid', description: 'Reference to signal definition', defaultValue: '—', validation: 'References talent_signal_definitions.id' },
+  { name: 'source_cycle_id', required: false, type: 'uuid', description: 'Source cycle (appraisal, 360, etc.)', defaultValue: 'null', validation: 'References cycle table' },
+  { name: 'source_record_type', required: true, type: 'text', description: 'Type of source record', defaultValue: '—', validation: 'appraisal | feedback_360 | competency_assessment | goal' },
+  { name: 'source_record_id', required: false, type: 'uuid', description: 'Specific source record reference', defaultValue: 'null', validation: 'e.g., appraisal_participant.id' },
+  { name: 'snapshot_version', required: true, type: 'integer', description: 'Version number for this snapshot', defaultValue: '1', validation: 'Auto-incremented' },
+  { name: 'signal_value', required: false, type: 'numeric(5,2)', description: 'Final computed signal value (0-100 scale)', defaultValue: 'null', validation: '0-100' },
+  { name: 'raw_value', required: false, type: 'numeric(5,2)', description: 'Raw score before normalization', defaultValue: 'null', validation: 'Depends on source' },
+  { name: 'normalized_score', required: false, type: 'numeric(5,4)', description: 'Normalized score (0-1 scale)', defaultValue: 'null', validation: '0-1' },
+  { name: 'confidence_score', required: false, type: 'numeric(3,2)', description: 'Confidence level (0-1 scale)', defaultValue: 'null', validation: '0-1' },
+  { name: 'bias_risk_level', required: true, type: 'enum', description: 'Assessed bias risk', defaultValue: 'low', validation: 'low | medium | high' },
+  { name: 'bias_factors', required: false, type: 'text[]', description: 'Detected bias factors', defaultValue: '[]', validation: 'Array of bias identifiers' },
+  { name: 'evidence_count', required: true, type: 'integer', description: 'Number of evidence sources', defaultValue: '0', validation: 'Non-negative integer' },
+  { name: 'evidence_summary', required: false, type: 'jsonb', description: 'Summary of evidence (response_count, rater_group_count, score_range)', defaultValue: '{}', validation: 'Structured JSON' },
+  { name: 'rater_breakdown', required: false, type: 'jsonb', description: 'Breakdown by rater category (avg, count per category)', defaultValue: '{}', validation: 'Structured JSON' },
+  { name: 'data_freshness_days', required: false, type: 'integer', description: 'Days since data capture (computed)', defaultValue: 'Computed', validation: 'Generated column' },
+  { name: 'effective_from', required: true, type: 'timestamptz', description: 'Start of validity period', defaultValue: 'now()', validation: 'Auto-set' },
+  { name: 'expires_at', required: false, type: 'timestamptz', description: 'End of validity period (null = current)', defaultValue: 'null', validation: 'Based on freshness rules' },
+  { name: 'is_current', required: true, type: 'boolean', description: 'Current snapshot flag', defaultValue: 'true', validation: 'Only one current per employee/signal' },
+  { name: 'captured_at', required: true, type: 'timestamptz', description: 'When signal was computed', defaultValue: 'now()', validation: 'Auto-set' },
+  { name: 'created_at', required: true, type: 'timestamptz', description: 'Record creation timestamp', defaultValue: 'now()', validation: 'Auto-set' },
+  { name: 'created_by', required: false, type: 'uuid', description: 'User or system that created snapshot', defaultValue: 'null', validation: 'References profiles.id' }
 ];
 
 const signalMappingFields: FieldDefinition[] = [
-  { name: 'id', required: true, type: 'UUID', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
-  { name: 'company_id', required: true, type: 'UUID', description: 'Company context', defaultValue: '—', validation: 'References companies.id' },
-  { name: 'signal_definition_id', required: true, type: 'UUID', description: 'Which signal to map', defaultValue: '—', validation: 'References talent_signal_definitions.id' },
-  { name: 'contributes_to', required: true, type: 'text', description: 'Target axis or assessment', defaultValue: '—', validation: 'performance, potential, readiness' },
-  { name: 'weight', required: true, type: 'numeric', description: 'Contribution weight', defaultValue: '1.0', validation: 'Relative weight within axis' },
-  { name: 'bias_multiplier', required: false, type: 'numeric', description: 'Adjustment for known bias', defaultValue: '1.0', validation: '0.5-1.5 typical range' },
-  { name: 'min_confidence', required: false, type: 'numeric', description: 'Minimum confidence to include', defaultValue: '0.5', validation: '0-1 scale' },
-  { name: 'is_active', required: false, type: 'boolean', description: 'Whether mapping is enabled', defaultValue: 'true', validation: '—' }
+  { name: 'id', required: true, type: 'uuid', description: 'Unique identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
+  { name: 'company_id', required: true, type: 'uuid', description: 'Company context', defaultValue: '—', validation: 'References companies.id' },
+  { name: 'signal_definition_id', required: true, type: 'uuid', description: 'Which signal to map', defaultValue: '—', validation: 'References talent_signal_definitions.id' },
+  { name: 'contributes_to', required: true, type: 'text', description: 'Target axis or assessment', defaultValue: '—', validation: 'performance | potential | readiness' },
+  { name: 'weight', required: true, type: 'numeric(5,2)', description: 'Contribution weight', defaultValue: '1.0', validation: 'Relative weight within axis' },
+  { name: 'min_confidence', required: false, type: 'numeric(3,2)', description: 'Minimum confidence to include', defaultValue: '0.5', validation: '0-1 scale' },
+  { name: 'bias_multiplier', required: false, type: 'numeric(3,2)', description: 'Adjustment for known bias', defaultValue: '1.0', validation: '0.5-1.5 typical range' },
+  { name: 'is_active', required: false, type: 'boolean', description: 'Whether mapping is enabled', defaultValue: 'true', validation: '—' },
+  { name: 'created_at', required: true, type: 'timestamptz', description: 'Record creation timestamp', defaultValue: 'now()', validation: 'Auto-set' },
+  { name: 'updated_at', required: true, type: 'timestamptz', description: 'Last update timestamp', defaultValue: 'now()', validation: 'Auto-set on update' }
 ];
 
 export function IntegrationTalentSignals() {
@@ -73,9 +92,9 @@ export function IntegrationTalentSignals() {
       </div>
 
       <LearningObjectives objectives={[
-        'Master the talent_signal_definitions table structure (15 fields)',
-        'Understand talent_signal_snapshots lifecycle and is_current flag management',
-        'Configure nine_box_signal_mappings for axis contribution',
+        'Master the talent_signal_definitions table structure (17 fields)',
+        'Understand talent_signal_snapshots lifecycle and is_current flag management (24 fields)',
+        'Configure nine_box_signal_mappings for axis contribution (11 fields)',
         'Apply bias multipliers and confidence thresholds'
       ]} />
 
@@ -128,7 +147,7 @@ export function IntegrationTalentSignals() {
 
       <FieldReferenceTable 
         fields={signalDefinitionFields} 
-        title="talent_signal_definitions Table (15 Fields)" 
+        title="talent_signal_definitions Table (17 Fields)" 
       />
 
       <Card>
@@ -194,7 +213,7 @@ export function IntegrationTalentSignals() {
 
       <FieldReferenceTable 
         fields={snapshotFields} 
-        title="talent_signal_snapshots Table (22 Fields)" 
+        title="talent_signal_snapshots Table (24 Fields)" 
       />
 
       <Card>
@@ -243,7 +262,7 @@ export function IntegrationTalentSignals() {
 
       <FieldReferenceTable 
         fields={signalMappingFields} 
-        title="nine_box_signal_mappings Table (9 Fields)" 
+        title="nine_box_signal_mappings Table (11 Fields)" 
       />
 
       <Card>
