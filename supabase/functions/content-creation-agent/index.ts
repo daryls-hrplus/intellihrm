@@ -18,6 +18,7 @@ type AgentAction =
   | 'suggest_improvements'
   | 'suggest_next_actions'
   | 'batch_generate'
+  | 'preview_section_regeneration'
   | 'chat';
 
 type Persona = 'ess' | 'mss' | 'hr' | 'admin' | 'all';
@@ -29,6 +30,8 @@ interface AgentRequest {
     featureCode?: string;
     sectionTitle?: string;
     sectionNumber?: string;
+    sectionId?: string;
+    customInstructions?: string;
     targetPersona?: Persona;
     targetAudience?: string[];
     contentType?: string;
@@ -1001,6 +1004,112 @@ Be conversational but focused on documentation tasks.`;
             success: true,
             reply,
             suggestedActions: extractSuggestedActions(reply),
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // ==================== PREVIEW SECTION REGENERATION ====================
+      case 'preview_section_regeneration': {
+        if (!context.sectionId) {
+          return new Response(
+            JSON.stringify({ error: "sectionId is required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Fetch the existing section
+        const { data: section, error: sectionError } = await supabase
+          .from("manual_sections")
+          .select(`
+            id,
+            section_number,
+            title,
+            content,
+            source_feature_codes,
+            last_generated_at,
+            manual_definitions!inner(current_version, manual_name, manual_code)
+          `)
+          .eq("id", context.sectionId)
+          .single();
+
+        if (sectionError || !section) {
+          return new Response(
+            JSON.stringify({ error: "Section not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Extract current content as markdown
+        const currentContent = (() => {
+          if (!section.content) return "";
+          const content = section.content as Record<string, unknown>;
+          if (typeof content.markdown === 'string') return content.markdown;
+          if (typeof content.content === 'string') return content.content;
+          return JSON.stringify(content, null, 2);
+        })();
+
+        // Get feature context for regeneration
+        const featureCodes = section.source_feature_codes || [];
+        let featureContext = "";
+        
+        if (featureCodes.length > 0) {
+          const { data: features } = await supabase
+            .from("application_features")
+            .select("feature_code, feature_name, description, workflow_steps, ui_elements")
+            .in("feature_code", featureCodes);
+          
+          if (features && features.length > 0) {
+            featureContext = features.map((f: any) => `
+Feature: ${f.feature_name} (${f.feature_code})
+Description: ${f.description || 'N/A'}
+Workflow Steps: ${JSON.stringify(f.workflow_steps || {})}
+UI Elements: ${JSON.stringify(f.ui_elements || {})}
+            `).join('\n');
+          }
+        }
+
+        const manualName = (section.manual_definitions as any)?.manual_name || "Administrator Manual";
+
+        // Generate new content
+        const userPrompt = `Regenerate the following Administrator Manual section for ${manualName} in Intelli HRM.
+
+## Current Section
+- Section Number: ${section.section_number}
+- Section Title: ${section.title}
+- Manual: ${manualName}
+
+## Source Features
+${featureContext || "No specific features linked to this section."}
+
+## Current Content (for reference)
+${currentContent.substring(0, 2000)}${currentContent.length > 2000 ? '...' : ''}
+
+## Requirements
+Generate an improved version of this section following the Intelli HRM Administrator Manual format:
+1. Section header with Badge (Section ${section.section_number}) and estimated reading time
+2. Clear, actionable content with step-by-step instructions where applicable
+3. Configuration tables if relevant
+4. Best practices and tips
+5. Troubleshooting section if applicable
+
+${context.customInstructions ? `Additional Instructions: ${context.customInstructions}` : ''}
+
+Format as clean markdown that can be rendered in a React component.`;
+
+        const proposedContent = await callAI(AGENT_SYSTEM_PROMPT, userPrompt);
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            currentContent,
+            proposedContent,
+            sectionInfo: {
+              sectionNumber: section.section_number,
+              title: section.title,
+              lastGeneratedAt: section.last_generated_at,
+              currentVersion: (section.manual_definitions as any)?.current_version || "1.0",
+            },
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
