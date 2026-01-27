@@ -1,5 +1,5 @@
 // Succession Planning Integration Section Exports
-// Chapter 9: Integration & Cross-Module Features (12 sections)
+// Chapter 9: Integration & Cross-Module Features (15 sections)
 
 export { IntegrationArchitectureOverview } from './IntegrationArchitectureOverview';
 export { IntegrationRulesEngine } from './IntegrationRulesEngine';
@@ -13,3 +13,8 @@ export { IntegrationCompensation } from './IntegrationCompensation';
 export { IntegrationHRHub } from './IntegrationHRHub';
 export { IntegrationExecutionAudit } from './IntegrationExecutionAudit';
 export { IntegrationTroubleshooting } from './IntegrationTroubleshooting';
+
+// Industry Alignment Sections (9.13-9.15)
+export { IntegrationCalibration } from './IntegrationCalibration';
+export { IntegrationRecruitment } from './IntegrationRecruitment';
+export { IntegrationAPI } from './IntegrationAPI';
