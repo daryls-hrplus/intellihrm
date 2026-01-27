@@ -21,7 +21,7 @@ export interface SuccessionSection {
 export interface SuccessionGlossaryTerm {
   term: string;
   definition: string;
-  category: 'Core' | 'Nine-Box' | 'Talent Pool' | 'Readiness' | 'Risk' | 'Career' | 'Integration' | 'Analytics';
+  category: 'Core' | 'Nine-Box' | 'Talent Pool' | 'Readiness' | 'Risk' | 'Career' | 'Integration' | 'Analytics' | 'Configuration' | 'Troubleshooting';
 }
 
 // =============================================================================
@@ -1438,6 +1438,26 @@ export const SUCCESSION_GLOSSARY: SuccessionGlossaryTerm[] = [
   { term: 'Readiness Distribution', definition: 'Statistical breakdown of successors by readiness band.', category: 'Analytics' },
   { term: 'Prediction Accuracy', definition: 'Measure of how well flight risk predictions match actual departures.', category: 'Analytics' },
   { term: 'Calibration Variance', definition: 'Difference between initial assessments and post-calibration ratings.', category: 'Analytics' },
+
+  // Configuration Terms (NEW)
+  { term: 'Assessor Type Weight', definition: 'Percentage weight assigned to each assessor role (Manager, HR, Executive) in multi-assessor score aggregation. Total must equal 100%.', category: 'Configuration' },
+  { term: 'Readiness Band Threshold', definition: 'Score ranges defining each readiness level (e.g., Ready Now = 0.85-1.0). Configured in readiness_rating_bands table.', category: 'Configuration' },
+  { term: 'Rating Source Configuration', definition: 'Setup of data inputs (appraisals, goals, 360) that feed Nine-Box axis calculations with assigned weights.', category: 'Configuration' },
+  { term: 'Signal Mapping', definition: 'Configuration linking talent signal definitions to Nine-Box axes with weight, confidence threshold, and bias multiplier.', category: 'Configuration' },
+  { term: 'Form Template', definition: 'Readiness assessment form containing categorized indicators, configured per staff type in readiness_assessment_forms.', category: 'Configuration' },
+  { term: 'Staff Type Mapping', definition: 'Assignment of readiness forms to employee staff types enabling automatic form selection during assessments.', category: 'Configuration' },
+  { term: 'Company Settings Inheritance', definition: 'Multi-company configuration pattern where child companies inherit settings from parent unless explicitly overridden.', category: 'Configuration' },
+  { term: 'Integration Rule', definition: 'Event-driven automation configuration defining triggers, conditions, and actions for cross-module data synchronization.', category: 'Configuration' },
+
+  // Troubleshooting Terms (NEW)
+  { term: 'Issue ID', definition: 'Standardized identifier for documented issues (e.g., CFG-001 for Configuration, NBX-002 for Nine-Box) enabling quick reference.', category: 'Troubleshooting' },
+  { term: 'Diagnostic Checklist', definition: 'Ordered list of verification steps to systematically identify root causes of issues before escalation.', category: 'Troubleshooting' },
+  { term: 'Root Cause Analysis', definition: 'Investigation technique to identify the underlying cause of an issue rather than surface symptoms.', category: 'Troubleshooting' },
+  { term: 'Resolution Steps', definition: 'Documented procedure to fix an identified issue, typically numbered for sequential execution.', category: 'Troubleshooting' },
+  { term: 'Prevention Tip', definition: 'Best practice guidance to avoid issue recurrence, typically included with each documented resolution.', category: 'Troubleshooting' },
+  { term: 'Escalation Trigger', definition: 'Criteria defining when an issue should be escalated to the next support tier (e.g., P1 severity, SLA breach).', category: 'Troubleshooting' },
+  { term: 'SLA Compliance', definition: 'Adherence to Service Level Agreement response and resolution times for issue severity levels (P1-P4).', category: 'Troubleshooting' },
+  { term: 'Support Tier', definition: 'Level in the 4-tier support model: Self-Service, HR Operations, Technical Support, Vendor Escalation.', category: 'Troubleshooting' },
 ];
 
 // =============================================================================

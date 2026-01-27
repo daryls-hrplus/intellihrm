@@ -288,6 +288,77 @@ export function TalentPoolSuccessionIssues() {
         Coverage Score = (Ready Now candidates × 1.0) + (1-2 Years × 0.75) + (3-5 Years × 0.5) / Target coverage. 
         A position with 1 Ready Now candidate = 100% coverage if target is 1.
       </InfoCallout>
+
+      {/* Additional Field References */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">talent_pool_members Additional Fields Reference</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm space-y-2">
+            <p><strong>development_notes:</strong> Free-text field for HR to capture development context, action items, and coaching notes for the pool member.</p>
+            <p><strong>joined_date:</strong> Date member was added to the pool (auto-set on approved status).</p>
+            <p><strong>exit_date:</strong> Date member graduated or was removed from the pool.</p>
+            <p><strong>exit_reason:</strong> Categorized reason for departure (graduation, performance, resignation, etc.).</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">talent_pool_review_packets Field Reference (12 Fields)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div><code className="text-xs bg-muted px-1 rounded">id</code> - UUID primary key</div>
+            <div><code className="text-xs bg-muted px-1 rounded">pool_member_id</code> - FK to talent_pool_members</div>
+            <div><code className="text-xs bg-muted px-1 rounded">generated_at</code> - Packet creation timestamp</div>
+            <div><code className="text-xs bg-muted px-1 rounded">generated_by</code> - User who triggered generation</div>
+            <div><code className="text-xs bg-muted px-1 rounded">evidence_summary</code> - JSONB evidence compilation</div>
+            <div><code className="text-xs bg-muted px-1 rounded">confidence_score</code> - Overall nomination confidence (0-1)</div>
+            <div><code className="text-xs bg-muted px-1 rounded">bias_risk_level</code> - low, medium, high</div>
+            <div><code className="text-xs bg-muted px-1 rounded">data_freshness_days</code> - Days since last signal update</div>
+            <div><code className="text-xs bg-muted px-1 rounded">recommendation</code> - AI recommendation text</div>
+            <div><code className="text-xs bg-muted px-1 rounded">hr_decision</code> - approved/rejected/needs_review</div>
+            <div><code className="text-xs bg-muted px-1 rounded">hr_notes</code> - HR decision justification</div>
+            <div><code className="text-xs bg-muted px-1 rounded">decided_at</code> - Decision timestamp</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* UI Component Troubleshooting */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-blue-600" />
+            UI Component Troubleshooting
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="border-l-2 border-blue-500 pl-4 space-y-2">
+            <h4 className="font-medium text-sm">TalentPoolNominationEvidence Component</h4>
+            <p className="text-sm text-muted-foreground">
+              Displays evidence summary for pool nomination decisions.
+            </p>
+            <div className="text-sm space-y-1">
+              <p><strong>Issue:</strong> Evidence not loading or showing "No items"</p>
+              <p><strong>Resolution:</strong> Verify talent_signal_snapshots has entries for the employee. Check that poolCriteria props are valid if passed.</p>
+            </div>
+          </div>
+          <div className="border-l-2 border-blue-500 pl-4 space-y-2">
+            <h4 className="font-medium text-sm">HRReviewConfidenceIndicators Component</h4>
+            <p className="text-sm text-muted-foreground">
+              Displays data quality indicators (confidence, bias risk, freshness) for HR review.
+            </p>
+            <div className="text-sm space-y-1">
+              <p><strong>Issue:</strong> Confidence score showing 0% or indicators not rendering</p>
+              <p><strong>Resolution:</strong> Ensure signal snapshot data is recent (≤30 days). Verify sourceCount and signalCount props are being passed correctly from the review packet.</p>
+              <p><strong>Issue:</strong> Bias risk showing "high" unexpectedly</p>
+              <p><strong>Resolution:</strong> Check for rater homogeneity in 360 feedback. Diversify assessment sources or document justification.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
