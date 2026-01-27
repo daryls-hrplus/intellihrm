@@ -4,18 +4,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, AreaChart, Area } from 'recharts';
 import { NineBoxAssessment, SuccessionPlan, KeyPositionRisk, TalentPool } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Target, TrendingDown, UserCheck, BookOpen, Layers } from 'lucide-react';
+import { Users, Target, TrendingDown, UserCheck, BookOpen, Layers, TrendingUp } from 'lucide-react';
+import { ReadinessTrendChart } from './ReadinessTrendChart';
 
 interface SuccessionAnalyticsProps {
   assessments: NineBoxAssessment[];
   plans: SuccessionPlan[];
   keyPositions: KeyPositionRisk[];
   talentPools: TalentPool[];
+  companyId?: string;
 }
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-export function SuccessionAnalytics({ assessments, plans, keyPositions, talentPools }: SuccessionAnalyticsProps) {
+export function SuccessionAnalytics({ assessments, plans, keyPositions, talentPools, companyId }: SuccessionAnalyticsProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [mentorshipData, setMentorshipData] = useState<any[]>([]);
   const [flightRiskData, setFlightRiskData] = useState<any[]>([]);
@@ -232,6 +234,10 @@ export function SuccessionAnalytics({ assessments, plans, keyPositions, talentPo
           <TabsTrigger value="bench-strength" className="flex items-center gap-2">
             <Layers className="h-4 w-4" />
             Bench Strength
+          </TabsTrigger>
+          <TabsTrigger value="readiness-trends" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Readiness Trends
           </TabsTrigger>
         </TabsList>
 
@@ -626,6 +632,16 @@ export function SuccessionAnalytics({ assessments, plans, keyPositions, talentPo
               </ResponsiveContainer>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Readiness Trends Tab */}
+        <TabsContent value="readiness-trends" className="space-y-6">
+          <ReadinessTrendChart
+            companyId={companyId}
+            mode="aggregate"
+            height={400}
+            showBandZones={true}
+          />
         </TabsContent>
       </Tabs>
     </div>

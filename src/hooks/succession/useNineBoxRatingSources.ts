@@ -165,7 +165,7 @@ export function useCalculateRatings(employeeId?: string, companyId?: string) {
           .eq('is_active', true),
         supabase
           .from('talent_signal_snapshots')
-          .select('id, signal_value, normalized_score, confidence_score, bias_risk_level, signal_definition:talent_signal_definitions(code, name, signal_category)')
+          .select('id, signal_value, normalized_score, confidence_score, bias_risk_level, signal_definition:talent_signal_definitions(signal_code, signal_name, category)')
           .eq('employee_id', employeeId)
           .eq('is_current', true),
         supabase

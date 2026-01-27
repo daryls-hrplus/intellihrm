@@ -64,7 +64,7 @@ export function useTalentProfileEvidence() {
         .from('talent_signal_snapshots')
         .select(`
           *,
-          talent_signal_definitions(name, signal_category)
+          talent_signal_definitions(signal_name, category)
         `)
         .eq('employee_id', employeeId)
         .eq('is_current', true);
@@ -93,7 +93,7 @@ export function useTalentProfileEvidence() {
       signalItems.forEach(signal => {
         const signalValue = signal.signal_value || signal.normalized_score || 0;
         const confidence = signal.confidence_score || 0;
-        const name = (signal.talent_signal_definitions as any)?.name || 'Unknown';
+        const name = (signal.talent_signal_definitions as any)?.signal_name || 'Unknown';
 
         if (signalValue >= 3.5) {
           strengths.push({ name, score: signalValue, confidence });
