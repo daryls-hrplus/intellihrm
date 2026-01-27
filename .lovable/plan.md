@@ -1,327 +1,155 @@
 
-# Release Command Center Integration & Documentation Sync
+# Update Release Command Center to Follow Color Semantics Standard
 
-## Summary
+## Problem
 
-This plan addresses four critical issues:
-1. Confirming manual publishing still works (and integrating version freeze)
-2. Creating documentation for the Release Command Center
-3. Expanding scope to include all content types (Quick Starts, Checklists, Module Docs)
-4. Moving Release Management out of hidden advanced features
+The Release Command Center page and its child components use hardcoded Tailwind colors (`text-green-600`, `bg-amber-50`, etc.) instead of the application's semantic color tokens. This causes:
+
+1. Low contrast in the AI chat messages (visible in your screenshot - "Documentation Gaps Identified" text is hard to read)
+2. Inconsistent color usage across the application
+3. Potential dark mode issues
 
 ---
 
-## Part 1: Move Release Management to Primary Navigation
+## Solution Overview
 
-### File: `src/pages/enablement/EnablementHubPage.tsx`
+Apply the established **UI Color Semantics Standard** consistently across all Release Command Center components:
 
-**Change 1:** Add Release Command Center to `primarySections` (visible by default)
+| Intent   | Color  | Usage                                    |
+|----------|--------|------------------------------------------|
+| info     | Blue   | Guidance, reference values, tooltips     |
+| success  | Green  | Achieved, validated, completed           |
+| warning  | Amber  | Needs attention, below target            |
+| error    | Red    | Critical gaps, failures, blockers        |
+| neutral  | Grey   | Pending, not assessed, placeholder       |
 
-Add a new section after "Publish" in the primary sections:
+---
 
-```typescript
-{
-  titleKey: "Release Management",
-  items: [
-    {
-      title: "Release Command Center",
-      description: "Version lifecycle, milestones, and AI release manager",
-      href: "/enablement/release-center",
-      icon: Rocket,
-      color: "bg-primary/10 text-primary",
-      badge: "Pre-Release", // Dynamic from lifecycle
-    },
-  ],
-},
+## Changes Required
+
+### 1. ReleaseManagerChat.tsx (AI Assistant Chat)
+
+**Issue:** The `prose` class inside `bg-muted` has poor contrast
+
+**Fix:**
+- Add `text-foreground` to markdown container for readable text
+- Replace generic `bg-muted` with semantic styling for different message types
+- Add proper dark mode compatible prose overrides
+
+```text
+Current:  className="prose prose-sm max-w-none dark:prose-invert"
+Updated:  className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-foreground prose-li:text-foreground prose-code:text-foreground prose-code:bg-muted"
 ```
 
-**Change 2:** Remove "Release Management" from `advancedSections`
+### 2. ReleaseCommandCenterPage.tsx
 
-Remove the entire "Release Management" section (lines 274-299) from `advancedSections`. Keep "Release Versions" and "Release Calendar" as deprecated links in advanced for backward compatibility, or remove entirely.
+**Issue:** Uses hardcoded colors like `text-green-600`, `text-amber-600`
+
+**Fixes:**
+- Replace `text-green-600` with `text-semantic-success` / `text-[hsl(var(--semantic-success-text))]`
+- Replace `text-amber-600` with `text-semantic-warning` / `text-[hsl(var(--semantic-warning-text))]`
+- Replace `text-red-600` with `text-semantic-error` / `text-[hsl(var(--semantic-error-text))]`
+
+Lines affected:
+- Lines 205-207: Readiness score color logic
+- Lines 322-340: Release status select items
+
+### 3. AIReadinessCard.tsx
+
+**Issue:** Uses hardcoded colors throughout
+
+**Fixes:**
+- `getGradeColor()` function: Replace hardcoded `bg-green-500/10`, `text-green-700` with semantic tokens
+- `getScoreColor()` function: Replace `text-green-600`, `text-amber-600`, `text-red-600` with semantic tokens
+- Blocker section (lines 211-218): Replace `bg-red-50 text-red-700` with semantic error styling
+- Warning section (lines 229-236): Replace `bg-amber-50 text-amber-700` with semantic warning styling
+- Content coverage icons (lines 170-198): Keep as decorative colors (acceptable per standard)
+
+### 4. ReleaseStatusBanner.tsx
+
+**Issue:** Uses hardcoded colors for readiness score
+
+**Fix (line 94-97):**
+- Replace `text-green-600`, `text-amber-600`, `text-red-600` with semantic tokens
+
+### 5. ReleaseStatusBadge.tsx
+
+Likely already using proper badge styling - will verify during implementation.
 
 ---
 
-## Part 2: Wire Version Freeze to Publishing
+## Technical Implementation
 
-### File: `src/hooks/useReleaseLifecycle.ts`
+### Add CSS Utilities (if not present)
 
-Export helper functions for use in publishing:
+Add semantic text utilities to Tailwind config or use direct HSL references:
+
+```css
+.text-semantic-success { color: hsl(var(--semantic-success-text)); }
+.text-semantic-warning { color: hsl(var(--semantic-warning-text)); }
+.text-semantic-error { color: hsl(var(--semantic-error-text)); }
+.text-semantic-info { color: hsl(var(--semantic-info-text)); }
+.text-semantic-neutral { color: hsl(var(--semantic-neutral-text)); }
+
+.bg-semantic-success-light { background: hsl(var(--semantic-success-bg)); }
+.bg-semantic-warning-light { background: hsl(var(--semantic-warning-bg)); }
+.bg-semantic-error-light { background: hsl(var(--semantic-error-bg)); }
+.bg-semantic-info-light { background: hsl(var(--semantic-info-bg)); }
+```
+
+Or use inline HSL references:
+```text
+text-[hsl(var(--semantic-success-text))]
+bg-[hsl(var(--semantic-error-bg))]
+```
+
+### Helper Function Pattern
+
+Create or reuse a semantic color utility function:
 
 ```typescript
-export function useVersionFreezeStatus() {
-  const { lifecycle, isPreRelease } = useReleaseLifecycle();
-  
-  return {
-    isVersionFrozen: lifecycle?.version_freeze_enabled && isPreRelease,
-    baseVersion: lifecycle?.base_version || '1.0.0',
-    releaseStatus: lifecycle?.release_status || 'pre-release',
-  };
+function getSemanticScoreColor(score: number) {
+  if (score >= 80) return 'text-[hsl(var(--semantic-success-text))]';
+  if (score >= 60) return 'text-[hsl(var(--semantic-warning-text))]';
+  return 'text-[hsl(var(--semantic-error-text))]';
 }
 ```
 
-### File: `src/components/kb/SmartVersionSelector.tsx`
-
-Add version freeze awareness:
-
-```typescript
-interface SmartVersionSelectorProps {
-  // ... existing props
-  versionFreezeEnabled?: boolean;
-  isPreRelease?: boolean;
-}
-
-// In visibleOptions filter:
-const visibleOptions = options.filter(opt => {
-  // ... existing logic
-  
-  // When version freeze is enabled and in pre-release:
-  if (versionFreezeEnabled && isPreRelease) {
-    // Only show initial (first publish) and patch (updates)
-    if (opt.value === 'major' || opt.value === 'minor') {
-      return false; // Hide major/minor during freeze
-    }
-  }
-  
-  return true;
-});
-```
-
-### File: `src/components/kb/PublishWizard.tsx`
-
-Add version freeze banner and pass props to SmartVersionSelector:
-
-```typescript
-import { useVersionFreezeStatus } from "@/hooks/useReleaseLifecycle";
-
-// In component:
-const { isVersionFrozen, releaseStatus } = useVersionFreezeStatus();
-
-// In Step 2 (version), before SmartVersionSelector:
-{isVersionFrozen && (
-  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-4">
-    <div className="flex items-center gap-2">
-      <Clock className="h-4 w-4 text-amber-600" />
-      <span className="font-medium text-amber-700">Pre-Release Mode</span>
-    </div>
-    <p className="text-sm text-amber-600 mt-1">
-      Version freeze is active. All updates will remain at v1.0.x until GA release.
-    </p>
-  </div>
-)}
-
-// Pass to SmartVersionSelector:
-<SmartVersionSelector
-  // ... existing props
-  versionFreezeEnabled={isVersionFrozen}
-  isPreRelease={releaseStatus === 'pre-release'}
-/>
-```
-
 ---
-
-## Part 3: Expand Content Type Coverage
-
-### Database Update: Add content type tracking
-
-The AI readiness assessment should cover all content types. Update the `release-manager-agent` edge function to query:
-
-1. **Administrator Manuals** (existing) — via `MANUAL_CONFIGS` or database
-2. **Quick Start Guides** — via `enablement_quickstart_templates` table
-3. **Implementation Checklists** — currently hardcoded in `ImplementationChecklistsPage.tsx`
-4. **Module Documentation** — via `application_modules` table
-
-### File: `supabase/functions/release-manager-agent/index.ts`
-
-Update `assess_readiness` action to include all content types:
-
-```typescript
-// Assess all content types
-const contentTypes = [
-  { type: 'manuals', label: 'Administrator Manuals' },
-  { type: 'quickstarts', label: 'Quick Start Guides' },
-  { type: 'checklists', label: 'Implementation Checklists' },
-  { type: 'module-docs', label: 'Module Documentation' },
-];
-
-// For Quick Start Guides:
-const { data: quickstarts } = await supabase
-  .from('enablement_quickstart_templates')
-  .select('module_code, status')
-  .eq('status', 'published');
-
-// Include in AI prompt context
-```
-
-### File: `src/components/enablement/AIReadinessCard.tsx`
-
-Update to show all content types:
-
-```typescript
-// Add content type breakdown
-<div className="grid grid-cols-2 gap-4 mt-4">
-  <div className="p-3 bg-muted rounded-lg">
-    <p className="text-sm text-muted-foreground">Manuals</p>
-    <p className="font-medium">10/10 complete</p>
-  </div>
-  <div className="p-3 bg-muted rounded-lg">
-    <p className="text-sm text-muted-foreground">Quick Starts</p>
-    <p className="font-medium">8/18 published</p>
-  </div>
-  <div className="p-3 bg-muted rounded-lg">
-    <p className="text-sm text-muted-foreground">Checklists</p>
-    <p className="font-medium">5/5 complete</p>
-  </div>
-  <div className="p-3 bg-muted rounded-lg">
-    <p className="text-sm text-muted-foreground">Module Docs</p>
-    <p className="font-medium">18/18 indexed</p>
-  </div>
-</div>
-```
-
----
-
-## Part 4: Add Release Status Badge to Manual Cards
-
-### File: `src/components/enablement/manuals/ManualCard.tsx`
-
-Add release status indicator:
-
-```typescript
-import { useReleaseLifecycle } from "@/hooks/useReleaseLifecycle";
-import { ReleaseStatusBadge } from "../ReleaseStatusBadge";
-
-// In component:
-const { isPreRelease, isGAReleased } = useReleaseLifecycle();
-
-// In card header, next to version badge:
-<ReleaseStatusBadge />
-```
-
-### File: `src/components/kb/ManualPublishCard.tsx`
-
-Add release status indicator:
-
-```typescript
-import { useReleaseLifecycle } from "@/hooks/useReleaseLifecycle";
-
-// In component:
-const { lifecycle } = useReleaseLifecycle();
-
-// In card header:
-<Badge 
-  variant="outline" 
-  className={
-    lifecycle?.release_status === 'pre-release' 
-      ? "bg-amber-50 text-amber-600 border-amber-200" 
-      : "bg-green-50 text-green-600 border-green-200"
-  }
->
-  {lifecycle?.release_status === 'pre-release' ? 'Pre-Release' : 'GA Released'}
-</Badge>
-```
-
----
-
-## Part 5: Create Documentation
-
-### New File: `src/pages/enablement/ReleaseCommandCenterGuidePage.tsx`
-
-Create a documentation page explaining:
-1. What is the Release Command Center
-2. Version Lifecycle States (Pre-Release → Preview → GA → Maintenance)
-3. How Version Freeze works
-4. Milestones management
-5. AI Readiness Assessment
-6. Release Notes aggregation
-
-### Update: `src/pages/enablement/EnablementGuidePage.tsx`
-
-Add a section linking to Release Command Center documentation.
-
----
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/pages/enablement/ReleaseCommandCenterGuidePage.tsx` | User guide for Release Command Center |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/pages/enablement/EnablementHubPage.tsx` | Move Release Management to primary sections |
-| `src/components/kb/SmartVersionSelector.tsx` | Add version freeze props |
-| `src/components/kb/PublishWizard.tsx` | Add freeze banner, pass props |
-| `src/hooks/useReleaseLifecycle.ts` | Export `useVersionFreezeStatus` helper |
-| `src/components/enablement/manuals/ManualCard.tsx` | Add release status badge |
-| `src/components/kb/ManualPublishCard.tsx` | Add release status badge |
-| `src/components/enablement/AIReadinessCard.tsx` | Expand to show all content types |
-| `supabase/functions/release-manager-agent/index.ts` | Include Quick Starts, Checklists in assessment |
-| `src/routes/lazyPages.ts` | Add ReleaseCommandCenterGuidePage |
-| `src/App.tsx` | Add route for guide page |
+| `src/components/enablement/ReleaseManagerChat.tsx` | Fix prose contrast, add explicit text color classes |
+| `src/pages/enablement/ReleaseCommandCenterPage.tsx` | Replace hardcoded colors with semantic tokens |
+| `src/components/enablement/AIReadinessCard.tsx` | Update getGradeColor, getScoreColor, blocker/warning sections |
+| `src/components/enablement/ReleaseStatusBanner.tsx` | Update readiness score colors |
+| `src/index.css` | Add semantic text/background utility classes (if needed) |
+
+---
+
+## Before/After Comparison
+
+**Readiness Score:**
+- Before: `text-green-600` / `text-amber-600` / `text-red-600`
+- After: `text-[hsl(var(--semantic-success-text))]` / `text-[hsl(var(--semantic-warning-text))]` / `text-[hsl(var(--semantic-error-text))]`
+
+**Blocker Items:**
+- Before: `bg-red-50 text-red-700`
+- After: `bg-[hsl(var(--semantic-error-bg))] text-[hsl(var(--semantic-error-text))]`
+
+**AI Chat Messages:**
+- Before: `prose prose-sm dark:prose-invert` (low contrast)
+- After: `prose prose-sm text-foreground [&_*]:text-inherit [&_strong]:text-foreground [&_code]:bg-background/50`
 
 ---
 
 ## Summary
 
-| Issue | Solution |
-|-------|----------|
-| Manual publishing still works? | ✅ Yes, unchanged — but now enhanced with version freeze |
-| Documentation exists? | 📝 Creating user guide for Release Command Center |
-| Includes all content types? | 🔄 Expanding to cover Quick Starts, Checklists, Module Docs |
-| Release Management hidden? | ✅ Moving to primary sections (visible by default) |
+This update ensures the Release Command Center follows the enterprise UI Color Semantics Standard, providing:
 
----
-
-## Visual: Content Sync Architecture
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                    RELEASE COMMAND CENTER                       │
-│                                                                 │
-│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
-│   │ Version      │  │ Milestones   │  │ AI Readiness        │ │
-│   │ Lifecycle    │  │ Timeline     │  │ Assessment          │ │
-│   └──────┬───────┘  └──────────────┘  └──────────┬───────────┘ │
-│          │                                        │             │
-│          ▼                                        ▼             │
-│   ┌──────────────────────────────────────────────────────────┐ │
-│   │                  CONTENT COVERAGE                         │ │
-│   │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────┐ │ │
-│   │  │ Manuals   │ │Quick Starts│ │ Checklists │ │ Module │ │ │
-│   │  │ 10/10     │ │ 8/18       │ │ 5/5        │ │ Docs   │ │ │
-│   │  └────────────┘ └────────────┘ └────────────┘ └────────┘ │ │
-│   └──────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│   ┌──────────────────────────────────────────────────────────┐ │
-│   │                 VERSION FREEZE                            │ │
-│   │                                                           │ │
-│   │  When enabled: All publishes → v1.0.x (patch only)       │ │
-│   │  SmartVersionSelector hides Major/Minor options          │ │
-│   │                                                           │ │
-│   └──────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    MANUAL PUBLISHING PAGE                       │
-│                  (Unchanged — still works!)                     │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ Publish Wizard                                           │   │
-│  │                                                          │   │
-│  │ Step 1: Select Sections                                  │   │
-│  │ Step 2: Version Config  ◄── Version Freeze Applied       │   │
-│  │ Step 3: Target Category                                  │   │
-│  │ Step 4: Confirm & Publish                                │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      HELP CENTER                                │
-│                                                                 │
-│  KB Articles created with source_manual_id → version tracked   │
-└─────────────────────────────────────────────────────────────────┘
-```
+- Consistent color meaning across the application
+- Proper contrast for readability (especially in AI chat)
+- Dark mode compatibility
+- Alignment with SAP SuccessFactors, Oracle HCM, and Workday design patterns
