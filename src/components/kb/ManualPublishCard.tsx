@@ -1,6 +1,5 @@
 // Card component for displaying manual publish status
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +21,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useReleaseLifecycle } from "@/hooks/useReleaseLifecycle";
 
 const ICON_MAP: Record<string, typeof Shield> = {
   Shield,
@@ -63,6 +63,7 @@ export function ManualPublishCard({
   onViewHistory,
   onPreview,
 }: ManualPublishCardProps) {
+  const { lifecycle } = useReleaseLifecycle();
   const Icon = ICON_MAP[manual.icon] || BookOpen;
   const progressPercent = status.sectionsTotal > 0 
     ? (status.sectionsPublished / status.sectionsTotal) * 100 
@@ -88,6 +89,22 @@ export function ManualPublishCard({
           </div>
           
           <div className="flex items-center gap-2">
+            {/* Release Status Badge */}
+            <Badge 
+              variant="outline" 
+              className={
+                lifecycle?.release_status === 'pre-release' 
+                  ? "bg-amber-50 text-amber-600 border-amber-200" 
+                  : lifecycle?.release_status === 'ga-released'
+                  ? "bg-green-50 text-green-600 border-green-200"
+                  : "bg-blue-50 text-blue-600 border-blue-200"
+              }
+            >
+              {lifecycle?.release_status === 'pre-release' ? 'Pre-Release' : 
+               lifecycle?.release_status === 'ga-released' ? 'GA Released' : 
+               lifecycle?.release_status?.replace('-', ' ').toUpperCase() || 'Pre-Release'}
+            </Badge>
+            
             {!status.isPublished && (
               <Badge variant="outline" className="bg-slate-50 text-slate-600">
                 <Clock className="h-3 w-3 mr-1" />
