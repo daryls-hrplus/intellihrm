@@ -612,6 +612,7 @@ const App = () => (
             <Route path="/enablement/manuals/time-attendance" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.TimeAttendanceManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals/feedback-360" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.Feedback360ManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals/succession" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.SuccessionManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/career-development" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.CareerDevelopmentManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals/client-provisioning" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ClientProvisioningGuidePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals/client-provisioning/testing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ClientProvisioningTestingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals/publishing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ManualPublishingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
