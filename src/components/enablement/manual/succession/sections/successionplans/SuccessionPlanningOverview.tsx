@@ -265,7 +265,7 @@ export function SuccessionPlanningOverview() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Succession planning integrates with multiple HRplus modules to leverage existing 
+            Succession planning integrates with multiple Intelli HRM modules to leverage existing 
             talent data and drive development actions.
           </p>
 

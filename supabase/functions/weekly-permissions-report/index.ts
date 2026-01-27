@@ -175,7 +175,7 @@ serve(async (req) => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "HRplus Security <noreply@notifications.intellihrm.net>",
+      from: "Intelli HRM Security <noreply@notifications.intellihrm.net>",
       to: adminEmails,
       subject: `📊 Weekly Permissions Report - ${new Date().toLocaleDateString()}`,
       html: `

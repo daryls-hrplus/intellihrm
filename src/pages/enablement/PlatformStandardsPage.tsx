@@ -128,7 +128,7 @@ export default function PlatformStandardsPage() {
               Platform Standards
             </h1>
             <p className="text-muted-foreground mt-1">
-              Enterprise patterns, design guidelines, and architectural standards for HRplus
+              Enterprise patterns, design guidelines, and architectural standards for Intelli HRM
             </p>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function PlatformStandardsPage() {
                 <h3 className="font-semibold text-lg">What are Platform Standards?</h3>
                 <p className="text-muted-foreground mt-1">
                   Platform Standards define the architectural patterns, UX conventions, and technical 
-                  guidelines that ensure consistency across all HRplus modules. Following these standards 
+                  guidelines that ensure consistency across all Intelli HRM modules. Following these standards 
                   enables enterprise-grade quality aligned with Workday, SAP SuccessFactors, and Oracle HCM.
                 </p>
               </div>

@@ -254,7 +254,7 @@ export function PlansVersioning() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            HRplus provides tools to compare plan versions and track changes across plan years.
+            Intelli HRM provides tools to compare plan versions and track changes across plan years.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="p-4 rounded-lg bg-muted/50">

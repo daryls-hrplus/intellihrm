@@ -210,7 +210,7 @@ export function PlansContributions() {
         <h3 className="text-xl font-semibold mb-2">3.3 Contribution Configuration</h3>
         <p className="text-muted-foreground">
           Contribution configuration determines how benefit costs are shared between employer 
-          and employee. HRplus supports multiple contribution structures to accommodate different 
+          and employee. Intelli HRM supports multiple contribution structures to accommodate different 
           benefit types and regional requirements.
         </p>
       </div>
@@ -330,7 +330,7 @@ export function PlansContributions() {
 
       <TipCallout title="Payroll Integration">
         Configure contribution amounts using the same frequency as your payroll system. 
-        HRplus automatically calculates per-period amounts if you enter annual or monthly 
+        Intelli HRM automatically calculates per-period amounts if you enter annual or monthly 
         figures. Use the Payroll Integration settings to map benefit deduction codes to 
         your payroll system.
       </TipCallout>

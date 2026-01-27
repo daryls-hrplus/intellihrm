@@ -392,7 +392,7 @@ export function BenefitsOverviewCoreConcepts() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-6">
-            HRplus supports multiple contribution models to accommodate different organizational policies 
+            Intelli HRM supports multiple contribution models to accommodate different organizational policies 
             and benefit strategies. Each model has trade-offs in terms of simplicity, cost-sharing, and employee perception.
           </p>
 

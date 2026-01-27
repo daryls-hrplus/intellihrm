@@ -309,7 +309,7 @@ export default function SuccessionManualPage() {
                             ) : (
                               <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                             )}
-                            <span className="flex-1 truncate">{section.sectionNumber}. {section.title}</span>
+                            <span className="flex-1 break-words">{section.sectionNumber}. {section.title}</span>
                             {section.subsections && section.subsections.length > 0 && (
                               expandedSections.includes(section.id) 
                                 ? <ChevronDown className="h-4 w-4 flex-shrink-0" />
@@ -335,7 +335,7 @@ export default function SuccessionManualPage() {
                                   ) : (
                                     <Circle className="h-3 w-3 flex-shrink-0" />
                                   )}
-                                  <span className="truncate">{sub.sectionNumber} {sub.title}</span>
+                                  <span className="break-words">{sub.sectionNumber} {sub.title}</span>
                                 </button>
                               ))}
                             </div>

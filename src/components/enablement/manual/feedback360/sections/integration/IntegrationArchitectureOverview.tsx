@@ -78,7 +78,7 @@ export function IntegrationArchitectureOverview() {
       </div>
 
       <LearningObjectives objectives={[
-        'Understand how 360 Feedback connects to other HRplus modules',
+        'Understand how 360 Feedback connects to other Intelli HRM modules',
         'Identify data flow directions and synchronization patterns',
         'Configure consent gates and policy enforcement points',
         'Plan integration implementation sequence'

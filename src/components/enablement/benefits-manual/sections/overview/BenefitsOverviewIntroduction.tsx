@@ -160,7 +160,7 @@ export function BenefitsOverviewIntroduction() {
         </div>
         <h2 className="text-2xl font-bold text-foreground">Introduction & Business Context</h2>
         <p className="text-muted-foreground mt-1">
-          Understanding the strategic value and scope of HRplus Benefits Administration
+          Understanding the strategic value and scope of Intelli HRM Benefits Administration
         </p>
       </div>
 
@@ -174,7 +174,7 @@ export function BenefitsOverviewIntroduction() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-foreground leading-relaxed">
-            The <strong>HRplus Benefits Administration Module</strong> is an enterprise-grade, AI-first platform 
+            The <strong>Intelli HRM Benefits Administration Module</strong> is an enterprise-grade, AI-first platform 
             designed to transform how organizations manage employee benefits across the Caribbean, Africa, and 
             global operations. By unifying plan configuration, enrollment management, claims processing, and 
             analytics into a single intelligent system, organizations can dramatically reduce administrative 

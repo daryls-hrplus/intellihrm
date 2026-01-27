@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification email
     const emailResponse = await resend.emails.send({
-      from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
+      from: "Intelli HRM <noreply@notifications.intellihrm.net>",
       to: validEmails,
       subject: `${senderName} shared a scenario planning analysis with you`,
       html: `
@@ -108,7 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 24px;">
-            This email was sent from HRplus Cerebra. If you didn't expect this, you can safely ignore it.
+            This email was sent from Intelli HRM. If you didn't expect this, you can safely ignore it.
           </p>
         </div>
       `,
