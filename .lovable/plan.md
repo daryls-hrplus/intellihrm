@@ -1,395 +1,297 @@
 
-# Content Creation Studio Revamp: Unified Documentation Agent
+# Content Creation Studio Enhancement: Chapter/Section Selection with Diff Preview
 
-## Executive Summary
+## Overview
 
-The current Content Creation Studio has **5 fragmented tabs** with overlapping functionality and an agent that lacks orchestration capabilities. This plan consolidates the workflow into a **single intelligent agent** that understands the entire documentation lifecycle, reads both UI components and database schema, and produces documentation matching your established manual format.
+This enhancement adds two key capabilities to the Content Creation Studio:
 
----
+1. **Hierarchical Manual Navigation**: Manual → Chapter → Section dropdowns to select existing documentation for updates
+2. **Diff Preview**: See AI-generated changes side-by-side with existing content before applying
 
-## Current State Analysis
-
-### Existing Architecture Issues
-
-| Component | Current State | Problem |
-|-----------|---------------|---------|
-| **AI Generator Tab** | Manual topic entry | No awareness of existing docs or features |
-| **Documentation Agent Tab** | Schema analysis only | Limited to KB articles, no manual section generation |
-| **Templates Tab** | Static card list | Not functional, no actual template usage |
-| **AI Tools Tab** | 11 disconnected tools | No orchestration, tools don't share context |
-| **Preview Tab** | Basic markdown view | No side-by-side editing capability |
-
-### What the Agent Currently Does
-
-1. `analyze_schema` - Scans `application_features` table
-2. `inspect_features` - Lists features with documentation status
-3. `generate_manual_section` - Creates markdown sections
-4. `generate_kb_article` - Creates KB articles
-5. `assess_coverage` - Calculates coverage metrics
-6. `sync_release` - Updates release lifecycle
-7. `generate_checklist` - Creates implementation checklists
-8. `bulk_generate` - Batch candidate identification
-
-### What's Missing for Industry Standards
-
-| Gap | Industry Standard | Implementation |
-|-----|-------------------|----------------|
-| **UI Awareness** | Agent reads UI component registry | Parse `featureRegistry.ts` |
-| **Documentation Formats** | Multiple output types | Administrator Manual sections, Quick Starts, SOPs, KB Articles |
-| **Contextual Generation** | Reference existing docs | Read related manual sections before generating |
-| **Quality Scoring** | Readability/completeness scoring | Flesch-Kincaid, topic coverage analysis |
-| **Version Awareness** | Track doc versions vs feature changes | Compare `updated_at` timestamps |
-| **Persona Targeting** | Role-specific content | ESS, MSS, HR Partner, Admin personas |
+These features enable a "review-before-apply" workflow that gives you control over what gets updated in your documentation.
 
 ---
 
-## Proposed Architecture
+## New User Workflow
 
-### 1. Unified Agent Hub (Single Tab Interface)
-
-Replace 5 tabs with a **chat-first agent interface** that exposes all capabilities through natural language:
-
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  1. SELECT CONTENT                                                          │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
+│  │ Manual        ▼ │  │ Chapter       ▼ │  │ Section       ▼ │              │
+│  │ 360 Feedback    │  │ 2. Setup        │  │ 2.1 Config      │              │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│                                                                              │
+│  Selected: Section 2.1 - "System Configuration"                             │
+│  Last Generated: Jan 15, 2025 • Version 1.2.0                               │
+│                                                                              │
+│  [Preview Changes]  [Regenerate Section]  [Regenerate Chapter]              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  2. REVIEW CHANGES (appears after clicking "Preview Changes")                │
+│  ┌──────────────────────────────┬──────────────────────────────┐            │
+│  │ Current Version (v1.2.0)    │ Proposed Changes             │            │
+│  ├──────────────────────────────┼──────────────────────────────┤            │
+│  │ ## Overview                  │ ## Overview                  │            │
+│  │ This section covers...       │ This section covers...       │            │
+│  │ - Step one                   │ + Step one (with details)    │            │
+│  │ - Step two                   │ - Step two (removed)         │            │
+│  │                              │ + New step three             │            │
+│  └──────────────────────────────┴──────────────────────────────┘            │
+│                                                                              │
+│  +12 additions  -3 deletions  85 unchanged                                  │
+│                                                                              │
+│  [Cancel]  [Apply Changes]  [Apply & Publish to KB]                         │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  CONTENT CREATION STUDIO - Documentation Agent                  │
-├───────────────────────────────────────┬─────────────────────────┤
-│  Agent Chat Panel                     │  Context & Preview      │
-│  ┌─────────────────────────────────┐  │  ┌───────────────────┐  │
-│  │ "What would you like to create?"│  │  │ Module: Workforce │  │
-│  │                                 │  │  │ Features: 45      │  │
-│  │ [Quick Actions]                 │  │  │ Coverage: 72%     │  │
-│  │ • Analyze Coverage              │  │  │                   │  │
-│  │ • Generate Manual Section       │  │  │ ─────────────────  │  │
-│  │ • Create KB Article             │  │  │ Preview Panel     │  │
-│  │ • Build Quick Start             │  │  │ (Live Markdown)   │  │
-│  │ • Run Gap Analysis              │  │  └───────────────────┘  │
-│  └─────────────────────────────────┘  │                         │
-├───────────────────────────────────────┴─────────────────────────┤
-│  Generated Artifacts (History)                                  │
-│  [Manual Section] [KB Article] [Quick Start] [Checklist]       │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 2. Enhanced Agent Capabilities
-
-The new `content-creation-agent` edge function will have these capabilities:
-
-#### Core Actions
-
-| Action | Description | Data Sources |
-|--------|-------------|--------------|
-| `analyze_context` | Full system analysis | DB schema + UI registry + existing docs |
-| `generate_manual_section` | Rich manual sections | Template formats from Admin Manual pattern |
-| `generate_kb_article` | End-user KB articles | Simplified persona-targeted content |
-| `generate_quickstart` | Module quick starts | Roles, prerequisites, setup steps |
-| `generate_sop` | Standard procedures | Step-by-step with screenshots markers |
-| `generate_training` | Training guides | Learning objectives, exercises |
-| `identify_gaps` | Gap analysis with priorities | Cross-reference all content types |
-| `suggest_improvements` | Content quality scoring | Readability, completeness, freshness |
-| `batch_generate` | Bulk generation queue | Priority-ordered batch processing |
-
-#### Data Sources the Agent Will Read
-
-1. **Database Tables**
-   - `application_modules` - Module metadata
-   - `application_features` - Feature registry with routes, UI elements
-   - `enablement_artifacts` - Existing content
-   - `enablement_content_status` - Documentation status
-   - `kb_articles` - Published KB content
-   - `enablement_quickstart_templates` - Quick start templates
-
-2. **UI Component Registry**
-   - Parse `src/routes/routeTabMapping.ts` for navigation structure
-   - Parse `src/constants/manualsStructure.ts` for manual organization
-   - Read existing manual section components for format patterns
-
-3. **Manual Section Templates**
-   - Extract structure from `AdminOverviewIntroduction.tsx` pattern
-   - Include: Executive Summary, Business Value, Target Audience Matrix, Learning Objectives, Document Conventions
 
 ---
 
-## Implementation Plan
+## Technical Implementation
 
-### Phase 1: Enhanced Edge Function (`content-creation-agent`)
+### Phase 1: Manual Content Selector Component
 
-**New file:** `supabase/functions/content-creation-agent/index.ts`
+**New file: `src/components/enablement/ManualContentSelector.tsx`**
 
-```
-Actions:
-├── analyze_context
-│   ├── Read application_features
-│   ├── Read enablement_artifacts
-│   ├── Calculate coverage by module
-│   └── Return prioritized recommendations
-│
-├── generate_manual_section
-│   ├── Read feature details
-│   ├── Read related manual sections (cross-reference)
-│   ├── Apply manual template structure
-│   │   ├── Section header with Badge + reading time
-│   │   ├── Executive Summary box
-│   │   ├── Business Value statement
-│   │   ├── Target Audience matrix (if overview)
-│   │   ├── Step-by-step procedures
-│   │   ├── Configuration tables
-│   │   ├── Best practices callouts
-│   │   ├── Related features links
-│   │   └── Learning objectives
-│   └── Return JSX-ready markdown
-│
-├── generate_kb_article
-│   ├── Persona-specific (ESS/MSS/HR)
-│   ├── Simplified language
-│   ├── Quick steps format
-│   └── FAQ section
-│
-├── generate_quickstart
-│   ├── Read module features
-│   ├── Generate roles array
-│   ├── Generate prerequisites
-│   ├── Generate pitfalls
-│   ├── Generate setup steps
-│   └── Return structured JSON
-│
-├── suggest_next_actions
-│   ├── Based on coverage gaps
-│   ├── Based on stale content
-│   └── Based on new features
-│
-└── batch_queue
-    ├── Accept priority list
-    ├── Generate sequentially
-    └── Track progress
-```
+A collapsible card component with three cascading dropdowns:
 
-### Phase 2: New Studio UI Component
-
-**Modified file:** `src/pages/enablement/ContentCreationStudioPage.tsx`
-
-Replace current 5-tab structure with:
-
-1. **Agent Chat Panel** (Left)
-   - Chat interface with agent
-   - Quick action buttons
-   - Context indicators (selected module, coverage)
-   - History of generated artifacts
-
-2. **Context & Preview Panel** (Right)
-   - Module/Feature selector
-   - Live coverage stats
-   - Preview of generated content
-   - Edit capabilities
-   - Save to Artifacts / Publish buttons
-
-### Phase 3: Agent Chat Component
-
-**New file:** `src/components/enablement/ContentCreationAgentChat.tsx`
+| Dropdown | Data Source | Behavior |
+|----------|-------------|----------|
+| **Manual** | `manual_definitions` table | Loads all available manuals |
+| **Chapter** | Extracted from `manual_sections` | Filters to top-level sections (e.g., "1", "2", "3") |
+| **Section** | `manual_sections` filtered by chapter | Shows child sections (e.g., "1.1", "1.2") |
 
 Features:
-- Streaming response display
-- Quick action buttons for common tasks
-- Context awareness (remembers selected module)
-- Artifact history with regeneration
-- Export options (Markdown, DOCX, PDF)
+- Displays section metadata (last generated date, version, word count)
+- Shows "needs regeneration" badge if section is stale
+- Action buttons: Preview Changes, Regenerate Section, Regenerate Chapter
 
-### Phase 4: Hook for Agent Communication
+---
 
-**New file:** `src/hooks/useContentCreationAgent.ts`
+### Phase 2: Diff Preview Dialog
+
+**New file: `src/components/enablement/ContentDiffPreview.tsx`**
+
+A dialog that shows the proposed changes before applying them:
 
 ```typescript
-interface AgentCapabilities {
-  analyzeContext: (moduleCode?: string) => Promise<ContextAnalysis>;
-  generateManualSection: (params: ManualSectionParams) => Promise<GeneratedSection>;
-  generateKBArticle: (featureCode: string, persona: Persona) => Promise<KBArticle>;
-  generateQuickStart: (moduleCode: string) => Promise<QuickStartContent>;
-  identifyGaps: (moduleCode?: string) => Promise<GapAnalysis>;
-  suggestNextActions: () => Promise<ActionSuggestion[]>;
-  batchGenerate: (candidates: string[]) => AsyncGenerator<GenerationProgress>;
+interface ContentDiffPreviewProps {
+  isOpen: boolean;
+  onClose: () => void;
+  sectionTitle: string;
+  sectionNumber: string;
+  currentContent: string;      // Existing markdown
+  proposedContent: string;     // AI-generated markdown
+  onApply: () => void;         // Apply changes to DB
+  onApplyAndPublish: () => void; // Apply + publish to KB
+  isApplying: boolean;
 }
 ```
 
----
-
-## Agent Performance Best Practices
-
-### How the Agent Can Best Perform Its Job
-
-#### 1. Context Loading Strategy
-
-```
-Before any generation:
-1. Load module metadata
-2. Load feature list for module
-3. Load existing artifacts for feature
-4. Load related manual sections
-5. Check for recent feature updates (stale content detection)
-```
-
-#### 2. Prompt Engineering Patterns
-
-**System Prompt Template:**
-
-```
-You are the Documentation Agent for Intelli HRM, an enterprise-grade HRMS.
-
-CURRENT CONTEXT:
-- Module: {module_name} ({module_code})
-- Feature: {feature_name}
-- Existing Documentation: {doc_count} articles
-- Last Updated: {last_update}
-- Target Audience: {personas}
-
-OUTPUT FORMAT:
-- Use the established manual section structure
-- Include feature status badges (Implemented/Recommended/Planned)
-- Add cross-references to related features
-- Include learning objectives for each section
-- Use document conventions (Tips, Warnings, Best Practices)
-
-QUALITY CRITERIA:
-- Readability: Flesch-Kincaid Grade 8-10
-- Completeness: Cover all UI elements and workflows
-- Accuracy: Reference actual database fields and UI components
-- Actionability: Every section should have clear next steps
-```
-
-#### 3. Quality Assurance Pipeline
-
-```
-Post-generation checks:
-├── Length validation (min/max tokens)
-├── Structure validation (required sections present)
-├── Cross-reference validation (linked features exist)
-├── Terminology consistency (brand name, product names)
-└── Readability score calculation
-```
-
-#### 4. Caching Strategy
-
-```
-Cache in sessionStorage:
-├── Module metadata (5 min TTL)
-├── Feature lists (5 min TTL)
-├── Coverage analysis (1 min TTL)
-└── Generated content (session duration)
-```
+Uses the existing `ContentDiffViewer` component with:
+- Side-by-side, inline, and unified view modes
+- Statistics (additions, deletions, unchanged)
+- Copy diff button
 
 ---
 
-## Documentation Format Templates
+### Phase 3: Hook for Preview Generation
 
-### Administrator Manual Section Format
+**New file: `src/hooks/useManualSectionPreview.ts`**
 
-Based on analysis of `AdminOverviewIntroduction.tsx`:
+```typescript
+interface ManualSectionPreviewState {
+  // Selection state
+  selectedManualId: string | null;
+  selectedChapter: string | null;
+  selectedSectionId: string | null;
+  
+  // Data
+  manuals: ManualDefinition[];
+  sections: ManualSection[];
+  chapters: ChapterInfo[];
+  currentSectionContent: string | null;
+  
+  // Preview state
+  isGeneratingPreview: boolean;
+  proposedContent: string | null;
+  previewError: string | null;
+  
+  // Actions
+  setSelectedManualId: (id: string | null) => void;
+  setSelectedChapter: (chapterNumber: string | null) => void;
+  setSelectedSectionId: (id: string | null) => void;
+  generatePreview: () => Promise<void>;
+  applyChanges: () => Promise<void>;
+  clearPreview: () => void;
+}
+```
+
+This hook:
+1. Fetches manuals and sections from the database
+2. Extracts chapters using `extractChapters()` from `useChapterGeneration.ts`
+3. Calls a new "preview" mode of the content-creation-agent that generates content without saving
+4. Stores both current and proposed content for diff display
+
+---
+
+### Phase 4: Edge Function Enhancement
+
+**Modified file: `supabase/functions/content-creation-agent/index.ts`**
+
+Add a new action `preview_section_regeneration`:
+
+```typescript
+case 'preview_section_regeneration': {
+  const { sectionId, customInstructions } = params;
+  
+  // 1. Fetch current section content
+  const currentContent = await fetchSectionContent(sectionId);
+  
+  // 2. Generate new content (same as generate_manual_section)
+  const proposedContent = await generateContent(sectionId, customInstructions);
+  
+  // 3. Return BOTH without saving
+  return {
+    success: true,
+    currentContent: convertToMarkdown(currentContent),
+    proposedContent: convertToMarkdown(proposedContent),
+    sectionInfo: {
+      sectionNumber,
+      title,
+      lastGeneratedAt,
+      currentVersion
+    }
+  };
+}
+```
+
+This allows previewing changes without committing them to the database.
+
+---
+
+### Phase 5: UI Integration
+
+**Modified file: `src/components/enablement/AgentContextPanel.tsx`**
+
+Add a new collapsible section "Manual Content" below the existing Context card:
 
 ```tsx
-<Card id="{section-id}" data-manual-anchor="{section-id}">
-  <CardHeader>
-    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-      <Badge variant="outline">Section X.Y</Badge>
-      <span>•</span>
-      <Clock className="h-3 w-3" />
-      <span>{reading_time} min read</span>
-    </div>
-    <CardTitle className="text-2xl">{section_title}</CardTitle>
-    <CardDescription>{section_description}</CardDescription>
-  </CardHeader>
-  <CardContent className="space-y-8">
-    {/* Executive Summary Box */}
-    {/* Business Value Statement */}
-    {/* Target Audience Matrix (if applicable) */}
-    {/* Main Content Sections */}
-    {/* Best Practices Callouts */}
-    {/* Learning Objectives */}
-    {/* Document Conventions */}
-  </CardContent>
-</Card>
+<Collapsible>
+  <CollapsibleTrigger>
+    <CardTitle>Manual Content</CardTitle>
+  </CollapsibleTrigger>
+  <CollapsibleContent>
+    <ManualContentSelector
+      manuals={manuals}
+      chapters={chapters}
+      sections={filteredSections}
+      selectedManualId={selectedManualId}
+      selectedChapter={selectedChapter}
+      selectedSectionId={selectedSectionId}
+      onManualChange={handleManualChange}
+      onChapterChange={handleChapterChange}
+      onSectionChange={handleSectionChange}
+      onPreviewChanges={handlePreviewChanges}
+      onRegenerateSection={handleRegenerateSection}
+      onRegenerateChapter={handleRegenerateChapter}
+      isLoading={isGeneratingPreview}
+    />
+  </CollapsibleContent>
+</Collapsible>
 ```
 
-### KB Article Format
+**Modified file: `src/pages/enablement/ContentCreationStudioPage.tsx`**
 
-```json
-{
-  "title": "How to [Action] in [Feature]",
-  "summary": "2-3 sentence overview",
-  "persona": "ESS|MSS|HR|Admin",
-  "steps": [
-    { "step": 1, "action": "...", "tip": "..." }
-  ],
-  "faqs": [
-    { "question": "...", "answer": "..." }
-  ],
-  "related": ["feature_code_1", "feature_code_2"]
-}
-```
+Add state and handlers:
+- Import and use `useManualSectionPreview` hook
+- Add state for manual/chapter/section selection
+- Add handlers for preview/apply actions
+- Render `ContentDiffPreview` dialog when preview is active
 
-### Quick Start Format
+---
 
-```json
-{
-  "roles": [
-    { "role": "...", "title": "...", "icon": "...", "responsibility": "..." }
-  ],
-  "prerequisites": [
-    { "id": "...", "title": "...", "required": true }
-  ],
-  "pitfalls": [
-    { "issue": "...", "prevention": "..." }
-  ],
-  "setupSteps": [
-    { "id": "...", "title": "...", "substeps": [], "estimatedTime": "..." }
-  ],
-  "successMetrics": [
-    { "metric": "...", "target": "...", "howToMeasure": "..." }
-  ]
-}
+## Files Summary
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `src/components/enablement/ManualContentSelector.tsx` | CREATE | Manual/Chapter/Section dropdowns |
+| `src/components/enablement/ContentDiffPreview.tsx` | CREATE | Diff preview dialog with apply buttons |
+| `src/hooks/useManualSectionPreview.ts` | CREATE | State management for preview workflow |
+| `src/components/enablement/AgentContextPanel.tsx` | MODIFY | Add ManualContentSelector section |
+| `src/pages/enablement/ContentCreationStudioPage.tsx` | MODIFY | Integrate preview state and dialog |
+| `supabase/functions/content-creation-agent/index.ts` | MODIFY | Add `preview_section_regeneration` action |
+
+---
+
+## Reused Components
+
+| Component | From | Usage |
+|-----------|------|-------|
+| `ContentDiffViewer` | `src/components/kb/ContentDiffViewer.tsx` | Side-by-side diff display |
+| `extractChapters` | `src/hooks/useChapterGeneration.ts` | Chapter extraction from sections |
+| `useManualDefinitions` | `src/hooks/useManualGeneration.ts` | Fetch manual list |
+| `useManualSections` | `src/hooks/useManualGeneration.ts` | Fetch sections for a manual |
+
+---
+
+## Data Flow
+
+```text
+User selects Manual
+       ↓
+Hook fetches sections (useManualSections)
+       ↓
+extractChapters() groups sections into chapters
+       ↓
+User selects Chapter
+       ↓
+Hook filters sections by chapter number
+       ↓
+User selects Section
+       ↓
+Section metadata displayed (last generated, version, etc.)
+       ↓
+User clicks "Preview Changes"
+       ↓
+Edge function generates preview (no DB save)
+       ↓
+ContentDiffPreview dialog opens with side-by-side view
+       ↓
+User reviews changes
+       ↓
+User clicks "Apply" → Updates section in DB
+User clicks "Apply & Publish" → Updates section + publishes to KB
 ```
 
 ---
 
-## Files to Create
+## State Persistence
 
-| File | Purpose |
-|------|---------|
-| `supabase/functions/content-creation-agent/index.ts` | New unified agent edge function |
-| `src/components/enablement/ContentCreationAgentChat.tsx` | Chat interface component |
-| `src/hooks/useContentCreationAgent.ts` | React hook for agent communication |
-| `src/components/enablement/AgentContextPanel.tsx` | Context and preview panel |
-| `src/components/enablement/GeneratedArtifactCard.tsx` | Artifact history card |
+Tab state will persist the selection across tab switches:
 
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/pages/enablement/ContentCreationStudioPage.tsx` | Replace 5-tab layout with agent hub |
-| `src/routes/lazyPages.ts` | Update exports if needed |
-
-## Files to Deprecate (Keep for Reference)
-
-| File | Reason |
-|------|--------|
-| `src/components/enablement/AIToolsPanel.tsx` | Merged into agent quick actions |
-| `src/components/enablement/DocumentationAgentPanel.tsx` | Replaced by new chat interface |
+```typescript
+const [tabState, setTabState] = useTabState({
+  defaultState: {
+    selectedModule: "",
+    selectedFeature: "",
+    // New manual navigation state
+    selectedManualId: "",
+    selectedChapter: "",
+    selectedSectionId: "",
+    artifactsExpanded: true,
+  },
+  syncToUrl: ["selectedModule", "selectedManualId", "selectedChapter"],
+});
+```
 
 ---
 
-## Success Metrics
+## Benefits
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Documentation generation time | 5-10 min per article | 1-2 min per article |
-| Agent awareness | Schema only | Schema + UI + existing docs |
-| Output formats | 2 (KB, Manual section) | 5 (KB, Manual, Quick Start, SOP, Training) |
-| Quality consistency | Variable | Templated with validation |
-| User interaction | 5 separate tabs | Single conversational interface |
-
----
-
-## Implementation Sequence
-
-1. **Phase 1** (Core): Create `content-creation-agent` edge function with enhanced capabilities
-2. **Phase 2** (UI): Build new agent chat interface component
-3. **Phase 3** (Integration): Replace ContentCreationStudioPage with new layout
-4. **Phase 4** (Quality): Add post-generation validation and scoring
-5. **Phase 5** (Batch): Implement bulk generation queue with progress tracking
+| Benefit | Description |
+|---------|-------------|
+| **Control** | Review AI-generated changes before applying |
+| **Context** | See exactly what changed with side-by-side diff |
+| **Safety** | No accidental overwrites - explicit apply action required |
+| **Efficiency** | Direct navigation to any section in any manual |
+| **Auditability** | Version history preserved with each apply |
