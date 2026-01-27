@@ -6,6 +6,7 @@ import {
   FUNCTIONAL_AREAS, 
   type ManualDefinition,
 } from "@/constants/manualsStructure";
+import { ReleaseStatusBadge } from "../ReleaseStatusBadge";
 
 interface ManualCardProps {
   manual: ManualDefinition;
@@ -25,9 +26,12 @@ export function ManualCard({ manual, onClick }: ManualCardProps) {
           <div className={`p-2 rounded-lg ${manual.color}`}>
             <IconComponent className="h-5 w-5" />
           </div>
-          <Badge variant="outline" className={manual.badgeColor}>
-            v{manual.version}
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            <ReleaseStatusBadge size="sm" />
+            <Badge variant="outline" className={manual.badgeColor}>
+              v{manual.version}
+            </Badge>
+          </div>
         </div>
         <CardTitle className="text-lg mt-3 group-hover:text-primary transition-colors">
           {manual.title}

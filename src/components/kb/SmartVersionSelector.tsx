@@ -18,6 +18,8 @@ interface SmartVersionSelectorProps {
     patch: string;
   };
   recommendedType?: VersionType;
+  versionFreezeEnabled?: boolean;
+  isPreRelease?: boolean;
 }
 
 export function SmartVersionSelector({
@@ -26,6 +28,8 @@ export function SmartVersionSelector({
   isFirstPublication,
   nextVersions,
   recommendedType,
+  versionFreezeEnabled = false,
+  isPreRelease = false,
 }: SmartVersionSelectorProps) {
   const options: Array<{
     value: VersionType;
@@ -65,9 +69,17 @@ export function SmartVersionSelector({
   ];
 
   const visibleOptions = options.filter(opt => {
-    if (opt.showWhen === 'always') return true;
-    if (opt.showWhen === 'first') return isFirstPublication;
-    if (opt.showWhen === 'update') return !isFirstPublication;
+    // Base visibility rules
+    if (opt.showWhen === 'first' && !isFirstPublication) return false;
+    if (opt.showWhen === 'update' && isFirstPublication) return false;
+    
+    // Version freeze rules: when enabled and in pre-release, hide major/minor
+    if (versionFreezeEnabled && isPreRelease) {
+      if (opt.value === 'major' || opt.value === 'minor') {
+        return false; // Only allow initial (first publish) and patch (updates)
+      }
+    }
+    
     return true;
   });
 

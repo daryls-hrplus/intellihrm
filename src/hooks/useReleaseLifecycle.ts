@@ -321,3 +321,14 @@ export function useReleaseLifecycle() {
     updateReadinessCache,
   };
 }
+
+// Helper hook for version freeze status (used in publishing)
+export function useVersionFreezeStatus() {
+  const { lifecycle, isPreRelease, versionFreezeEnabled } = useReleaseLifecycle();
+  
+  return {
+    isVersionFrozen: versionFreezeEnabled && isPreRelease,
+    baseVersion: lifecycle?.base_version || '1.0.0',
+    releaseStatus: lifecycle?.release_status || 'pre-release',
+  };
+}

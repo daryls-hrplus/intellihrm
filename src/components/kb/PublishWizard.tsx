@@ -40,6 +40,7 @@ import {
   Users,
   Sparkles,
   RefreshCw,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionSelector } from "./SectionSelector";
@@ -53,6 +54,7 @@ import { ContentQualityCheck } from "./ContentQualityCheck";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+import { useVersionFreezeStatus } from "@/hooks/useReleaseLifecycle";
 
 interface PublishWizardProps {
   open: boolean;
@@ -90,6 +92,7 @@ export function PublishWizard({
   onPublishComplete,
 }: PublishWizardProps) {
   const { t } = useTranslation();
+  const { isVersionFrozen, releaseStatus } = useVersionFreezeStatus();
   const [currentStep, setCurrentStep] = useState(0);
   const [isPublishing, setIsPublishing] = useState(false);
 
@@ -387,6 +390,19 @@ export function PublishWizard({
               </div>
             )}
 
+            {/* Version Freeze Banner */}
+            {isVersionFrozen && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  <span className="font-medium text-amber-700">Pre-Release Mode</span>
+                </div>
+                <p className="text-sm text-amber-600 mt-1">
+                  Version freeze is active. All updates will remain at v1.0.x until GA release.
+                </p>
+              </div>
+            )}
+
             {/* Version Type - Smart Selector */}
             <div className="space-y-3">
               <Label>Version Type</Label>
@@ -395,7 +411,9 @@ export function PublishWizard({
                 onChange={setVersionType}
                 isFirstPublication={isFirstPublication}
                 nextVersions={nextVersions}
-                recommendedType={isFirstPublication ? 'initial' : 'minor'}
+                recommendedType={isFirstPublication ? 'initial' : 'patch'}
+                versionFreezeEnabled={isVersionFrozen}
+                isPreRelease={releaseStatus === 'pre-release'}
               />
             </div>
 
