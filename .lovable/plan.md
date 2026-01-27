@@ -1,324 +1,404 @@
 
-# Succession Module: Field Name Cascade Audit & Readiness Trend Chart Implementation
+# Succession Manual Chapter 7: Risk Management - Comprehensive Review & Update Plan
 
 ## Executive Summary
 
-This plan addresses two critical issues:
-1. **Field name inconsistencies**: Database columns were renamed to industry standards, but 7 code files still use old column names
-2. **Missing UI feature**: Section 10.7 documents Readiness Trend Analysis but no UI component exists for historical trend visualization
+Chapter 7 (Risk Management) is currently in **placeholder state** with only 4 generic sections (~55 lines total). This audit reveals significant structural, content, and industry-alignment issues requiring a complete rewrite to match the comprehensive modular pattern used in other chapters (Foundation: 10 sections, Succession Plans: 10 sections, Analytics: 12 sections).
 
 ---
 
-## Part 1: Field Name Cascade Audit Results
+## Part 1: Current State Analysis
 
-### Database Schema (Confirmed Updated)
+### Current Chapter 7 Structure (Placeholder)
 
-| Table | New Standard Names | Status |
-|-------|-------------------|--------|
-| `talent_signal_definitions` | `signal_code`, `signal_name`, `category`, `calculation_method` | Migrated |
-| `talent_signal_snapshots` | `raw_value`, `captured_at`, `expires_at`, `effective_from`, `source_record_type` | Migrated |
-| `nine_box_signal_mappings` | `min_confidence`, `bias_multiplier` | Migrated |
+| Section | Title | Status |
+|---------|-------|--------|
+| 7.1 | Flight Risk Assessment | Empty placeholder |
+| 7.2 | Retention Risk Matrix | Empty placeholder |
+| 7.3 | Key Position Vacancy Risk | Empty placeholder |
+| 7.4 | Bench Strength Analysis | Empty placeholder |
 
-### Code Files Using OLD Field Names (Broken Queries)
+**Total Lines:** ~55 (placeholder content only)
 
-| File | Old Names Used | New Names Required |
-|------|---------------|-------------------|
-| `src/components/succession/NineBoxEvidencePanel.tsx` (line 78) | `code, name, signal_category` | `signal_code, signal_name, category` |
-| `src/components/succession/SuccessorProfileLeadershipSignals.tsx` (line 46-47) | `name, signal_category` | `signal_name, category` |
-| `src/hooks/succession/useNineBoxRatingSources.ts` (line 168) | `code, name, signal_category` | `signal_code, signal_name, category` |
-| `src/hooks/useTalentProfileEvidence.ts` (line 67) | `name, signal_category` | `signal_name, category` |
-| `src/hooks/useTalentPoolReviewPackets.ts` (line 93) | `name, signal_category` | `signal_name, category` |
-| `src/components/succession/CalibrationEvidenceComparison.tsx` (line 88) | `signal_category` | `category` |
+### Industry Standard Risk Management Framework
 
-### Code Files Already Updated (No Action Needed)
-
-| File | Status |
-|------|--------|
-| `src/hooks/feedback/useTalentSignals.ts` | Uses `signal_code, signal_name, category` |
-| `src/hooks/feedback/useModuleEvidence.ts` | Uses `signal_code, signal_name, category` |
-| `src/hooks/succession/useNineBoxSignalMappings.ts` | Uses `signal_code, signal_name, category` |
-| `src/types/talentSignals.ts` | Type definitions updated |
-| `src/components/feedback/signals/SignalTrendChart.tsx` | Uses `signal_name, signal_code` |
-
----
-
-## Part 2: Implementation Plan - Field Name Cascade Fixes
-
-### 2.1 NineBoxEvidencePanel.tsx
-
-**Location**: `src/components/succession/NineBoxEvidencePanel.tsx`
-
-**Change** (line 78):
-```typescript
-// FROM:
-signal_definition:talent_signal_definitions(code, name, signal_category)
-
-// TO:
-signal_definition:talent_signal_definitions(signal_code, signal_name, category)
-```
-
-**Additional changes** (where old field names are accessed):
-- Update any references to `signal_definition?.code` → `signal_definition?.signal_code`
-- Update any references to `signal_definition?.name` → `signal_definition?.signal_name`
-- Update any references to `signal_definition?.signal_category` → `signal_definition?.category`
-
----
-
-### 2.2 SuccessorProfileLeadershipSignals.tsx
-
-**Location**: `src/components/succession/SuccessorProfileLeadershipSignals.tsx`
-
-**Change** (lines 45-48):
-```typescript
-// FROM:
-talent_signal_definitions(
-  name,
-  signal_category
-)
-
-// TO:
-talent_signal_definitions(
-  signal_name,
-  category
-)
-```
-
-**Change** (lines 55, 58):
-```typescript
-// FROM:
-.filter(s => (s.talent_signal_definitions as any)?.signal_category === 'leadership')
-name: (s.talent_signal_definitions as any)?.name || 'Unknown',
-
-// TO:
-.filter(s => (s.talent_signal_definitions as any)?.category === 'leadership')
-name: (s.talent_signal_definitions as any)?.signal_name || 'Unknown',
-```
-
----
-
-### 2.3 useNineBoxRatingSources.ts
-
-**Location**: `src/hooks/succession/useNineBoxRatingSources.ts`
-
-**Change** (line 168):
-```typescript
-// FROM:
-signal_definition:talent_signal_definitions(code, name, signal_category)
-
-// TO:
-signal_definition:talent_signal_definitions(signal_code, signal_name, category)
-```
-
-**Change** (lines 219-220 where accessed):
-- Update references to access new field names in the rating calculation logic
-
----
-
-### 2.4 useTalentProfileEvidence.ts
-
-**Location**: `src/hooks/useTalentProfileEvidence.ts`
-
-**Change** (line 67):
-```typescript
-// FROM:
-talent_signal_definitions(name, signal_category)
-
-// TO:
-talent_signal_definitions(signal_name, category)
-```
-
-**Change** (line 96):
-```typescript
-// FROM:
-const name = (signal.talent_signal_definitions as any)?.name || 'Unknown';
-
-// TO:
-const name = (signal.talent_signal_definitions as any)?.signal_name || 'Unknown';
-```
-
----
-
-### 2.5 useTalentPoolReviewPackets.ts
-
-**Location**: `src/hooks/useTalentPoolReviewPackets.ts`
-
-**Change** (line 93):
-```typescript
-// FROM:
-talent_signal_definitions(name, signal_category)
-
-// TO:
-talent_signal_definitions(signal_name, category)
-```
-
-**Change** (lines 99-100):
-```typescript
-// FROM:
-(s.talent_signal_definitions as any)?.signal_category === 'leadership'
-
-// TO:
-(s.talent_signal_definitions as any)?.category === 'leadership'
-```
-
----
-
-### 2.6 CalibrationEvidenceComparison.tsx
-
-**Location**: `src/components/succession/CalibrationEvidenceComparison.tsx`
-
-**Change** (line 88):
-```typescript
-// FROM:
-talent_signal_definitions(signal_category)
-
-// TO:
-talent_signal_definitions(category)
-```
-
-**Change** (line 102):
-```typescript
-// FROM:
-(s.talent_signal_definitions as any)?.signal_category === 'leadership'
-
-// TO:
-(s.talent_signal_definitions as any)?.category === 'leadership'
-```
-
----
-
-## Part 3: Readiness Trend Chart Implementation
-
-### Current Gap
-
-The existing `SignalTrendChart.tsx` component visualizes **talent signal** history over time, but there is no equivalent for **readiness score** history. Section 10.7 of the Succession Manual documents readiness trends, but the UI lacks this visualization.
-
-### Data Source
-
-Historical readiness data is available from:
+The industry-standard risk management module in succession planning follows this logical sequence:
 
 ```text
-readiness_assessment_events table:
-- id, candidate_id, overall_score, readiness_band, completed_at
-
-succession_candidates table:
-- latest_readiness_score, latest_readiness_band, readiness_assessed_at
+1. Risk Framework Overview & Terminology (Foundation)
+2. Key Position Identification & Criticality (Assessment)
+3. Vacancy Risk Assessment (Triggers)
+4. Flight Risk Assessment - Employee Level (Detection)
+5. Retention Risk Matrix - Position Level (Prioritization)
+6. Risk Mitigation & Action Planning (Response)
+7. Risk Monitoring & Review Cadence (Governance)
+8. AI-Assisted Risk Prediction (Automation)
+9. Integration with Succession Planning (Cross-Module)
+10. Troubleshooting & FAQs (Support)
 ```
 
-The `readiness_assessment_events` table stores each assessment event, providing the historical data needed for trend visualization.
+---
 
-### Implementation Approach
+## Part 2: Duplication Analysis
 
-#### 3.1 Create New Hook: `useReadinessTrendHistory`
+### Critical Content Overlaps Identified
 
-**Location**: `src/hooks/succession/useReadinessTrendHistory.ts`
+| Content Area | Chapter 7 (Planned) | Other Chapters | Resolution |
+|--------------|---------------------|----------------|------------|
+| Flight Risk Assessment | Sec 7.4 | **Ch 10.4** (fully documented) | Remove from Ch 7, add cross-reference |
+| Retention Risk Matrix | Sec 7.2 | **Ch 10.4** (fully documented) | Remove from Ch 7, add cross-reference |
+| Bench Strength Analysis | Sec 7.4 | **Ch 10.3** (fully documented) | Remove from Ch 7, add cross-reference |
+| Key Position Risk | Sec 7.3 | **Ch 6.3** (fully documented) | Cross-reference only |
+| Position Criticality | N/A | **Ch 6.4** (succession_plans table) | Reference existing |
 
-**Purpose**: Fetch historical readiness assessments for a candidate
+### Content Currently in Chapter 10 (Analytics)
+
+Chapter 10 already comprehensively documents:
+- **10.3 Bench Strength Analysis**: Coverage algorithm, depth metrics, UI component
+- **10.4 Flight Risk & Retention Reporting**: Risk of Loss, Impact of Loss, Retention Risk Matrix, all 13 fields of `flight_risk_assessments`, standard risk factors, analytics metrics
+
+### Content in Chapter 6 (Succession Planning Workflow)
+
+Chapter 6 already documents:
+- **6.2 Key Position Identification**: `jobs.is_key_position` flag
+- **6.3 Position Risk Assessment**: Full `key_position_risks` table (17 fields), criticality levels, vacancy risk factors
+
+---
+
+## Part 3: Proposed New Chapter 7 Structure
+
+### Recommended Focus: Operational Risk Management
+
+Rather than duplicating analytical content from Chapter 10 and configuration content from Chapter 6, Chapter 7 should focus on **operational risk management workflows and governance** - the day-to-day execution and review processes.
+
+### Proposed 10-Section Structure
+
+```text
+Part 7: Risk Management (~75 min read)
+├── 7.1 Risk Management Overview
+│   └── Framework introduction, chapter scope, cross-module dependencies
+├── 7.2 Risk Terminology & Standards
+│   └── Industry definitions (Oracle HCM, SAP SF), Risk of Loss vs Impact of Loss
+├── 7.3 Employee Flight Risk Assessment Workflow
+│   └── Operational workflow: detect, assess, document, action (FlightRiskTab.tsx)
+├── 7.4 Retention Strategy & Action Planning
+│   └── Retention actions, intervention types, escalation paths
+├── 7.5 Position Vacancy Risk Monitoring
+│   └── Retirement risk, market demand, tenure analysis, early warning system
+├── 7.6 Risk Review Cadence & Governance
+│   └── Monthly/quarterly review cycles, stakeholder roles, SLA compliance
+├── 7.7 Risk Mitigation Playbooks
+│   └── Standard response templates by risk level, escalation matrix
+├── 7.8 AI-Assisted Risk Prediction
+│   └── Predictive indicators, talent signals integration, confidence scoring
+├── 7.9 Cross-Module Risk Integration
+│   └── Links to Compensation, Learning, Performance, Workforce
+└── 7.10 Risk Management Troubleshooting
+    └── Common issues, data quality, calculation discrepancies
+```
+
+---
+
+## Part 4: Database Schema Coverage
+
+### Tables to Document in Chapter 7
+
+| Table | Field Count | Coverage Location |
+|-------|-------------|-------------------|
+| `flight_risk_assessments` | 13 | Sec 7.3 (workflow context) |
+| `key_position_risks` | 17 | Sec 7.5 (cross-ref to Ch 6.3) |
+
+### New Fields to Emphasize (Operational Focus)
+
+From `flight_risk_assessments`:
+- `risk_factors` (JSONB) - Standard risk factor selection
+- `retention_actions` - Action planning documentation
+- `next_review_date` - Review cadence compliance
+- `is_current` - Historical assessment tracking
+
+---
+
+## Part 5: UI Components to Document
+
+| Component | Location | Chapter 7 Section |
+|-----------|----------|-------------------|
+| `FlightRiskTab.tsx` | src/components/succession/ | 7.3 (workflow) |
+| `KeyPositionsTab.tsx` | src/components/succession/ | 7.5 (cross-ref) |
+| `RetentionRiskMatrix.tsx` | src/components/succession/ | 7.4 (strategy) |
+| `BenchStrengthTab.tsx` | src/components/succession/ | Cross-ref to Ch 10.3 |
+
+---
+
+## Part 6: Files to Create
+
+### New Section Components (10 files)
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `RiskOverview.tsx` | `sections/risk/` | Sec 7.1 |
+| `RiskTerminologyStandards.tsx` | `sections/risk/` | Sec 7.2 |
+| `FlightRiskWorkflow.tsx` | `sections/risk/` | Sec 7.3 |
+| `RetentionStrategyPlanning.tsx` | `sections/risk/` | Sec 7.4 |
+| `VacancyRiskMonitoring.tsx` | `sections/risk/` | Sec 7.5 |
+| `RiskReviewGovernance.tsx` | `sections/risk/` | Sec 7.6 |
+| `RiskMitigationPlaybooks.tsx` | `sections/risk/` | Sec 7.7 |
+| `AIAssistedRiskPrediction.tsx` | `sections/risk/` | Sec 7.8 |
+| `CrossModuleRiskIntegration.tsx` | `sections/risk/` | Sec 7.9 |
+| `RiskTroubleshooting.tsx` | `sections/risk/` | Sec 7.10 |
+| `index.ts` | `sections/risk/` | Exports |
+
+### Files to Modify
+
+| File | Change |
+|------|--------|
+| `SuccessionRiskSection.tsx` | Replace placeholders with modular imports |
+| `src/types/successionManual.ts` | Update TOC with 10 subsections |
+
+---
+
+## Part 7: Section Content Specifications
+
+### Section 7.1: Risk Management Overview
+
+**Content:**
+- Chapter scope and purpose (operational focus vs. analytical)
+- Industry framework (SAP SuccessFactors Risk & Retention model)
+- Cross-chapter dependencies map
+- Key performance indicators for risk management
+
+**Cross-References:**
+- Ch 6.3: Position Risk Assessment (configuration)
+- Ch 10.3-10.4: Analytics and reporting
+
+---
+
+### Section 7.2: Risk Terminology & Standards
+
+**Content:**
+- Industry definitions (Oracle HCM pattern):
+  - **Risk of Loss**: Probability employee will leave
+  - **Impact of Loss**: Business consequence of departure
+  - **Retention Risk**: Combined Risk × Impact assessment
+- Risk level definitions (Critical, High, Medium, Low)
+- Standard risk factors with categories
+
+**Industry Alignment:** Oracle HCM, SAP SuccessFactors, Visier, SHRM
+
+---
+
+### Section 7.3: Employee Flight Risk Assessment Workflow
+
+**Content:**
+- Step-by-step workflow: Identify → Assess → Document → Action → Review
+- FlightRiskTab.tsx UI walkthrough
+- Field reference table (13 fields from `flight_risk_assessments`)
+- Standard risk factors (10 predefined options)
+- Retention action documentation
+- is_current flag lifecycle
+
+**UI Component:** `FlightRiskTab.tsx`
+**Navigation:** Succession → Flight Risk
+
+---
+
+### Section 7.4: Retention Strategy & Action Planning
+
+**Content:**
+- Retention action categories:
+  - Compensation adjustments
+  - Career development opportunities
+  - Work-life balance improvements
+  - Manager relationship interventions
+  - Executive retention conversations
+- Escalation paths by risk level
+- RetentionRiskMatrix.tsx visualization
+- Action tracking and follow-up
+
+**Business Rules:**
+- High/Critical risk requires documented retention action within 48 hours
+- All actions must have owner and due date
+- Escalation to executive sponsor for Critical risk
+
+---
+
+### Section 7.5: Position Vacancy Risk Monitoring
+
+**Content:**
+- Vacancy risk triggers:
+  - Retirement proximity (age + tenure analysis)
+  - Flight risk signals from employees
+  - Market demand for skills
+  - Contract/assignment end dates
+- KeyPositionsTab.tsx integration
+- Early warning system configuration
+- Cross-reference to Ch 6.3 for key_position_risks table
+
+**Data Sources:**
+- `key_position_risks.retirement_risk`
+- `key_position_risks.flight_risk`
+- `key_position_risks.vacancy_risk`
+
+---
+
+### Section 7.6: Risk Review Cadence & Governance
+
+**Content:**
+- Review cycle recommendations:
+  - Critical positions: Monthly
+  - High-risk employees: Bi-weekly
+  - Standard monitoring: Quarterly
+- Stakeholder roles (HR, Manager, Executive)
+- `next_review_date` compliance tracking
+- Meeting templates and agenda items
+- Audit trail requirements (SOC 2)
+
+**Industry Benchmark:** SHRM recommends quarterly talent risk reviews
+
+---
+
+### Section 7.7: Risk Mitigation Playbooks
+
+**Content:**
+- Standard response templates by risk level:
+  - Low: Monitor + development plan
+  - Medium: Manager check-in + career conversation
+  - High: HR escalation + retention action plan
+  - Critical: Executive intervention + counteroffer protocol
+- Escalation matrix with SLAs
+- Success metrics (retention rate improvement)
+
+---
+
+### Section 7.8: AI-Assisted Risk Prediction
+
+**Content:**
+- Talent signal integration for predictive risk
+- Confidence scoring for AI recommendations
+- Signal-to-risk mapping configuration
+- AI-suggested risk levels with override capability
+- Cross-reference to Ch 3 (Nine-Box signal mappings)
+
+**Data Sources:**
+- `talent_signal_snapshots` - Leading indicators
+- `nine_box_signal_mappings` - Risk factor weights
+
+---
+
+### Section 7.9: Cross-Module Risk Integration
+
+**Content:**
+- Integration touchpoints:
+  - **Compensation**: Below-market salary triggers
+  - **Performance**: Declining ratings correlation
+  - **Learning**: Stalled development indicators
+  - **Workforce**: Tenure milestones, position changes
+- Event-driven notifications
+- Data flow architecture diagram
+
+---
+
+### Section 7.10: Risk Management Troubleshooting
+
+**Content:**
+- Common issues:
+  - Risk level not updating
+  - Missing retention actions
+  - is_current flag conflicts
+  - Review date overdue alerts
+  - Data quality gaps
+- Resolution procedures
+- FAQ section
+
+---
+
+## Part 8: TOC Update for successionManual.ts
 
 ```typescript
-// New hook structure
-export function useReadinessTrendHistory(candidateId?: string) {
-  return useQuery({
-    queryKey: ["readiness-trend-history", candidateId],
-    queryFn: async () => {
-      // Query readiness_assessment_events ordered by completed_at
-      // Return array of { date, score, band, assessor } objects
-    },
-    enabled: !!candidateId,
-  });
+// PART 7: RISK MANAGEMENT (~75 min)
+{
+  id: 'part-7',
+  sectionNumber: '7',
+  title: 'Risk Management',
+  description: 'Operational risk management workflows, retention strategies, review governance, and AI-assisted prediction.',
+  contentLevel: 'procedure',
+  estimatedReadTime: 75,
+  targetRoles: ['Admin', 'HR Partner', 'Manager'],
+  subsections: [
+    { id: 'sec-7-1', sectionNumber: '7.1', title: 'Risk Management Overview', ... },
+    { id: 'sec-7-2', sectionNumber: '7.2', title: 'Risk Terminology & Standards', ... },
+    { id: 'sec-7-3', sectionNumber: '7.3', title: 'Employee Flight Risk Assessment Workflow', ... },
+    { id: 'sec-7-4', sectionNumber: '7.4', title: 'Retention Strategy & Action Planning', ... },
+    { id: 'sec-7-5', sectionNumber: '7.5', title: 'Position Vacancy Risk Monitoring', ... },
+    { id: 'sec-7-6', sectionNumber: '7.6', title: 'Risk Review Cadence & Governance', ... },
+    { id: 'sec-7-7', sectionNumber: '7.7', title: 'Risk Mitigation Playbooks', ... },
+    { id: 'sec-7-8', sectionNumber: '7.8', title: 'AI-Assisted Risk Prediction', ... },
+    { id: 'sec-7-9', sectionNumber: '7.9', title: 'Cross-Module Risk Integration', ... },
+    { id: 'sec-7-10', sectionNumber: '7.10', title: 'Risk Management Troubleshooting', ... }
+  ]
 }
 ```
 
-#### 3.2 Create New Component: `ReadinessTrendChart.tsx`
+---
 
-**Location**: `src/components/succession/ReadinessTrendChart.tsx`
+## Part 9: Implementation Phases
 
-**Features**:
-- Line chart showing readiness score progression over time
-- Reference line showing target readiness threshold
-- Band indicators (Ready Now, Ready 1-2 Years, etc.) as colored zones
-- Tooltips showing assessment date, score, band, and assessor
-- Filter by candidate or view aggregate trends
-- Mobile responsive using Recharts
+### Phase 1: Structure & Foundation (1-2 hours)
+- Create `src/components/enablement/manual/succession/sections/risk/` directory
+- Create `index.ts` with all exports
+- Update `SuccessionRiskSection.tsx` to import modular sections
+- Update TOC in `successionManual.ts`
 
-**Visual Design** (following existing patterns from `SignalTrendChart.tsx` and `HeadcountTrend.tsx`):
-- Uses Recharts `LineChart` with `ResponsiveContainer`
-- HSL CSS variable colors for theme consistency
-- Reference lines for score thresholds
-- Custom tooltip with readiness band context
+### Phase 2: Core Risk Sections (7.1-7.5) (4-5 hours)
+- RiskOverview.tsx - Framework and cross-references
+- RiskTerminologyStandards.tsx - Industry definitions
+- FlightRiskWorkflow.tsx - Operational workflow with UI mapping
+- RetentionStrategyPlanning.tsx - Action categories and escalation
+- VacancyRiskMonitoring.tsx - Position-level monitoring
 
-#### 3.3 Integrate into SuccessionAnalytics.tsx
+### Phase 3: Governance & Automation (7.6-7.8) (2-3 hours)
+- RiskReviewGovernance.tsx - Review cycles and stakeholder roles
+- RiskMitigationPlaybooks.tsx - Response templates
+- AIAssistedRiskPrediction.tsx - Predictive analytics integration
 
-**Location**: `src/components/succession/SuccessionAnalytics.tsx`
-
-Add a new "Readiness Trends" section to the existing analytics component, either as:
-- A new tab alongside Overview, Mentorship, Flight Risk, Career Development, Bench Strength
-- Or embedded within an appropriate existing tab
+### Phase 4: Integration & Support (7.9-7.10) (1-2 hours)
+- CrossModuleRiskIntegration.tsx - Integration touchpoints
+- RiskTroubleshooting.tsx - Common issues and FAQs
 
 ---
 
-## Part 4: Documentation Update
+## Part 10: Quality Metrics After Implementation
 
-### 4.1 Update Section 10.7 ReadinessTrendAnalysis.tsx
-
-Add a note that the UI now includes the `ReadinessTrendChart` component:
-
-```text
-UI Component Reference: ReadinessTrendChart.tsx
-Navigation: Succession → Analytics → Readiness Trends tab
-Features: Historical score progression, band thresholds, development correlation
-```
-
----
-
-## Part 5: Files to Modify
-
-### Field Name Cascade Fixes (6 files)
-
-| File | Change Type | Priority |
-|------|-------------|----------|
-| `src/components/succession/NineBoxEvidencePanel.tsx` | Query + field access | Critical |
-| `src/components/succession/SuccessorProfileLeadershipSignals.tsx` | Query + field access | Critical |
-| `src/hooks/succession/useNineBoxRatingSources.ts` | Query + field access | Critical |
-| `src/hooks/useTalentProfileEvidence.ts` | Query + field access | Critical |
-| `src/hooks/useTalentPoolReviewPackets.ts` | Query + field access | Critical |
-| `src/components/succession/CalibrationEvidenceComparison.tsx` | Query + field access | Critical |
-
-### Readiness Trend Chart (3 new files, 2 modified)
-
-| File | Change Type | Priority |
-|------|-------------|----------|
-| `src/hooks/succession/useReadinessTrendHistory.ts` | New file | High |
-| `src/components/succession/ReadinessTrendChart.tsx` | New file | High |
-| `src/components/succession/SuccessionAnalytics.tsx` | Add Readiness Trends tab | High |
-| `src/components/enablement/manual/succession/sections/analytics/ReadinessTrendAnalysis.tsx` | Add UI component reference | Medium |
-| `src/components/succession/index.ts` | Export new component (if exists) | Low |
+| Metric | Current | Target |
+|--------|---------|--------|
+| Documented sections | 4 (placeholders) | 10 (comprehensive) |
+| Lines of content | ~55 | ~2,500 |
+| Field references | 0 | 30+ fields |
+| UI component coverage | 0 | 4 components |
+| Industry terminology alignment | 0% | 100% |
+| Cross-references to other chapters | 0 | 8+ links |
+| Troubleshooting guides | 0 | 10+ issues |
+| Step-by-step workflows | 0 | 5+ procedures |
 
 ---
 
-## Part 6: Estimated Effort
+## Part 11: Estimated Effort
 
-| Task | Files | Lines Changed | Time |
-|------|-------|---------------|------|
-| Field name cascade fixes | 6 | ~60 | 30 min |
-| useReadinessTrendHistory hook | 1 new | ~50 | 20 min |
-| ReadinessTrendChart component | 1 new | ~180 | 45 min |
-| SuccessionAnalytics integration | 1 | ~80 | 20 min |
-| Documentation update | 1 | ~20 | 10 min |
-| **Total** | **10** | **~390** | **~2 hours** |
+| Phase | Files | Lines | Time |
+|-------|-------|-------|------|
+| Phase 1: Structure | 3 | ~150 | 1-2 hours |
+| Phase 2: Core Sections | 5 | ~1,200 | 4-5 hours |
+| Phase 3: Governance | 3 | ~700 | 2-3 hours |
+| Phase 4: Support | 2 | ~450 | 1-2 hours |
+| **Total** | **13** | **~2,500** | **8-12 hours** |
 
 ---
 
-## Part 7: Testing Checklist
+## Part 12: Key Differentiators from Other Chapters
 
-### Field Name Fixes
-- [ ] NineBoxEvidencePanel renders without console errors
-- [ ] SuccessorProfileLeadershipSignals displays leadership signals correctly
-- [ ] Talent Pool review packets generate with correct signal names
-- [ ] Nine-Box rating calculation uses correct category filters
+| Chapter | Focus | Chapter 7 Differentiation |
+|---------|-------|---------------------------|
+| Ch 6 (Succession Plans) | Configuration & Setup | Operational workflow execution |
+| Ch 10 (Analytics) | Reporting & Metrics | Action planning & governance |
+| Ch 7 (Risk) | Workflows & Governance | Day-to-day risk management processes |
 
-### Readiness Trend Chart
-- [ ] Chart renders with historical data when assessments exist
-- [ ] Empty state shown when no historical data
-- [ ] Tooltips display correct date, score, and band
-- [ ] Chart is responsive on mobile
-- [ ] Integration with SuccessionAnalytics works correctly
+This restructuring ensures Chapter 7 provides unique value as the **operational guide** for risk management, while properly cross-referencing analytical content in Chapter 10 and configuration content in Chapter 6.
