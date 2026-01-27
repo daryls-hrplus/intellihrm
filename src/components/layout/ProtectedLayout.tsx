@@ -10,6 +10,7 @@ import { SessionRecoveryManager } from "./SessionRecoveryManager";
 import { TabProvider } from "@/contexts/TabContext";
 import { useTabKeyboardShortcuts } from "@/hooks/useTabKeyboardShortcuts";
 import { useTabDatabaseSync } from "@/hooks/useTabDatabaseSync";
+import { useRouteToTabSync } from "@/hooks/useRouteToTabSync";
 import { TabCloseConfirmDialog } from "@/components/dialogs/TabCloseConfirmDialog";
 import {
   TourProvider,
@@ -22,6 +23,11 @@ import { HelpButton } from "@/components/help";
 
 function TabDatabaseSyncHandler() {
   useTabDatabaseSync();
+  return null;
+}
+
+function RouteToTabSyncHandler() {
+  useRouteToTabSync();
   return null;
 }
 
@@ -66,6 +72,7 @@ export function ProtectedLayout() {
     <TabProvider>
       <TourProvider>
         <TabKeyboardHandler>
+          <RouteToTabSyncHandler />
           <SessionRecoveryManager />
           <div className="min-h-screen bg-background">
             <RealtimeNotifications />
