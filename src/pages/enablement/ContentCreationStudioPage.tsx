@@ -76,12 +76,20 @@ export default function ContentCreationStudioPage() {
 
   // Handle module/feature selection
   const handleModuleChange = (moduleCode: string) => {
-    setTabState({ selectedModule: moduleCode, selectedFeature: "" });
+    // Convert special values back to empty string for internal state
+    const actualValue = moduleCode === "__all__" ? "" : moduleCode;
+    setTabState({ selectedModule: actualValue, selectedFeature: "" });
   };
 
   const handleFeatureChange = (featureCode: string) => {
-    setTabState({ selectedFeature: featureCode });
+    // Convert special values back to empty string for internal state
+    const actualValue = featureCode === "__none__" ? "" : featureCode;
+    setTabState({ selectedFeature: actualValue });
   };
+
+  // Convert internal state to Select-compatible values (non-empty)
+  const selectModuleValue = tabState.selectedModule || "__all__";
+  const selectFeatureValue = tabState.selectedFeature || "__none__";
 
   // Handle quick actions from chat
   const handleQuickAction = async (action: string, params?: Record<string, unknown>) => {
@@ -241,8 +249,8 @@ export default function ContentCreationStudioPage() {
                     isLoading={isLoading && currentAction === 'analyze_context'}
                     modules={modules}
                     features={features}
-                    selectedModule={tabState.selectedModule}
-                    selectedFeature={tabState.selectedFeature}
+                    selectedModule={selectModuleValue}
+                    selectedFeature={selectFeatureValue}
                     onModuleChange={handleModuleChange}
                     onFeatureChange={handleFeatureChange}
                     onRefreshAnalysis={() => analyzeContext(tabState.selectedModule || undefined)}
