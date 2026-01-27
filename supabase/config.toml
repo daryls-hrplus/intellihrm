@@ -446,3 +446,6 @@ verify_jwt = false
 
 [functions.generate-quickstart-content]
 verify_jwt = false
+
+[functions.release-manager-agent]
+verify_jwt = false
