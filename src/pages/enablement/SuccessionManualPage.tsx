@@ -269,7 +269,7 @@ export default function SuccessionManualPage() {
       <div className="container mx-auto px-6 py-6 flex-1 overflow-hidden">
         <div className="flex gap-6 h-full">
           {/* Left Sidebar - Table of Contents */}
-          <div className="w-80 flex-shrink-0 h-full">
+          <div className="w-[340px] flex-shrink-0 h-full">
             <Card className="h-full flex flex-col">
               <CardHeader className="pb-3 flex-shrink-0">
                 <CardTitle className="text-base flex items-center gap-2">
