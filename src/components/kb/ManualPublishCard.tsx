@@ -17,7 +17,11 @@ import {
   Users,
   HelpCircle,
   BookOpen,
-  Target
+  Target,
+  Heart,
+  Radar,
+  Grid3X3,
+  TrendingUp
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -29,6 +33,11 @@ const ICON_MAP: Record<string, typeof Shield> = {
   HelpCircle,
   BookOpen,
   Target,
+  Clock,
+  Heart,
+  Radar,
+  Grid3X3,
+  TrendingUp,
 };
 
 interface ManualPublishCardProps {
