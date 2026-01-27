@@ -1,118 +1,160 @@
 
-# Update Release Command Center to Follow Color Semantics Standard
+
+# Sync Manual Publishing Configuration with Complete Manuals Structure
 
 ## Problem
 
-The Release Command Center page and its child components use hardcoded Tailwind colors (`text-green-600`, `bg-amber-50`, etc.) instead of the application's semantic color tokens. This causes:
+The Manual Publishing Center only shows **5 manuals**, but the Administrator Manuals Index has **10 manuals**. This is because `useManualPublishing.ts` has a hardcoded `MANUAL_CONFIGS` array that was never updated to include all manuals.
 
-1. Low contrast in the AI chat messages (visible in your screenshot - "Documentation Gaps Identified" text is hard to read)
-2. Inconsistent color usage across the application
-3. Potential dark mode issues
+## Current State
 
----
+| Source | Manual Count |
+|--------|--------------|
+| `manualsStructure.ts` (source of truth) | 10 manuals |
+| `useManualPublishing.ts` (publishing page) | 5 manuals ❌ |
 
-## Solution Overview
+## Missing Manuals
 
-Apply the established **UI Color Semantics Standard** consistently across all Release Command Center components:
+These 5 manuals exist in `manualsStructure.ts` but are missing from `MANUAL_CONFIGS`:
 
-| Intent   | Color  | Usage                                    |
-|----------|--------|------------------------------------------|
-| info     | Blue   | Guidance, reference values, tooltips     |
-| success  | Green  | Achieved, validated, completed           |
-| warning  | Amber  | Needs attention, below target            |
-| error    | Red    | Critical gaps, failures, blockers        |
-| neutral  | Grey   | Pending, not assessed, placeholder       |
+1. **Time & Attendance Guide** - 65 sections, 8 chapters
+2. **Benefits Administrator Guide** - 45 sections, 8 chapters  
+3. **360 Feedback Guide** - 59 sections, 8 chapters
+4. **Succession Planning Guide** - 55 sections, 11 chapters
+5. **Career Development Guide** - 52 sections, 10 chapters
 
----
+## Solution
 
-## Changes Required
-
-### 1. ReleaseManagerChat.tsx (AI Assistant Chat)
-
-**Issue:** The `prose` class inside `bg-muted` has poor contrast
-
-**Fix:**
-- Add `text-foreground` to markdown container for readable text
-- Replace generic `bg-muted` with semantic styling for different message types
-- Add proper dark mode compatible prose overrides
-
-```text
-Current:  className="prose prose-sm max-w-none dark:prose-invert"
-Updated:  className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-p:text-foreground prose-li:text-foreground prose-code:text-foreground prose-code:bg-muted"
-```
-
-### 2. ReleaseCommandCenterPage.tsx
-
-**Issue:** Uses hardcoded colors like `text-green-600`, `text-amber-600`
-
-**Fixes:**
-- Replace `text-green-600` with `text-semantic-success` / `text-[hsl(var(--semantic-success-text))]`
-- Replace `text-amber-600` with `text-semantic-warning` / `text-[hsl(var(--semantic-warning-text))]`
-- Replace `text-red-600` with `text-semantic-error` / `text-[hsl(var(--semantic-error-text))]`
-
-Lines affected:
-- Lines 205-207: Readiness score color logic
-- Lines 322-340: Release status select items
-
-### 3. AIReadinessCard.tsx
-
-**Issue:** Uses hardcoded colors throughout
-
-**Fixes:**
-- `getGradeColor()` function: Replace hardcoded `bg-green-500/10`, `text-green-700` with semantic tokens
-- `getScoreColor()` function: Replace `text-green-600`, `text-amber-600`, `text-red-600` with semantic tokens
-- Blocker section (lines 211-218): Replace `bg-red-50 text-red-700` with semantic error styling
-- Warning section (lines 229-236): Replace `bg-amber-50 text-amber-700` with semantic warning styling
-- Content coverage icons (lines 170-198): Keep as decorative colors (acceptable per standard)
-
-### 4. ReleaseStatusBanner.tsx
-
-**Issue:** Uses hardcoded colors for readiness score
-
-**Fix (line 94-97):**
-- Replace `text-green-600`, `text-amber-600`, `text-red-600` with semantic tokens
-
-### 5. ReleaseStatusBadge.tsx
-
-Likely already using proper badge styling - will verify during implementation.
+Refactor `useManualPublishing.ts` to import the manuals from `manualsStructure.ts` instead of maintaining a separate hardcoded list. This ensures both pages always stay in sync.
 
 ---
 
-## Technical Implementation
+## Implementation
 
-### Add CSS Utilities (if not present)
+### File: `src/hooks/useManualPublishing.ts`
 
-Add semantic text utilities to Tailwind config or use direct HSL references:
+**Change 1:** Remove the hardcoded `MANUAL_CONFIGS` array (lines 8-55)
 
-```css
-.text-semantic-success { color: hsl(var(--semantic-success-text)); }
-.text-semantic-warning { color: hsl(var(--semantic-warning-text)); }
-.text-semantic-error { color: hsl(var(--semantic-error-text)); }
-.text-semantic-info { color: hsl(var(--semantic-info-text)); }
-.text-semantic-neutral { color: hsl(var(--semantic-neutral-text)); }
-
-.bg-semantic-success-light { background: hsl(var(--semantic-success-bg)); }
-.bg-semantic-warning-light { background: hsl(var(--semantic-warning-bg)); }
-.bg-semantic-error-light { background: hsl(var(--semantic-error-bg)); }
-.bg-semantic-info-light { background: hsl(var(--semantic-info-bg)); }
-```
-
-Or use inline HSL references:
-```text
-text-[hsl(var(--semantic-success-text))]
-bg-[hsl(var(--semantic-error-bg))]
-```
-
-### Helper Function Pattern
-
-Create or reuse a semantic color utility function:
+**Change 2:** Import from `manualsStructure.ts` and transform the data
 
 ```typescript
-function getSemanticScoreColor(score: number) {
-  if (score >= 80) return 'text-[hsl(var(--semantic-success-text))]';
-  if (score >= 60) return 'text-[hsl(var(--semantic-warning-text))]';
-  return 'text-[hsl(var(--semantic-error-text))]';
+import { getAllManuals, type ManualDefinition } from "@/constants/manualsStructure";
+
+// Transform ManualDefinition to publishing format
+function transformToPublishConfig(manuals: ManualDefinition[]) {
+  return manuals.map(m => ({
+    id: m.id,
+    name: m.title,
+    version: `v${m.version}.0`,
+    sectionsCount: m.sections,
+    href: m.href,
+    icon: m.icon.displayName || 'BookOpen',
+    color: m.color,
+  }));
 }
+
+// Dynamic MANUAL_CONFIGS from single source of truth
+export const MANUAL_CONFIGS = transformToPublishConfig(getAllManuals());
+```
+
+**Note:** The icon field needs special handling since `manualsStructure.ts` uses actual Lucide icon components, but the publishing card uses string icon names.
+
+---
+
+## Alternative Approach (Simpler)
+
+If the transformation is complex, simply add the 5 missing manuals to `MANUAL_CONFIGS`:
+
+### File: `src/hooks/useManualPublishing.ts`
+
+Add after line 54:
+
+```typescript
+  {
+    id: 'time-attendance',
+    name: 'Time & Attendance - Administrator Guide',
+    version: 'v1.0.0',
+    sectionsCount: 65,
+    href: '/enablement/manuals/time-attendance',
+    icon: 'Clock',
+    color: 'bg-indigo-500/10 text-indigo-600',
+  },
+  {
+    id: 'benefits',
+    name: 'Benefits - Administrator Guide',
+    version: 'v1.0.0',
+    sectionsCount: 45,
+    href: '/enablement/manuals/benefits',
+    icon: 'Heart',
+    color: 'bg-pink-500/10 text-pink-600',
+  },
+  {
+    id: 'feedback-360',
+    name: '360 Feedback - Administrator Guide',
+    version: 'v1.0.0',
+    sectionsCount: 59,
+    href: '/enablement/manuals/feedback-360',
+    icon: 'Radar',
+    color: 'bg-cyan-500/10 text-cyan-600',
+  },
+  {
+    id: 'succession',
+    name: 'Succession Planning - Administrator Guide',
+    version: 'v1.0.0',
+    sectionsCount: 55,
+    href: '/enablement/manuals/succession',
+    icon: 'Grid3X3',
+    color: 'bg-amber-500/10 text-amber-600',
+  },
+  {
+    id: 'career-development',
+    name: 'Career Development - Administrator Guide',
+    version: 'v1.0.0',
+    sectionsCount: 52,
+    href: '/enablement/manuals/career-development',
+    icon: 'TrendingUp',
+    color: 'bg-emerald-500/10 text-emerald-600',
+  },
+```
+
+---
+
+## Update Icon Map
+
+### File: `src/components/kb/ManualPublishCard.tsx`
+
+The component uses `ICON_MAP` to resolve string icon names to Lucide components. Currently:
+
+```typescript
+const ICON_MAP: Record<string, typeof Shield> = {
+  Shield,
+  Users,
+  HelpCircle,
+  BookOpen,
+  Target,
+};
+```
+
+Add the missing icons:
+
+```typescript
+import { 
+  Shield, Users, HelpCircle, BookOpen, Target,
+  Clock, Heart, Radar, Grid3X3, TrendingUp 
+} from "lucide-react";
+
+const ICON_MAP: Record<string, typeof Shield> = {
+  Shield,
+  Users,
+  HelpCircle,
+  BookOpen,
+  Target,
+  Clock,
+  Heart,
+  Radar,
+  Grid3X3,
+  TrendingUp,
+};
 ```
 
 ---
@@ -121,35 +163,22 @@ function getSemanticScoreColor(score: number) {
 
 | File | Changes |
 |------|---------|
-| `src/components/enablement/ReleaseManagerChat.tsx` | Fix prose contrast, add explicit text color classes |
-| `src/pages/enablement/ReleaseCommandCenterPage.tsx` | Replace hardcoded colors with semantic tokens |
-| `src/components/enablement/AIReadinessCard.tsx` | Update getGradeColor, getScoreColor, blocker/warning sections |
-| `src/components/enablement/ReleaseStatusBanner.tsx` | Update readiness score colors |
-| `src/index.css` | Add semantic text/background utility classes (if needed) |
+| `src/hooks/useManualPublishing.ts` | Add 5 missing manuals to MANUAL_CONFIGS |
+| `src/components/kb/ManualPublishCard.tsx` | Add 5 icons to ICON_MAP |
 
 ---
 
-## Before/After Comparison
+## Recommendation
 
-**Readiness Score:**
-- Before: `text-green-600` / `text-amber-600` / `text-red-600`
-- After: `text-[hsl(var(--semantic-success-text))]` / `text-[hsl(var(--semantic-warning-text))]` / `text-[hsl(var(--semantic-error-text))]`
-
-**Blocker Items:**
-- Before: `bg-red-50 text-red-700`
-- After: `bg-[hsl(var(--semantic-error-bg))] text-[hsl(var(--semantic-error-text))]`
-
-**AI Chat Messages:**
-- Before: `prose prose-sm dark:prose-invert` (low contrast)
-- After: `prose prose-sm text-foreground [&_*]:text-inherit [&_strong]:text-foreground [&_code]:bg-background/50`
+I recommend **Option 1 (refactor to use single source of truth)** for long-term maintainability, but **Option 2 (add missing manuals)** is faster to implement and lower risk.
 
 ---
 
-## Summary
+## After Fix
 
-This update ensures the Release Command Center follows the enterprise UI Color Semantics Standard, providing:
+| Metric | Before | After |
+|--------|--------|-------|
+| Total Manuals | 5 | 10 |
+| Total Sections | 239 | 515 |
+| Alignment with Manuals Index | ❌ Out of sync | ✅ Aligned |
 
-- Consistent color meaning across the application
-- Proper contrast for readability (especially in AI chat)
-- Dark mode compatibility
-- Alignment with SAP SuccessFactors, Oracle HCM, and Workday design patterns
