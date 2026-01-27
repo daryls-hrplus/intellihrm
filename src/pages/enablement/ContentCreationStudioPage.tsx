@@ -22,10 +22,12 @@ import {
   Copy,
   Download,
   ArrowRight,
+  Brain,
 } from "lucide-react";
 import { useTabState } from "@/hooks/useTabState";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { DocumentationAgentPanel } from "@/components/enablement/DocumentationAgentPanel";
+import { AIToolsPanel } from "@/components/enablement/AIToolsPanel";
 import { useApplicationModules } from "@/hooks/useApplicationFeatures";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -196,7 +198,7 @@ export default function ContentCreationStudioPage() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Content Creation Studio</h1>
               <p className="text-muted-foreground">
-                AI-powered documentation generation with templates and schema awareness
+                AI-powered documentation generation with templates, schema awareness, and automation tools
               </p>
             </div>
           </div>
@@ -211,7 +213,7 @@ export default function ContentCreationStudioPage() {
           value={tabState.activeTab} 
           onValueChange={(value) => setTabState({ activeTab: value })}
         >
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="ai-generator" className="gap-2">
               <Wand2 className="h-4 w-4" />
               AI Generator
@@ -223,6 +225,11 @@ export default function ContentCreationStudioPage() {
             <TabsTrigger value="templates" className="gap-2">
               <Library className="h-4 w-4" />
               Templates
+            </TabsTrigger>
+            <TabsTrigger value="ai-tools" className="gap-2">
+              <Brain className="h-4 w-4" />
+              AI Tools
+              <Badge variant="secondary" className="ml-1 text-xs">11</Badge>
             </TabsTrigger>
             <TabsTrigger value="preview" className="gap-2" disabled={!generatedContent}>
               <FileText className="h-4 w-4" />
@@ -431,6 +438,11 @@ export default function ContentCreationStudioPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* AI Tools Tab */}
+          <TabsContent value="ai-tools" className="mt-6">
+            <AIToolsPanel />
           </TabsContent>
 
           {/* Preview Tab */}

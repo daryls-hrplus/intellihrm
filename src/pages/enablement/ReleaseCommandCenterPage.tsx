@@ -490,6 +490,36 @@ export default function ReleaseCommandCenterPage() {
               )}
             </div>
 
+            {/* Export Tools Section */}
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Export Tools
+                </CardTitle>
+                <CardDescription>
+                  Create LMS-compatible packages from your content
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigateToRecord({
+                    route: "/enablement/scorm-generator",
+                    title: "SCORM Generator",
+                    subtitle: "Export Tool",
+                    moduleCode: "enablement",
+                    contextType: "tool",
+                    contextId: "scorm-generator",
+                    icon: Settings,
+                  })}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Open SCORM-Lite Generator
+                </Button>
+              </CardContent>
+            </Card>
+
             {/* Publish Wizard */}
             {selectedManual && (
               <PublishWizard
