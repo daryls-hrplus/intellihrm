@@ -7,7 +7,7 @@ import { LoadingFallback } from './RouteConfig';
 // Lazy load enablement pages
 const EnablementHubPage = lazy(() => import('@/pages/enablement/EnablementHubPage'));
 const ContentCreationStudioPage = lazy(() => import('@/pages/enablement/ContentCreationStudioPage'));
-const FeatureAuditDashboard = lazy(() => import('@/pages/enablement/FeatureAuditDashboard'));
+// Deprecated: FeatureAuditDashboard - now redirects to /enablement/release-center?activeTab=coverage
 const EnablementAnalyticsPage = lazy(() => import('@/pages/enablement/EnablementAnalyticsPage'));
 const SCORMGeneratorPage = lazy(() => import('@/pages/enablement/SCORMGeneratorPage'));
 const ReleaseCommandCenterPage = lazy(() => import('@/pages/enablement/ReleaseCommandCenterPage'));
@@ -67,12 +67,12 @@ export function EnablementRoutes() {
       <Route path="/enablement/docs-generator" element={<Navigate to="/enablement/create" replace />} />
       <Route path="/enablement/template-library" element={<Navigate to="/enablement/create?activeTab=templates" replace />} />
       
-      {/* Feature Audit (consolidated) */}
-      <Route path="/enablement/audit" element={<EnablementRoute><FeatureAuditDashboard /></EnablementRoute>} />
+      {/* Feature Audit → Redirects to Release Command Center Coverage tab */}
+      <Route path="/enablement/audit" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
       
-      {/* Redirects for deprecated pages → Feature Audit */}
-      <Route path="/enablement/feature-catalog" element={<Navigate to="/enablement/audit" replace />} />
-      <Route path="/enablement/feature-database" element={<Navigate to="/enablement/audit" replace />} />
+      {/* Redirects for deprecated pages → Release Command Center Coverage tab */}
+      <Route path="/enablement/feature-catalog" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
+      <Route path="/enablement/feature-database" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
       
       {/* Unified Release Command Center */}
       <Route path="/enablement/release-center" element={<EnablementRoute><ReleaseCommandCenterPage /></EnablementRoute>} />

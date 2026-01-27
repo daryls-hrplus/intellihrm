@@ -106,10 +106,10 @@ export default function EnablementHubPage() {
     (i.workflow_status as string) === "ready_for_enablement"
   ).length;
 
-  // PRIMARY SECTIONS - Core workflow (6 items in 3 sections)
+  // PRIMARY SECTIONS - Simplified to 3 clear phases (Create → Manage → Reference)
   const primarySections: ModuleSection[] = useMemo(() => [
     {
-      titleKey: "Create Content",
+      titleKey: "1. Create",
       items: [
         {
           title: "Content Creation Studio",
@@ -117,12 +117,24 @@ export default function EnablementHubPage() {
           href: "/enablement/create",
           icon: Sparkles,
           color: "bg-primary/10 text-primary",
-          badge: "Consolidated",
         },
       ],
     },
     {
-      titleKey: "Documentation Library",
+      titleKey: "2. Manage & Release",
+      items: [
+        {
+          title: "Release Command Center",
+          description: "Coverage, workflow, publishing, milestones & AI manager",
+          href: "/enablement/release-center",
+          icon: Rocket,
+          color: "bg-primary/10 text-primary",
+          badge: "All-in-One",
+        },
+      ],
+    },
+    {
+      titleKey: "3. Reference Library",
       items: [
         {
           title: "Administrator Manuals",
@@ -153,49 +165,12 @@ export default function EnablementHubPage() {
           icon: FolderTree,
           color: "bg-violet-500/10 text-violet-500",
         },
-      ],
-    },
-      {
-        titleKey: "Content Workflow",
-        items: [
-          {
-            title: "Content Workflow",
-            description: "Track content from draft to published",
-            href: "/enablement/release-center?activeTab=workflow",
-            icon: Kanban,
-            color: "bg-amber-500/10 text-amber-500",
-          },
-          {
-            title: "Feature Audit",
-            description: "Identify documentation gaps and coverage",
-            href: "/enablement/audit",
-            icon: ClipboardCheck,
-            color: "bg-emerald-500/10 text-emerald-500",
-          },
-        ],
-      },
-    {
-      titleKey: "Publish",
-      items: [
         {
-          title: "Publish to Help Center",
-          description: "AI-enhanced publishing with version control",
-          href: "/enablement/manual-publishing",
-          icon: Upload,
-          color: "bg-emerald-500/10 text-emerald-500",
-        },
-      ],
-    },
-    {
-      titleKey: "Release Management",
-      items: [
-        {
-          title: "Release Command Center",
-          description: "Version lifecycle, milestones, coverage analysis & AI manager",
-          href: "/enablement/release-center",
-          icon: Rocket,
-          color: "bg-primary/10 text-primary",
-          badge: "Pre-Release",
+          title: "Enablement Artifacts",
+          description: "Single source of truth for all content",
+          href: "/enablement/artifacts",
+          icon: FileText,
+          color: "bg-cyan-500/10 text-cyan-500",
         },
       ],
     },

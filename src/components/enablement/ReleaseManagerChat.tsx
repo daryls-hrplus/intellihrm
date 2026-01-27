@@ -18,6 +18,8 @@ import {
   Kanban,
   AlertTriangle,
   TrendingDown,
+  Upload,
+  Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { markdownToHtml } from "@/lib/utils/markdown";
@@ -39,6 +41,8 @@ const QUICK_ACTIONS = [
   { label: 'Workflow Status', action: 'workflow_status', icon: Kanban },
   { label: 'Suggest Priorities', action: 'suggest_priorities', icon: AlertTriangle },
   { label: 'Bottleneck Analysis', action: 'bottleneck_analysis', icon: TrendingDown },
+  { label: 'Publishing Status', action: 'publishing_status', icon: Upload },
+  { label: 'Bulk Publish', action: 'bulk_publish_recommendation', icon: Layers },
 ];
 
 export function ReleaseManagerChat() {
