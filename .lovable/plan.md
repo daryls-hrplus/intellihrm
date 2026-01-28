@@ -1,384 +1,333 @@
 
-# Add "Keep/Retain" Action to Orphan Management
 
-## Overview
+# Add "Keep" Action to All Orphan Views
 
-This plan adds an explicit **"Mark as Reviewed"** (Keep) action to the orphan management system, allowing administrators to intentionally flag database entries as reviewed and retained. This prevents legitimate features from appearing in future orphan scans and creates an audit trail.
+## Problem Summary
 
----
+The "Keep" (mark as reviewed and retained) action was only implemented in the main orphan list but is missing from four other key views:
 
-## Current State Analysis
+| View | Current Actions | Missing |
+|------|----------------|---------|
+| **Migration Batches** | Archive Batch | Keep, Keep Batch |
+| **Duplicate Feature Names** | Archive, Delete | Keep |
+| **By Module Accordion** | Archive, Delete | Keep |
+| **Prefixed Variants** | Archive, Delete | Keep |
 
-### What Exists Today
-| Action | Database Effect | UI Available |
-|--------|----------------|--------------|
-| **Archive** | Sets `is_active = false` | Yes |
-| **Delete** | Permanently removes row | Yes |
-| **Keep** | None - no way to mark as reviewed | **Missing** |
-
-### The Problem
-- Entries marked as "Keep" recommendation still appear in every scan
-- No audit trail of who reviewed and approved retention
-- Administrators must re-review the same orphans repeatedly
-- No way to distinguish "not yet reviewed" from "reviewed and intentional"
+This creates an inconsistent experience where administrators cannot mark entries as "intentionally kept" from specialized views.
 
 ---
 
-## Solution Design
+## Solution
 
-### Database Changes
-
-Add a new column to `application_features` table:
-
-| Column | Type | Default | Purpose |
-|--------|------|---------|---------|
-| `reviewed_at` | `timestamp with time zone` | `null` | When the entry was reviewed |
-| `reviewed_by` | `uuid` | `null` | Who reviewed (references auth.users) |
-| `review_status` | `text` | `null` | 'kept', 'needs_review', null |
-| `review_notes` | `text` | `null` | Optional reason for keeping |
-
-**SQL Migration:**
-```sql
-ALTER TABLE public.application_features
-ADD COLUMN reviewed_at timestamp with time zone,
-ADD COLUMN reviewed_by uuid REFERENCES auth.users(id),
-ADD COLUMN review_status text CHECK (review_status IN ('kept', 'needs_review')),
-ADD COLUMN review_notes text;
-```
+Add the "Keep" action to all four components by:
+1. Adding `onKeep` callback prop to each component
+2. Adding a Keep button (green CheckCircle icon) alongside existing Archive/Delete buttons
+3. For batch views, also add "Keep Entire Batch" option
 
 ---
 
-### Code Changes
+## File Changes
 
-#### 1. Update Types (`src/types/orphanTypes.ts`)
+### 1. MigrationBatchesPanel.tsx
 
-Add review-related fields to `OrphanEntry`:
-
+**Add props:**
 ```typescript
-export interface OrphanEntry {
-  // ... existing fields ...
-  
-  // New review fields
-  reviewedAt: Date | null;
-  reviewedBy: string | null;
-  reviewStatus: 'kept' | 'needs_review' | null;
-  reviewNotes: string | null;
+interface MigrationBatchesPanelProps {
+  batches: MigrationBatch[];
+  orphans: OrphanEntry[];
+  onArchiveBatch: (codes: string[]) => void;
+  onKeepBatch: (codes: string[]) => void;  // NEW
 }
 ```
 
----
-
-#### 2. Update useOrphanDetection Hook
-
-**File:** `src/hooks/useOrphanDetection.ts`
-
-**Changes:**
-1. Add `reviewed_at`, `reviewed_by`, `review_status`, `review_notes` to the SELECT query
-2. Filter out entries where `review_status = 'kept'` from orphan results (unless showing all)
-3. Add optional `includeReviewed` parameter to `detectOrphans()`
-
+**Add "Keep Entire Batch" button (line 117-125):**
 ```typescript
-// In detectOrphans query:
-const { data: dbFeatures } = await supabase
-  .from("application_features")
-  .select(`
-    id,
-    feature_code,
-    // ... existing fields ...
-    reviewed_at,
-    reviewed_by,
-    review_status,
-    review_notes
-  `)
-  .order("module_code");
+<div className="flex justify-end gap-2 mb-3">
+  <Button 
+    variant="outline" 
+    size="sm"
+    className="text-green-600 border-green-200 hover:bg-green-50"
+    onClick={() => onKeepBatch(batch.codes)}
+  >
+    <CheckCircle className="h-4 w-4 mr-2" />
+    Keep Entire Batch
+  </Button>
+  <Button 
+    variant="outline" 
+    size="sm"
+    onClick={() => onArchiveBatch(batch.codes)}
+  >
+    <Archive className="h-4 w-4 mr-2" />
+    Archive Entire Batch
+  </Button>
+</div>
+```
 
-// Filter out reviewed entries from orphan detection
-const orphanFeatures = allDbFeatures.filter(f => 
-  !codeFeatureSet.has(f.feature_code) && 
-  f.review_status !== 'kept'  // Exclude already-reviewed entries
-);
+**Import CheckCircle:**
+```typescript
+import { Archive, ChevronDown, Database, Clock, CheckCircle } from "lucide-react";
 ```
 
 ---
 
-#### 3. Update useOrphanActions Hook
+### 2. OrphanDuplicatesPanel.tsx
 
-**File:** `src/hooks/useOrphanActions.ts`
-
-**Add new functions:**
-
+**Add prop:**
 ```typescript
-/**
- * Mark an orphan as reviewed and kept
- */
-const markAsKept = useCallback(async (
-  orphanId: string, 
-  notes?: string
-): Promise<OrphanActionResult> => {
-  setIsProcessing(true);
-  try {
-    const { data: userData } = await supabase.auth.getUser();
-    
-    const { error } = await supabase
-      .from("application_features")
-      .update({ 
-        review_status: 'kept',
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: userData.user?.id,
-        review_notes: notes || null
-      })
-      .eq("id", orphanId);
+interface OrphanDuplicatesPanelProps {
+  duplicates: OrphanDuplicate[];
+  routeConflicts: OrphanRouteConflict[];
+  onArchive: (orphan: OrphanEntry) => void;
+  onDelete: (orphan: OrphanEntry) => void;
+  onKeep: (orphan: OrphanEntry) => void;  // NEW
+  onViewDuplicate: (duplicate: OrphanDuplicate) => void;
+}
+```
 
-    if (error) throw error;
+**Add Keep button in duplicate entries table (lines 128-147):**
+```typescript
+<TableCell>
+  <div className="flex gap-1">
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+      onClick={() => onKeep(entry)}
+      title="Mark as reviewed and keep"
+    >
+      <CheckCircle className="h-4 w-4" />
+    </Button>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8"
+      onClick={() => onArchive(entry)}
+      title="Archive"
+    >
+      <Archive className="h-4 w-4" />
+    </Button>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 text-destructive hover:text-destructive"
+      onClick={() => onDelete(entry)}
+      title="Delete"
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
+  </div>
+</TableCell>
+```
 
-    toast.success("Feature marked as reviewed and kept");
-    return { success: true, affectedCount: 1, errors: [] };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to mark as kept';
-    toast.error(message);
-    return { success: false, affectedCount: 0, errors: [message] };
-  } finally {
-    setIsProcessing(false);
-  }
-}, []);
+**Add same Keep button in route conflicts table (lines 221-240)**
 
-/**
- * Bulk mark orphans as kept
- */
-const markMultipleAsKept = useCallback(async (
-  orphanIds: string[],
-  notes?: string
-): Promise<OrphanActionResult> => {
-  // Similar implementation with .in("id", orphanIds)
-}, []);
-
-/**
- * Undo keep action (reset review status)
- */
-const undoKeep = useCallback(async (orphanId: string): Promise<boolean> => {
-  // Sets review_status, reviewed_at, reviewed_by back to null
-}, []);
+**Import CheckCircle:**
+```typescript
+import { Archive, Trash2, ExternalLink, Copy, GitMerge, Route, CheckCircle } from "lucide-react";
 ```
 
 ---
 
-#### 4. Update OrphanManagementPanel UI
+### 3. OrphanModuleAccordion.tsx
 
-**File:** `src/components/enablement/route-registry/OrphanManagementPanel.tsx`
-
-**Changes:**
-
-1. **Add "Kept" tab** to show entries that were marked as reviewed:
+**Add prop:**
 ```typescript
-<TabsTrigger value="kept" className="gap-2">
-  <CheckCircle className="h-4 w-4" />
-  Kept ({keptCount})
-</TabsTrigger>
+interface OrphanModuleAccordionProps {
+  moduleGroups: ModuleGroup[];
+  selectedOrphans: Set<string>;
+  onToggleSelection: (id: string) => void;
+  onArchive: (orphan: OrphanEntry) => void;
+  onDelete: (orphan: OrphanEntry) => void;
+  onKeep: (orphan: OrphanEntry) => void;  // NEW
+  onViewDuplicate: (duplicate: OrphanDuplicate) => void;
+  duplicates: OrphanDuplicate[];
+  getRecommendationBadge: (recommendation: OrphanRecommendation) => React.ReactNode;
+  getSourceBadge: (source: OrphanSource) => React.ReactNode;
+}
 ```
 
-2. **Add Keep button** next to Archive/Delete buttons:
+**Add Keep button in actions column (lines 188-206):**
 ```typescript
-<Button
-  variant="ghost"
-  size="icon"
-  onClick={() => setActionDialog({ open: true, type: 'keep', orphan })}
-  disabled={isProcessing}
-  title="Mark as reviewed and keep"
->
-  <CheckCircle className="h-4 w-4 text-green-600" />
-</Button>
+<TableCell>
+  <div className="flex gap-1">
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+      onClick={() => onKeep(orphan)}
+      title="Mark as reviewed and keep"
+    >
+      <CheckCircle className="h-4 w-4" />
+    </Button>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8"
+      onClick={() => onArchive(orphan)}
+      title="Archive (soft delete)"
+    >
+      <Archive className="h-4 w-4" />
+    </Button>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 text-destructive hover:text-destructive"
+      onClick={() => onDelete(orphan)}
+      title="Delete permanently"
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
+  </div>
+</TableCell>
 ```
 
-3. **Add bulk "Keep Selected" action** in selection bar:
+**Import CheckCircle:**
 ```typescript
-<Button 
-  size="sm" 
-  variant="outline"
-  onClick={() => setActionDialog({ open: true, type: 'keep_bulk', count: selectedOrphans.size })}
->
-  <CheckCircle className="h-4 w-4 mr-2" />
-  Keep Selected
-</Button>
+import { Archive, Trash2, ExternalLink, FolderOpen, Copy, CheckCircle } from "lucide-react";
 ```
 
-4. **Toggle to show/hide kept entries:**
+---
+
+### 4. PrefixedVariantsPanel.tsx
+
+**Add prop:**
 ```typescript
-<Switch 
-  checked={showKept} 
-  onCheckedChange={setShowKept}
+interface PrefixedVariantsPanelProps {
+  prefixedVariants: OrphanDuplicate[];
+  onArchive: (orphan: OrphanEntry) => void;
+  onDelete: (orphan: OrphanEntry) => void;
+  onKeep: (orphan: OrphanEntry) => void;  // NEW
+}
+```
+
+**Add Keep button (lines 83-100):**
+```typescript
+{cluster.suggestedPrimary !== entry.featureCode && (
+  <div className="flex gap-1">
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+      onClick={() => onKeep(entry)}
+      title="Mark as reviewed and keep"
+    >
+      <CheckCircle className="h-4 w-4" />
+    </Button>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8"
+      onClick={() => onArchive(entry)}
+    >
+      <Archive className="h-4 w-4" />
+    </Button>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 text-destructive hover:text-destructive"
+      onClick={() => onDelete(entry)}
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
+  </div>
+)}
+```
+
+**Import CheckCircle:**
+```typescript
+import { Archive, Trash2, GitMerge, CheckCircle } from "lucide-react";
+```
+
+---
+
+### 5. OrphanManagementPanel.tsx
+
+**Update component usages to pass `onKeep` handler:**
+
+```typescript
+// For By Module tab:
+<OrphanModuleAccordion
+  moduleGroups={moduleGroups}
+  selectedOrphans={selectedOrphans}
+  onToggleSelection={toggleSelection}
+  onArchive={(o) => setActionDialog({ open: true, type: 'archive', orphan: o })}
+  onDelete={(o) => setActionDialog({ open: true, type: 'delete', orphan: o })}
+  onKeep={(o) => setKeepDialog({ open: true, orphan: o })}  // NEW
+  onViewDuplicate={(d) => setDuplicateDialog({ open: true, duplicate: d })}
+  duplicates={duplicates}
+  getRecommendationBadge={getRecommendationBadge}
+  getSourceBadge={getSourceBadge}
 />
-<Label>Show previously reviewed entries</Label>
+
+// For Duplicates tab:
+<OrphanDuplicatesPanel
+  duplicates={duplicates}
+  routeConflicts={routeConflicts}
+  onArchive={(o) => setActionDialog({ open: true, type: 'archive', orphan: o })}
+  onDelete={(o) => setActionDialog({ open: true, type: 'delete', orphan: o })}
+  onKeep={(o) => setKeepDialog({ open: true, orphan: o })}  // NEW
+  onViewDuplicate={(d) => setDuplicateDialog({ open: true, duplicate: d })}
+/>
+
+// For Prefixed Variants tab:
+<PrefixedVariantsPanel
+  prefixedVariants={prefixedVariants}
+  onArchive={(o) => setActionDialog({ open: true, type: 'archive', orphan: o })}
+  onDelete={(o) => setActionDialog({ open: true, type: 'delete', orphan: o })}
+  onKeep={(o) => setKeepDialog({ open: true, orphan: o })}  // NEW
+/>
+
+// For Migration Batches tab:
+<MigrationBatchesPanel
+  batches={migrationBatches}
+  orphans={orphans}
+  onArchiveBatch={handleBatchArchive}
+  onKeepBatch={handleBatchKeep}  // NEW
+/>
 ```
 
----
-
-#### 5. Create KeepActionDialog Component
-
-**File:** `src/components/enablement/route-registry/KeepActionDialog.tsx`
-
-A dialog for confirming "Keep" actions with optional notes:
-
+**Add batch keep handler:**
 ```typescript
-interface KeepActionDialogProps {
-  open: boolean;
-  orphan?: OrphanEntry;
-  count?: number;
-  isProcessing: boolean;
-  onConfirm: (notes?: string) => Promise<void>;
-  onCancel: () => void;
-}
-
-export function KeepActionDialog({...props}) {
-  const [notes, setNotes] = useState("");
+const handleBatchKeep = async (codes: string[]) => {
+  // Find orphan IDs by feature codes
+  const orphanIds = orphans
+    .filter(o => codes.includes(o.featureCode))
+    .map(o => o.id);
   
-  return (
-    <Dialog>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            <CheckCircle className="text-green-600" />
-            Mark as Reviewed & Keep
-          </DialogTitle>
-        </DialogHeader>
-        
-        {/* Show feature details */}
-        <div className="space-y-2">
-          <Badge>{orphan.featureCode}</Badge>
-          <p>{orphan.featureName}</p>
-        </div>
-        
-        {/* Optional notes */}
-        <div>
-          <Label>Reason for keeping (optional)</Label>
-          <Textarea 
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="e.g., Planned for Q2 release..."
-          />
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>Cancel</Button>
-          <Button onClick={() => onConfirm(notes)} className="bg-green-600">
-            <CheckCircle className="mr-2" />
-            Mark as Kept
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
+  if (orphanIds.length > 0) {
+    setKeepDialog({ open: true, count: orphanIds.length });
+    // Store codes for the dialog to use
+    setBatchKeepCodes(codes);
+  }
+};
 ```
 
 ---
 
-#### 6. Add "Kept" Tab Content
+## Files to Modify
 
-Show reviewed entries with:
-- Feature details
-- Who reviewed and when
-- Review notes
-- Option to "Un-keep" (reset review status)
-
-```typescript
-<TabsContent value="kept">
-  <Card>
-    <CardHeader>
-      <CardTitle>Reviewed & Kept Features</CardTitle>
-      <CardDescription>
-        These entries were reviewed and intentionally kept in the database.
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      {keptEntries.map(entry => (
-        <div key={entry.id} className="flex items-center justify-between">
-          <div>
-            <code>{entry.featureCode}</code>
-            <p>{entry.featureName}</p>
-            {entry.reviewNotes && (
-              <p className="text-sm italic">"{entry.reviewNotes}"</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Reviewed by {entry.reviewedBy} on {format(entry.reviewedAt, 'PPP')}
-            </p>
-          </div>
-          <Button variant="ghost" onClick={() => undoKeep(entry.id)}>
-            <Undo className="h-4 w-4" />
-            Undo
-          </Button>
-        </div>
-      ))}
-    </CardContent>
-  </Card>
-</TabsContent>
-```
+| File | Changes |
+|------|---------|
+| `src/components/enablement/route-registry/MigrationBatchesPanel.tsx` | Add `onKeepBatch` prop, "Keep Entire Batch" button |
+| `src/components/enablement/route-registry/OrphanDuplicatesPanel.tsx` | Add `onKeep` prop, Keep buttons in both tables |
+| `src/components/enablement/route-registry/OrphanModuleAccordion.tsx` | Add `onKeep` prop, Keep button in actions column |
+| `src/components/enablement/route-registry/PrefixedVariantsPanel.tsx` | Add `onKeep` prop, Keep button for non-primary entries |
+| `src/components/enablement/route-registry/OrphanManagementPanel.tsx` | Pass `onKeep` handlers to all child components |
 
 ---
 
-## Files to Modify/Create
+## Visual Result
 
-| File | Action | Purpose |
-|------|--------|---------|
-| **Database** | MIGRATE | Add `reviewed_at`, `reviewed_by`, `review_status`, `review_notes` columns |
-| `src/types/orphanTypes.ts` | MODIFY | Add review fields to OrphanEntry interface |
-| `src/hooks/useOrphanDetection.ts` | MODIFY | Query new fields, filter out kept entries |
-| `src/hooks/useOrphanActions.ts` | MODIFY | Add `markAsKept()`, `markMultipleAsKept()`, `undoKeep()` functions |
-| `src/components/enablement/route-registry/OrphanManagementPanel.tsx` | MODIFY | Add Keep button, Kept tab, toggle for showing kept |
-| `src/components/enablement/route-registry/KeepActionDialog.tsx` | CREATE | Dialog for confirming keep action with notes |
-| `src/components/enablement/route-registry/KeptEntriesPanel.tsx` | CREATE | Panel showing reviewed/kept entries |
+After implementation, all views will have consistent actions:
 
----
+| View | Actions Available |
+|------|-------------------|
+| Migration Batches | Keep Batch, Archive Batch |
+| Duplicate Names | Keep, Archive, Delete |
+| By Module | Keep, Archive, Delete |
+| Prefixed Variants | Keep, Archive, Delete |
+| Registry Candidates | Keep, Archive, Delete |
+| All Orphans | Keep, Archive, Delete |
 
-## User Experience
+Each "Keep" button will trigger the existing `KeepActionDialog` for notes and confirmation.
 
-### Before
-1. Administrator sees 500+ orphans
-2. Reviews each one, decides to keep some
-3. Next scan: same 500+ orphans appear again
-4. No memory of previous review decisions
-
-### After
-1. Administrator sees 500+ orphans
-2. Reviews each one, clicks "Keep" for legitimate entries
-3. Enters optional note: "Planned for Q3 release"
-4. Next scan: only unreviewed orphans appear
-5. Can view "Kept" tab to see all approved entries
-6. Full audit trail: who kept what, when, and why
-
----
-
-## Industry Alignment
-
-This approach matches enterprise HRMS standards:
-
-| Feature | SAP SuccessFactors | Workday | HRplus (After) |
-|---------|-------------------|---------|----------------|
-| Explicit "Keep" action | Yes | Yes | Yes |
-| Review audit trail | Yes | Yes | Yes |
-| Notes/justification | Yes | Yes | Yes |
-| Hide reviewed items | Yes | Yes | Yes |
-| Bulk keep | Yes | Yes | Yes |
-| Undo capability | Limited | Yes | Yes |
-
----
-
-## Summary Stats After Implementation
-
-The Orphan Management panel will show:
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│  DB Features: 837  |  Registry: 261  |  Synced: 250            │
-│  Orphans: 350      |  Kept: 226      |  Total Unreviewed: 350  │
-├─────────────────────────────────────────────────────────────────┤
-│  Tabs: Summary | By Module | Duplicates | Batches | Kept       │
-│        ────────────────────────────────────         ^^^^ NEW   │
-│                                                                 │
-│  [☑] Show previously reviewed entries                          │
-│                                                                 │
-│  Each orphan row:                                               │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ admin_leave_calendar  [Archive] [Keep ✓] [Delete]       │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-```
