@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Building2, LayoutGrid, ArrowRight, Target, CheckCircle2 } from 'lucide-react';
+import { Building2, LayoutGrid, ArrowRight, Target, CheckCircle2, Rocket, Clock, Monitor, Users, Star, Phone } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
 export function LndVendorConcepts() {
   return (
     <section className="space-y-6" id="sec-3-1" data-manual-anchor="sec-3-1">
@@ -277,6 +276,104 @@ INTEGRATION POINTS:
           balance specialization with volume discounts.
         </AlertDescription>
       </Alert>
+
+      {/* UI Roadmap Section */}
+      <Card className="border-2 border-dashed border-indigo-300 dark:border-indigo-700">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Rocket className="h-5 w-5 text-indigo-600" />
+            UI Roadmap: Planned Vendor Management Pages
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            The following UI pages are planned for future releases to provide comprehensive 
+            vendor management capabilities within the L&D module.
+          </p>
+          
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Page</TableHead>
+                <TableHead>Route</TableHead>
+                <TableHead>Purpose</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-medium flex items-center gap-2">
+                  <Monitor className="h-4 w-4 text-blue-500" />
+                  VendorManagementPage
+                </TableCell>
+                <TableCell className="font-mono text-sm">/training/vendors</TableCell>
+                <TableCell>Vendor registry CRUD, search, filtering, status management</TableCell>
+                <TableCell><Badge className="bg-indigo-100 text-indigo-800">Planned</Badge></TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-emerald-500" />
+                  VendorDetailPage
+                </TableCell>
+                <TableCell className="font-mono text-sm">/training/vendors/:id</TableCell>
+                <TableCell>Vendor profile with tabbed interface for all vendor data</TableCell>
+                <TableCell><Badge className="bg-indigo-100 text-indigo-800">Planned</Badge></TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4 text-purple-500" />
+                  VendorCoursesTab
+                </TableCell>
+                <TableCell className="font-mono text-sm">Embedded</TableCell>
+                <TableCell>Course catalog management within vendor profile</TableCell>
+                <TableCell><Badge className="bg-indigo-100 text-indigo-800">Planned</Badge></TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-orange-500" />
+                  VendorSessionsTab
+                </TableCell>
+                <TableCell className="font-mono text-sm">Embedded</TableCell>
+                <TableCell>Session scheduling, capacity, and enrollment tracking</TableCell>
+                <TableCell><Badge className="bg-indigo-100 text-indigo-800">Planned</Badge></TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium flex items-center gap-2">
+                  <Star className="h-4 w-4 text-amber-500" />
+                  VendorReviewsTab
+                </TableCell>
+                <TableCell className="font-mono text-sm">Embedded</TableCell>
+                <TableCell>Performance reviews, scorecards, and quality ratings</TableCell>
+                <TableCell><Badge className="bg-indigo-100 text-indigo-800">Planned</Badge></TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-teal-500" />
+                  VendorContactsTab
+                </TableCell>
+                <TableCell className="font-mono text-sm">Embedded</TableCell>
+                <TableCell>Multi-contact management and escalation paths</TableCell>
+                <TableCell><Badge className="bg-indigo-100 text-indigo-800">Planned</Badge></TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-semibold flex items-center gap-2 mb-2">
+              <Clock className="h-4 w-4" />
+              Future Roadmap Items (Deferred)
+            </h4>
+            <ul className="text-sm space-y-1 text-muted-foreground">
+              <li>• <strong>Content Marketplace:</strong> Integration with external content sourcing platforms</li>
+              <li>• <strong>Vendor API Integration:</strong> xAPI/LTI connections for seamless data exchange</li>
+              <li>• <strong>Automated Session Booking:</strong> AI-powered session matching and auto-enrollment</li>
+            </ul>
+            <p className="text-xs text-muted-foreground mt-2 italic">
+              These features are documented in the product roadmap and will be implemented in future releases.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

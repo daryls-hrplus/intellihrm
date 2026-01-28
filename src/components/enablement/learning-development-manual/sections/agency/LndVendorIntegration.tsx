@@ -358,6 +358,18 @@ Gap Analysis Complete
           continuously learns from completion data and post-training assessments.
         </AlertDescription>
       </Alert>
+
+      <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30">
+        <Database className="h-4 w-4" />
+        <AlertTitle>Schema Note: training_needs vs Database</AlertTitle>
+        <AlertDescription>
+          The <code className="text-xs bg-muted px-1 rounded">training_needs</code> table 
+          documented above represents the canonical design. Some implementations may use 
+          simpler structures initially. The <code className="text-xs bg-muted px-1 rounded">competency_course_mappings</code> table 
+          supports both internal (<code>course_id</code>) and external (<code>vendor_course_id</code>) 
+          course references for comprehensive gap-to-course matching.
+        </AlertDescription>
+      </Alert>
     </section>
   );
 }

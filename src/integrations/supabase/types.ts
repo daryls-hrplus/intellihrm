@@ -12057,6 +12057,7 @@ export type Database = {
           is_mandatory: boolean | null
           min_gap_level: number | null
           notes: string | null
+          vendor_course_id: string | null
         }
         Insert: {
           company_id?: string | null
@@ -12068,6 +12069,7 @@ export type Database = {
           is_mandatory?: boolean | null
           min_gap_level?: number | null
           notes?: string | null
+          vendor_course_id?: string | null
         }
         Update: {
           company_id?: string | null
@@ -12079,6 +12081,7 @@ export type Database = {
           is_mandatory?: boolean | null
           min_gap_level?: number | null
           notes?: string | null
+          vendor_course_id?: string | null
         }
         Relationships: [
           {
@@ -12114,6 +12117,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_course_mappings_vendor_course_id_fkey"
+            columns: ["vendor_course_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendor_courses"
             referencedColumns: ["id"]
           },
         ]
@@ -74942,6 +74952,7 @@ export type Database = {
           end_date: string | null
           end_time: string | null
           id: string
+          instructor_id: string | null
           instructor_name: string | null
           location: string | null
           location_type: string | null
@@ -74968,6 +74979,7 @@ export type Database = {
           end_date?: string | null
           end_time?: string | null
           id?: string
+          instructor_id?: string | null
           instructor_name?: string | null
           location?: string | null
           location_type?: string | null
@@ -74994,6 +75006,7 @@ export type Database = {
           end_date?: string | null
           end_time?: string | null
           id?: string
+          instructor_id?: string | null
           instructor_name?: string | null
           location?: string | null
           location_type?: string | null
@@ -75011,6 +75024,13 @@ export type Database = {
           waitlist_count?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "training_vendor_sessions_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "training_instructors"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "training_vendor_sessions_vendor_course_id_fkey"
             columns: ["vendor_course_id"]
@@ -75038,6 +75058,7 @@ export type Database = {
           group_id: string | null
           id: string
           is_preferred: boolean
+          is_shared: boolean | null
           last_review_date: string | null
           name: string
           next_review_date: string | null
@@ -75047,6 +75068,8 @@ export type Database = {
           sla_document_url: string | null
           specializations: string[] | null
           status: string
+          terminated_at: string | null
+          termination_reason: string | null
           updated_at: string
           vendor_type: string
           website_url: string | null
@@ -75068,6 +75091,7 @@ export type Database = {
           group_id?: string | null
           id?: string
           is_preferred?: boolean
+          is_shared?: boolean | null
           last_review_date?: string | null
           name: string
           next_review_date?: string | null
@@ -75077,6 +75101,8 @@ export type Database = {
           sla_document_url?: string | null
           specializations?: string[] | null
           status?: string
+          terminated_at?: string | null
+          termination_reason?: string | null
           updated_at?: string
           vendor_type?: string
           website_url?: string | null
@@ -75098,6 +75124,7 @@ export type Database = {
           group_id?: string | null
           id?: string
           is_preferred?: boolean
+          is_shared?: boolean | null
           last_review_date?: string | null
           name?: string
           next_review_date?: string | null
@@ -75107,6 +75134,8 @@ export type Database = {
           sla_document_url?: string | null
           specializations?: string[] | null
           status?: string
+          terminated_at?: string | null
+          termination_reason?: string | null
           updated_at?: string
           vendor_type?: string
           website_url?: string | null
