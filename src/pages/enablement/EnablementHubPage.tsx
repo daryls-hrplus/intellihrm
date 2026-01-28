@@ -12,7 +12,6 @@ import {
   FileText,
   Sparkles,
   ArrowRight,
-  CheckCircle2,
   FolderTree,
   ClipboardCheck,
   HelpCircle,
@@ -20,11 +19,13 @@ import {
 } from "lucide-react";
 import { FeatureRegistrySyncDialog } from "@/components/enablement/FeatureRegistrySyncDialog";
 import { NewFeaturesIndicator } from "@/components/enablement/NewFeaturesIndicator";
-import { EnablementWelcomeBanner } from "@/components/enablement/EnablementWelcomeBanner";
 import { EnablementHelpPanel } from "@/components/enablement/EnablementHelpPanel";
-import { useEnablementContentStatus, useEnablementReleases } from "@/hooks/useEnablementData";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { EnablementWorkflowStepper } from "@/components/enablement/EnablementWorkflowStepper";
+import { RecommendedNextActions } from "@/components/enablement/RecommendedNextActions";
+import { PhaseTransitionBanner } from "@/components/enablement/PhaseTransitionBanner";
+import { EnablementOnboardingWizard } from "@/components/enablement/EnablementOnboardingWizard";
+import { EnhancedWorkflowStats } from "@/components/enablement/EnhancedWorkflowStats";
+import { useEnablementReleases } from "@/hooks/useEnablementData";
 import { useTabState } from "@/hooks/useTabState";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
@@ -41,36 +42,13 @@ export default function EnablementHubPage() {
   });
 
   const [syncDialogOpen, setSyncDialogOpen] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(() => {
-    const dismissed = localStorage.getItem('enablement-welcome-dismissed');
-    return dismissed !== 'true';
-  });
-  const { contentItems } = useEnablementContentStatus();
   const { releases } = useEnablementReleases();
-
-  // Fetch published KB articles count
-  const { data: publishedArticlesCount } = useQuery({
-    queryKey: ["published-kb-articles-count"],
-    queryFn: async (): Promise<number> => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const query = supabase.from("kb_articles").select("*", { count: "exact", head: true }) as any;
-      const { count, error } = await query.eq("status", "published");
-      if (error) throw error;
-      return count ?? 0;
-    },
-  });
 
   const activeRelease = releases.find(
     (r) => r.status === "preview" || r.status === "planning"
   );
 
-  // Simplified stats - 3 key metrics
-  const contentCreatedCount = contentItems.length;
-  const readyToPublishCount = contentItems.filter((i) => 
-    (i.workflow_status as string) === "ready_for_enablement"
-  ).length;
-
-  // PRIMARY SECTIONS - Simplified to 3 clear phases (Create → Review → Manage → Reference)
+  // PRIMARY SECTIONS - Simplified to 4 clear phases (Create → Review → Release → Library)
   const primarySections: ModuleSection[] = useMemo(() => [
     {
       titleKey: "1. Create",
@@ -176,14 +154,6 @@ export default function EnablementHubPage() {
     },
   ], []);
 
-  // Check if user has published content
-  const hasPublishedContent = (publishedArticlesCount ?? 0) > 0;
-  
-  const handleDismissWelcome = () => {
-    setShowWelcome(false);
-    localStorage.setItem('enablement-welcome-dismissed', 'true');
-  };
-
   const handleNavigateToDocsGenerator = () => {
     navigateToList({
       route: "/enablement/create",
@@ -196,6 +166,9 @@ export default function EnablementHubPage() {
   return (
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
+        {/* Onboarding Wizard - Shows on first visit */}
+        <EnablementOnboardingWizard />
+
         {/* Breadcrumb */}
         <Breadcrumbs
           items={[
@@ -225,90 +198,59 @@ export default function EnablementHubPage() {
           </div>
         </div>
 
-        {/* Welcome Banner - Show for new users until dismissed or they have published content */}
-        {showWelcome && !hasPublishedContent && (
-          <EnablementWelcomeBanner onDismiss={handleDismissWelcome} />
-        )}
+        {/* Visual Workflow Stepper - NEW Enhancement 1 */}
+        <EnablementWorkflowStepper />
 
-        {/* Simplified Stats - 3 key metrics */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <FileText className="h-5 w-5 text-primary" />
+        {/* Phase Transition Banner - NEW Enhancement 4 */}
+        <PhaseTransitionBanner />
+
+        {/* Recommended Next Actions - NEW Enhancement 3 */}
+        <RecommendedNextActions />
+
+        {/* Stats Row: Enhanced Stats + Active Release */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Enhanced Workflow Stats - NEW Enhancement 5 */}
+          <EnhancedWorkflowStats />
+
+          {/* Active Release Banner */}
+          {activeRelease && (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-4 h-full flex flex-col justify-center">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Rocket className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        Active Release: {activeRelease.version_number}
+                        {activeRelease.release_name && ` - ${activeRelease.release_name}`}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Status: {activeRelease.status} • {activeRelease.feature_count} features
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigateToList({
+                      route: "/enablement/release-center",
+                      title: "Release Command Center",
+                      moduleCode: "enablement",
+                      icon: Rocket,
+                    })}
+                  >
+                    View Release
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{contentCreatedCount}</p>
-                  <p className="text-xs text-muted-foreground">Content Created</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/10">
-                  <ArrowRight className="h-5 w-5 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{readyToPublishCount}</p>
-                  <p className="text-xs text-muted-foreground">Ready to Publish</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{publishedArticlesCount ?? 0}</p>
-                  <p className="text-xs text-muted-foreground">Published</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
-        {/* Active Release Banner */}
-        {activeRelease && (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Rocket className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="font-medium">
-                      Active Release: {activeRelease.version_number}
-                      {activeRelease.release_name && ` - ${activeRelease.release_name}`}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Status: {activeRelease.status} • {activeRelease.feature_count} features
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => navigateToList({
-                    route: "/enablement/release-center",
-                    title: "Release Command Center",
-                    moduleCode: "enablement",
-                    icon: Rocket,
-                  })}
-                >
-                  View Release
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Primary Sections - 3 Phase Workflow */}
+        {/* Primary Sections - 4 Phase Workflow */}
         <div className="space-y-6">
           <GroupedModuleCards sections={primarySections} defaultOpen={true} />
         </div>
