@@ -308,6 +308,19 @@ export class ManualPublishService {
     return data || [];
   }
 
+  // Get sections that are approved for publishing (review_status = 'approved' or 'published')
+  static async getPublishableSections(manualId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('manual_sections')
+      .select('*')
+      .eq('manual_id', manualId)
+      .in('review_status', ['approved', 'published'])
+      .order('display_order');
+
+    if (error) throw error;
+    return data || [];
+  }
+
   // Archive a published manual
   static async archiveManual(manualId: string): Promise<{ success: boolean; error?: string }> {
     try {
