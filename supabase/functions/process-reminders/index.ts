@@ -103,6 +103,20 @@ function replaceMessagePlaceholders(
     eventTypeName: string;
     itemName?: string;
     companyName?: string;
+    // L&D-specific placeholders
+    courseName?: string;
+    courseCode?: string;
+    progressPercent?: number;
+    dueDate?: string;
+    certificateNumber?: string;
+    certificateExpiry?: string;
+    trainingProvider?: string;
+    sessionDate?: string;
+    sessionLocation?: string;
+    quizScore?: number;
+    passingScore?: number;
+    retakesRemaining?: number;
+    enrollmentDate?: string;
   }
 ): string {
   // Format the date nicely
@@ -115,6 +129,17 @@ function replaceMessagePlaceholders(
 
   const firstName = data.employeeFirstName || data.employeeName.split(' ')[0];
 
+  // Format optional dates
+  const formatOptionalDate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return template
     // Single curly brace format (in-app)
     .replace(/{employee_name}/gi, data.employeeName)
@@ -124,6 +149,20 @@ function replaceMessagePlaceholders(
     .replace(/{event_type}/gi, data.eventTypeName)
     .replace(/{item_name}/gi, data.itemName || data.eventTypeName)
     .replace(/{company_name}/gi, data.companyName || '')
+    // L&D-specific placeholders (single curly)
+    .replace(/{course_name}/gi, data.courseName || data.itemName || '')
+    .replace(/{course_code}/gi, data.courseCode || '')
+    .replace(/{progress_percent}/gi, data.progressPercent?.toString() || '0')
+    .replace(/{due_date}/gi, formatOptionalDate(data.dueDate) || formattedDate)
+    .replace(/{certificate_number}/gi, data.certificateNumber || '')
+    .replace(/{certificate_expiry}/gi, formatOptionalDate(data.certificateExpiry))
+    .replace(/{training_provider}/gi, data.trainingProvider || '')
+    .replace(/{session_date}/gi, formatOptionalDate(data.sessionDate) || formattedDate)
+    .replace(/{session_location}/gi, data.sessionLocation || '')
+    .replace(/{quiz_score}/gi, data.quizScore?.toString() || '')
+    .replace(/{passing_score}/gi, data.passingScore?.toString() || '')
+    .replace(/{retakes_remaining}/gi, data.retakesRemaining?.toString() || '')
+    .replace(/{enrollment_date}/gi, formatOptionalDate(data.enrollmentDate))
     // Double curly brace format (email templates)
     .replace(/\{\{employee_name\}\}/gi, data.employeeName)
     .replace(/\{\{employee_full_name\}\}/gi, data.employeeName)
@@ -133,7 +172,21 @@ function replaceMessagePlaceholders(
     .replace(/\{\{event_type\}\}/gi, data.eventTypeName)
     .replace(/\{\{event_title\}\}/gi, data.itemName || data.eventTypeName)
     .replace(/\{\{item_name\}\}/gi, data.itemName || data.eventTypeName)
-    .replace(/\{\{company_name\}\}/gi, data.companyName || '');
+    .replace(/\{\{company_name\}\}/gi, data.companyName || '')
+    // L&D-specific placeholders (double curly)
+    .replace(/\{\{course_name\}\}/gi, data.courseName || data.itemName || '')
+    .replace(/\{\{course_code\}\}/gi, data.courseCode || '')
+    .replace(/\{\{progress_percent\}\}/gi, data.progressPercent?.toString() || '0')
+    .replace(/\{\{due_date\}\}/gi, formatOptionalDate(data.dueDate) || formattedDate)
+    .replace(/\{\{certificate_number\}\}/gi, data.certificateNumber || '')
+    .replace(/\{\{certificate_expiry\}\}/gi, formatOptionalDate(data.certificateExpiry))
+    .replace(/\{\{training_provider\}\}/gi, data.trainingProvider || '')
+    .replace(/\{\{session_date\}\}/gi, formatOptionalDate(data.sessionDate) || formattedDate)
+    .replace(/\{\{session_location\}\}/gi, data.sessionLocation || '')
+    .replace(/\{\{quiz_score\}\}/gi, data.quizScore?.toString() || '')
+    .replace(/\{\{passing_score\}\}/gi, data.passingScore?.toString() || '')
+    .replace(/\{\{retakes_remaining\}\}/gi, data.retakesRemaining?.toString() || '')
+    .replace(/\{\{enrollment_date\}\}/gi, formatOptionalDate(data.enrollmentDate));
 }
 
 serve(async (req) => {
@@ -1039,6 +1092,655 @@ serve(async (req) => {
               itemName: `360 Self-Assessment for ${r.subject?.full_name || 'yourself'}`,
               sourceTable: 'feedback_360_requests'
             }));
+          break;
+        }
+
+        // ========================
+        // L&D: COURSE ENROLLMENT & PROGRESS
+        // ========================
+        case 'LMS_ENROLLMENT_CONFIRMATION': {
+          const { data: enrollments } = await supabase
+            .from('lms_enrollments')
+            .select(`
+              id, enrolled_at, status, progress_percentage, due_date,
+              course:course_id(id, title, code, company_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .gte('enrolled_at', `${targetDateStr}T00:00:00`)
+            .lt('enrolled_at', `${targetDateStr}T23:59:59`);
+          
+          records = (enrollments || [])
+            .filter((e: any) => {
+              const empCompany = e.profiles?.company_id;
+              const courseCompany = e.course?.company_id;
+              return empCompany === rule.company_id || courseCompany === rule.company_id;
+            })
+            .map((e: any) => ({
+              id: e.id,
+              employee: e.profiles,
+              eventDate: e.enrolled_at?.split('T')[0] || targetDateStr,
+              itemName: e.course?.title || 'Course Enrollment',
+              sourceTable: 'lms_enrollments'
+            }));
+          break;
+        }
+
+        case 'LMS_ENROLLMENT_EXPIRING':
+        case 'LMS_COURSE_REMINDER': {
+          const { data: enrollments } = await supabase
+            .from('lms_enrollments')
+            .select(`
+              id, due_date, status, progress_percentage,
+              course:course_id(id, title, code, company_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('due_date', targetDateStr)
+            .not('status', 'in', '("completed","passed")');
+          
+          records = (enrollments || [])
+            .filter((e: any) => {
+              const empCompany = e.profiles?.company_id;
+              const courseCompany = e.course?.company_id;
+              return empCompany === rule.company_id || courseCompany === rule.company_id;
+            })
+            .map((e: any) => ({
+              id: e.id,
+              employee: e.profiles,
+              eventDate: e.due_date,
+              itemName: e.course?.title || 'Training Course',
+              sourceTable: 'lms_enrollments'
+            }));
+          break;
+        }
+
+        case 'LMS_OVERDUE_TRAINING': {
+          // For overdue, we look at enrollments where due_date matches targetDateStr
+          // (negative days_before creates the overdue logic)
+          const { data: enrollments } = await supabase
+            .from('lms_enrollments')
+            .select(`
+              id, due_date, status, progress_percentage,
+              course:course_id(id, title, code, company_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('due_date', targetDateStr)
+            .not('status', 'in', '("completed","passed")');
+          
+          records = (enrollments || [])
+            .filter((e: any) => {
+              const empCompany = e.profiles?.company_id;
+              const courseCompany = e.course?.company_id;
+              return empCompany === rule.company_id || courseCompany === rule.company_id;
+            })
+            .map((e: any) => ({
+              id: e.id,
+              employee: e.profiles,
+              eventDate: e.due_date,
+              itemName: `OVERDUE: ${e.course?.title || 'Training Course'}`,
+              sourceTable: 'lms_enrollments'
+            }));
+          break;
+        }
+
+        case 'LMS_PROGRESS_STALLED': {
+          // Find enrollments where updated_at is older than targetDateStr (stalled for X days)
+          const { data: enrollments } = await supabase
+            .from('lms_enrollments')
+            .select(`
+              id, updated_at, status, progress_percentage, due_date,
+              course:course_id(id, title, code, company_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('status', 'in_progress')
+            .lt('progress_percentage', 100)
+            .lt('updated_at', `${targetDateStr}T00:00:00`);
+          
+          records = (enrollments || [])
+            .filter((e: any) => {
+              const empCompany = e.profiles?.company_id;
+              const courseCompany = e.course?.company_id;
+              return empCompany === rule.company_id || courseCompany === rule.company_id;
+            })
+            .map((e: any) => ({
+              id: e.id,
+              employee: e.profiles,
+              eventDate: e.updated_at?.split('T')[0] || targetDateStr,
+              itemName: `Stalled Progress: ${e.course?.title || 'Course'}`,
+              sourceTable: 'lms_enrollments'
+            }));
+          break;
+        }
+
+        case 'LMS_COURSE_COMPLETED': {
+          const { data: enrollments } = await supabase
+            .from('lms_enrollments')
+            .select(`
+              id, completed_at, status, progress_percentage,
+              course:course_id(id, title, code, company_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('status', 'completed')
+            .gte('completed_at', `${targetDateStr}T00:00:00`)
+            .lt('completed_at', `${targetDateStr}T23:59:59`);
+          
+          records = (enrollments || [])
+            .filter((e: any) => {
+              const empCompany = e.profiles?.company_id;
+              const courseCompany = e.course?.company_id;
+              return empCompany === rule.company_id || courseCompany === rule.company_id;
+            })
+            .map((e: any) => ({
+              id: e.id,
+              employee: e.profiles,
+              eventDate: e.completed_at?.split('T')[0] || targetDateStr,
+              itemName: `Completed: ${e.course?.title || 'Course'}`,
+              sourceTable: 'lms_enrollments'
+            }));
+          break;
+        }
+
+        // ========================
+        // L&D: ASSESSMENT & CERTIFICATION
+        // ========================
+        case 'LMS_QUIZ_DEADLINE': {
+          // Find quiz attempts started but not submitted
+          const { data: attempts } = await supabase
+            .from('lms_quiz_attempts')
+            .select(`
+              id, started_at, status,
+              quiz:quiz_id(id, title, time_limit_minutes, course_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('status', 'in_progress')
+            .is('submitted_at', null)
+            .gte('started_at', `${targetDateStr}T00:00:00`)
+            .lt('started_at', `${targetDateStr}T23:59:59`);
+          
+          records = (attempts || [])
+            .filter((a: any) => a.profiles?.company_id === rule.company_id)
+            .map((a: any) => ({
+              id: a.id,
+              employee: a.profiles,
+              eventDate: a.started_at?.split('T')[0] || targetDateStr,
+              itemName: `Quiz: ${a.quiz?.title || 'Assessment'}`,
+              sourceTable: 'lms_quiz_attempts'
+            }));
+          break;
+        }
+
+        case 'LMS_QUIZ_FAILED': {
+          // Find failed quiz attempts with retakes available
+          const { data: attempts } = await supabase
+            .from('lms_quiz_attempts')
+            .select(`
+              id, submitted_at, passed, score, attempt_number,
+              quiz:quiz_id(id, title, max_attempts, passing_score),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('passed', false)
+            .gte('submitted_at', `${targetDateStr}T00:00:00`)
+            .lt('submitted_at', `${targetDateStr}T23:59:59`);
+          
+          records = (attempts || [])
+            .filter((a: any) => {
+              if (a.profiles?.company_id !== rule.company_id) return false;
+              const maxAttempts = a.quiz?.max_attempts || 3;
+              return a.attempt_number < maxAttempts;
+            })
+            .map((a: any) => ({
+              id: a.id,
+              employee: a.profiles,
+              eventDate: a.submitted_at?.split('T')[0] || targetDateStr,
+              itemName: `Quiz Failed: ${a.quiz?.title || 'Assessment'} - Retake Available`,
+              sourceTable: 'lms_quiz_attempts'
+            }));
+          break;
+        }
+
+        case 'LMS_CERTIFICATE_ISSUED': {
+          const { data: certificates } = await supabase
+            .from('lms_certificates')
+            .select(`
+              id, issued_at, certificate_number, expires_at,
+              course:course_id(id, title, company_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .gte('issued_at', `${targetDateStr}T00:00:00`)
+            .lt('issued_at', `${targetDateStr}T23:59:59`);
+          
+          records = (certificates || [])
+            .filter((c: any) => {
+              const empCompany = c.profiles?.company_id;
+              const courseCompany = c.course?.company_id;
+              return empCompany === rule.company_id || courseCompany === rule.company_id;
+            })
+            .map((c: any) => ({
+              id: c.id,
+              employee: c.profiles,
+              eventDate: c.issued_at?.split('T')[0] || targetDateStr,
+              itemName: `Certificate: ${c.course?.title || 'Course'}`,
+              sourceTable: 'lms_certificates'
+            }));
+          break;
+        }
+
+        case 'LMS_CERTIFICATE_EXPIRING':
+        case 'LMS_RECERTIFICATION_DUE': {
+          const { data: certificates } = await supabase
+            .from('lms_certificates')
+            .select(`
+              id, issued_at, expires_at, certificate_number,
+              course:course_id(id, title, company_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('expires_at', targetDateStr)
+            .not('expires_at', 'is', null);
+          
+          records = (certificates || [])
+            .filter((c: any) => {
+              const empCompany = c.profiles?.company_id;
+              const courseCompany = c.course?.company_id;
+              return empCompany === rule.company_id || courseCompany === rule.company_id;
+            })
+            .map((c: any) => ({
+              id: c.id,
+              employee: c.profiles,
+              eventDate: c.expires_at,
+              itemName: `Certificate Expiring: ${c.course?.title || 'Course'}`,
+              sourceTable: 'lms_certificates'
+            }));
+          break;
+        }
+
+        // ========================
+        // L&D: TRAINING REQUESTS & APPROVALS
+        // ========================
+        case 'TRAINING_REQUEST_SUBMITTED': {
+          const { data: requests } = await supabase
+            .from('training_requests')
+            .select(`
+              id, created_at, training_name, status,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('status', 'pending')
+            .gte('created_at', `${targetDateStr}T00:00:00`)
+            .lt('created_at', `${targetDateStr}T23:59:59`);
+          
+          records = (requests || []).map((r: any) => ({
+            id: r.id,
+            employee: r.profiles,
+            eventDate: r.created_at?.split('T')[0] || targetDateStr,
+            itemName: r.training_name || 'Training Request',
+            sourceTable: 'training_requests'
+          }));
+          break;
+        }
+
+        case 'TRAINING_REQUEST_APPROVED': {
+          const { data: requests } = await supabase
+            .from('training_requests')
+            .select(`
+              id, approved_at, training_name, status,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('status', 'approved')
+            .gte('approved_at', `${targetDateStr}T00:00:00`)
+            .lt('approved_at', `${targetDateStr}T23:59:59`);
+          
+          records = (requests || []).map((r: any) => ({
+            id: r.id,
+            employee: r.profiles,
+            eventDate: r.approved_at?.split('T')[0] || targetDateStr,
+            itemName: `Approved: ${r.training_name || 'Training Request'}`,
+            sourceTable: 'training_requests'
+          }));
+          break;
+        }
+
+        case 'TRAINING_REQUEST_REJECTED': {
+          const { data: requests } = await supabase
+            .from('training_requests')
+            .select(`
+              id, updated_at, training_name, status,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('status', 'rejected')
+            .gte('updated_at', `${targetDateStr}T00:00:00`)
+            .lt('updated_at', `${targetDateStr}T23:59:59`);
+          
+          records = (requests || []).map((r: any) => ({
+            id: r.id,
+            employee: r.profiles,
+            eventDate: r.updated_at?.split('T')[0] || targetDateStr,
+            itemName: `Rejected: ${r.training_name || 'Training Request'}`,
+            sourceTable: 'training_requests'
+          }));
+          break;
+        }
+
+        case 'TRAINING_REQUEST_PENDING': {
+          // Reminder for pending requests - days_before from creation date
+          const { data: requests } = await supabase
+            .from('training_requests')
+            .select(`
+              id, created_at, training_name, status,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('status', 'pending')
+            .eq('created_at::date', targetDateStr);
+          
+          records = (requests || []).map((r: any) => ({
+            id: r.id,
+            employee: r.profiles,
+            eventDate: r.created_at?.split('T')[0] || targetDateStr,
+            itemName: `Pending Approval: ${r.training_name || 'Training Request'}`,
+            sourceTable: 'training_requests'
+          }));
+          break;
+        }
+
+        case 'TRAINING_BUDGET_ALERT': {
+          // Budget alerts - deferred, log and skip
+          console.log('TRAINING_BUDGET_ALERT: Budget monitoring not yet implemented');
+          records = [];
+          break;
+        }
+
+        // ========================
+        // L&D: ILT/VENDOR SESSIONS
+        // ========================
+        case 'VENDOR_SESSION_REMINDER': {
+          const { data: enrollments } = await supabase
+            .from('vendor_session_enrollments')
+            .select(`
+              id, created_at, status,
+              session:session_id(id, title, start_date, end_date, location, status, vendor_id),
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('status', 'confirmed');
+          
+          records = (enrollments || [])
+            .filter((e: any) => {
+              if (e.profiles?.company_id !== rule.company_id) return false;
+              return e.session?.start_date === targetDateStr && e.session?.status === 'scheduled';
+            })
+            .map((e: any) => ({
+              id: e.id,
+              employee: e.profiles,
+              eventDate: e.session?.start_date || targetDateStr,
+              itemName: `Session: ${e.session?.title || 'Training Session'}`,
+              sourceTable: 'vendor_session_enrollments'
+            }));
+          break;
+        }
+
+        case 'VENDOR_SESSION_REG_DEADLINE': {
+          const { data: sessions } = await supabase
+            .from('training_vendor_sessions')
+            .select(`
+              id, title, registration_deadline, start_date, location, status,
+              vendor:vendor_id(id, name, company_id)
+            `)
+            .eq('registration_deadline', targetDateStr)
+            .eq('status', 'scheduled');
+          
+          // For registration deadline, we create reminders for HR/admins rather than employees
+          records = (sessions || [])
+            .filter((s: any) => s.vendor?.company_id === rule.company_id)
+            .map((s: any) => ({
+              id: s.id,
+              employee: {
+                id: s.id,
+                full_name: `Session: ${s.title}`,
+                email: '',
+                company_id: s.vendor?.company_id,
+                hire_date: null,
+                probation_end_date: null,
+                current_contract_end_date: null,
+                date_of_birth: null
+              },
+              eventDate: s.registration_deadline,
+              itemName: `Registration Deadline: ${s.title}`,
+              sourceTable: 'training_vendor_sessions'
+            }));
+          break;
+        }
+
+        case 'VENDOR_SESSION_CONFIRMED': {
+          const { data: enrollments } = await supabase
+            .from('vendor_session_enrollments')
+            .select(`
+              id, confirmed_at, status,
+              session:session_id(id, title, start_date),
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('status', 'confirmed')
+            .gte('confirmed_at', `${targetDateStr}T00:00:00`)
+            .lt('confirmed_at', `${targetDateStr}T23:59:59`);
+          
+          records = (enrollments || [])
+            .filter((e: any) => e.profiles?.company_id === rule.company_id)
+            .map((e: any) => ({
+              id: e.id,
+              employee: e.profiles,
+              eventDate: e.confirmed_at?.split('T')[0] || targetDateStr,
+              itemName: `Confirmed: ${e.session?.title || 'Training Session'}`,
+              sourceTable: 'vendor_session_enrollments'
+            }));
+          break;
+        }
+
+        case 'VENDOR_SESSION_CANCELLED': {
+          const { data: sessions } = await supabase
+            .from('training_vendor_sessions')
+            .select(`
+              id, title, updated_at, status, start_date,
+              vendor:vendor_id(id, name, company_id)
+            `)
+            .eq('status', 'cancelled')
+            .gte('updated_at', `${targetDateStr}T00:00:00`)
+            .lt('updated_at', `${targetDateStr}T23:59:59`);
+          
+          // Get enrolled employees for cancelled sessions
+          const cancelledRecords: RecordWithEmployee[] = [];
+          for (const session of sessions || []) {
+            if ((session as any).vendor?.company_id !== rule.company_id) continue;
+            
+            const { data: enrollees } = await supabase
+              .from('vendor_session_enrollments')
+              .select(`
+                id,
+                profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+              `)
+              .eq('session_id', (session as any).id);
+            
+            for (const enrollee of enrollees || []) {
+              cancelledRecords.push({
+                id: (enrollee as any).id,
+                employee: (enrollee as any).profiles,
+                eventDate: (session as any).updated_at?.split('T')[0] || targetDateStr,
+                itemName: `Cancelled: ${(session as any).title || 'Training Session'}`,
+                sourceTable: 'vendor_session_enrollments'
+              });
+            }
+          }
+          records = cancelledRecords;
+          break;
+        }
+
+        // ========================
+        // L&D: EXTERNAL TRAINING & VERIFICATION
+        // ========================
+        case 'EXTERNAL_TRAINING_SUBMITTED': {
+          const { data: externalRecords } = await supabase
+            .from('external_training_records')
+            .select(`
+              id, created_at, training_name, provider_name, status,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .gte('created_at', `${targetDateStr}T00:00:00`)
+            .lt('created_at', `${targetDateStr}T23:59:59`);
+          
+          records = (externalRecords || [])
+            .filter((r: any) => r.profiles?.company_id === rule.company_id)
+            .map((r: any) => ({
+              id: r.id,
+              employee: r.profiles,
+              eventDate: r.created_at?.split('T')[0] || targetDateStr,
+              itemName: r.training_name || 'External Training',
+              sourceTable: 'external_training_records'
+            }));
+          break;
+        }
+
+        case 'EXTERNAL_TRAINING_VERIFIED': {
+          const { data: externalRecords } = await supabase
+            .from('external_training_records')
+            .select(`
+              id, updated_at, training_name, provider_name, status,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('status', 'verified')
+            .gte('updated_at', `${targetDateStr}T00:00:00`)
+            .lt('updated_at', `${targetDateStr}T23:59:59`);
+          
+          records = (externalRecords || [])
+            .filter((r: any) => r.profiles?.company_id === rule.company_id)
+            .map((r: any) => ({
+              id: r.id,
+              employee: r.profiles,
+              eventDate: r.updated_at?.split('T')[0] || targetDateStr,
+              itemName: `Verified: ${r.training_name || 'External Training'}`,
+              sourceTable: 'external_training_records'
+            }));
+          break;
+        }
+
+        case 'EXTERNAL_CERT_EXPIRING': {
+          const { data: externalRecords } = await supabase
+            .from('external_training_records')
+            .select(`
+              id, certificate_expiry_date, training_name, provider_name, certificate_received,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('certificate_expiry_date', targetDateStr)
+            .eq('certificate_received', true);
+          
+          records = (externalRecords || [])
+            .filter((r: any) => r.profiles?.company_id === rule.company_id)
+            .map((r: any) => ({
+              id: r.id,
+              employee: r.profiles,
+              eventDate: r.certificate_expiry_date,
+              itemName: `Expiring: ${r.training_name || 'External Certificate'}`,
+              sourceTable: 'external_training_records'
+            }));
+          break;
+        }
+
+        // ========================
+        // L&D: POST-TRAINING EVALUATION
+        // ========================
+        case 'TRAINING_EVALUATION_DUE':
+        case 'TRAINING_EVALUATION_REMINDER': {
+          // Training evaluation - check if table exists
+          const { data: evaluations, error: evalError } = await supabase
+            .from('training_evaluation_responses')
+            .select(`
+              id, created_at, status, due_date,
+              enrollment:enrollment_id(id, course:course_id(title)),
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('status', 'pending')
+            .eq('due_date', targetDateStr);
+          
+          if (evalError) {
+            console.log(`TRAINING_EVALUATION: Table may not exist or query failed: ${evalError.message}`);
+            records = [];
+          } else {
+            records = (evaluations || [])
+              .filter((e: any) => e.profiles?.company_id === rule.company_id)
+              .map((e: any) => ({
+                id: e.id,
+                employee: e.profiles,
+                eventDate: e.due_date || targetDateStr,
+                itemName: `Evaluation: ${e.enrollment?.course?.title || 'Training Feedback'}`,
+                sourceTable: 'training_evaluation_responses'
+              }));
+          }
+          break;
+        }
+
+        // ========================
+        // L&D: LEGACY TRAINING_DUE (LMS)
+        // ========================
+        case 'TRAINING_DUE': {
+          // Also check lms_enrollments for LMS-based training
+          const { data: lmsEnrollments } = await supabase
+            .from('lms_enrollments')
+            .select(`
+              id, due_date, status, progress_percentage,
+              course:course_id(id, title, company_id),
+              profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('due_date', targetDateStr)
+            .not('status', 'in', '("completed","passed")');
+          
+          records = (lmsEnrollments || [])
+            .filter((e: any) => {
+              const empCompany = e.profiles?.company_id;
+              const courseCompany = e.course?.company_id;
+              return empCompany === rule.company_id || courseCompany === rule.company_id;
+            })
+            .map((e: any) => ({
+              id: e.id,
+              employee: e.profiles,
+              eventDate: e.due_date,
+              itemName: e.course?.title || 'LMS Training',
+              sourceTable: 'lms_enrollments'
+            }));
+          break;
+        }
+
+        case 'TRAINING_START': {
+          // Check for courses with start_date matching target
+          const { data: courses } = await supabase
+            .from('lms_courses')
+            .select(`
+              id, title, start_date, company_id
+            `)
+            .eq('start_date', targetDateStr)
+            .eq('status', 'published');
+          
+          // Get enrolled employees for each course starting on target date
+          const startRecords: RecordWithEmployee[] = [];
+          for (const course of courses || []) {
+            if ((course as any).company_id !== rule.company_id) continue;
+            
+            const { data: enrollments } = await supabase
+              .from('lms_enrollments')
+              .select(`
+                id,
+                profiles:user_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+              `)
+              .eq('course_id', (course as any).id)
+              .eq('status', 'enrolled');
+            
+            for (const enrollment of enrollments || []) {
+              startRecords.push({
+                id: (enrollment as any).id,
+                employee: (enrollment as any).profiles,
+                eventDate: (course as any).start_date,
+                itemName: `Starting: ${(course as any).title}`,
+                sourceTable: 'lms_enrollments'
+              });
+            }
+          }
+          records = startRecords;
           break;
         }
 
