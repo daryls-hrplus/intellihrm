@@ -1,154 +1,438 @@
 
-# Sync Manual Structure and Update Feature Documentation Status
+# Redesign Documentation Agent UX - Enhanced Gap Analysis
 
 ## Problem Summary
 
-The Coverage panel shows **0%** and **4 gaps** for the Appraisals module because:
+The current Documentation Agent has significant UX issues:
 
-1. The `manual_sections` table has **0 rows** for the Appraisals manual (despite the static `APPRAISALS_MANUAL_STRUCTURE` existing in TypeScript)
-2. The `enablement_content_status` records for all 4 Appraisal features show `documentation_status: 'not_started'`
-3. The coverage calculation only considers features with `documentation_status === 'complete'` or `workflow_status === 'published'`
-
-## Solution Overview
-
-Implement **both options** as requested:
-
-1. **Option A**: When manual sections are initialized, update the coverage calculation to also check for existing `manual_sections` records
-2. **Option B**: Automatically update related features' `documentation_status` to reflect the presence of manual sections
+| Issue | Current State | Impact |
+|-------|---------------|--------|
+| **Toast-only feedback** | "Found 834 gaps" shows as toast, data is lost | User can't see or act on specific gaps |
+| **No gap breakdown** | Data returned by API but not displayed | User doesn't know WHERE gaps are |
+| **No action options** | Only a number shown | No way to fix gaps from the interface |
+| **No quality checks** | Agent doesn't validate content quality | Placeholders and missing screenshots go undetected |
+| **Context not visible** | Module/feature selection is sidebar, not integrated | Disconnected experience |
 
 ---
 
-## Implementation Plan
+## Solution: Enhanced Agent Dashboard with Gap Explorer
 
-### Part 1: Enhance the Initialize Sections Edge Function
-
-Modify `initialize-manual-sections/index.ts` to also update the `enablement_content_status` table for related features.
-
-**Changes:**
-- After creating manual sections, fetch features that match the module codes
-- Upsert `enablement_content_status` records with `documentation_status: 'in_progress'` for each feature
-- This ensures that when sections exist, the features are marked as having documentation work in progress
-
-```typescript
-// After creating sections, update related feature documentation status
-const { data: relatedFeatures } = await supabase
-  .from('application_features')
-  .select('feature_code, application_modules!inner(module_code)')
-  .in('application_modules.module_code', moduleCodes);
-
-if (relatedFeatures && relatedFeatures.length > 0) {
-  for (const feature of relatedFeatures) {
-    const moduleCode = (feature.application_modules as any)?.module_code;
-    await supabase
-      .from('enablement_content_status')
-      .upsert({
-        feature_code: feature.feature_code,
-        module_code: moduleCode,
-        documentation_status: 'in_progress',
-        workflow_status: 'documentation',
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'feature_code',
-        ignoreDuplicates: false
-      });
-  }
-}
-```
-
-### Part 2: Enhance Coverage Calculation
-
-Modify `content-creation-agent/index.ts` in the `analyze_context` action to also consider `manual_sections` when determining if a feature is documented.
-
-**Changes:**
-- Fetch `manual_sections` grouped by source module codes
-- When calculating `isDocumented`, also check if the feature's module has manual sections
-
-```typescript
-// Fetch manual sections coverage
-const { data: manualSections } = await supabase
-  .from('manual_sections')
-  .select('id, source_module_codes')
-  .not('source_module_codes', 'is', null);
-
-// Build a set of module codes that have manual sections
-const modulesWithManualSections = new Set<string>();
-for (const section of manualSections || []) {
-  const codes = (section.source_module_codes as string[]) || [];
-  codes.forEach(code => modulesWithManualSections.add(code));
-}
-
-// In the coverage loop, update isDocumented check:
-const hasManualContent = modulesWithManualSections.has(modCode);
-const isDocumented = 
-  status?.documentation_status === 'complete' ||
-  status?.workflow_status === 'published' ||
-  hasArtifacts ||
-  hasManualContent; // NEW: Consider manual sections
-```
-
-### Part 3: Add Manual Count to Coverage Response
-
-Add a new field to the coverage analysis response showing manual section coverage.
-
-```typescript
-// Add to response
-manualSectionCoverage: {
-  totalModulesWithSections: modulesWithManualSections.size,
-  totalSections: manualSections?.length || 0,
-  modulesWithContent: Array.from(modulesWithManualSections)
-}
-```
-
-### Part 4: Update UI to Show Manual Section Coverage
-
-Update `AgentContextPanel.tsx` to display manual section coverage in the stats.
-
-**Changes:**
-- Add a new stat row showing "Manual Sections" count when available
-- Show which modules have manual documentation vs which don't
+Replace the simple toast notification with an interactive Gap Analysis panel that shows detailed breakdown and provides inline actions.
 
 ---
 
-## Files to Modify
+## UI Redesign Overview
+
+### Current Layout (Problems)
+```text
++------------------------+-------------------+
+| Documentation Agent    | Context Panel     |
+| - Quick Actions grid   | - Module selector |
+| - Empty chat area      | - Manual selector |
+| - (Gaps show as toast) | - Coverage stats  |
++------------------------+-------------------+
+```
+
+### Proposed Layout (Solution)
+```text
++------------------------+-------------------+
+| Documentation Agent    | Context Panel     |
+| - Quick Actions (top)  | - Context selectors|
+| - Analysis Results     | - Manual Content   |
+|   (expandable panels)  | - Coverage + Gaps  |
+|   * Gap Categories     |   MERGED PANEL     |
+|   * Actionable Items   |                   |
+| - Chat (bottom)        |                   |
++------------------------+-------------------+
+```
+
+---
+
+## Detailed Component Changes
+
+### 1. New `GapAnalysisPanel` Component
+
+Create a new component that displays gap analysis results with actionable items.
+
+**File: `src/components/enablement/GapAnalysisPanel.tsx`**
+
+```typescript
+interface GapAnalysisPanelProps {
+  gaps: GapAnalysis | null;
+  summary: GapSummary | null;
+  isLoading: boolean;
+  onGenerateForFeature: (featureCode: string, type: 'kb' | 'manual' | 'sop') => void;
+  onDismissGap: (featureCode: string) => void;
+  onRefresh: () => void;
+}
+```
+
+**UI Structure:**
+- **Summary Header**: "Gap Analysis: X total issues"
+- **Category Tabs**:
+  - Undocumented (X)
+  - Missing KB Articles (X)
+  - Missing Quick Starts (X)
+  - Missing SOPs (X)
+  - Orphaned Docs (X)
+- **Per-Category List**:
+  - Feature name + module badge
+  - Action buttons: Generate, Mark N/A, View Feature
+- **Bulk Actions**: "Generate All" for selected category
+
+### 2. Enhanced Coverage Panel
+
+Merge Coverage stats with Gap summary in `AgentContextPanel`.
+
+**Changes to `AgentContextPanel.tsx`:**
+- Add collapsible "Gap Summary" section below Coverage stats
+- Show gap counts by category with clickable badges
+- Clicking a badge filters the gap list
+
+### 3. Gap Results in Chat Area
+
+When "Find Gaps" is clicked, display results inline in the chat area as a structured message, not just a toast.
+
+**Changes to `ContentCreationAgentChat.tsx`:**
+- Add special rendering for `identify_gaps` results
+- Show collapsible gap categories with items
+- Include inline "Generate" buttons for each gap
+
+### 4. Content Quality Indicators (Future Enhancement)
+
+Add quality checks to the agent that detect:
+- Sections with placeholder text (`[Screenshot]`, `TODO`, `TBD`)
+- Sections without images
+- Sections below readability threshold
+- Stale content (not updated in 90+ days)
+
+---
+
+## Component File Changes
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `src/components/enablement/GapAnalysisPanel.tsx` | Displays detailed gap analysis with actions |
+| `src/components/enablement/GapCategoryList.tsx` | Renders list of gaps for a specific category |
+| `src/components/enablement/GapItemCard.tsx` | Individual gap item with action buttons |
+
+### Modified Files
 
 | File | Changes |
 |------|---------|
-| `supabase/functions/initialize-manual-sections/index.ts` | Add upsert for `enablement_content_status` with `documentation_status: 'in_progress'` after creating sections |
-| `supabase/functions/content-creation-agent/index.ts` | Update `analyze_context` to include `manual_sections` in coverage calculation |
-| `src/components/enablement/AgentContextPanel.tsx` | (Optional) Add visual indicator for manual section coverage |
+| `src/components/enablement/ContentCreationAgentChat.tsx` | Add gap results rendering in chat, store `identifyGaps` result in state for display |
+| `src/components/enablement/AgentContextPanel.tsx` | Add gap summary section with badge counts linking to detailed view |
+| `src/pages/enablement/ContentCreationStudioPage.tsx` | Add state for gap analysis results, wire up generate actions from gap panel |
+| `src/hooks/useContentCreationAgent.ts` | Return gap data to caller for display, not just show toast |
 
 ---
 
-## Expected Outcome
+## Detailed Implementation
 
-**After Implementation:**
+### Step 1: Store Gap Analysis Results in State
 
-1. **Initialize Sections** for Appraisals manual → Creates ~30 sections in `manual_sections`
-2. The 4 Appraisal features get their `documentation_status` updated to `'in_progress'`
-3. Coverage panel refreshes and shows:
-   - **25% - 100%** coverage (depending on exact calculation logic)
-   - **0-4 gaps** (instead of 4)
-4. The Coverage calculation now considers both `enablement_content_status` AND `manual_sections`
+**File: `src/pages/enablement/ContentCreationStudioPage.tsx`**
 
----
+Add state to track gap analysis results:
 
-## Database Impact
-
-- **`manual_sections`**: Will be populated with standard structure sections (~30-35 rows per manual)
-- **`enablement_content_status`**: Existing `not_started` records will be updated to `in_progress`
-
----
-
-## Alternative: Immediate Database Fix
-
-If you want to immediately fix the coverage without waiting for code changes, we can run a database update to mark the 4 Appraisal features as having documentation:
-
-```sql
-UPDATE enablement_content_status 
-SET documentation_status = 'in_progress',
-    workflow_status = 'documentation',
-    updated_at = NOW()
-WHERE module_code = 'appraisals';
+```typescript
+const [gapAnalysis, setGapAnalysis] = useState<{
+  gaps: GapAnalysis;
+  summary: GapSummary;
+} | null>(null);
 ```
 
-This would show the features as "in progress" rather than gaps, while the full solution adds the proper sync logic.
+Update `handleQuickAction` to capture and store results:
+
+```typescript
+case 'identify_gaps':
+  const gapResult = await identifyGaps();
+  if (gapResult) {
+    setGapAnalysis(gapResult);
+  }
+  break;
+```
+
+### Step 2: Create GapAnalysisPanel Component
+
+**File: `src/components/enablement/GapAnalysisPanel.tsx`**
+
+```typescript
+export function GapAnalysisPanel({ 
+  gaps, 
+  summary, 
+  isLoading, 
+  onGenerateForFeature,
+  onRefresh 
+}: GapAnalysisPanelProps) {
+  const [activeCategory, setActiveCategory] = useState<string>('noDocumentation');
+
+  const categories = [
+    { id: 'noDocumentation', label: 'Undocumented', count: summary?.undocumentedFeatures || 0, icon: FileX },
+    { id: 'noKBArticle', label: 'Missing KB', count: summary?.missingKBArticles || 0, icon: FileQuestion },
+    { id: 'noQuickStart', label: 'Missing Quick Start', count: summary?.missingQuickStarts || 0, icon: Rocket },
+    { id: 'noSOP', label: 'Missing SOP', count: summary?.missingSOPs || 0, icon: ClipboardList },
+    { id: 'orphanedDocumentation', label: 'Orphaned', count: summary?.orphanedDocumentation || 0, icon: AlertTriangle },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            Gap Analysis
+          </CardTitle>
+          <Button variant="ghost" size="sm" onClick={onRefresh}>
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {/* Category Tabs */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {categories.map(cat => (
+            <Badge
+              key={cat.id}
+              variant={activeCategory === cat.id ? 'default' : 'outline'}
+              className="cursor-pointer"
+              onClick={() => setActiveCategory(cat.id)}
+            >
+              <cat.icon className="h-3 w-3 mr-1" />
+              {cat.label} ({cat.count})
+            </Badge>
+          ))}
+        </div>
+
+        {/* Gap Items List */}
+        <ScrollArea className="h-[300px]">
+          {activeCategory === 'noDocumentation' && (
+            <div className="space-y-2">
+              {gaps?.noDocumentation.map(gap => (
+                <div key={gap.feature_code} className="flex items-center justify-between p-2 rounded border">
+                  <div>
+                    <p className="font-medium text-sm">{gap.feature_name}</p>
+                    <p className="text-xs text-muted-foreground">{gap.module_name}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => onGenerateForFeature(gap.feature_code, 'manual')}>
+                      <BookOpen className="h-3 w-3" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => onGenerateForFeature(gap.feature_code, 'kb')}>
+                      <FileText className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* Similar sections for other categories */}
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Step 3: Add Gap Summary to AgentContextPanel
+
+**File: `src/components/enablement/AgentContextPanel.tsx`**
+
+Add after the Coverage section:
+
+```typescript
+{/* Gap Summary - Quick Overview */}
+{gapSummary && (
+  <Card>
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm flex items-center gap-2">
+        <AlertCircle className="h-4 w-4 text-yellow-500" />
+        Documentation Gaps
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="flex justify-between p-2 rounded bg-muted/50">
+          <span>Undocumented</span>
+          <Badge variant="destructive">{gapSummary.undocumentedFeatures}</Badge>
+        </div>
+        <div className="flex justify-between p-2 rounded bg-muted/50">
+          <span>Missing KB</span>
+          <Badge variant="secondary">{gapSummary.missingKBArticles}</Badge>
+        </div>
+        <div className="flex justify-between p-2 rounded bg-muted/50">
+          <span>Missing QS</span>
+          <Badge variant="secondary">{gapSummary.missingQuickStarts}</Badge>
+        </div>
+        <div className="flex justify-between p-2 rounded bg-muted/50">
+          <span>Orphaned</span>
+          <Badge variant="outline">{gapSummary.orphanedDocumentation}</Badge>
+        </div>
+      </div>
+      <Button 
+        variant="link" 
+        size="sm" 
+        className="mt-2 p-0 h-auto"
+        onClick={onViewGapDetails}
+      >
+        View detailed breakdown
+      </Button>
+    </CardContent>
+  </Card>
+)}
+```
+
+### Step 4: Render Gap Results in Chat
+
+**File: `src/components/enablement/ContentCreationAgentChat.tsx`**
+
+Add special message type for gap results:
+
+```typescript
+// In message rendering section, add special case for gap analysis
+{message.type === 'gap_analysis' && message.gapData && (
+  <div className="mt-3 space-y-2">
+    <p className="text-sm font-medium">Documentation Gap Analysis</p>
+    <div className="grid grid-cols-2 gap-2">
+      <div className="p-2 rounded bg-red-50 dark:bg-red-950/20">
+        <span className="text-lg font-bold text-red-600">{message.gapData.summary.undocumentedFeatures}</span>
+        <p className="text-xs text-muted-foreground">Undocumented</p>
+      </div>
+      {/* Similar for other categories */}
+    </div>
+    {message.gapData.gaps.noDocumentation.length > 0 && (
+      <div className="mt-2">
+        <p className="text-xs text-muted-foreground mb-1">Top gaps to address:</p>
+        {message.gapData.gaps.noDocumentation.slice(0, 3).map(gap => (
+          <div key={gap.feature_code} className="flex items-center justify-between py-1">
+            <span className="text-sm">{gap.feature_name}</span>
+            <Button size="sm" variant="ghost" onClick={() => onQuickAction('generate_kb_article', { featureCode: gap.feature_code })}>
+              Generate
+            </Button>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+```
+
+---
+
+## Future Enhancement: Content Quality Checks
+
+### Add to Edge Function (`content-creation-agent/index.ts`)
+
+New action `validate_content_quality`:
+
+```typescript
+case 'validate_content_quality': {
+  const { data: sections } = await supabase
+    .from('manual_sections')
+    .select('id, title, content_markdown, updated_at');
+
+  const issues = [];
+  
+  for (const section of sections || []) {
+    const content = section.content_markdown || '';
+    
+    // Check for placeholders
+    if (/\[(Screenshot|TODO|TBD|Placeholder)\]/i.test(content)) {
+      issues.push({
+        sectionId: section.id,
+        title: section.title,
+        issue: 'placeholder_detected',
+        severity: 'warning',
+        details: 'Contains placeholder text that needs to be replaced'
+      });
+    }
+    
+    // Check for missing images
+    if (!content.includes('![') && content.length > 500) {
+      issues.push({
+        sectionId: section.id,
+        title: section.title,
+        issue: 'no_images',
+        severity: 'info',
+        details: 'Long section without any images'
+      });
+    }
+  }
+  
+  return new Response(
+    JSON.stringify({ success: true, qualityIssues: issues }),
+    { headers }
+  );
+}
+```
+
+---
+
+## Files to Create/Modify Summary
+
+### New Files
+| File | Description |
+|------|-------------|
+| `src/components/enablement/GapAnalysisPanel.tsx` | Main gap analysis display component |
+| `src/components/enablement/GapCategoryList.tsx` | List of gaps for a category |
+| `src/components/enablement/GapItemCard.tsx` | Individual gap card with actions |
+
+### Modified Files
+| File | Changes |
+|------|---------|
+| `src/pages/enablement/ContentCreationStudioPage.tsx` | Add gapAnalysis state, wire up gap panel |
+| `src/components/enablement/ContentCreationAgentChat.tsx` | Render gap results inline with action buttons |
+| `src/components/enablement/AgentContextPanel.tsx` | Add gap summary section with counts |
+| `src/hooks/useContentCreationAgent.ts` | Ensure identifyGaps returns data (not just toast) |
+| `supabase/functions/content-creation-agent/index.ts` | (Future) Add content quality validation action |
+
+---
+
+## Expected User Experience After Implementation
+
+### Current Flow (Problems)
+1. User clicks "Find Gaps"
+2. Toast shows "Found 834 undocumented features"
+3. Toast disappears after 3 seconds
+4. User has no idea what to do next
+
+### New Flow (Solution)
+1. User clicks "Find Gaps"
+2. Gap Analysis panel appears with category breakdown:
+   - "Undocumented (120)" - "Missing KB (340)" - "Missing SOP (280)" - etc.
+3. User clicks a category to see specific items
+4. Each item shows feature name + module + action buttons
+5. User can click "Generate" directly on any gap
+6. Summary also appears in right-side Coverage panel for quick reference
+7. Chat displays structured gap summary with top priorities
+
+---
+
+## Visual Mockup (Text-Based)
+
+```text
++-----------------------------------------------------+
+| Documentation Agent                                 |
+| AI-powered content creation                    [X]  |
++-----------------------------------------------------+
+| Quick Actions                                       |
+| [Analyze Coverage] [Find Gaps] [Gen Manual] [KB]    |
++-----------------------------------------------------+
+| Gap Analysis Results                           [R]  |
+| +-----------------------------------------------+   |
+| | [Undocumented (120)] [KB (340)] [SOP (280)]   |   |
+| +-----------------------------------------------+   |
+| | evaluations        Appraisals    [📖] [📄]    |   |
+| | cycles             Appraisals    [📖] [📄]    |   |
+| | calibration        Appraisals    [📖] [📄]    |   |
+| | ... 117 more                                  |   |
+| +-----------------------------------------------+   |
++-----------------------------------------------------+
+| Chat                                                |
+| [Sparkle] Ask me to generate documentation...       |
+|                                                     |
+| [Input field...                            ] [Send] |
++-----------------------------------------------------+
+```
