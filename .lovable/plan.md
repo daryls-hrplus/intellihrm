@@ -1,449 +1,317 @@
 
-
-# L&D Workflow Template Seeding Plan
-## Industry-Aligned HR Hub Integration
+# L&D Notifications & Reminders Seeding Plan
+## Industry-Aligned Templates for Learning & Development
 
 ---
 
 ## Executive Summary
 
-This plan implements **industry-standard L&D workflow templates** seeded in the HR Hub workflow engine, aligned with best practices from Workday Learning, SAP SuccessFactors, and Cornerstone OnDemand. The current `TRAINING_REQUEST_APPROVAL` template exists but has **0 steps configured**, leaving L&D workflows disconnected from the unified HR Hub approval engine.
+This plan implements **industry-standard notification and reminder event types** for the Learning & Development module, aligned with best practices from Workday Learning, SAP SuccessFactors, Cornerstone OnDemand, and SCORM compliance frameworks.
 
----
-
-## Current State Analysis
+### Current State Analysis
 
 | Component | Status | Gap |
 |-----------|--------|-----|
-| `TRAINING_REQUEST_APPROVAL` template | EXISTS (0 steps) | No approval chain configured |
-| `training_request` workflow category | EXISTS in enum | Not actively used |
-| `learning_approval` category | EXISTS in enum | No templates using it |
-| `certification_request` workflow code | DEFINED in module structure | No template exists |
-| Cost-based routing | DOCUMENTED | Not implemented |
-| Multi-level approval chain | DOCUMENTED | Not seeded |
+| `training` category | EXISTS | Only 4 event types (minimal coverage) |
+| LMS Certificate expiry | MISSING | No `lms_certificates.expires_at` trigger |
+| Course enrollment notification | MISSING | No welcome/enrollment confirmation |
+| Quiz/Assessment reminders | MISSING | No deadline or retake reminders |
+| Training request status | MISSING | No approval/rejection notifications |
+| Session/ILT reminders | MISSING | No vendor session date triggers |
+| Recertification reminders | MISSING | No auto-recert triggers |
+| Evaluation/Feedback due | MISSING | No post-training evaluation reminders |
+| External training verification | MISSING | No status change notifications |
+
+**Existing L&D Reminder Event Types (4 total):**
+1. `TRAINING_DUE` - Training Due Date (lms_enrollments.due_date)
+2. `TRAINING_START` - Training Starting (lms_courses.start_date)
+3. `skill_expiry` - Competency/Skill Expiring (employee_competencies.end_date)
+4. `safety_training_expiry` - Safety/HSE Training Expiring (hse_training_records.expiry_date)
 
 ---
 
-## Industry-Standard L&D Workflows to Seed
+## Industry-Standard L&D Reminder Event Types to Seed
 
-### 1. Training Request Approval (Cost-Based Routing)
+### Category A: Course Enrollment & Progress (6 new types)
 
-**Industry Pattern (Workday/SAP):** Training requests route through different approval chains based on cost thresholds.
+| Code | Name | Source Table | Date Field | Description |
+|------|------|--------------|------------|-------------|
+| `LMS_ENROLLMENT_CONFIRMATION` | Course Enrollment Confirmed | lms_enrollments | enrolled_at | Welcome notification when learner is enrolled |
+| `LMS_ENROLLMENT_EXPIRING` | Enrollment Expiring | lms_enrollments | due_date | Final warning before enrollment expires |
+| `LMS_COURSE_REMINDER` | Course Completion Reminder | lms_enrollments | due_date | Periodic nudge for incomplete courses |
+| `LMS_OVERDUE_TRAINING` | Overdue Training Alert | lms_enrollments | due_date | Escalation when training is past due |
+| `LMS_PROGRESS_STALLED` | Learning Progress Stalled | lms_lesson_progress | updated_at | No progress detected for X days |
+| `LMS_COURSE_COMPLETED` | Course Completed | lms_enrollments | completed_at | Congratulations notification |
 
-| Cost Tier | Approval Chain | SLA |
-|-----------|---------------|-----|
-| < $500 | Manager only | 24h |
-| $500 - $2,500 | Manager → HR | 24h + 48h |
-| $2,500 - $10,000 | Manager → HR → Finance | 24h + 48h + 24h |
-| > $10,000 | Manager → HR → Finance → Executive | 24h + 48h + 24h + 72h |
+### Category B: Assessment & Certification (5 new types)
 
-**Template:** `TRAINING_REQUEST_APPROVAL` (update existing)
+| Code | Name | Source Table | Date Field | Description |
+|------|------|--------------|------------|-------------|
+| `LMS_QUIZ_DEADLINE` | Quiz Deadline Approaching | lms_quiz_attempts | created_at | Reminder to complete started quiz |
+| `LMS_QUIZ_FAILED` | Quiz Failed - Retake Available | lms_quiz_attempts | submitted_at | Notification when quiz failed with retakes remaining |
+| `LMS_CERTIFICATE_ISSUED` | Certificate Issued | lms_certificates | issued_at | Notification when certificate is generated |
+| `LMS_CERTIFICATE_EXPIRING` | Certificate Expiring | lms_certificates | expires_at | Recertification reminder |
+| `LMS_RECERTIFICATION_DUE` | Recertification Due | lms_certificates | expires_at | Trigger to start recertification process |
 
-### 2. Certification Request Approval (NEW)
+### Category C: Training Requests & Approvals (5 new types)
 
-**Industry Pattern:** Professional certifications (AWS, PMP, SHRM) require pre-approval due to exam fees and study time allocation.
+| Code | Name | Source Table | Date Field | Description |
+|------|------|--------------|------------|-------------|
+| `TRAINING_REQUEST_SUBMITTED` | Training Request Submitted | training_requests | created_at | Confirmation to employee |
+| `TRAINING_REQUEST_APPROVED` | Training Request Approved | training_requests | approved_at | Approval notification |
+| `TRAINING_REQUEST_REJECTED` | Training Request Rejected | training_requests | updated_at | Rejection notification with reason |
+| `TRAINING_REQUEST_PENDING` | Training Request Pending Approval | training_requests | created_at | Reminder to approvers |
+| `TRAINING_BUDGET_ALERT` | Training Budget Threshold | training_budgets | updated_at | Alert when budget nearing limit |
 
-| Step | Approver | SLA | Escalation |
-|------|----------|-----|------------|
-| 1 | Direct Manager | 24h | Skip to HR |
-| 2 | HR Learning Team | 48h | Auto-approve |
+### Category D: ILT/Vendor Sessions (4 new types)
 
-**Template:** `CERTIFICATION_REQUEST_APPROVAL` (create new)
+| Code | Name | Source Table | Date Field | Description |
+|------|------|--------------|------------|-------------|
+| `VENDOR_SESSION_REMINDER` | Vendor Session Reminder | training_vendor_sessions | start_date | Reminder before ILT/virtual session |
+| `VENDOR_SESSION_REGISTRATION_DEADLINE` | Registration Deadline Approaching | training_vendor_sessions | registration_deadline | Deadline to register for session |
+| `VENDOR_SESSION_CONFIRMATION` | Session Registration Confirmed | vendor_session_enrollments | created_at | Confirmation of session registration |
+| `VENDOR_SESSION_CANCELLED` | Session Cancelled | training_vendor_sessions | updated_at | Notification when session is cancelled |
 
-### 3. External Training Record Verification (NEW)
+### Category E: External Training & Verification (3 new types)
 
-**Industry Pattern:** Employee-submitted external training requires HR verification before appearing on official transcript.
+| Code | Name | Source Table | Date Field | Description |
+|------|------|--------------|------------|-------------|
+| `EXTERNAL_TRAINING_SUBMITTED` | External Training Submitted | external_training_records | created_at | Confirmation to employee |
+| `EXTERNAL_TRAINING_VERIFIED` | External Training Verified | external_training_records | updated_at | HR approved the record |
+| `EXTERNAL_CERT_EXPIRING` | External Certificate Expiring | external_training_records | certificate_expiry_date | Reminder for external cert renewal |
 
-| Step | Approver | SLA | Escalation |
-|------|----------|-----|------------|
-| 1 | HR Learning Team | 72h | Send reminder |
+### Category F: Post-Training Evaluation (2 new types)
 
-**Template:** `EXTERNAL_TRAINING_VERIFICATION` (create new)
-
-### 4. Recertification Request Approval (NEW)
-
-**Industry Pattern:** Expiring certifications trigger auto-requests that need streamlined approval.
-
-| Step | Approver | SLA | Escalation |
-|------|----------|-----|------------|
-| 1 | Direct Manager | 48h | Auto-approve (if mandatory) |
-
-**Template:** `RECERTIFICATION_REQUEST_APPROVAL` (create new)
-
-### 5. Training Budget Exception Request (NEW)
-
-**Industry Pattern:** Requests exceeding department training budget caps require CFO/Finance approval.
-
-| Step | Approver | SLA | Escalation |
-|------|----------|-----|------------|
-| 1 | Department Head | 48h | Skip to HR |
-| 2 | HR Budget Manager | 48h | Notify Finance |
-| 3 | Finance Approval | 72h | Escalate to CFO |
-
-**Template:** `TRAINING_BUDGET_EXCEPTION` (create new)
-
----
-
-## Database Changes Required
-
-### A. Add New Workflow Category Enum Values
-
-```sql
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'certification_request';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'external_training';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'recertification_request';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'training_budget';
-```
-
-### B. Seed Workflow Templates (5 total)
-
-1. **Update existing TRAINING_REQUEST_APPROVAL** with 3 default steps
-2. **Create CERTIFICATION_REQUEST_APPROVAL** with 2 steps
-3. **Create EXTERNAL_TRAINING_VERIFICATION** with 1 step
-4. **Create RECERTIFICATION_REQUEST_APPROVAL** with 1 step
-5. **Create TRAINING_BUDGET_EXCEPTION** with 3 steps
-
-### C. Seed Workflow Steps (10 total steps across 5 templates)
-
-Each step includes:
-- `step_order` - Sequence in chain
-- `name` - Display name
-- `description` - What this step does
-- `approver_type` - manager | hr | role
-- `use_reporting_line` - TRUE for manager steps
-- `requires_comment` - TRUE for rejections
-- `escalation_hours` - SLA deadline
-- `sla_warning_hours` - Warning threshold
-- `can_delegate` - Allow delegation
+| Code | Name | Source Table | Date Field | Description |
+|------|------|--------------|------------|-------------|
+| `TRAINING_EVALUATION_DUE` | Training Evaluation Due | training_evaluation_responses | created_at | Reminder to complete post-training feedback |
+| `TRAINING_EVALUATION_REMINDER` | Evaluation Reminder | training_evaluation_responses | updated_at | Follow-up for incomplete evaluations |
 
 ---
 
 ## Implementation Details
 
-### Phase 1: Migration SQL
+### Phase 1: Database Migration
 
-**File:** `supabase/migrations/XXXXXX_seed_lnd_workflow_templates.sql`
+**File:** `supabase/migrations/XXXXXX_seed_lnd_reminder_event_types.sql`
 
 ```sql
 -- =========================================================
--- LEARNING & DEVELOPMENT WORKFLOW TEMPLATES SEED
--- Industry-aligned templates following Workday/SAP patterns
+-- LEARNING & DEVELOPMENT REMINDER EVENT TYPES SEED
+-- Industry-aligned templates following Workday/SAP/Cornerstone patterns
 -- =========================================================
 
--- Add new workflow categories for L&D
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'certification_request';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'external_training';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'recertification_request';
-ALTER TYPE workflow_category ADD VALUE IF NOT EXISTS 'training_budget';
+-- ===============================================
+-- CATEGORY A: Course Enrollment & Progress
+-- ===============================================
 
--- Get system user for created_by
-DO $$
-DECLARE
-  v_system_user_id UUID;
-BEGIN
-  SELECT id INTO v_system_user_id FROM profiles WHERE email LIKE '%admin%' LIMIT 1;
-  IF v_system_user_id IS NULL THEN
-    SELECT id INTO v_system_user_id FROM profiles LIMIT 1;
-  END IF;
-  
-  -- ===============================================
-  -- 1. TRAINING REQUEST APPROVAL (Update Existing)
-  -- ===============================================
-  
-  -- Add Step 1: Manager Approval
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 1, 'Manager Approval',
-    'Direct manager reviews training relevance, timing, and cost justification',
-    'manager', true, false, false, true, 24, 16, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'TRAINING_REQUEST_APPROVAL'
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws 
-    WHERE ws.template_id = wt.id AND ws.step_order = 1
-  );
-  
-  -- Add Step 2: HR Learning Review
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 2, 'HR Learning Review',
-    'HR validates training provider, negotiates rates, and confirms budget availability',
-    'hr', false, false, true, true, 48, 24, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'TRAINING_REQUEST_APPROVAL'
-  AND EXISTS (SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id AND ws.step_order = 1)
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws 
-    WHERE ws.template_id = wt.id AND ws.step_order = 2
-  );
-  
-  -- Add Step 3: Finance Approval (for high-cost training)
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 3, 'Finance Approval',
-    'Finance reviews budget impact for training requests exceeding $2,500',
-    'role', false, false, true, false, 72, 48, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'TRAINING_REQUEST_APPROVAL'
-  AND EXISTS (SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id AND ws.step_order = 2)
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws 
-    WHERE ws.template_id = wt.id AND ws.step_order = 3
-  );
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_ENROLLMENT_CONFIRMATION', 'Course Enrollment Confirmed', 
+       'Welcome notification when learner is enrolled in a course', 
+       'training', 'lms_enrollments', 'enrolled_at', true, true, 10
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_ENROLLMENT_CONFIRMATION');
 
-  -- ===============================================
-  -- 2. CERTIFICATION REQUEST APPROVAL (New Template)
-  -- ===============================================
-  
-  INSERT INTO workflow_templates (
-    name, code, category, description, is_global, is_active,
-    requires_signature, requires_letter, auto_terminate_hours,
-    allow_return_to_previous, created_by, start_date
-  )
-  SELECT
-    'Certification Request Approval',
-    'CERTIFICATION_REQUEST_APPROVAL',
-    'certification_request'::workflow_category,
-    'Approval workflow for professional certification exams and renewals (AWS, PMP, SHRM, etc.)',
-    true, true, false, false, 168, true, v_system_user_id, CURRENT_DATE
-  WHERE NOT EXISTS (
-    SELECT 1 FROM workflow_templates WHERE code = 'CERTIFICATION_REQUEST_APPROVAL'
-  );
-  
-  -- Certification Step 1: Manager
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 1, 'Manager Approval',
-    'Manager confirms certification aligns with role requirements and approves study time allocation',
-    'manager', true, false, false, true, 24, 16, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'CERTIFICATION_REQUEST_APPROVAL'
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id
-  );
-  
-  -- Certification Step 2: HR Learning
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 2, 'HR Learning Approval',
-    'HR Learning team validates certification provider and registers employee for exam',
-    'hr', false, false, false, true, 48, 24, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'CERTIFICATION_REQUEST_APPROVAL'
-  AND EXISTS (SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id AND ws.step_order = 1)
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id AND ws.step_order = 2
-  );
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_ENROLLMENT_EXPIRING', 'Enrollment Expiring', 
+       'Final warning before course enrollment expires without completion', 
+       'training', 'lms_enrollments', 'due_date', true, true, 15
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_ENROLLMENT_EXPIRING');
 
-  -- ===============================================
-  -- 3. EXTERNAL TRAINING VERIFICATION (New Template)
-  -- ===============================================
-  
-  INSERT INTO workflow_templates (
-    name, code, category, description, is_global, is_active,
-    requires_signature, requires_letter, auto_terminate_hours,
-    allow_return_to_previous, created_by, start_date
-  )
-  SELECT
-    'External Training Verification',
-    'EXTERNAL_TRAINING_VERIFICATION',
-    'external_training'::workflow_category,
-    'HR verification workflow for employee-submitted external training records before transcript inclusion',
-    true, true, false, false, 168, true, v_system_user_id, CURRENT_DATE
-  WHERE NOT EXISTS (
-    SELECT 1 FROM workflow_templates WHERE code = 'EXTERNAL_TRAINING_VERIFICATION'
-  );
-  
-  -- External Training Step 1: HR Verification
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 1, 'HR Verification',
-    'HR validates training completion certificate, duration, and provider legitimacy',
-    'hr', false, false, true, true, 72, 48, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'EXTERNAL_TRAINING_VERIFICATION'
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id
-  );
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_COURSE_REMINDER', 'Course Completion Reminder', 
+       'Periodic nudge for incomplete courses approaching due date', 
+       'training', 'lms_enrollments', 'due_date', true, true, 20
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_COURSE_REMINDER');
 
-  -- ===============================================
-  -- 4. RECERTIFICATION REQUEST APPROVAL (New Template)
-  -- ===============================================
-  
-  INSERT INTO workflow_templates (
-    name, code, category, description, is_global, is_active,
-    requires_signature, requires_letter, auto_terminate_hours,
-    allow_return_to_previous, created_by, start_date
-  )
-  SELECT
-    'Recertification Request Approval',
-    'RECERTIFICATION_REQUEST_APPROVAL',
-    'recertification_request'::workflow_category,
-    'Streamlined approval for certification renewal requests triggered by expiry reminders',
-    true, true, false, false, 120, true, v_system_user_id, CURRENT_DATE
-  WHERE NOT EXISTS (
-    SELECT 1 FROM workflow_templates WHERE code = 'RECERTIFICATION_REQUEST_APPROVAL'
-  );
-  
-  -- Recertification Step 1: Manager
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 1, 'Manager Approval',
-    'Manager confirms continued need for certification and approves renewal cost',
-    'manager', true, false, false, true, 48, 24, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'RECERTIFICATION_REQUEST_APPROVAL'
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id
-  );
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_OVERDUE_TRAINING', 'Overdue Training Alert', 
+       'Escalation notification when training is past due date', 
+       'training', 'lms_enrollments', 'due_date', true, true, 25
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_OVERDUE_TRAINING');
 
-  -- ===============================================
-  -- 5. TRAINING BUDGET EXCEPTION (New Template)
-  -- ===============================================
-  
-  INSERT INTO workflow_templates (
-    name, code, category, description, is_global, is_active,
-    requires_signature, requires_letter, auto_terminate_hours,
-    allow_return_to_previous, created_by, start_date
-  )
-  SELECT
-    'Training Budget Exception Request',
-    'TRAINING_BUDGET_EXCEPTION',
-    'training_budget'::workflow_category,
-    'Multi-level approval for training requests that exceed department budget allocation',
-    true, true, false, false, 240, true, v_system_user_id, CURRENT_DATE
-  WHERE NOT EXISTS (
-    SELECT 1 FROM workflow_templates WHERE code = 'TRAINING_BUDGET_EXCEPTION'
-  );
-  
-  -- Budget Exception Step 1: Department Head
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 1, 'Department Head Approval',
-    'Department head confirms training priority and willingness to reallocate budget',
-    'manager', true, false, true, false, 48, 24, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'TRAINING_BUDGET_EXCEPTION'
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id
-  );
-  
-  -- Budget Exception Step 2: HR Budget Review
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 2, 'HR Budget Review',
-    'HR reviews company-wide training budget and recommends approval or alternative timing',
-    'hr', false, false, true, true, 48, 24, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'TRAINING_BUDGET_EXCEPTION'
-  AND EXISTS (SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id AND ws.step_order = 1)
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id AND ws.step_order = 2
-  );
-  
-  -- Budget Exception Step 3: Finance Approval
-  INSERT INTO workflow_steps (
-    template_id, step_order, name, description, approver_type,
-    use_reporting_line, requires_signature, requires_comment,
-    can_delegate, escalation_hours, sla_warning_hours, is_active
-  )
-  SELECT 
-    wt.id, 3, 'Finance Approval',
-    'Finance validates budget exception and approves funding source',
-    'role', false, true, true, false, 72, 48, true
-  FROM workflow_templates wt
-  WHERE wt.code = 'TRAINING_BUDGET_EXCEPTION'
-  AND EXISTS (SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id AND ws.step_order = 2)
-  AND NOT EXISTS (
-    SELECT 1 FROM workflow_steps ws WHERE ws.template_id = wt.id AND ws.step_order = 3
-  );
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_PROGRESS_STALLED', 'Learning Progress Stalled', 
+       'Alert when no learning progress detected for extended period', 
+       'training', 'lms_lesson_progress', 'updated_at', true, true, 28
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_PROGRESS_STALLED');
 
-END $$;
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_COURSE_COMPLETED', 'Course Completed', 
+       'Congratulations notification when course is successfully completed', 
+       'training', 'lms_enrollments', 'completed_at', true, true, 29
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_COURSE_COMPLETED');
+
+-- ===============================================
+-- CATEGORY B: Assessment & Certification
+-- ===============================================
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_QUIZ_DEADLINE', 'Quiz Deadline Approaching', 
+       'Reminder to complete in-progress quiz before time expires', 
+       'training', 'lms_quiz_attempts', 'created_at', true, true, 40
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_QUIZ_DEADLINE');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_QUIZ_FAILED', 'Quiz Failed - Retake Available', 
+       'Notification when quiz failed with retake attempts remaining', 
+       'training', 'lms_quiz_attempts', 'submitted_at', true, true, 42
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_QUIZ_FAILED');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_CERTIFICATE_ISSUED', 'Certificate Issued', 
+       'Notification when course completion certificate is generated', 
+       'training', 'lms_certificates', 'issued_at', true, true, 50
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_CERTIFICATE_ISSUED');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_CERTIFICATE_EXPIRING', 'Certificate Expiring', 
+       'Reminder when LMS course certificate is approaching expiry', 
+       'training', 'lms_certificates', 'expires_at', true, true, 55
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_CERTIFICATE_EXPIRING');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'LMS_RECERTIFICATION_DUE', 'Recertification Due', 
+       'Trigger to start recertification process before certificate expires', 
+       'training', 'lms_certificates', 'expires_at', true, true, 58
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'LMS_RECERTIFICATION_DUE');
+
+-- ===============================================
+-- CATEGORY C: Training Requests & Approvals
+-- ===============================================
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'TRAINING_REQUEST_SUBMITTED', 'Training Request Submitted', 
+       'Confirmation to employee when training request is submitted', 
+       'training', 'training_requests', 'created_at', true, true, 60
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'TRAINING_REQUEST_SUBMITTED');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'TRAINING_REQUEST_APPROVED', 'Training Request Approved', 
+       'Notification when training request has been approved', 
+       'training', 'training_requests', 'approved_at', true, true, 62
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'TRAINING_REQUEST_APPROVED');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'TRAINING_REQUEST_REJECTED', 'Training Request Rejected', 
+       'Notification when training request has been rejected with reason', 
+       'training', 'training_requests', 'updated_at', true, true, 64
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'TRAINING_REQUEST_REJECTED');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'TRAINING_REQUEST_PENDING', 'Training Request Pending Approval', 
+       'Reminder to approvers about pending training requests', 
+       'training', 'training_requests', 'created_at', true, true, 66
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'TRAINING_REQUEST_PENDING');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'TRAINING_BUDGET_ALERT', 'Training Budget Threshold', 
+       'Alert when department training budget is nearing limit', 
+       'training', 'training_budgets', 'updated_at', true, true, 68
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'TRAINING_BUDGET_ALERT');
+
+-- ===============================================
+-- CATEGORY D: ILT/Vendor Sessions
+-- ===============================================
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'VENDOR_SESSION_REMINDER', 'Vendor Session Reminder', 
+       'Reminder before scheduled ILT or virtual classroom session', 
+       'training', 'training_vendor_sessions', 'start_date', true, true, 70
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'VENDOR_SESSION_REMINDER');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'VENDOR_SESSION_REG_DEADLINE', 'Registration Deadline Approaching', 
+       'Reminder before session registration deadline closes', 
+       'training', 'training_vendor_sessions', 'registration_deadline', true, true, 72
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'VENDOR_SESSION_REG_DEADLINE');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'VENDOR_SESSION_CONFIRMED', 'Session Registration Confirmed', 
+       'Confirmation when employee registers for vendor session', 
+       'training', 'vendor_session_enrollments', 'created_at', true, true, 74
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'VENDOR_SESSION_CONFIRMED');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'VENDOR_SESSION_CANCELLED', 'Session Cancelled', 
+       'Notification when scheduled vendor session is cancelled', 
+       'training', 'training_vendor_sessions', 'updated_at', true, true, 76
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'VENDOR_SESSION_CANCELLED');
+
+-- ===============================================
+-- CATEGORY E: External Training & Verification
+-- ===============================================
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'EXTERNAL_TRAINING_SUBMITTED', 'External Training Submitted', 
+       'Confirmation when employee submits external training record', 
+       'training', 'external_training_records', 'created_at', true, true, 80
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'EXTERNAL_TRAINING_SUBMITTED');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'EXTERNAL_TRAINING_VERIFIED', 'External Training Verified', 
+       'Notification when HR verifies external training record', 
+       'training', 'external_training_records', 'updated_at', true, true, 82
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'EXTERNAL_TRAINING_VERIFIED');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'EXTERNAL_CERT_EXPIRING', 'External Certificate Expiring', 
+       'Reminder when external training certificate is approaching expiry', 
+       'training', 'external_training_records', 'certificate_expiry_date', true, true, 85
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'EXTERNAL_CERT_EXPIRING');
+
+-- ===============================================
+-- CATEGORY F: Post-Training Evaluation
+-- ===============================================
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'TRAINING_EVALUATION_DUE', 'Training Evaluation Due', 
+       'Reminder to complete post-training feedback (Kirkpatrick L1)', 
+       'training', 'training_evaluation_responses', 'created_at', true, true, 90
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'TRAINING_EVALUATION_DUE');
+
+INSERT INTO reminder_event_types (code, name, description, category, source_table, date_field, is_system, is_active, sequence_order)
+SELECT 'TRAINING_EVALUATION_REMINDER', 'Evaluation Follow-up', 
+       'Follow-up reminder for incomplete post-training evaluations', 
+       'training', 'training_evaluation_responses', 'updated_at', true, true, 92
+WHERE NOT EXISTS (SELECT 1 FROM reminder_event_types WHERE code = 'TRAINING_EVALUATION_REMINDER');
 ```
 
-### Phase 2: Update Workflow Module Structure
+---
 
-**File:** `src/constants/workflowModuleStructure.ts`
+### Phase 2: Template Placeholder Enhancements
 
-Add new workflow definitions to the Training & Learning module:
+**File:** `src/components/reminders/templatePlaceholders.ts`
+
+Add L&D-specific placeholders:
 
 ```typescript
-{
-  id: "training",
-  name: "Training & Learning",
-  icon: GraduationCap,
-  categories: [
-    {
-      id: "training_requests",
-      name: "Training Requests",
-      color: "indigo",
-      icon: Award,
-      workflows: [
-        { code: "training_request", name: "Training Request", transactionTypeCode: null },
-        { code: "certification_request", name: "Certification Request", transactionTypeCode: null },
-        { code: "recertification_request", name: "Recertification Request", transactionTypeCode: null },
-        { code: "training_budget", name: "Budget Exception Request", transactionTypeCode: null }
-      ]
-    },
-    {
-      id: "training_records",
-      name: "Training Records",
-      color: "teal",
-      icon: FileCheck,
-      workflows: [
-        { code: "external_training", name: "External Training Verification", transactionTypeCode: null }
-      ]
-    }
-  ]
-}
+// L&D-specific placeholders
+{ key: '{course_name}', label: 'Course Name', description: 'Name of the training course' },
+{ key: '{course_code}', label: 'Course Code', description: 'Course identifier code' },
+{ key: '{enrollment_date}', label: 'Enrollment Date', description: 'Date enrolled in course' },
+{ key: '{due_date}', label: 'Due Date', description: 'Training completion deadline' },
+{ key: '{progress_percent}', label: 'Progress %', description: 'Current completion percentage' },
+{ key: '{certificate_number}', label: 'Certificate #', description: 'Certificate number if issued' },
+{ key: '{certificate_expiry}', label: 'Certificate Expiry', description: 'Certificate expiration date' },
+{ key: '{training_provider}', label: 'Training Provider', description: 'Vendor or provider name' },
+{ key: '{session_date}', label: 'Session Date', description: 'ILT/virtual session date' },
+{ key: '{session_location}', label: 'Session Location', description: 'Training session location' },
+{ key: '{quiz_score}', label: 'Quiz Score', description: 'Quiz result score' },
+{ key: '{passing_score}', label: 'Passing Score', description: 'Required score to pass' },
+{ key: '{retakes_remaining}', label: 'Retakes Remaining', description: 'Number of quiz retakes left' },
 ```
 
-### Phase 3: Update Documentation
+---
+
+### Phase 3: Documentation Update
 
 **File:** `src/components/enablement/learning-development-manual/sections/workflows/LndWorkflowHRHubIntegration.tsx`
 
-Update the documentation to reflect the newly seeded templates:
-
-1. Change the amber warning alert to a green success alert confirming templates are configured
-2. Add a reference table showing all 5 L&D workflow templates
-3. Document cost-threshold routing logic
-4. Add configuration steps for each template
+Add a new section documenting all seeded notification types with their:
+- Trigger conditions
+- Default recipients (employee/manager/HR)
+- Recommended reminder intervals
+- Message template examples
 
 ---
 
@@ -451,9 +319,9 @@ Update the documentation to reflect the newly seeded templates:
 
 | File | Action | Description |
 |------|--------|-------------|
-| `supabase/migrations/XXXXXX_seed_lnd_workflow_templates.sql` | CREATE | Seed 5 templates + 10 steps |
-| `src/constants/workflowModuleStructure.ts` | UPDATE | Add 4 new workflow definitions |
-| `LndWorkflowHRHubIntegration.tsx` | UPDATE | Reflect seeded templates in documentation |
+| `supabase/migrations/XXXXXX_seed_lnd_reminder_event_types.sql` | CREATE | Seed 25 new L&D reminder event types |
+| `src/components/reminders/templatePlaceholders.ts` | UPDATE | Add 13 L&D-specific placeholders |
+| `LndWorkflowHRHubIntegration.tsx` | UPDATE | Document notification types in manual |
 
 ---
 
@@ -461,41 +329,44 @@ Update the documentation to reflect the newly seeded templates:
 
 | Standard | Alignment |
 |----------|-----------|
-| **Workday Learning** | Cost-based routing, multi-level approval, HR validation step |
-| **SAP SuccessFactors** | Certification tracking, recertification workflow, budget controls |
-| **Cornerstone OnDemand** | External training verification, transcript integrity |
-| **ISO 21001** | Learning management system governance, audit trail |
+| **Workday Learning** | Enrollment confirmations, due date reminders, completion notifications |
+| **SAP SuccessFactors** | Certificate expiry, recertification triggers, session reminders |
+| **Cornerstone OnDemand** | Training request status, external training verification |
+| **SCORM/xAPI** | Progress tracking, quiz completion, assessment notifications |
+| **Kirkpatrick Model** | Post-training evaluation reminders (Level 1 reactions) |
 
 ---
 
 ## Post-Implementation Verification
 
-After migration runs:
-
 ```sql
--- Verify template step counts
-SELECT 
-  wt.name,
-  wt.code,
-  wt.category,
-  COUNT(ws.id) as step_count
-FROM workflow_templates wt
-LEFT JOIN workflow_steps ws ON ws.template_id = wt.id
-WHERE wt.code IN (
-  'TRAINING_REQUEST_APPROVAL',
-  'CERTIFICATION_REQUEST_APPROVAL',
-  'EXTERNAL_TRAINING_VERIFICATION',
-  'RECERTIFICATION_REQUEST_APPROVAL',
-  'TRAINING_BUDGET_EXCEPTION'
-)
-GROUP BY wt.id
-ORDER BY wt.code;
+-- Verify L&D reminder event type counts
+SELECT category, COUNT(*) as count 
+FROM reminder_event_types 
+WHERE category = 'training' 
+GROUP BY category;
+
+-- Expected: training = 29 (4 existing + 25 new)
+
+-- List all L&D event types
+SELECT code, name, source_table, date_field 
+FROM reminder_event_types 
+WHERE category = 'training' 
+ORDER BY sequence_order;
 ```
 
-Expected results:
-- TRAINING_REQUEST_APPROVAL: 3 steps
-- CERTIFICATION_REQUEST_APPROVAL: 2 steps
-- EXTERNAL_TRAINING_VERIFICATION: 1 step
-- RECERTIFICATION_REQUEST_APPROVAL: 1 step
-- TRAINING_BUDGET_EXCEPTION: 3 steps
+---
 
+## Recommended Reminder Rule Defaults
+
+After seeding event types, companies can configure rules with these industry-standard defaults:
+
+| Event Type | Days Before | Recipients | Priority |
+|------------|-------------|------------|----------|
+| LMS_COURSE_REMINDER | 7, 3, 1 | Employee | Medium |
+| LMS_ENROLLMENT_EXPIRING | 3, 1 | Employee, Manager | High |
+| LMS_OVERDUE_TRAINING | -1, -3, -7 | Employee, Manager, HR | Critical |
+| LMS_CERTIFICATE_EXPIRING | 90, 60, 30, 14 | Employee, Manager | High |
+| LMS_RECERTIFICATION_DUE | 60, 30 | Employee, HR | High |
+| VENDOR_SESSION_REMINDER | 7, 1 | Employee | Medium |
+| TRAINING_EVALUATION_DUE | 3, 1 | Employee | Medium |
