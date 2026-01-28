@@ -41,6 +41,10 @@ interface Course {
   is_mandatory: boolean;
   passing_score: number | null;
   thumbnail_url: string | null;
+  allow_self_enrollment: boolean;
+  max_enrollments: number | null;
+  enrollment_start_date: string | null;
+  enrollment_end_date: string | null;
   category?: Category;
 }
 
@@ -76,7 +80,10 @@ interface Quiz {
   time_limit_minutes: number | null;
   max_attempts: number | null;
   shuffle_questions: boolean;
+  shuffle_options: boolean;
   show_correct_answers: boolean;
+  show_explanations: boolean;
+  allow_review: boolean;
   is_published: boolean;
 }
 
@@ -224,6 +231,10 @@ export default function AdminLmsManagementPage() {
       passing_score: parseInt(formData.get('passing_score') as string) || 70,
       is_published: formData.get('is_published') === 'true',
       is_mandatory: formData.get('is_mandatory') === 'true',
+      allow_self_enrollment: formData.get('allow_self_enrollment') === 'true',
+      max_enrollments: formData.get('max_enrollments') ? parseInt(formData.get('max_enrollments') as string) : null,
+      enrollment_start_date: formData.get('enrollment_start_date') as string || null,
+      enrollment_end_date: formData.get('enrollment_end_date') as string || null,
       created_by: user?.id
     };
 
@@ -336,7 +347,10 @@ export default function AdminLmsManagementPage() {
       time_limit_minutes: parseInt(formData.get('time_limit_minutes') as string) || null,
       max_attempts: parseInt(formData.get('max_attempts') as string) || null,
       shuffle_questions: formData.get('shuffle_questions') === 'true',
+      shuffle_options: formData.get('shuffle_options') === 'true',
       show_correct_answers: formData.get('show_correct_answers') === 'true',
+      show_explanations: formData.get('show_explanations') === 'true',
+      allow_review: formData.get('allow_review') === 'true',
       is_published: formData.get('is_published') === 'true'
     };
 
@@ -937,6 +951,29 @@ export default function AdminLmsManagementPage() {
                     <Switch id="is_mandatory" name="is_mandatory" defaultChecked={editingCourse?.is_mandatory ?? false} />
                     <Label htmlFor="is_mandatory">Mandatory</Label>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch id="allow_self_enrollment" name="allow_self_enrollment" defaultChecked={editingCourse?.allow_self_enrollment ?? true} />
+                    <Label htmlFor="allow_self_enrollment">Self-Enrollment</Label>
+                  </div>
+                </div>
+                
+                {/* Enrollment Settings */}
+                <div className="border-t pt-4 space-y-4">
+                  <h4 className="font-medium text-sm">Enrollment Settings</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="max_enrollments">Max Enrollments</Label>
+                      <Input id="max_enrollments" name="max_enrollments" type="number" defaultValue={editingCourse?.max_enrollments || ''} placeholder="Unlimited" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="enrollment_start_date">Enrollment Opens</Label>
+                      <Input id="enrollment_start_date" name="enrollment_start_date" type="date" defaultValue={editingCourse?.enrollment_start_date || ''} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="enrollment_end_date">Enrollment Closes</Label>
+                      <Input id="enrollment_end_date" name="enrollment_end_date" type="date" defaultValue={editingCourse?.enrollment_end_date || ''} />
+                    </div>
+                  </div>
                 </div>
               </div>
               <DialogFooter className="mt-4">
@@ -1071,19 +1108,33 @@ export default function AdminLmsManagementPage() {
                   <Label htmlFor="max_attempts">Max Attempts</Label>
                   <Input id="max_attempts" name="max_attempts" type="number" defaultValue={editingQuiz?.max_attempts || ''} placeholder="Unlimited" />
                 </div>
-                <div className="flex gap-6">
+                <div className="flex flex-wrap gap-4">
                   <div className="flex items-center space-x-2">
                     <Switch id="shuffle_questions" name="shuffle_questions" defaultChecked={editingQuiz?.shuffle_questions ?? false} />
                     <Label htmlFor="shuffle_questions">Shuffle Questions</Label>
                   </div>
                   <div className="flex items-center space-x-2">
+                    <Switch id="shuffle_options" name="shuffle_options" defaultChecked={editingQuiz?.shuffle_options ?? false} />
+                    <Label htmlFor="shuffle_options">Shuffle Options</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
                     <Switch id="show_correct_answers" name="show_correct_answers" defaultChecked={editingQuiz?.show_correct_answers ?? true} />
-                    <Label htmlFor="show_correct_answers">Show Correct Answers</Label>
+                    <Label htmlFor="show_correct_answers">Show Answers</Label>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Switch id="is_published" name="is_published" defaultChecked={editingQuiz?.is_published ?? false} />
-                  <Label htmlFor="is_published">Published</Label>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch id="show_explanations" name="show_explanations" defaultChecked={editingQuiz?.show_explanations ?? true} />
+                    <Label htmlFor="show_explanations">Show Explanations</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch id="allow_review" name="allow_review" defaultChecked={editingQuiz?.allow_review ?? true} />
+                    <Label htmlFor="allow_review">Allow Review</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch id="is_published" name="is_published" defaultChecked={editingQuiz?.is_published ?? false} />
+                    <Label htmlFor="is_published">Published</Label>
+                  </div>
                 </div>
               </div>
               <DialogFooter className="mt-4">

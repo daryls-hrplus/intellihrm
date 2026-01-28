@@ -44267,6 +44267,7 @@ export type Database = {
       lms_categories: {
         Row: {
           code: string
+          company_id: string | null
           created_at: string
           description: string | null
           display_order: number
@@ -44278,6 +44279,7 @@ export type Database = {
         }
         Insert: {
           code: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -44289,6 +44291,7 @@ export type Database = {
         }
         Update: {
           code?: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -44298,7 +44301,15 @@ export type Database = {
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lms_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lms_certificates: {
         Row: {
@@ -44462,6 +44473,7 @@ export type Database = {
       }
       lms_courses: {
         Row: {
+          allow_self_enrollment: boolean | null
           category_id: string | null
           certificate_template: string | null
           code: string
@@ -44471,15 +44483,19 @@ export type Database = {
           description: string | null
           difficulty_level: string
           duration_minutes: number | null
+          enrollment_end_date: string | null
+          enrollment_start_date: string | null
           id: string
           is_mandatory: boolean
           is_published: boolean
+          max_enrollments: number | null
           passing_score: number | null
           thumbnail_url: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          allow_self_enrollment?: boolean | null
           category_id?: string | null
           certificate_template?: string | null
           code: string
@@ -44489,15 +44505,19 @@ export type Database = {
           description?: string | null
           difficulty_level?: string
           duration_minutes?: number | null
+          enrollment_end_date?: string | null
+          enrollment_start_date?: string | null
           id?: string
           is_mandatory?: boolean
           is_published?: boolean
+          max_enrollments?: number | null
           passing_score?: number | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          allow_self_enrollment?: boolean | null
           category_id?: string | null
           certificate_template?: string | null
           code?: string
@@ -44507,9 +44527,12 @@ export type Database = {
           description?: string | null
           difficulty_level?: string
           duration_minutes?: number | null
+          enrollment_end_date?: string | null
+          enrollment_start_date?: string | null
           id?: string
           is_mandatory?: boolean
           is_published?: boolean
+          max_enrollments?: number | null
           passing_score?: number | null
           thumbnail_url?: string | null
           title?: string
@@ -45193,6 +45216,7 @@ export type Database = {
       }
       lms_quizzes: {
         Row: {
+          allow_review: boolean | null
           course_id: string
           created_at: string
           description: string | null
@@ -45201,12 +45225,15 @@ export type Database = {
           max_attempts: number | null
           passing_score: number
           show_correct_answers: boolean
+          show_explanations: boolean | null
+          shuffle_options: boolean | null
           shuffle_questions: boolean
           time_limit_minutes: number | null
           title: string
           updated_at: string
         }
         Insert: {
+          allow_review?: boolean | null
           course_id: string
           created_at?: string
           description?: string | null
@@ -45215,12 +45242,15 @@ export type Database = {
           max_attempts?: number | null
           passing_score?: number
           show_correct_answers?: boolean
+          show_explanations?: boolean | null
+          shuffle_options?: boolean | null
           shuffle_questions?: boolean
           time_limit_minutes?: number | null
           title: string
           updated_at?: string
         }
         Update: {
+          allow_review?: boolean | null
           course_id?: string
           created_at?: string
           description?: string | null
@@ -45229,6 +45259,8 @@ export type Database = {
           max_attempts?: number | null
           passing_score?: number
           show_correct_answers?: boolean
+          show_explanations?: boolean | null
+          shuffle_options?: boolean | null
           shuffle_questions?: boolean
           time_limit_minutes?: number | null
           title?: string

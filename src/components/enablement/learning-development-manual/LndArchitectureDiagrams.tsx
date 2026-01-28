@@ -10,7 +10,7 @@ export function LndArchitectureDiagrams() {
         <h2 className="text-2xl font-bold mb-4">Appendix B: Architecture Diagrams</h2>
         <p className="text-muted-foreground mb-6">
           Complete database architecture reference for the Learning & Development module. 
-          The L&D module comprises <strong>56 database tables</strong> organized across 10 functional domains.
+          The L&D module comprises <strong>69 database tables</strong> organized across 10 functional domains.
         </p>
       </section>
 
@@ -27,13 +27,14 @@ export function LndArchitectureDiagrams() {
           <pre className="text-xs bg-muted p-4 rounded overflow-x-auto font-mono">{`
 ┌─────────────────────────────────────────────────────────────┐
 │                      lms_categories                          │
-│         (code, name, description, icon, display_order)       │
+│    (code, name, description, icon, display_order, company_id)│
 └─────────────────────┬────────────────────────────────────────┘
                       │ 1:N
 ┌─────────────────────▼────────────────────────────────────────┐
 │                       lms_courses                            │
 │    (code, title, description, difficulty_level, duration)    │
 │    (passing_score, is_mandatory, is_published, thumbnail)    │
+│    (allow_self_enrollment, max_enrollments, enrollment_dates)│
 └─────────────────────┬────────────────────────────────────────┘
                       │ 1:N
 ┌─────────────────────▼────────────────────────────────────────┐
@@ -55,7 +56,7 @@ export function LndArchitectureDiagrams() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="h-5 w-5 text-green-600" />
-            Database Table Inventory (56 Tables)
+            Database Table Inventory (69 Tables)
           </CardTitle>
           <CardDescription>Complete list of all L&D database tables organized by domain</CardDescription>
         </CardHeader>
@@ -64,7 +65,7 @@ export function LndArchitectureDiagrams() {
           <div>
             <h4 className="font-semibold mb-2 flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
-              Core LMS (18 tables)
+              Core LMS (20 tables)
             </h4>
             <Table>
               <TableHeader>
@@ -78,12 +79,12 @@ export function LndArchitectureDiagrams() {
                 <TableRow>
                   <TableCell className="font-mono text-sm">lms_categories</TableCell>
                   <TableCell>Course groupings for catalog organization</TableCell>
-                  <TableCell>code, name, icon, display_order</TableCell>
+                  <TableCell>code, name, icon, display_order, company_id</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-mono text-sm">lms_courses</TableCell>
                   <TableCell>Main course records</TableCell>
-                  <TableCell>code, title, difficulty_level, passing_score</TableCell>
+                  <TableCell>code, title, difficulty_level, passing_score, allow_self_enrollment, max_enrollments</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-mono text-sm">lms_modules</TableCell>
@@ -118,7 +119,7 @@ export function LndArchitectureDiagrams() {
                 <TableRow>
                   <TableCell className="font-mono text-sm">lms_quizzes</TableCell>
                   <TableCell>Quiz/assessment definitions</TableCell>
-                  <TableCell>course_id, passing_score, time_limit</TableCell>
+                  <TableCell>course_id, passing_score, time_limit, shuffle_options, show_explanations, allow_review</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-mono text-sm">lms_quiz_questions</TableCell>
@@ -207,7 +208,7 @@ export function LndArchitectureDiagrams() {
           <div>
             <h4 className="font-semibold mb-2 flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Training Operations (12 tables)
+              Training Operations (18 tables)
             </h4>
             <Table>
               <TableHeader>
@@ -277,6 +278,36 @@ export function LndArchitectureDiagrams() {
                   <TableCell className="font-mono text-sm">training_quiz_answers</TableCell>
                   <TableCell>Submitted quiz answers</TableCell>
                   <TableCell>attempt_id, question_id, selected_option</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">training_remediation</TableCell>
+                  <TableCell>Remedial training rules</TableCell>
+                  <TableCell>trigger_condition, remediation_course_id, is_active</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">training_topics</TableCell>
+                  <TableCell>Topic definitions for tagging</TableCell>
+                  <TableCell>name, description, parent_topic_id</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">training_content_topics</TableCell>
+                  <TableCell>Topic assignments to content</TableCell>
+                  <TableCell>content_id, topic_id, content_type</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">training_module_progress</TableCell>
+                  <TableCell>Module-level progress tracking</TableCell>
+                  <TableCell>user_id, module_id, started_at, completed_at</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">external_training_records</TableCell>
+                  <TableCell>External training completions</TableCell>
+                  <TableCell>employee_id, training_name, provider_name, certificate_url</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-mono text-sm">course_instructors</TableCell>
+                  <TableCell>Course-instructor assignments</TableCell>
+                  <TableCell>course_id, instructor_id, role</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
