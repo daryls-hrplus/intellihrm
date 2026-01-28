@@ -428,23 +428,39 @@ Escalation Actions (configurable per step):
                     <th className="text-left py-2 font-semibold">Process Type</th>
                     <th className="text-left py-2 font-semibold">Scope Levels</th>
                     <th className="text-left py-2 font-semibold">Template Code</th>
+                    <th className="text-left py-2 font-semibold">Steps</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b">
-                    <td className="py-2">Learning Requests</td>
-                    <td className="py-2">Individual, Team, Department</td>
+                    <td className="py-2">Training Request</td>
+                    <td className="py-2">Individual</td>
                     <td className="py-2 font-mono text-xs">TRAINING_REQUEST_APPROVAL</td>
+                    <td className="py-2">3</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="py-2">Learning Budgets</td>
-                    <td className="py-2">Department, Company</td>
-                    <td className="py-2 font-mono text-xs">TRAINING_BUDGET_APPROVAL</td>
+                    <td className="py-2">Certification Request</td>
+                    <td className="py-2">Individual</td>
+                    <td className="py-2 font-mono text-xs">CERTIFICATION_REQUEST_APPROVAL</td>
+                    <td className="py-2">2</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2">External Training Verification</td>
+                    <td className="py-2">Individual</td>
+                    <td className="py-2 font-mono text-xs">EXTERNAL_TRAINING_VERIFICATION</td>
+                    <td className="py-2">1</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2">Recertification Request</td>
+                    <td className="py-2">Individual</td>
+                    <td className="py-2 font-mono text-xs">RECERTIFICATION_REQUEST_APPROVAL</td>
+                    <td className="py-2">1</td>
                   </tr>
                   <tr>
-                    <td className="py-2">External Training</td>
-                    <td className="py-2">Individual</td>
-                    <td className="py-2 font-mono text-xs">EXTERNAL_TRAINING_APPROVAL</td>
+                    <td className="py-2">Budget Exception</td>
+                    <td className="py-2">Department</td>
+                    <td className="py-2 font-mono text-xs">TRAINING_BUDGET_EXCEPTION</td>
+                    <td className="py-2">3</td>
                   </tr>
                 </tbody>
               </table>
@@ -495,14 +511,15 @@ Escalation Actions (configurable per step):
         </CardContent>
       </Card>
 
-      <Alert variant="destructive" className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
-        <AlertTriangle className="h-4 w-4 text-amber-600" />
-        <AlertTitle className="text-amber-800 dark:text-amber-200">Current Implementation Note</AlertTitle>
-        <AlertDescription className="text-amber-700 dark:text-amber-300">
-          The TRAINING_REQUEST_APPROVAL template exists in the database but currently has 0 steps 
-          configured. Until steps are added via the TalentApprovalWorkflowManager, training requests 
-          will continue to use the standalone <code className="bg-muted px-1 rounded">training_request_approvals</code> table. 
-          Configure the template to enable full HR Hub integration.
+      <Alert className="border-green-200 bg-green-50 dark:bg-green-950/20">
+        <CheckCircle2 className="h-4 w-4 text-green-600" />
+        <AlertTitle className="text-green-800 dark:text-green-200">Templates Configured</AlertTitle>
+        <AlertDescription className="text-green-700 dark:text-green-300">
+          All 5 L&D workflow templates are seeded and active with industry-standard approval chains:
+          TRAINING_REQUEST_APPROVAL (3 steps), CERTIFICATION_REQUEST_APPROVAL (2 steps), 
+          EXTERNAL_TRAINING_VERIFICATION (1 step), RECERTIFICATION_REQUEST_APPROVAL (1 step), 
+          and TRAINING_BUDGET_EXCEPTION (3 steps). Training requests meeting cost thresholds 
+          will automatically route through the HR Hub workflow engine.
         </AlertDescription>
       </Alert>
 

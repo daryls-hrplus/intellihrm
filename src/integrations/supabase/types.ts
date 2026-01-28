@@ -78939,6 +78939,10 @@ export type Database = {
         | "goal_approval_individual"
         | "goal_approval_team"
         | "goal_approval_department"
+        | "certification_request"
+        | "external_training"
+        | "recertification_request"
+        | "training_budget"
       workflow_status:
         | "draft"
         | "pending"
@@ -79352,6 +79356,10 @@ export const Constants = {
         "goal_approval_individual",
         "goal_approval_team",
         "goal_approval_department",
+        "certification_request",
+        "external_training",
+        "recertification_request",
+        "training_budget",
       ],
       workflow_status: [
         "draft",

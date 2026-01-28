@@ -135,7 +135,18 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         icon: Award,
         workflows: [
           { code: "training_request", name: "Training Request", transactionTypeCode: null },
-          { code: "certification_request", name: "Certification Request", transactionTypeCode: null }
+          { code: "certification_request", name: "Certification Request", transactionTypeCode: null },
+          { code: "recertification_request", name: "Recertification Request", transactionTypeCode: null },
+          { code: "training_budget", name: "Budget Exception Request", transactionTypeCode: null }
+        ]
+      },
+      {
+        id: "training_records",
+        name: "Training Records",
+        color: "teal",
+        icon: FileCheck,
+        workflows: [
+          { code: "external_training", name: "External Training Verification", transactionTypeCode: null }
         ]
       }
     ]
