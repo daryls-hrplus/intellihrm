@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useRegistryFeatureCodes } from "./useRegistryFeatureCodes";
 
 export interface CoverageAnalysis {
   totalFeatures: number;
@@ -63,13 +64,26 @@ export function useDocumentationAgent() {
   const [coverageAssessment, setCoverageAssessment] = useState<CoverageAssessment | null>(null);
   const [bulkCandidates, setBulkCandidates] = useState<BulkCandidate[]>([]);
 
+  // Get registry feature codes for consistent analysis
+  const { allFeatureCodes: registryFeatureCodes, getModuleFeatureCodes } = useRegistryFeatureCodes();
+
   const analyzeSchema = useCallback(async (moduleCode?: string) => {
     setIsAnalyzing(true);
     try {
+      // Use module-specific codes if filtering, otherwise all registry codes
+      const featureCodesToUse = moduleCode 
+        ? getModuleFeatureCodes(moduleCode).length > 0 
+          ? getModuleFeatureCodes(moduleCode) 
+          : registryFeatureCodes
+        : registryFeatureCodes;
+
       const { data, error } = await supabase.functions.invoke('documentation-agent', {
         body: { 
           action: 'analyze_schema',
-          context: { moduleCode }
+          context: { 
+            moduleCode,
+            registryFeatureCodes: featureCodesToUse,
+          }
         }
       });
 
@@ -84,7 +98,7 @@ export function useDocumentationAgent() {
     } finally {
       setIsAnalyzing(false);
     }
-  }, []);
+  }, [registryFeatureCodes, getModuleFeatureCodes]);
 
   const inspectFeatures = useCallback(async () => {
     setIsAnalyzing(true);

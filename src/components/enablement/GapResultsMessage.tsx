@@ -8,8 +8,10 @@ import {
   AlertTriangle,
   Sparkles,
   ArrowRight,
+  Database,
 } from "lucide-react";
 import { GapAnalysis, GapSummary } from "@/hooks/useContentCreationAgent";
+import { useRegistryFeatureCodes } from "@/hooks/useRegistryFeatureCodes";
 import { cn } from "@/lib/utils";
 
 interface GapResultsMessageProps {
@@ -25,6 +27,9 @@ export function GapResultsMessage({
   onGenerateForFeature,
   onViewFullAnalysis,
 }: GapResultsMessageProps) {
+  // Get registry feature count to show source of truth
+  const { totalCount: registryFeatureCount } = useRegistryFeatureCodes();
+
   const totalGaps =
     summary.undocumentedFeatures +
     summary.missingKBArticles +
@@ -73,7 +78,11 @@ export function GapResultsMessage({
         <Sparkles className="h-4 w-4 text-primary" />
         <span className="text-sm font-medium">Gap Analysis Complete</span>
         <Badge variant="secondary" className="ml-auto">
-          {totalGaps} total gaps
+          {totalGaps} gaps
+        </Badge>
+        <Badge variant="outline" className="text-[10px] px-1.5 gap-1">
+          <Database className="h-2.5 w-2.5" />
+          {registryFeatureCount}
         </Badge>
       </div>
 

@@ -40,6 +40,7 @@ interface AgentRequest {
     batchCandidates?: string[];
     chatMessage?: string;
     conversationHistory?: Array<{ role: string; content: string }>;
+    registryFeatureCodes?: string[];  // Feature codes from FEATURE_REGISTRY for consistent analysis
   };
 }
 
@@ -275,6 +276,8 @@ serve(async (req) => {
     switch (action) {
       // ==================== ANALYZE CONTEXT ====================
       case 'analyze_context': {
+        const registryCodes = context.registryFeatureCodes;
+        
         // Fetch all features with module info
         let featuresQuery = supabase
           .from("application_features")
@@ -283,6 +286,11 @@ serve(async (req) => {
             application_modules!inner(module_code, module_name)
           `)
           .eq("is_active", true);
+
+        // Filter to registry features if provided (ensures consistency with code registry)
+        if (registryCodes && registryCodes.length > 0) {
+          featuresQuery = featuresQuery.in("feature_code", registryCodes);
+        }
 
         if (context.moduleCode) {
           featuresQuery = featuresQuery.eq("application_modules.module_code", context.moduleCode);
@@ -828,8 +836,9 @@ Generate a formal SOP JSON structure:
       // ==================== IDENTIFY GAPS ====================
       case 'identify_gaps': {
         const moduleCodeFilter = context.moduleCode;
+        const registryCodes = context.registryFeatureCodes;
         
-        // Get all features (optionally filtered by module)
+        // Get all features (optionally filtered by module and/or registry)
         let featuresQuery = supabase
           .from("application_features")
           .select(`
@@ -837,6 +846,11 @@ Generate a formal SOP JSON structure:
             application_modules!inner(module_code, module_name)
           `)
           .eq("is_active", true);
+
+        // Filter to registry features if provided (ensures consistency with code registry)
+        if (registryCodes && registryCodes.length > 0) {
+          featuresQuery = featuresQuery.in("feature_code", registryCodes);
+        }
 
         if (moduleCodeFilter) {
           featuresQuery = featuresQuery.eq("application_modules.module_code", moduleCodeFilter);
@@ -965,11 +979,19 @@ Generate a formal SOP JSON structure:
 
       // ==================== SUGGEST NEXT ACTIONS ====================
       case 'suggest_next_actions': {
-        // Get current state
-        const { data: features } = await supabase
+        const registryCodes = context.registryFeatureCodes;
+        
+        // Get current state (filtered to registry if provided)
+        let featuresQuery = supabase
           .from("application_features")
-          .select("id")
+          .select("id, feature_code")
           .eq("is_active", true);
+
+        if (registryCodes && registryCodes.length > 0) {
+          featuresQuery = featuresQuery.in("feature_code", registryCodes);
+        }
+
+        const { data: features } = await featuresQuery;
 
         const { data: contentStatus } = await supabase
           .from("enablement_content_status")

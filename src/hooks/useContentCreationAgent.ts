@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useRegistryFeatureCodes } from "./useRegistryFeatureCodes";
 
 // Types for the agent
 export type Persona = 'ess' | 'mss' | 'hr' | 'admin' | 'all';
@@ -153,11 +154,28 @@ export function useContentCreationAgent() {
   const [generatedArtifacts, setGeneratedArtifacts] = useState<GeneratedArtifact[]>([]);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
 
-  // Helper to invoke the agent
+  // Get registry feature codes for consistent analysis
+  const { allFeatureCodes: registryFeatureCodes, getModuleFeatureCodes } = useRegistryFeatureCodes();
+
+  // Helper to invoke the agent with registry codes
   const invokeAgent = useCallback(async (action: string, context: Record<string, unknown> = {}) => {
     try {
+      // Determine which feature codes to use based on module filter
+      const moduleCode = context.moduleCode as string | undefined;
+      const featureCodesToUse = moduleCode 
+        ? getModuleFeatureCodes(moduleCode).length > 0 
+          ? getModuleFeatureCodes(moduleCode) 
+          : registryFeatureCodes
+        : registryFeatureCodes;
+
       const { data, error } = await supabase.functions.invoke('content-creation-agent', {
-        body: { action, context }
+        body: { 
+          action, 
+          context: {
+            ...context,
+            registryFeatureCodes: featureCodesToUse,
+          }
+        }
       });
 
       if (error) throw error;
@@ -166,7 +184,7 @@ export function useContentCreationAgent() {
       console.error(`Agent action '${action}' failed:`, error);
       throw error;
     }
-  }, []);
+  }, [registryFeatureCodes, getModuleFeatureCodes]);
 
   // Analyze context and coverage
   const analyzeContext = useCallback(async (moduleCode?: string): Promise<ContextAnalysis | null> => {
