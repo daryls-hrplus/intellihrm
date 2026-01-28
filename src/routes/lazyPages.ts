@@ -121,6 +121,7 @@ export const WorkspaceNavigationStandardPage = lazy(() => import('@/pages/enable
 export const Feedback360ManualPage = lazy(() => import('@/pages/enablement/Feedback360ManualPage'));
 export const SuccessionManualPage = lazy(() => import('@/pages/enablement/SuccessionManualPage'));
 export const CareerDevelopmentManualPage = lazy(() => import('@/pages/enablement/CareerDevelopmentManualPage'));
+export const LearningDevelopmentManualPage = lazy(() => import('@/pages/enablement/LearningDevelopmentManualPage'));
 export const ReleaseCommandCenterPage = lazy(() => import('@/pages/enablement/ReleaseCommandCenterPage'));
 export const ReleaseCommandCenterGuidePage = lazy(() => import('@/pages/enablement/ReleaseCommandCenterGuidePage'));
 
