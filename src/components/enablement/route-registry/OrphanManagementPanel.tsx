@@ -31,7 +31,10 @@ import {
   BarChart3,
   FolderTree,
   Copy,
-  AlertTriangle
+  AlertTriangle,
+  GitMerge,
+  Database,
+  Plus
 } from "lucide-react";
 import { useOrphanDetection } from "@/hooks/useOrphanDetection";
 import { useOrphanActions } from "@/hooks/useOrphanActions";
@@ -40,6 +43,9 @@ import { OrphanModuleAccordion } from "./OrphanModuleAccordion";
 import { OrphanDuplicatesPanel } from "./OrphanDuplicatesPanel";
 import { OrphanActionDialog } from "./OrphanActionDialog";
 import { DuplicateDetailDialog } from "./DuplicateDetailDialog";
+import { PrefixedVariantsPanel } from "./PrefixedVariantsPanel";
+import { RegistryCandidatesPanel } from "./RegistryCandidatesPanel";
+import { MigrationBatchesPanel } from "./MigrationBatchesPanel";
 import { cn } from "@/lib/utils";
 
 export function OrphanManagementPanel() {
@@ -67,6 +73,9 @@ export function OrphanManagementPanel() {
     duplicates,
     routeConflicts,
     totalDbFeatures,
+    prefixedVariants,
+    migrationBatches,
+    registryCandidates,
     error,
     detectOrphans,
     getOrphansByModule,
@@ -193,12 +202,12 @@ export function OrphanManagementPanel() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
+      {/* Summary Cards - Row 1: Core Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total DB Features
+              DB Features
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -209,11 +218,24 @@ export function OrphanManagementPanel() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Code Routes
+              Registry Features
             </CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold text-green-600">{codeRouteCount}</span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Synced
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <span className="text-2xl font-bold text-emerald-600">
+              {totalDbFeatures - (stats?.total ?? 0)}
+            </span>
           </CardContent>
         </Card>
 
@@ -231,37 +253,22 @@ export function OrphanManagementPanel() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Orphan Rate
+              Prefixed Variants
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-amber-600">
-              {totalDbFeatures > 0 
-                ? ((stats?.total ?? 0) / totalDbFeatures * 100).toFixed(1) 
-                : 0}%
-            </span>
+            <span className="text-2xl font-bold text-blue-600">{prefixedVariants.length}</span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Duplicates
+              Candidates
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-blue-600">{stats?.duplicateClusters ?? 0}</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Route Conflicts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-purple-600">{stats?.routeConflicts ?? 0}</span>
+            <span className="text-2xl font-bold text-purple-600">{registryCandidates.length}</span>
           </CardContent>
         </Card>
       </div>
@@ -399,7 +406,7 @@ export function OrphanManagementPanel() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="summary" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             Summary
@@ -412,9 +419,21 @@ export function OrphanManagementPanel() {
             <Copy className="h-4 w-4" />
             Duplicates ({duplicates.length})
           </TabsTrigger>
+          <TabsTrigger value="prefixed-variants" className="gap-2">
+            <GitMerge className="h-4 w-4" />
+            Prefixed Variants ({prefixedVariants.length})
+          </TabsTrigger>
+          <TabsTrigger value="migration-batches" className="gap-2">
+            <Database className="h-4 w-4" />
+            Batches ({migrationBatches.length})
+          </TabsTrigger>
+          <TabsTrigger value="registry-candidates" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Candidates ({registryCandidates.length})
+          </TabsTrigger>
           <TabsTrigger value="all" className="gap-2">
             <FileWarning className="h-4 w-4" />
-            All Orphans ({filteredOrphans.length})
+            All ({filteredOrphans.length})
           </TabsTrigger>
         </TabsList>
 
@@ -480,6 +499,32 @@ export function OrphanManagementPanel() {
             onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
             onViewDuplicate={(duplicate) => setDuplicateDialog({ open: true, duplicate })}
           />
+        </TabsContent>
+
+        <TabsContent value="prefixed-variants" className="mt-6">
+          <PrefixedVariantsPanel
+            prefixedVariants={prefixedVariants}
+            onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
+            onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
+          />
+        </TabsContent>
+
+        <TabsContent value="migration-batches" className="mt-6">
+          <MigrationBatchesPanel
+            batches={migrationBatches}
+            orphans={orphans}
+            onArchiveBatch={async (codes) => {
+              const ids = orphans.filter(o => codes.includes(o.featureCode)).map(o => o.id);
+              if (ids.length > 0) {
+                await archiveMultiple(ids);
+                detectOrphans();
+              }
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="registry-candidates" className="mt-6">
+          <RegistryCandidatesPanel candidates={registryCandidates} />
         </TabsContent>
 
         <TabsContent value="all" className="mt-6">

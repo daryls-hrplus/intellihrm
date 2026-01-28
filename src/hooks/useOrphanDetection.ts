@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCodeRegistryScanner } from "./useCodeRegistryScanner";
 import { 
@@ -24,6 +24,36 @@ interface RawDbFeature {
   display_order: number | null;
 }
 
+// Known prefixes for detecting prefixed variants (e.g., admin_announcements = announcements)
+const KNOWN_PREFIXES = [
+  'admin_', 'ess_', 'mss_', 'emp_', 'payroll_', 'perf_', 
+  'recruit_', 'succ_', 'ben_', 'comp_', 'lms_', 'hse_',
+  'wf_', 'hub_', 'enbl_', 'onb_', 'er_', 'rpt_', 'prop_',
+  'ta_', 'time_', 'leave_', 'train_', 'help_', 'ai_'
+];
+
+/**
+ * Extract base code by removing known prefixes
+ */
+const getBaseCode = (code: string): string => {
+  for (const prefix of KNOWN_PREFIXES) {
+    if (code.startsWith(prefix)) {
+      return code.slice(prefix.length);
+    }
+  }
+  return code;
+};
+
+/**
+ * Check if a code is a prefixed variant of another
+ */
+const isPrefixedVariant = (code1: string, code2: string): boolean => {
+  if (code1 === code2) return false;
+  const base1 = getBaseCode(code1);
+  const base2 = getBaseCode(code2);
+  return base1 === base2 || base1 === code2 || base2 === code1;
+};
+
 /**
  * Hook for detecting and fetching orphaned database entries
  */
@@ -34,6 +64,9 @@ export function useOrphanDetection() {
   const [duplicates, setDuplicates] = useState<OrphanDuplicate[]>([]);
   const [routeConflicts, setRouteConflicts] = useState<OrphanRouteConflict[]>([]);
   const [totalDbFeatures, setTotalDbFeatures] = useState(0);
+  const [prefixedVariants, setPrefixedVariants] = useState<OrphanDuplicate[]>([]);
+  const [migrationBatches, setMigrationBatches] = useState<{ timestamp: string; count: number; codes: string[] }[]>([]);
+  const [registryCandidates, setRegistryCandidates] = useState<OrphanEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const { codeRoutes } = useCodeRegistryScanner();
@@ -180,34 +213,83 @@ export function useOrphanDetection() {
         }
       });
 
-      // Transform to OrphanEntry with analysis
+      // Detect prefixed variants (e.g., admin_announcements vs announcements)
+      const prefixedVariantMap = new Map<string, string[]>();
+      orphanFeatures.forEach(f => {
+        const baseCode = getBaseCode(f.feature_code);
+        // Find other orphans that share the same base code
+        orphanFeatures.forEach(other => {
+          if (other.feature_code !== f.feature_code && isPrefixedVariant(f.feature_code, other.feature_code)) {
+            if (!prefixedVariantMap.has(baseCode)) {
+              prefixedVariantMap.set(baseCode, []);
+            }
+            const existing = prefixedVariantMap.get(baseCode)!;
+            if (!existing.includes(f.feature_code)) existing.push(f.feature_code);
+            if (!existing.includes(other.feature_code)) existing.push(other.feature_code);
+          }
+        });
+      });
+
+      // Detect batch-created entries (same timestamp = likely migration)
+      const batchTimestamps = new Map<string, string[]>();
+      orphanFeatures.forEach(f => {
+        const timestamp = new Date(f.created_at).toISOString().slice(0, 19); // Truncate to second
+        if (!batchTimestamps.has(timestamp)) {
+          batchTimestamps.set(timestamp, []);
+        }
+        batchTimestamps.get(timestamp)!.push(f.feature_code);
+      });
+
+      // Mark entries from large batches (>10) as auto_migration candidates
+      const autoMigratedCodes = new Set<string>();
+      batchTimestamps.forEach((codes, _timestamp) => {
+        if (codes.length > 10) {
+          codes.forEach(code => autoMigratedCodes.add(code));
+        }
+      });
+
+      // Transform to OrphanEntry with enhanced analysis
       const orphanEntries: OrphanEntry[] = orphanFeatures.map(f => {
         const normalizedName = f.feature_name.toLowerCase().trim();
         const duplicatesOfThis = (nameMap.get(normalizedName) || []).filter(code => code !== f.feature_code);
         
-        // Find similar entries
+        // Find prefixed variants of this entry
+        const baseCode = getBaseCode(f.feature_code);
+        const prefixedVariantsOfThis = (prefixedVariantMap.get(baseCode) || []).filter(code => code !== f.feature_code);
+        
+        // Find similar entries (Levenshtein-based)
         const similarEntries: string[] = [];
         orphanFeatures.forEach(other => {
           if (other.feature_code !== f.feature_code && 
               !duplicatesOfThis.includes(other.feature_code) &&
+              !prefixedVariantsOfThis.includes(other.feature_code) &&
               isSimilar(f.feature_name, other.feature_name)) {
             similarEntries.push(other.feature_code);
           }
         });
 
-        // Determine recommendation
+        // Determine recommendation with enhanced logic
         let recommendation: OrphanEntry['recommendation'] = 'review';
         let recommendationReason = 'Requires manual review';
 
         const source = parseSource(f.source);
         const hasRoute = !!f.route_path;
         const hasDuplicate = duplicatesOfThis.length > 0;
+        const hasPrefixedVariant = prefixedVariantsOfThis.length > 0;
+        const isFromBatch = autoMigratedCodes.has(f.feature_code);
         const isOld = new Date(f.created_at) < new Date(Date.now() - 180 * 24 * 60 * 60 * 1000); // 6 months
         const hasDescription = !!f.description && f.description.length > 10;
 
+        // Priority-based recommendation
         if (hasDuplicate) {
           recommendation = 'merge';
-          recommendationReason = `Duplicate name found: ${duplicatesOfThis.join(', ')}`;
+          recommendationReason = `Exact duplicate name found: ${duplicatesOfThis.slice(0, 3).join(', ')}${duplicatesOfThis.length > 3 ? '...' : ''}`;
+        } else if (hasPrefixedVariant) {
+          recommendation = 'merge';
+          recommendationReason = `Prefixed variant detected: ${prefixedVariantsOfThis.slice(0, 3).join(', ')}`;
+        } else if (isFromBatch && !hasDescription) {
+          recommendation = 'archive';
+          recommendationReason = 'Part of batch migration (auto-created)';
         } else if (source === 'auto_migration' && !hasDescription) {
           recommendation = 'archive';
           recommendationReason = 'Auto-migrated entry with no description';
@@ -219,7 +301,7 @@ export function useOrphanDetection() {
           recommendationReason = 'Stale planned feature (>6 months old)';
         } else if (hasRoute && hasDescription) {
           recommendation = 'keep_as_planned';
-          recommendationReason = 'Has route and description - likely a planned feature';
+          recommendationReason = 'Has route and description - likely a planned feature (registry candidate)';
         }
 
         return {
@@ -233,8 +315,8 @@ export function useOrphanDetection() {
           source,
           createdAt: new Date(f.created_at),
           isActive: f.is_active ?? true,
-          hasDuplicate,
-          duplicateOf: duplicatesOfThis,
+          hasDuplicate: hasDuplicate || hasPrefixedVariant,
+          duplicateOf: [...duplicatesOfThis, ...prefixedVariantsOfThis],
           similarTo: similarEntries.slice(0, 5), // Limit similar entries
           recommendation,
           recommendationReason,
@@ -273,7 +355,8 @@ export function useOrphanDetection() {
         bySource: sourceStats,
         byModule: moduleStats,
         byRecommendation: recommendationStats,
-        duplicateClusters: Array.from(nameMap.values()).filter(arr => arr.length > 1).length,
+        duplicateClusters: Array.from(nameMap.values()).filter(arr => arr.length > 1).length + 
+                          Array.from(prefixedVariantMap.values()).length,
         routeConflicts: Array.from(routeMap.values()).filter(arr => arr.length > 1).length,
         oldestOrphan: orphanEntries.length > 0 
           ? new Date(Math.min(...orphanEntries.map(o => o.createdAt.getTime())))
@@ -283,7 +366,7 @@ export function useOrphanDetection() {
           : null
       };
 
-      // Build duplicate clusters
+      // Build duplicate clusters (exact name matches)
       const duplicateClusters: OrphanDuplicate[] = [];
       nameMap.forEach((codes, name) => {
         if (codes.length > 1) {
@@ -296,6 +379,42 @@ export function useOrphanDetection() {
           });
         }
       });
+
+      // Build prefixed variant clusters
+      const prefixedVariantClusters: OrphanDuplicate[] = [];
+      prefixedVariantMap.forEach((codes, baseCode) => {
+        if (codes.length > 1) {
+          const entries = codes.map(code => orphanEntries.find(o => o.featureCode === code)!).filter(Boolean);
+          // Suggest the shortest code (usually the base) as primary
+          const sorted = entries.sort((a, b) => a.featureCode.length - b.featureCode.length);
+          prefixedVariantClusters.push({
+            featureName: `Variants of: ${baseCode}`,
+            entries,
+            suggestedPrimary: sorted[0]?.featureCode || null,
+            mergeRecommendation: `Keep base code "${sorted[0]?.featureCode}", delete prefixed variants`
+          });
+        }
+      });
+
+      // Build migration batch list
+      const migrationBatchList: { timestamp: string; count: number; codes: string[] }[] = [];
+      batchTimestamps.forEach((codes, timestamp) => {
+        if (codes.length > 10) {
+          migrationBatchList.push({
+            timestamp,
+            count: codes.length,
+            codes
+          });
+        }
+      });
+      migrationBatchList.sort((a, b) => b.count - a.count);
+
+      // Identify registry candidates (orphans that could be added to registry)
+      const candidates = orphanEntries.filter(o => 
+        o.recommendation === 'keep_as_planned' && 
+        o.routePath && 
+        o.description
+      );
 
       // Build route conflicts
       const conflicts: OrphanRouteConflict[] = [];
@@ -314,12 +433,18 @@ export function useOrphanDetection() {
       setStats(stats);
       setDuplicates(duplicateClusters);
       setRouteConflicts(conflicts);
+      setPrefixedVariants(prefixedVariantClusters);
+      setMigrationBatches(migrationBatchList);
+      setRegistryCandidates(candidates);
 
       return {
         orphans: orphanEntries,
         stats,
         duplicates: duplicateClusters,
         routeConflicts: conflicts,
+        prefixedVariants: prefixedVariantClusters,
+        migrationBatches: migrationBatchList,
+        registryCandidates: candidates,
         totalDbFeatures: allDbFeatures.length
       };
     } catch (err) {
@@ -388,6 +513,9 @@ export function useOrphanDetection() {
     duplicates,
     routeConflicts,
     totalDbFeatures,
+    prefixedVariants,
+    migrationBatches,
+    registryCandidates,
     error,
     
     // Actions
@@ -399,6 +527,9 @@ export function useOrphanDetection() {
     
     // Stats
     orphanCount: orphans.length,
-    codeRouteCount: codeRoutes.length
+    codeRouteCount: codeRoutes.length,
+    prefixedVariantCount: prefixedVariants.length,
+    migrationBatchCount: migrationBatches.length,
+    registryCandidateCount: registryCandidates.length
   };
 }
