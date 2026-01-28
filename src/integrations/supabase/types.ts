@@ -75737,6 +75737,118 @@ export type Database = {
           },
         ]
       }
+      vendor_contract_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          action_notes: string | null
+          actioned_at: string | null
+          actioned_by: string | null
+          alert_priority: string
+          alert_type: string
+          company_id: string
+          created_at: string
+          days_until_event: number | null
+          escalation_level: number | null
+          id: string
+          last_escalation_at: string | null
+          message: string
+          notification_sent: boolean | null
+          notification_sent_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action_notes?: string | null
+          actioned_at?: string | null
+          actioned_by?: string | null
+          alert_priority?: string
+          alert_type: string
+          company_id: string
+          created_at?: string
+          days_until_event?: number | null
+          escalation_level?: number | null
+          id?: string
+          last_escalation_at?: string | null
+          message: string
+          notification_sent?: boolean | null
+          notification_sent_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action_notes?: string | null
+          actioned_at?: string | null
+          actioned_by?: string | null
+          alert_priority?: string
+          alert_type?: string
+          company_id?: string
+          created_at?: string
+          days_until_event?: number | null
+          escalation_level?: number | null
+          id?: string
+          last_escalation_at?: string | null
+          message?: string
+          notification_sent?: boolean | null
+          notification_sent_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_contract_alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "vendor_contract_alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_contract_alerts_actioned_by_fkey"
+            columns: ["actioned_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "vendor_contract_alerts_actioned_by_fkey"
+            columns: ["actioned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_contract_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_contract_alerts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_session_enrollments: {
         Row: {
           attendance_notes: string | null
@@ -75875,6 +75987,225 @@ export type Database = {
             columns: ["training_request_id"]
             isOneToOne: false
             referencedRelation: "training_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_sla_breaches: {
+        Row: {
+          actual_value: number
+          breach_date: string
+          breach_type: string
+          company_id: string
+          created_at: string
+          description: string | null
+          financial_impact: number | null
+          id: string
+          penalty_amount: number | null
+          penalty_applied: boolean | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          session_id: string | null
+          severity: string
+          sla_metric_id: string | null
+          status: string
+          threshold_value: number
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          actual_value: number
+          breach_date: string
+          breach_type: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          financial_impact?: number | null
+          id?: string
+          penalty_amount?: number | null
+          penalty_applied?: boolean | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          session_id?: string | null
+          severity?: string
+          sla_metric_id?: string | null
+          status?: string
+          threshold_value: number
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          actual_value?: number
+          breach_date?: string
+          breach_type?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          financial_impact?: number | null
+          id?: string
+          penalty_amount?: number | null
+          penalty_applied?: boolean | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          session_id?: string | null
+          severity?: string
+          sla_metric_id?: string | null
+          status?: string
+          threshold_value?: number
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_sla_breaches_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_sla_breaches_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "vendor_sla_breaches_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_sla_breaches_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendor_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_sla_breaches_sla_metric_id_fkey"
+            columns: ["sla_metric_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_sla_metrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_sla_breaches_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_sla_metrics: {
+        Row: {
+          attendance_rate_score: number | null
+          calculated_at: string
+          calculated_by: string | null
+          company_id: string
+          completion_rate_score: number | null
+          created_at: string
+          delivery_on_time_score: number | null
+          delivery_threshold: number | null
+          id: string
+          metric_date: string
+          metric_period: string
+          notes: string | null
+          overall_sla_score: number | null
+          quality_score: number | null
+          quality_threshold: number | null
+          response_time_score: number | null
+          response_time_threshold: number | null
+          satisfaction_score: number | null
+          sessions_delivered: number | null
+          total_completions: number | null
+          total_enrollments: number | null
+          total_evaluations: number | null
+          vendor_id: string
+        }
+        Insert: {
+          attendance_rate_score?: number | null
+          calculated_at?: string
+          calculated_by?: string | null
+          company_id: string
+          completion_rate_score?: number | null
+          created_at?: string
+          delivery_on_time_score?: number | null
+          delivery_threshold?: number | null
+          id?: string
+          metric_date: string
+          metric_period?: string
+          notes?: string | null
+          overall_sla_score?: number | null
+          quality_score?: number | null
+          quality_threshold?: number | null
+          response_time_score?: number | null
+          response_time_threshold?: number | null
+          satisfaction_score?: number | null
+          sessions_delivered?: number | null
+          total_completions?: number | null
+          total_enrollments?: number | null
+          total_evaluations?: number | null
+          vendor_id: string
+        }
+        Update: {
+          attendance_rate_score?: number | null
+          calculated_at?: string
+          calculated_by?: string | null
+          company_id?: string
+          completion_rate_score?: number | null
+          created_at?: string
+          delivery_on_time_score?: number | null
+          delivery_threshold?: number | null
+          id?: string
+          metric_date?: string
+          metric_period?: string
+          notes?: string | null
+          overall_sla_score?: number | null
+          quality_score?: number | null
+          quality_threshold?: number | null
+          response_time_score?: number | null
+          response_time_threshold?: number | null
+          satisfaction_score?: number | null
+          sessions_delivered?: number | null
+          total_completions?: number | null
+          total_enrollments?: number | null
+          total_evaluations?: number | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_sla_metrics_calculated_by_fkey"
+            columns: ["calculated_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "vendor_sla_metrics_calculated_by_fkey"
+            columns: ["calculated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_sla_metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_sla_metrics_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendors"
             referencedColumns: ["id"]
           },
         ]
@@ -77916,6 +78247,7 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: undefined
       }
+      check_vendor_contract_expiries: { Args: never; Returns: undefined }
       check_year_end_reports_complete: {
         Args: { p_closing_id: string }
         Returns: boolean
