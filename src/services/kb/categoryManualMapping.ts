@@ -13,6 +13,7 @@ export const MANUAL_TO_CATEGORY_MAP: Record<string, string> = {
   'feedback-360': 'feedback-360',
   'succession': 'succession-planning',
   'career-development': 'career-development',
+  'learning-development': 'training-learning',
   
   // Future manuals → KB categories (placeholders)
   'ess': 'ess',
@@ -44,7 +45,7 @@ export const CATEGORY_MANUAL_REVERSE_MAP: Record<string, string[]> = {
   'payroll-compensation': ['payroll', 'compensation'],
   'leave-management': ['leave'],
   'recruitment': ['recruitment'],
-  'training-learning': ['training', 'learning'],
+  'training-learning': ['training', 'learning', 'learning-development'],
   'health-safety': ['hse'],
   'employee-relations': ['employee-relations'],
   'company-property': ['company-property'],
