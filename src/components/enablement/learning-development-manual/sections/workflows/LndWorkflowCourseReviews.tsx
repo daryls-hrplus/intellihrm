@@ -14,7 +14,7 @@ import {
 
 export function LndWorkflowCourseReviews() {
   return (
-    <section className="space-y-6" id="sec-4-21" data-manual-anchor="sec-4-21">
+    <section className="space-y-6" id="sec-4-38" data-manual-anchor="sec-4-38">
       <div>
         <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
           <Star className="h-6 w-6 text-amber-600" />

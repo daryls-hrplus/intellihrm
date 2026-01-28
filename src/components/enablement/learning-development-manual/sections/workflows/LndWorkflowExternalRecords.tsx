@@ -12,7 +12,7 @@ import {
 
 export function LndWorkflowExternalRecords() {
   return (
-    <section className="space-y-6" id="sec-4-14" data-manual-anchor="sec-4-14">
+    <section className="space-y-6" id="sec-4-32" data-manual-anchor="sec-4-32">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.14 External Records</h2>
         <p className="text-muted-foreground">Record and track training completed outside the LMS.</p>

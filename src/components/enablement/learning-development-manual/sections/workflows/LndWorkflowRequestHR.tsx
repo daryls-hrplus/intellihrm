@@ -3,7 +3,7 @@ import { Users } from 'lucide-react';
 
 export function LndWorkflowRequestHR() {
   return (
-    <section className="space-y-6" id="sec-4-7" data-manual-anchor="sec-4-7">
+    <section className="space-y-6" id="sec-4-24" data-manual-anchor="sec-4-24">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.7 HR-Initiated Requests</h2>
         <p className="text-muted-foreground">Bulk training assignments initiated by HR administrators.</p>

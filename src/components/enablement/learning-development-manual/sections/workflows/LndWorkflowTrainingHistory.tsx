@@ -3,9 +3,9 @@ import { History } from 'lucide-react';
 
 export function LndWorkflowTrainingHistory() {
   return (
-    <section className="space-y-6" id="sec-4-13" data-manual-anchor="sec-4-13">
+    <section className="space-y-6" id="sec-4-19" data-manual-anchor="sec-4-19">
       <div>
-        <h2 className="text-2xl font-bold mb-2">4.13 Training History</h2>
+        <h2 className="text-2xl font-bold mb-2">4.19 Training History & Transcript</h2>
         <p className="text-muted-foreground">Consolidated view of all training activities per employee.</p>
       </div>
       <Card className="border-l-4 border-l-blue-500">

@@ -11,7 +11,7 @@ import {
 
 export function LndWorkflowProgressTracking() {
   return (
-    <section className="space-y-6" id="sec-4-9" data-manual-anchor="sec-4-9">
+    <section className="space-y-6" id="sec-4-3" data-manual-anchor="sec-4-3">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.9 Progress Tracking</h2>
         <p className="text-muted-foreground">Monitor learner progress through courses and learning paths.</p>

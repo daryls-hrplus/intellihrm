@@ -3,7 +3,7 @@ import { ClipboardCheck } from 'lucide-react';
 
 export function LndWorkflowRequestAppraisal() {
   return (
-    <section className="space-y-6" id="sec-4-4" data-manual-anchor="sec-4-4">
+    <section className="space-y-6" id="sec-4-22" data-manual-anchor="sec-4-22">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.4 Request via Appraisal</h2>
         <p className="text-muted-foreground">Training requests initiated through performance appraisal outcomes.</p>

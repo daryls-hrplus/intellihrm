@@ -11,7 +11,7 @@ import {
 
 export function LndWorkflowCertification() {
   return (
-    <section className="space-y-6" id="sec-4-12" data-manual-anchor="sec-4-12">
+    <section className="space-y-6" id="sec-4-17" data-manual-anchor="sec-4-17">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.12 Certification</h2>
         <p className="text-muted-foreground">Generate and manage course completion certificates.</p>

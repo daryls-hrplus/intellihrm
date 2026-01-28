@@ -3,7 +3,7 @@ import { CheckCircle } from 'lucide-react';
 
 export function LndWorkflowCompletion() {
   return (
-    <section className="space-y-6" id="sec-4-11" data-manual-anchor="sec-4-11">
+    <section className="space-y-6" id="sec-4-16" data-manual-anchor="sec-4-16">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.11 Completion & Evaluation</h2>
         <p className="text-muted-foreground">Process course completions and collect learner feedback.</p>
