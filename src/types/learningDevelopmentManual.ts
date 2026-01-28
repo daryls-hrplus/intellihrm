@@ -144,12 +144,11 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
       {
         id: 'sec-2-1',
         sectionNumber: '2.1',
-        title: 'Prerequisites Checklist',
+        title: 'Prerequisites & Implementation Sequence',
         description: 'Required configurations from Workforce, Performance, and Competency modules before L&D setup',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'Consultant'],
-        legacyReference: 'Introduction and Key Concepts',
         industryContext: {
           frequency: 'One-time',
           timing: 'Pre-implementation',
@@ -163,8 +162,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Create logical groupings for training content (Compliance, Technical, Leadership, Soft Skills)',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'How to setup Training Types?'
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-2-3',
@@ -173,121 +171,112 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Course → Module → Lesson hierarchy, content types, duration estimates, thumbnails, and prerequisites',
         contentLevel: 'procedure',
         estimatedReadTime: 12,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'How to set up Training Courses?'
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-2-4',
         sectionNumber: '2.4',
-        title: 'Delivery Methods Configuration',
-        description: 'In-person, Online, VILT, Blended, OJT delivery method setup and defaults',
+        title: 'Modules & Lessons',
+        description: 'Course → Module → Lesson hierarchy and content structure',
         contentLevel: 'procedure',
-        estimatedReadTime: 5,
-        targetRoles: ['Admin'],
-        legacyReference: 'How to set up Delivery Methods?'
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-2-5',
         sectionNumber: '2.5',
-        title: 'Rating Codes Setup',
-        description: 'Course and agency quality rating codes with point values',
-        contentLevel: 'procedure',
-        estimatedReadTime: 4,
-        targetRoles: ['Admin'],
-        legacyReference: 'How to set up Rating Codes?'
-      },
-      {
-        id: 'sec-2-6',
-        sectionNumber: '2.6',
-        title: 'Cost Types Configuration',
-        description: 'Direct, indirect, and support cost type categories for training budgeting',
-        contentLevel: 'procedure',
-        estimatedReadTime: 4,
-        targetRoles: ['Admin'],
-        legacyReference: 'How to set up Cost Types?'
-      },
-      {
-        id: 'sec-2-7',
-        sectionNumber: '2.7',
-        title: 'Reject & Cancel Reasons Setup',
-        description: 'Training request rejection and cancellation reason codes',
-        contentLevel: 'procedure',
-        estimatedReadTime: 4,
-        targetRoles: ['Admin'],
-        legacyReference: 'How to set up Reject/Cancel Reasons?'
-      },
-      {
-        id: 'sec-2-8',
-        sectionNumber: '2.8',
-        title: 'Training Staff Assignment',
-        description: 'L&D administrators assignment by company for workflow routing',
-        contentLevel: 'procedure',
-        estimatedReadTime: 4,
-        targetRoles: ['Admin'],
-        legacyReference: 'How to set up Training Staff?'
-      },
-      {
-        id: 'sec-2-9',
-        sectionNumber: '2.9',
-        title: 'Quiz & Assessment Configuration',
-        description: 'Question types, passing scores, time limits, retake policies, and feedback display settings',
+        title: 'Quiz Configuration',
+        description: 'Question types, passing scores, time limits, retake policies',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'L&D Admin']
       },
       {
-        id: 'sec-2-10',
-        sectionNumber: '2.10',
-        title: 'Learning Paths Setup',
-        description: 'Structured learning journeys, prerequisite courses, completion criteria, and milestones',
+        id: 'sec-2-6',
+        sectionNumber: '2.6',
+        title: 'Learning Paths',
+        description: 'Structured learning journeys, prerequisite courses, milestones',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin']
       },
       {
-        id: 'sec-2-11',
-        sectionNumber: '2.11',
-        title: 'Competency-Course Mapping',
+        id: 'sec-2-7',
+        sectionNumber: '2.7',
+        title: 'Competency Mapping',
         description: 'Link courses to skills and competencies for gap-based recommendations',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Search By Competencies'
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-2-8',
+        sectionNumber: '2.8',
+        title: 'Compliance Training Rules',
+        description: 'Mandatory training configuration, recertification periods',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-2-9',
+        sectionNumber: '2.9',
+        title: 'Instructors',
+        description: 'Internal and external instructor profiles, qualifications',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-2-10',
+        sectionNumber: '2.10',
+        title: 'Training Budgets',
+        description: 'Department and company training budgets, spending thresholds',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin']
+      },
+      {
+        id: 'sec-2-11',
+        sectionNumber: '2.11',
+        title: 'Training Evaluations',
+        description: 'Kirkpatrick evaluation levels, feedback collection, surveys',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-2-12',
         sectionNumber: '2.12',
-        title: 'Compliance Training Rules',
-        description: 'Mandatory training configuration, recertification periods, and target audience rules',
+        title: 'Badges & Gamification',
+        description: 'Achievement badges, points, leaderboards, learner engagement',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
+        estimatedReadTime: 6,
         targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-2-13',
         sectionNumber: '2.13',
-        title: 'Budget Configuration',
-        description: 'Department and company training budgets, spending thresholds, and approval rules',
+        title: 'SCORM/xAPI Integration',
+        description: 'Import eLearning packages, tracking settings, completion criteria',
         contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['Admin'],
-        legacyReference: 'Cost Types context'
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant']
       },
       {
         id: 'sec-2-14',
         sectionNumber: '2.14',
-        title: 'Instructor Management',
-        description: 'Internal and external instructor profiles, qualifications, and availability',
+        title: 'Certificate Templates',
+        description: 'Design certificate templates with dynamic fields and expiry',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Training Staff'
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-2-15',
         sectionNumber: '2.15',
-        title: 'Certificate Templates',
-        description: 'Design certificate templates with dynamic fields, logos, and expiry settings',
+        title: 'Training Requests Configuration',
+        description: 'Request types, approval workflows, source integrations',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
         targetRoles: ['Admin', 'L&D Admin']
@@ -295,11 +284,11 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
       {
         id: 'sec-2-16',
         sectionNumber: '2.16',
-        title: 'SCORM/xAPI Package Configuration',
-        description: 'Import eLearning packages, tracking settings, completion criteria, and score passthrough',
+        title: 'Company L&D Settings',
+        description: 'Company-specific L&D configuration and defaults',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['Admin', 'Consultant']
+        estimatedReadTime: 6,
+        targetRoles: ['Admin']
       }
     ]
   },
