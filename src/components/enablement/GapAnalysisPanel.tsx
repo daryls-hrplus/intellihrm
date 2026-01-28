@@ -20,15 +20,23 @@ import {
   X,
   Sparkles,
   Filter,
+  Database,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GapAnalysis, GapSummary } from "@/hooks/useContentCreationAgent";
 import { ApplicationModule } from "@/hooks/useApplicationFeatures";
+import { useRegistryFeatureCodes } from "@/hooks/useRegistryFeatureCodes";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface GapAnalysisPanelProps {
   gaps: GapAnalysis | null;
@@ -183,6 +191,12 @@ export function GapAnalysisPanel({
 }: GapAnalysisPanelProps) {
   const [activeTab, setActiveTab] = useState("undocumented");
   const [localModuleFilter, setLocalModuleFilter] = useState(selectedModule);
+  
+  // Get registry feature count for display
+  const { totalCount: registryFeatureCount, getModuleFeatureCodes } = useRegistryFeatureCodes();
+  const moduleFeatureCount = localModuleFilter 
+    ? getModuleFeatureCodes(localModuleFilter).length 
+    : registryFeatureCount;
 
   const categories = [
     {
@@ -248,10 +262,23 @@ export function GapAnalysisPanel({
             </div>
             <div>
               <CardTitle className="text-base">Gap Analysis</CardTitle>
-              <p className="text-xs text-muted-foreground">
-                {isLoading ? "Analyzing..." : `${totalGaps} total gaps found`}
-                {localModuleFilter && ` in ${localModuleFilter}`}
-              </p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{isLoading ? "Analyzing..." : `${totalGaps} total gaps found`}</span>
+                {localModuleFilter && <span>in {localModuleFilter}</span>}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 gap-1 cursor-help">
+                        <Database className="h-2.5 w-2.5" />
+                        {moduleFeatureCount} features
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Analyzing {moduleFeatureCount} features from code registry</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
           <div className="flex gap-1">
