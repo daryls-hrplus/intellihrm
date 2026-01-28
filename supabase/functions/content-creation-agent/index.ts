@@ -893,6 +893,19 @@ Generate a formal SOP JSON structure:
           .from("enablement_artifacts")
           .select("feature_code, artifact_type");
 
+        // Query manual feature coverage (links static manuals to features)
+        const { data: manualCoverage } = await supabase
+          .from("manual_feature_coverage")
+          .select("feature_codes");
+
+        // Build set of features covered by static manuals
+        const featuresWithManualCoverage = new Set<string>();
+        for (const row of manualCoverage || []) {
+          ((row.feature_codes as string[]) || []).forEach((code: string) => 
+            featuresWithManualCoverage.add(code)
+          );
+        }
+
         const statusMap = new Map((contentStatus || []).map(c => [c.feature_code, c]));
         const artifactCounts = new Map<string, Set<string>>();
         (artifacts || []).forEach(a => {
@@ -917,7 +930,8 @@ Generate a formal SOP JSON structure:
           const types = artifactCounts.get(feature.feature_code) || new Set();
 
           const isDocumented = status?.documentation_status === 'complete' ||
-            status?.workflow_status === 'published';
+            status?.workflow_status === 'published' ||
+            featuresWithManualCoverage.has(feature.feature_code);
 
           if (!isDocumented && types.size === 0) {
             gaps.noDocumentation.push({
@@ -928,7 +942,7 @@ Generate a formal SOP JSON structure:
             });
           }
 
-          if (!types.has('kb_article')) {
+          if (!types.has('kb_article') && !featuresWithManualCoverage.has(feature.feature_code)) {
             gaps.noKBArticle.push({ feature_code: feature.feature_code, feature_name: feature.feature_name });
           }
           if (!types.has('sop')) {
