@@ -45,7 +45,7 @@ export interface ManualSectionPreviewState {
   setSelectedChapter: (chapterNumber: string) => void;
   setSelectedSectionId: (id: string) => void;
   generatePreview: (customInstructions?: string) => Promise<PreviewResult | null>;
-  applyChanges: () => Promise<boolean>;
+  applyChanges: (saveAsDraft?: boolean) => Promise<boolean>;
   regenerateSection: () => Promise<boolean>;
   regenerateChapter: () => Promise<boolean>;
   clearPreview: () => void;
@@ -181,8 +181,8 @@ export function useManualSectionPreview(): ManualSectionPreviewState {
     }
   }, [selectedSectionId, selectedSection]);
   
-  // Apply the previewed changes
-  const applyChanges = useCallback(async (): Promise<boolean> => {
+  // Apply the previewed changes (saves as draft for review by default)
+  const applyChanges = useCallback(async (saveAsDraft = true): Promise<boolean> => {
     if (!previewResult || !selectedSectionId) {
       toast.error("No preview to apply");
       return false;
@@ -191,22 +191,55 @@ export function useManualSectionPreview(): ManualSectionPreviewState {
     setIsApplying(true);
     
     try {
-      // Update the section content directly
-      const { error } = await supabase
-        .from('manual_sections')
-        .update({
-          content: { markdown: previewResult.proposedContent },
-          last_generated_at: new Date().toISOString(),
-          needs_regeneration: false,
-        })
-        .eq('id', selectedSectionId);
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (error) throw error;
+      if (saveAsDraft) {
+        // Save to draft_content and set review_status to pending_review
+        const { error } = await supabase
+          .from('manual_sections')
+          .update({
+            draft_content: { markdown: previewResult.proposedContent },
+            review_status: 'pending_review',
+            submitted_for_review_at: new Date().toISOString(),
+            submitted_by: user?.id || null,
+            last_generated_at: new Date().toISOString(),
+            needs_regeneration: false,
+          })
+          .eq('id', selectedSectionId);
+        
+        if (error) throw error;
+        
+        // Create audit trail entry
+        await supabase.from('manual_section_reviews').insert({
+          section_id: selectedSectionId,
+          previous_content: selectedSection?.content || null,
+          proposed_content: { markdown: previewResult.proposedContent },
+          action: 'submitted',
+          action_by: user?.id || null,
+          notes: 'Submitted for review via Content Creation Studio',
+        });
+        
+        toast.success("Content submitted for review");
+      } else {
+        // Direct apply (for already-approved content or when skipping review)
+        const { error } = await supabase
+          .from('manual_sections')
+          .update({
+            content: { markdown: previewResult.proposedContent },
+            review_status: 'approved',
+            last_generated_at: new Date().toISOString(),
+            needs_regeneration: false,
+          })
+          .eq('id', selectedSectionId);
+        
+        if (error) throw error;
+        toast.success("Changes applied directly");
+      }
       
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['manual-sections'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-reviews'] });
       
-      toast.success("Changes applied successfully");
       setPreviewResult(null);
       return true;
     } catch (error) {
@@ -216,7 +249,7 @@ export function useManualSectionPreview(): ManualSectionPreviewState {
     } finally {
       setIsApplying(false);
     }
-  }, [previewResult, selectedSectionId, queryClient]);
+  }, [previewResult, selectedSectionId, selectedSection, queryClient]);
   
   // Regenerate section directly (no preview)
   const regenerateSection = useCallback(async (): Promise<boolean> => {
