@@ -11,7 +11,11 @@ import {
   LndVendorPerformance,
   LndExternalCertifications,
   LndVendorSharing,
-  LndVendorIntegration
+  LndVendorIntegration,
+  LndExternalInstructors,
+  LndSessionEnrollments,
+  LndVendorContacts,
+  LndVendorOffboarding
 } from './sections/agency';
 
 export function LndAgencySection() {
@@ -30,13 +34,13 @@ export function LndAgencySection() {
           Cornerstone best practices.
         </p>
         <div className="flex gap-2 mt-4">
-          <span className="text-sm bg-muted px-3 py-1 rounded-full">12 Sections</span>
-          <span className="text-sm bg-muted px-3 py-1 rounded-full">~90 min read</span>
-          <span className="text-sm bg-muted px-3 py-1 rounded-full">5 Database Tables</span>
+          <span className="text-sm bg-muted px-3 py-1 rounded-full">16 Sections</span>
+          <span className="text-sm bg-muted px-3 py-1 rounded-full">~120 min read</span>
+          <span className="text-sm bg-muted px-3 py-1 rounded-full">9 Database Tables</span>
         </div>
       </div>
 
-      {/* All 12 Sections */}
+      {/* All 16 Sections */}
       <LndVendorConcepts />
       <LndVendorRegistry />
       <LndVendorSelection />
@@ -49,6 +53,10 @@ export function LndAgencySection() {
       <LndExternalCertifications />
       <LndVendorSharing />
       <LndVendorIntegration />
+      <LndExternalInstructors />
+      <LndSessionEnrollments />
+      <LndVendorContacts />
+      <LndVendorOffboarding />
     </div>
   );
 }

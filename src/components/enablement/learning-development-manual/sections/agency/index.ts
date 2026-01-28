@@ -11,6 +11,10 @@ export { LndVendorPerformance } from './LndVendorPerformance';
 export { LndExternalCertifications } from './LndExternalCertifications';
 export { LndVendorSharing } from './LndVendorSharing';
 export { LndVendorIntegration } from './LndVendorIntegration';
+export { LndExternalInstructors } from './LndExternalInstructors';
+export { LndSessionEnrollments } from './LndSessionEnrollments';
+export { LndVendorContacts } from './LndVendorContacts';
+export { LndVendorOffboarding } from './LndVendorOffboarding';
 
 // Legacy exports (deprecated - kept for backward compatibility)
 export { LndVendorConcepts as LndAgencyConcepts } from './LndVendorConcepts';

@@ -294,7 +294,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
   },
 
   // ==========================================================================
-  // CHAPTER 3: EXTERNAL TRAINING & VENDOR MANAGEMENT (~90 min)
+  // CHAPTER 3: EXTERNAL TRAINING & VENDOR MANAGEMENT (~120 min)
   // ==========================================================================
   {
     id: 'chapter-3',
@@ -302,7 +302,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
     title: 'External Training & Vendor Management',
     description: 'Enterprise vendor lifecycle management including selection, onboarding, course catalogs, session scheduling, cost tracking, performance reviews, and multi-company sharing.',
     contentLevel: 'procedure',
-    estimatedReadTime: 90,
+    estimatedReadTime: 120,
     targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
     subsections: [
       {
@@ -355,16 +355,16 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-3-6',
         sectionNumber: '3.6',
         title: 'Cost Management & Budgets',
-        description: 'Configure itemized costs, multi-currency pricing, and budget integration',
+        description: 'Configure itemized costs, multi-currency pricing, budget integration, and volume discounts',
         contentLevel: 'procedure',
-        estimatedReadTime: 7,
+        estimatedReadTime: 8,
         targetRoles: ['Admin']
       },
       {
         id: 'sec-3-7',
         sectionNumber: '3.7',
         title: 'Training Request Workflow',
-        description: 'Request lifecycle, approval chains, and source-based request types',
+        description: 'Request lifecycle, approval chains, approval tracking, and source-based request types',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
@@ -382,34 +382,70 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-3-9',
         sectionNumber: '3.9',
         title: 'Vendor Performance Management',
-        description: 'Reviews, scorecards, KPIs, and improvement tracking',
+        description: 'Reviews, scorecards, KPIs, learner feedback integration, and improvement tracking',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
+        estimatedReadTime: 10,
         targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-3-10',
         sectionNumber: '3.10',
         title: 'Certifications & Credentials',
-        description: 'External certification tracking, expiry management, and renewal workflows',
+        description: 'External certification tracking, expiry management, verification, and renewal workflows',
         contentLevel: 'procedure',
-        estimatedReadTime: 5,
+        estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-3-11',
         sectionNumber: '3.11',
         title: 'Multi-Company Vendor Sharing',
-        description: 'Group-level vendor relationships and volume discount tracking',
+        description: 'Group-level vendor relationships, volume discount tracking, and cross-company enrollment',
         contentLevel: 'procedure',
-        estimatedReadTime: 5,
+        estimatedReadTime: 7,
         targetRoles: ['Admin']
       },
       {
         id: 'sec-3-12',
         sectionNumber: '3.12',
         title: 'Integration with Training Needs',
-        description: 'Gap-based vendor recommendations and AI-powered course matching',
+        description: 'Gap-based vendor recommendations, AI-powered course matching, and competency mapping',
+        contentLevel: 'procedure',
+        estimatedReadTime: 7,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-3-13',
+        sectionNumber: '3.13',
+        title: 'External Instructors',
+        description: 'Manage external training instructors, specializations, rates, and performance',
+        contentLevel: 'procedure',
+        estimatedReadTime: 7,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-3-14',
+        sectionNumber: '3.14',
+        title: 'Session Enrollments & Waitlists',
+        description: 'Employee enrollment tracking, waitlist management, and attendance',
+        contentLevel: 'procedure',
+        estimatedReadTime: 7,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-3-15',
+        sectionNumber: '3.15',
+        title: 'Vendor Contacts Management',
+        description: 'Multiple contact types, escalation paths, and communication',
+        contentLevel: 'procedure',
+        estimatedReadTime: 5,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-3-16',
+        sectionNumber: '3.16',
+        title: 'Vendor Offboarding',
+        description: 'Contract termination, data retention, and transition planning',
         contentLevel: 'procedure',
         estimatedReadTime: 5,
         targetRoles: ['Admin', 'L&D Admin']

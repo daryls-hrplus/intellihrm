@@ -388,13 +388,186 @@ Employee Submits Request
         </CardContent>
       </Card>
 
+      {/* Additional Fields Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" />
+            Additional training_requests Fields
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Field</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Description</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-mono text-sm">company_id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell>Company scope for multi-tenant filtering</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">approved_by</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell>Final approver who granted approval</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">approved_at</TableCell>
+                <TableCell>Timestamp</TableCell>
+                <TableCell>When final approval was granted</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">rejection_reason</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell>Reason provided if request was rejected</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">workflow_instance_id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell>Link to workflow engine instance</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">source_module</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell>Originating module (training | performance | onboarding)</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Request Approvals Subsection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" />
+            3.7.1 Field Reference: training_request_approvals
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            Tracks individual approval actions within the request workflow chain.
+          </p>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Field</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Required</TableHead>
+                <TableHead>Description</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-mono text-sm">id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell><Badge variant="destructive">Auto</Badge></TableCell>
+                <TableCell>Primary key</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">request_id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>FK to training_requests</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">approval_level</TableCell>
+                <TableCell>Integer</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>Step number in approval chain (1, 2, 3...)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">approver_id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>User who took action</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">approver_role</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell><Badge variant="outline">No</Badge></TableCell>
+                <TableCell>Role at time of approval (manager | hr | dept_head)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">action</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>approved | rejected | info_required | delegated</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">comments</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell><Badge variant="outline">No</Badge></TableCell>
+                <TableCell>Approver comments or feedback</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">created_at</TableCell>
+                <TableCell>Timestamp</TableCell>
+                <TableCell><Badge variant="destructive">Auto</Badge></TableCell>
+                <TableCell>When action was taken</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Approval SLA Configuration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Approval Level</TableHead>
+                <TableHead>Default SLA</TableHead>
+                <TableHead>Escalation After</TableHead>
+                <TableHead>Escalation Target</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>Manager (Level 1)</TableCell>
+                <TableCell>48 hours</TableCell>
+                <TableCell>72 hours</TableCell>
+                <TableCell>Skip-level manager</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>HR/L&D (Level 2)</TableCell>
+                <TableCell>24 hours</TableCell>
+                <TableCell>48 hours</TableCell>
+                <TableCell>HR Manager</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Dept Head (Level 3)</TableCell>
+                <TableCell>48 hours</TableCell>
+                <TableCell>72 hours</TableCell>
+                <TableCell>VP/Director</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Executive (Level 4)</TableCell>
+                <TableCell>72 hours</TableCell>
+                <TableCell>120 hours</TableCell>
+                <TableCell>CEO/COO</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
       <Alert>
         <FileText className="h-4 w-4" />
         <AlertTitle>Workflow Integration</AlertTitle>
         <AlertDescription>
           Training requests integrate with the platform's workflow engine. Approvers receive 
           notifications via email and in-app alerts. Escalation rules can be configured for 
-          requests pending more than 72 hours. All approval actions are logged for audit trail.
+          requests pending more than 72 hours. All approval actions are logged for audit trail
+          in the training_request_approvals table, providing complete approval chain visibility.
         </AlertDescription>
       </Alert>
     </section>
