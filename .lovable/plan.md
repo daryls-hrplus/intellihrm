@@ -1,393 +1,355 @@
 
+# Vendor Management UI Implementation Plan
 
-# L&D Manual Chapter 3: Full Industry Alignment Implementation Plan
+## Overview
 
-## Scope
-
-Close ALL gaps between documentation, database schema, and industry standards with the exception of:
-- Content Marketplace (Future Roadmap)
-- Vendor API Integration (Future Roadmap)
-- Automated Session Booking (Future Roadmap)
-
----
-
-## Phase 1: Database Schema Enhancements
-
-### 1.1 Add Missing Fields to Existing Tables
-
-**Table: `training_vendors`**
-| Field | Type | Purpose |
-|-------|------|---------|
-| `group_id` | UUID | Multi-company vendor sharing |
-| `sla_document_url` | TEXT | Service level agreement document |
-
-**Table: `training_vendor_sessions`**
-| Field | Type | Purpose |
-|-------|------|---------|
-| `minimum_attendees` | INTEGER | Threshold for session confirmation |
-| `confirmation_deadline` | DATE | Deadline to confirm session runs |
-
-**Table: `training_vendor_courses`**
-| Field | Type | Purpose |
-|-------|------|---------|
-| `base_price` | NUMERIC | Course-level pricing (separate from session) |
-| `currency` | TEXT | Base price currency |
-
-### 1.2 Create New Tables
-
-**Table: `training_vendor_contacts` (Multi-contact support)**
-```sql
-CREATE TABLE training_vendor_contacts (
-  id UUID PRIMARY KEY,
-  vendor_id UUID REFERENCES training_vendors(id),
-  contact_type TEXT, -- primary, billing, technical, escalation
-  name TEXT NOT NULL,
-  title TEXT,
-  email TEXT,
-  phone TEXT,
-  is_primary BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-```
-
-**Table: `vendor_session_enrollments` (Session enrollment tracking)**
-```sql
-CREATE TABLE vendor_session_enrollments (
-  id UUID PRIMARY KEY,
-  session_id UUID REFERENCES training_vendor_sessions(id),
-  employee_id UUID REFERENCES employees(id),
-  training_request_id UUID REFERENCES training_requests(id),
-  status TEXT, -- registered, waitlisted, confirmed, attended, no_show, cancelled
-  registered_at TIMESTAMPTZ DEFAULT now(),
-  confirmed_at TIMESTAMPTZ,
-  attended BOOLEAN,
-  notes TEXT
-);
-```
-
-**Table: `vendor_session_waitlist` (Waitlist management)**
-```sql
-CREATE TABLE vendor_session_waitlist (
-  id UUID PRIMARY KEY,
-  session_id UUID REFERENCES training_vendor_sessions(id),
-  employee_id UUID REFERENCES employees(id),
-  training_request_id UUID REFERENCES training_requests(id),
-  position INTEGER NOT NULL,
-  added_at TIMESTAMPTZ DEFAULT now(),
-  promoted_at TIMESTAMPTZ,
-  expired_at TIMESTAMPTZ,
-  status TEXT DEFAULT 'waiting' -- waiting, promoted, expired, cancelled
-);
-```
-
-**Table: `vendor_volume_discounts` (Tiered pricing)**
-```sql
-CREATE TABLE vendor_volume_discounts (
-  id UUID PRIMARY KEY,
-  vendor_id UUID REFERENCES training_vendors(id),
-  min_enrollments INTEGER NOT NULL,
-  max_enrollments INTEGER,
-  discount_percentage NUMERIC NOT NULL,
-  effective_from DATE,
-  effective_to DATE,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-```
+Implement the 6 planned UI components documented in Chapter 3's UI Roadmap:
+1. `VendorManagementPage` - CRUD registry at `/training/vendors`
+2. `VendorDetailPage` - Profile with tabs at `/training/vendors/:id`
+3. `VendorCoursesTab` - Course catalog management (embedded)
+4. `VendorSessionsTab` - Session scheduling (embedded)
+5. `VendorContactsTab` - Contact management (embedded)
+6. `VendorReviewsTab` - Performance reviews (embedded)
 
 ---
 
-## Phase 2: Expand Thin Documentation Sections
+## Phase 1: Create Vendor Type Definitions
 
-### 2.1 Section 3.9: Vendor Performance Management
-**Current**: 130 lines (conceptual only)
-**Add**:
-- Full `training_vendor_reviews` field reference table (17 fields)
-- Full `training_evaluations` field reference (learner feedback link)
-- Full `training_evaluation_responses` field reference
-- Performance score calculation methodology
-- Review workflow diagram
-- Action item tracking process
+### File: `src/types/vendor.ts`
 
-### 2.2 Section 3.10: Certifications & Credentials
-**Current**: 71 lines (thin)
-**Add**:
-- Certificate fields from `external_training_records` (certificate_received, certificate_url, certificate_expiry_date)
-- Certificate fields from `training_vendor_courses` (certification_name, certification_validity_months)
-- Step-by-step: Uploading certificates
-- Recertification workflow automation
-- Compliance alert configuration
-
-### 2.3 Section 3.11: Multi-Company Vendor Sharing
-**Current**: 70 lines (conceptual)
-**Add**:
-- New `group_id` field documentation
-- Cross-company enrollment tracking
-- Volume discount aggregation logic
-- Per-company budget isolation
-- Group-level reporting
-
-### 2.4 Section 3.12: Integration with Training Needs
-**Current**: 69 lines (conceptual)
-**Add**:
-- `training_needs` table field reference (16 fields)
-- `training_needs_analysis` table field reference
-- `competency_course_mappings` field reference
-- AI recommendation workflow diagram
-- Gap-to-course matching algorithm
-
----
-
-## Phase 3: Add Missing Field Documentation
-
-### 3.1 Section 3.7: Training Request Workflow
-
-**Add missing `training_requests` fields (6 fields)**:
-| Field | Type | Description |
-|-------|------|-------------|
-| `company_id` | UUID | Company scope |
-| `approved_by` | UUID | Final approver |
-| `approved_at` | Timestamp | Approval timestamp |
-| `rejection_reason` | Text | Reason if rejected |
-| `workflow_instance_id` | UUID | Link to workflow engine |
-| `source_module` | Text | Originating module |
-
-**Add new subsection 3.7.1: Request Approvals**
-- Full `training_request_approvals` field reference (8 fields)
-- Approval chain configuration
-- Escalation rules
-- SLA tracking
-
-### 3.2 Section 3.6: Cost Management & Budgets
-
-**Add full `training_budgets` field reference (10 fields)**:
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Primary key |
-| company_id | UUID | Company scope |
-| department_id | UUID | Department scope (optional) |
-| fiscal_year | INTEGER | Budget year |
-| allocated_amount | NUMERIC | Total budget |
-| spent_amount | NUMERIC | Year-to-date spend |
-| committed_amount | NUMERIC | Approved but not spent |
-| currency | TEXT | Budget currency |
-| created_at | TIMESTAMPTZ | Record creation |
-| updated_at | TIMESTAMPTZ | Last update |
-
-**Add new subsection: Volume Discounts**
-- `vendor_volume_discounts` table field reference
-- Discount tier configuration
-- Automatic discount application
-
----
-
-## Phase 4: Create New Documentation Sections
-
-### 4.1 Section 3.13: External Instructors
-
-**New file**: `LndExternalInstructors.tsx`
-
-**Content (~300 lines)**:
-- Learning objectives
-- `training_instructors` field reference (14 fields)
-- Internal vs External instructor distinction
-- Step-by-step: Adding external instructor
-- Specialization management
-- Hourly rate configuration
-- Instructor assignment to sessions
-- Instructor performance tracking
-
-### 4.2 Section 3.14: Session Enrollments & Waitlists
-
-**New file**: `LndSessionEnrollments.tsx`
-
-**Content (~280 lines)**:
-- Learning objectives
-- `vendor_session_enrollments` field reference (10 fields)
-- `vendor_session_waitlist` field reference (8 fields)
-- Enrollment workflow diagram
-- Waitlist promotion automation
-- No-show tracking
-- Attendance confirmation
-
-### 4.3 Section 3.15: Vendor Contacts Management
-
-**New file**: `LndVendorContacts.tsx`
-
-**Content (~200 lines)**:
-- Learning objectives
-- `training_vendor_contacts` field reference (9 fields)
-- Contact type definitions
-- Primary contact designation
-- Escalation path configuration
-
-### 4.4 Section 3.16: Vendor Offboarding
-
-**New file**: `LndVendorOffboarding.tsx`
-
-**Content (~220 lines)**:
-- Learning objectives
-- Offboarding triggers (contract end, performance issues, business decision)
-- Data retention requirements
-- Historical record preservation
-- Transition planning checklist
-- Knowledge transfer process
-
----
-
-## Phase 5: Update Parent Component & Exports
-
-### 5.1 Update `LndAgencySection.tsx`
-
-- Import 4 new section components
-- Update header: "16 Sections" (was 12)
-- Update read time: "~120 min" (was 90)
-- Update table count: "9 Database Tables" (was 5)
-
-### 5.2 Update `sections/agency/index.ts`
-
-Add exports for new components:
-```typescript
-export { LndExternalInstructors } from './LndExternalInstructors';
-export { LndSessionEnrollments } from './LndSessionEnrollments';
-export { LndVendorContacts } from './LndVendorContacts';
-export { LndVendorOffboarding } from './LndVendorOffboarding';
-```
-
----
-
-## Phase 6: Update TOC Structure
-
-### 6.1 Add 4 New Sections to `learningDevelopmentManual.ts`
+Define TypeScript interfaces matching the database schema:
 
 ```typescript
-{
-  id: 'sec-3-13',
-  sectionNumber: '3.13',
-  title: 'External Instructors',
-  description: 'Manage external training instructors, specializations, and rates',
-  contentLevel: 'procedure',
-  estimatedReadTime: 7,
-  targetRoles: ['Admin', 'L&D Admin']
-},
-{
-  id: 'sec-3-14',
-  sectionNumber: '3.14',
-  title: 'Session Enrollments & Waitlists',
-  description: 'Employee enrollment tracking, waitlist management, and attendance',
-  contentLevel: 'procedure',
-  estimatedReadTime: 7,
-  targetRoles: ['Admin', 'L&D Admin']
-},
-{
-  id: 'sec-3-15',
-  sectionNumber: '3.15',
-  title: 'Vendor Contacts Management',
-  description: 'Multiple contact types, escalation paths, and communication',
-  contentLevel: 'procedure',
-  estimatedReadTime: 5,
-  targetRoles: ['Admin', 'L&D Admin']
-},
-{
-  id: 'sec-3-16',
-  sectionNumber: '3.16',
-  title: 'Vendor Offboarding',
-  description: 'Contract termination, data retention, and transition planning',
-  contentLevel: 'procedure',
-  estimatedReadTime: 5,
-  targetRoles: ['Admin', 'L&D Admin']
+// Core vendor interface (31 fields from training_vendors)
+interface Vendor {
+  id: string;
+  company_id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  vendor_type: string;
+  status: 'active' | 'pending' | 'suspended' | 'terminated';
+  is_preferred: boolean;
+  is_shared: boolean | null;
+  // Contact info (legacy single contact)
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  // Contract details
+  contract_start_date: string | null;
+  contract_end_date: string | null;
+  contract_value: number | null;
+  // ... additional fields
+}
+
+// Related entity interfaces
+interface VendorCourse { ... }  // 17 fields
+interface VendorSession { ... } // 25 fields  
+interface VendorContact { ... } // 11 fields
+interface VendorReview { ... }  // 17 fields
+```
+
+---
+
+## Phase 2: Create Vendor Data Hooks
+
+### File: `src/hooks/useVendors.ts`
+
+Custom hook for vendor CRUD operations:
+
+```typescript
+export function useVendors(companyId: string) {
+  // Fetch vendors list with filters
+  const { data: vendors, isLoading, refetch } = useQuery({
+    queryKey: ['vendors', companyId],
+    queryFn: () => supabase
+      .from('training_vendors')
+      .select('*')
+      .eq('company_id', companyId)
+  });
+
+  // Create vendor mutation
+  const createVendor = useMutation({ ... });
+  
+  // Update vendor mutation
+  const updateVendor = useMutation({ ... });
+
+  return { vendors, isLoading, createVendor, updateVendor, refetch };
 }
 ```
 
-### 6.2 Update Chapter Metadata
-
-- Total sections: 16 (was 12)
-- Estimated read time: 120 min (was 90)
-- Database tables: 9 (was 5)
-
----
-
-## Phase 7: Document UI Roadmap
-
-### 7.1 Add UI Roadmap Section to Documentation
-
-Note in Section 3.1 (Concepts) or create new section:
-
-**Planned UI Pages (Future Release)**:
-| Page | Route | Purpose |
-|------|-------|---------|
-| VendorManagementPage | /training/vendors | Vendor registry CRUD |
-| VendorDetailPage | /training/vendors/:id | Vendor profile with tabs |
-| VendorCoursesTab | Embedded | Course catalog management |
-| VendorSessionsTab | Embedded | Session scheduling |
-| VendorReviewsTab | Embedded | Performance reviews |
-| VendorContactsTab | Embedded | Contact management |
-
-**Future Roadmap Items** (Not in current scope):
-- Content Marketplace integration
-- Vendor API Integration (xAPI, LTI)
-- Automated Session Booking
+### Additional hooks:
+- `useVendorCourses(vendorId)` - Course catalog operations
+- `useVendorSessions(vendorId)` - Session scheduling operations
+- `useVendorContacts(vendorId)` - Multi-contact management
+- `useVendorReviews(vendorId)` - Performance review operations
 
 ---
 
-## Implementation Summary
+## Phase 3: Create VendorManagementPage
 
-### Database Changes
-| Change Type | Count |
-|-------------|-------|
-| New fields in existing tables | 6 fields |
-| New tables | 4 tables |
-| New indexes | ~8 |
-| New RLS policies | ~8 |
+### File: `src/pages/training/VendorManagementPage.tsx`
 
-### Documentation Changes
-| Change Type | Files | Lines Added |
-|-------------|-------|-------------|
-| Expand thin sections (3.9-3.12) | 4 | +450 |
-| Add missing fields (3.6, 3.7) | 2 | +150 |
-| New sections (3.13-3.16) | 4 | +1,000 |
-| Parent component updates | 2 | +50 |
-| TOC updates | 1 | +60 |
-| **TOTAL** | 13 | **~1,710 lines** |
+Full CRUD registry following existing patterns (similar to `InstructorsPage`):
 
-### Files to Create/Modify
+**Features:**
+- Company filter selector (multi-company support)
+- Data table with sortable columns
+- Status badges (Active, Pending, Suspended, Terminated)
+- Preferred vendor indicator
+- Contract expiry warnings
+- Performance score display
+- Search and filter capabilities
+- Add/Edit vendor dialog
 
-| File | Action |
-|------|--------|
-| `supabase/migrations/xxx_vendor_schema_enhancements.sql` | CREATE |
-| `LndVendorPerformance.tsx` | EXPAND |
-| `LndExternalCertifications.tsx` | EXPAND |
-| `LndVendorSharing.tsx` | EXPAND |
-| `LndVendorIntegration.tsx` | EXPAND |
-| `LndTrainingRequests.tsx` | ADD FIELDS |
-| `LndVendorCosts.tsx` | ADD BUDGETS |
-| `LndExternalInstructors.tsx` | CREATE |
-| `LndSessionEnrollments.tsx` | CREATE |
-| `LndVendorContacts.tsx` | CREATE |
-| `LndVendorOffboarding.tsx` | CREATE |
-| `index.ts` | UPDATE EXPORTS |
-| `LndAgencySection.tsx` | UPDATE PARENT |
-| `learningDevelopmentManual.ts` | UPDATE TOC |
+**Key Components:**
+```tsx
+<AppLayout>
+  <Breadcrumbs items={[
+    { label: "Learning & Development", href: "/training" },
+    { label: "Vendor Management" }
+  ]} />
+  
+  <PageHeader 
+    title="Training Vendors"
+    icon={Building2}
+    actions={<Button onClick={openAddDialog}>Add Vendor</Button>}
+  />
+  
+  <CompanySelector />
+  
+  <VendorDataTable 
+    vendors={vendors}
+    onRowClick={navigateToVendorDetail}
+  />
+  
+  <VendorFormDialog />
+</AppLayout>
+```
 
 ---
 
-## Gap Closure Summary
+## Phase 4: Create VendorDetailPage
 
-| Gap Category | Before | After | Status |
-|--------------|--------|-------|--------|
-| Documentation sections | 12 | 16 | CLOSED |
-| Thin sections expanded | 4 thin | 0 thin | CLOSED |
-| Missing field docs | ~30 fields | 0 | CLOSED |
-| Missing tables | 2 | 0 | CLOSED |
-| Schema multi-company | No group_id | Has group_id | CLOSED |
-| Schema enrollments | None | Full tracking | CLOSED |
-| Schema waitlists | count only | Full table | CLOSED |
-| Schema volume discounts | None | Full table | CLOSED |
-| Schema vendor contacts | Single | Multiple | CLOSED |
-| Vendor offboarding | None | Documented | CLOSED |
-| UI pages | None | Documented as planned | NOTED |
-| Content Marketplace | None | Future roadmap | DEFERRED |
-| Vendor API Integration | None | Future roadmap | DEFERRED |
-| Automated Session Booking | None | Future roadmap | DEFERRED |
+### File: `src/pages/training/VendorDetailPage.tsx`
 
-**Industry alignment: ~95%** (excluding 3 deferred features)
+Profile page with tabbed interface (similar to `EmployeeProfilePage` pattern):
 
+**Layout:**
+```tsx
+<AppLayout>
+  <Breadcrumbs items={[...]} />
+  
+  {/* Vendor Header Card */}
+  <Card>
+    <VendorProfileHeader vendor={vendor} />
+    <VendorQuickStats vendor={vendor} />
+  </Card>
+  
+  {/* Tabbed Content */}
+  <Tabs value={activeTab} onValueChange={handleTabChange}>
+    <TabsList>
+      <TabsTrigger value="overview">Overview</TabsTrigger>
+      <TabsTrigger value="courses">Courses</TabsTrigger>
+      <TabsTrigger value="sessions">Sessions</TabsTrigger>
+      <TabsTrigger value="contacts">Contacts</TabsTrigger>
+      <TabsTrigger value="reviews">Reviews</TabsTrigger>
+    </TabsList>
+    
+    <TabsContent value="overview">
+      <VendorOverviewTab vendor={vendor} />
+    </TabsContent>
+    <TabsContent value="courses">
+      <VendorCoursesTab vendorId={vendorId} />
+    </TabsContent>
+    <TabsContent value="sessions">
+      <VendorSessionsTab vendorId={vendorId} />
+    </TabsContent>
+    <TabsContent value="contacts">
+      <VendorContactsTab vendorId={vendorId} />
+    </TabsContent>
+    <TabsContent value="reviews">
+      <VendorReviewsTab vendorId={vendorId} />
+    </TabsContent>
+  </Tabs>
+</AppLayout>
+```
+
+**Tab State Persistence:**
+- Use `useTabState` for active tab
+- Sync tab to URL (`?tab=courses`)
+
+---
+
+## Phase 5: Create Embedded Tab Components
+
+### 5.1 VendorCoursesTab
+
+**File:** `src/components/training/vendor/VendorCoursesTab.tsx`
+
+**Features:**
+- Course catalog table (17 fields)
+- Add/Edit course dialog
+- Delivery method badges (Classroom, Virtual, Hybrid, Online)
+- Certification tracking
+- Base pricing display
+- Course activation toggle
+
+### 5.2 VendorSessionsTab
+
+**File:** `src/components/training/vendor/VendorSessionsTab.tsx`
+
+**Features:**
+- Session calendar/table view
+- Status badges (Scheduled, Confirmed, Completed, Cancelled)
+- Capacity indicators (registered vs capacity)
+- Waitlist count display
+- Instructor assignment
+- Registration deadline warnings
+- Session enrollment details
+
+### 5.3 VendorContactsTab
+
+**File:** `src/components/training/vendor/VendorContactsTab.tsx`
+
+**Features:**
+- Multi-contact management (11 fields)
+- Contact type categorization (Primary, Billing, Technical, Escalation)
+- Primary contact designation
+- Quick actions (email, call)
+- Add/Edit contact dialog
+
+### 5.4 VendorReviewsTab
+
+**File:** `src/components/training/vendor/VendorReviewsTab.tsx`
+
+**Features:**
+- Review history table (17 fields)
+- Score visualization (Quality, Delivery, Value, Responsiveness)
+- Overall score trending chart
+- Action items tracking
+- Add review dialog
+- Review status (Draft, Submitted, Approved)
+
+---
+
+## Phase 6: Routing and Navigation
+
+### 6.1 Update `src/routes/lazyPages.ts`
+
+Add lazy exports:
+```typescript
+// Vendor Management
+export const VendorManagementPage = lazy(() => import('@/pages/training/VendorManagementPage'));
+export const VendorDetailPage = lazy(() => import('@/pages/training/VendorDetailPage'));
+```
+
+### 6.2 Update `src/App.tsx`
+
+Add routes in Training section:
+```tsx
+<Route path="/training/vendors" element={
+  <ProtectedRoute moduleCode="training">
+    <LazyPage><Pages.VendorManagementPage /></LazyPage>
+  </ProtectedRoute>
+} />
+<Route path="/training/vendors/:id" element={
+  <ProtectedRoute moduleCode="training">
+    <LazyPage><Pages.VendorDetailPage /></LazyPage>
+  </ProtectedRoute>
+} />
+```
+
+### 6.3 Update Icon Registry
+
+Add vendor-specific icons to `src/lib/iconRegistry.ts`:
+```typescript
+// Already present: Building2, Users, Calendar, Star
+// Ensure: Handshake, FileContract (if needed)
+```
+
+---
+
+## Phase 7: Integration Points
+
+### 7.1 Training Dashboard Link
+
+Add vendor management card to `TrainingDashboardPage.tsx`:
+```tsx
+<ModuleCard
+  title="Vendor Management"
+  description="Manage external training providers"
+  icon={Building2}
+  onClick={() => navigateToList({
+    route: "/training/vendors",
+    title: "Training Vendors",
+    moduleCode: "training",
+    icon: Building2,
+  })}
+/>
+```
+
+### 7.2 External Training Link
+
+Update `ExternalTrainingPage.tsx` to link to vendor detail when provider matches a vendor.
+
+---
+
+## Phase 8: Update Documentation
+
+### 8.1 Update UI Roadmap in `LndVendorConcepts.tsx`
+
+Change status from "PLANNED" to "IMPLEMENTED":
+```tsx
+<Badge className="bg-green-100 text-green-800">IMPLEMENTED</Badge>
+```
+
+---
+
+## File Summary
+
+| File | Action | Lines (Est.) |
+|------|--------|-------------|
+| `src/types/vendor.ts` | CREATE | ~120 |
+| `src/hooks/useVendors.ts` | CREATE | ~180 |
+| `src/hooks/useVendorCourses.ts` | CREATE | ~80 |
+| `src/hooks/useVendorSessions.ts` | CREATE | ~90 |
+| `src/hooks/useVendorContacts.ts` | CREATE | ~60 |
+| `src/hooks/useVendorReviews.ts` | CREATE | ~70 |
+| `src/pages/training/VendorManagementPage.tsx` | CREATE | ~350 |
+| `src/pages/training/VendorDetailPage.tsx` | CREATE | ~400 |
+| `src/components/training/vendor/VendorCoursesTab.tsx` | CREATE | ~280 |
+| `src/components/training/vendor/VendorSessionsTab.tsx` | CREATE | ~320 |
+| `src/components/training/vendor/VendorContactsTab.tsx` | CREATE | ~200 |
+| `src/components/training/vendor/VendorReviewsTab.tsx` | CREATE | ~280 |
+| `src/components/training/vendor/VendorFormDialog.tsx` | CREATE | ~300 |
+| `src/components/training/vendor/VendorOverviewTab.tsx` | CREATE | ~150 |
+| `src/components/training/vendor/index.ts` | CREATE | ~20 |
+| `src/routes/lazyPages.ts` | MODIFY | +3 |
+| `src/App.tsx` | MODIFY | +6 |
+| `src/pages/training/TrainingDashboardPage.tsx` | MODIFY | +15 |
+| `LndVendorConcepts.tsx` | MODIFY | +5 |
+| **TOTAL** | | **~2,900 lines** |
+
+---
+
+## Technical Implementation Notes
+
+1. **State Management**: Use `useTabState` for all filter/search persistence
+2. **Navigation**: Use `navigateToRecord` with `contextType: "vendor"` for duplicate tab prevention
+3. **Data Fetching**: Use TanStack Query with proper cache invalidation
+4. **Form Handling**: Use React Hook Form + Zod for validation
+5. **Multi-Company**: Respect `company_id` scoping with optional `group_id` for shared vendors
+6. **RLS**: Existing policies on vendor tables will enforce access control
+
+---
+
+## Implementation Order
+
+1. **Phase 1-2**: Types and hooks (foundation)
+2. **Phase 3**: VendorManagementPage (entry point)
+3. **Phase 4**: VendorDetailPage with overview
+4. **Phase 5**: Embedded tabs (courses, sessions, contacts, reviews)
+5. **Phase 6**: Routing integration
+6. **Phase 7**: Dashboard integration
+7. **Phase 8**: Documentation update
