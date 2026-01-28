@@ -1,354 +1,168 @@
 
-
-# Industry-Aligned Orphan Management Action Consistency
+# Show Creator Information for Orphan Entries
 
 ## Problem Summary
 
-The Route Registry orphan management system has **inconsistent action availability** across its tabs. Enterprise HCM systems like Workday and SAP SuccessFactors provide uniform action patterns regardless of the view context. Users should be able to Keep, Archive, or Delete entries from any management view, with contextual variations only where semantically required.
+You want to see which logged-in user created orphan entries to help assess which ones to keep. Currently, the `application_features` table tracks **how** entries were created (via the `source` column: migration, manual, registry) but not **who** created them.
 
-## Current State Analysis
+## Current State
 
-| Tab | Keep | Archive | Delete | Current Status |
-|-----|------|---------|--------|----------------|
-| **Summary** | - | - | - | Stats only (no row actions) |
-| **By Module** | Yes | Yes | Yes | Complete |
-| **Duplicates** | Yes | Yes | Yes | Complete |
-| **Prefixed Variants** | Yes | Yes | Yes | Complete |
-| **Batches** | Yes (Bulk) | Yes (Bulk) | No | **Missing Delete** |
-| **Candidates** | No | No | No | **Display only - Missing all actions** |
-| **Kept** | No | No | No | **Only has "Undo Keep"** |
-| **Archived** | No | No | Yes | **Missing Keep action** |
-| **All** | Yes | Yes | Yes | Complete |
+| Field | Status | Purpose |
+|-------|--------|---------|
+| `source` | ✅ Exists | Tracks creation method (migration, manual, registry) |
+| `reviewed_by` | ✅ Exists | Tracks who marked entry as "Kept" |
+| `created_by` | ❌ Missing | Does not exist - cannot track creator |
 
-## Industry Alignment Principles
+## Solution
 
-Following enterprise HCM patterns (Workday, SAP SuccessFactors):
+### Step 1: Add `created_by` Column to Database
 
-1. **Consistent Action Vocabulary**: Same action labels and icons across all views
-2. **Contextual Action Availability**: Actions should be available unless semantically meaningless
-3. **Bulk Operations**: Multi-select with bulk actions on all list views
-4. **Confirmation Dialogs**: Destructive actions require confirmation with impact summary
-5. **Undo Capability**: Soft-delete operations (Archive) should support undo within a time window
+Create a migration to add the `created_by` column that references the `profiles` table:
 
-## Implementation Plan
+```sql
+-- Add created_by column to application_features
+ALTER TABLE public.application_features 
+ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
 
-### Part 1: Update MigrationBatchesPanel (Add Delete Action)
+-- Create index for performance
+CREATE INDEX IF NOT EXISTS idx_application_features_created_by 
+ON public.application_features(created_by);
 
-**File**: `src/components/enablement/route-registry/MigrationBatchesPanel.tsx`
-
-**Changes**:
-1. Add `onDeleteBatch` prop to interface
-2. Add "Delete Entire Batch" button alongside existing Keep/Archive buttons
-3. Use destructive styling for delete button
-
-```typescript
-// Updated interface
-interface MigrationBatchesPanelProps {
-  batches: MigrationBatch[];
-  orphans: OrphanEntry[];
-  onArchiveBatch: (codes: string[]) => void;
-  onKeepBatch: (codes: string[]) => void;
-  onDeleteBatch: (codes: string[]) => void; // NEW
-}
-
-// New button in expanded batch content
-<Button 
-  variant="destructive" 
-  size="sm"
-  onClick={() => onDeleteBatch(batch.codes)}
->
-  <Trash2 className="h-4 w-4 mr-2" />
-  Delete Entire Batch
-</Button>
+-- Comment for documentation
+COMMENT ON COLUMN public.application_features.created_by IS 'User ID who created this feature entry';
 ```
 
 ---
 
-### Part 2: Update RegistryCandidatesPanel (Add Keep, Archive, Delete Actions)
+### Step 2: Update Types
 
-**File**: `src/components/enablement/route-registry/RegistryCandidatesPanel.tsx`
+**File**: `src/types/orphanTypes.ts`
 
-**Changes**:
-1. Add action handler props to interface
-2. Add row-level action buttons (Keep, Archive, Delete)
-3. Add bulk selection support with Select All capability
-4. Add selection-based bulk action bar
+Add `createdBy` and `createdByName` fields to the `OrphanEntry` interface:
 
 ```typescript
-// Updated interface
-interface RegistryCandidatesPanelProps {
-  candidates: OrphanEntry[];
-  onKeep: (orphan: OrphanEntry) => void;    // NEW
-  onArchive: (orphan: OrphanEntry) => void; // NEW
-  onDelete: (orphan: OrphanEntry) => void;  // NEW
-  isProcessing?: boolean;                    // NEW
+export interface OrphanEntry {
+  // ... existing fields
+  
+  // Creator tracking (NEW)
+  createdBy: string | null;       // User ID
+  createdByName: string | null;   // Full name from profiles
+}
+```
+
+---
+
+### Step 3: Update Detection Hook to Fetch Creator Info
+
+**File**: `src/hooks/useOrphanDetection.ts`
+
+Update the data fetching to:
+1. Add `created_by` to the SELECT query
+2. Separately fetch profile information for all unique `created_by` IDs
+3. Map creator names to each orphan entry
+
+```typescript
+// Updated RawDbFeature interface
+interface RawDbFeature {
+  // ... existing fields
+  created_by: string | null;  // NEW
 }
 
-// Add to each candidate row
-<div className="flex gap-1">
-  <Button variant="ghost" size="icon" onClick={() => onKeep(entry)}>
-    <CheckCircle className="h-4 w-4 text-green-600" />
-  </Button>
-  <Button variant="ghost" size="icon" onClick={() => onArchive(entry)}>
-    <Archive className="h-4 w-4" />
-  </Button>
-  <Button variant="ghost" size="icon" onClick={() => onDelete(entry)}>
-    <Trash2 className="h-4 w-4 text-destructive" />
-  </Button>
+// In detectOrphans():
+// 1. Fetch features with created_by
+const { data: dbFeatures } = await supabase
+  .from("application_features")
+  .select(`
+    id, feature_code, feature_name, ...,
+    created_by  // ADD THIS
+  `)
+
+// 2. Get unique creator IDs
+const creatorIds = [...new Set(
+  dbFeatures?.map(f => f.created_by).filter(Boolean) || []
+)];
+
+// 3. Fetch creator profiles
+let creatorMap = new Map<string, string>();
+if (creatorIds.length > 0) {
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", creatorIds);
+  
+  profiles?.forEach(p => creatorMap.set(p.id, p.full_name || 'Unknown'));
+}
+
+// 4. Add to OrphanEntry
+return {
+  // ... existing fields
+  createdBy: f.created_by,
+  createdByName: f.created_by ? creatorMap.get(f.created_by) || null : null
+};
+```
+
+---
+
+### Step 4: Update UI Panels to Display Creator
+
+Add creator information to all orphan management panels:
+
+**MigrationBatchesPanel.tsx** - Show creator in batch header and individual entries:
+
+```tsx
+{/* In batch header */}
+{batchCreators.size > 0 && (
+  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+    <User className="h-3 w-3" />
+    Created by: {Array.from(batchCreators).join(', ')}
+  </div>
+)}
+
+{/* In entry rows */}
+<div className="flex items-center justify-between p-2 rounded bg-muted/50 text-sm">
+  <code className="font-mono text-xs truncate flex-1">
+    {orphan.featureCode}
+  </code>
+  {orphan.createdByName && (
+    <Badge variant="outline" className="text-xs mx-2 bg-blue-50 text-blue-700">
+      <User className="h-3 w-3 mr-1" />
+      {orphan.createdByName}
+    </Badge>
+  )}
+  <Badge variant="outline" className="text-xs ml-2">
+    {orphan.moduleCode || 'unassigned'}
+  </Badge>
 </div>
 ```
 
----
-
-### Part 3: Update KeptEntriesPanel (Add Archive and Delete Actions)
-
-**File**: `src/components/enablement/route-registry/KeptEntriesPanel.tsx`
-
-**Changes**:
-1. Add `onArchive` and `onDelete` props
-2. Add Archive and Delete buttons alongside Undo button
-3. Add tooltip explaining that Archive/Delete are available for entries that were kept by mistake
-
-```typescript
-// Updated interface
-interface KeptEntriesPanelProps {
-  keptEntries: OrphanEntry[];
-  onUndoKeep: (orphanId: string) => Promise<void>;
-  onArchive: (orphan: OrphanEntry) => void;  // NEW
-  onDelete: (orphan: OrphanEntry) => void;   // NEW
-  isProcessing: boolean;
-}
-
-// Updated action buttons per row
-<div className="flex gap-1">
-  <Button variant="outline" size="sm" onClick={() => onUndoKeep(entry.id)}>
-    <Undo2 className="h-4 w-4 mr-2" />
-    Undo Keep
-  </Button>
-  <Button variant="ghost" size="icon" onClick={() => onArchive(entry)}>
-    <Archive className="h-4 w-4" />
-  </Button>
-  <Button variant="ghost" size="icon" onClick={() => onDelete(entry)}>
-    <Trash2 className="h-4 w-4 text-destructive" />
-  </Button>
-</div>
-```
+**Apply similar updates to:**
+- `RegistryCandidatesPanel.tsx`
+- `KeptEntriesPanel.tsx`
+- `ArchivedEntriesPanel.tsx`
+- `OrphansByModulePanel.tsx` (if it has entry rows)
+- `DuplicatesPanel.tsx` (if it has entry rows)
 
 ---
 
-### Part 4: Update ArchivedEntriesPanel (Add Keep Action)
+### Step 5: Enhance Source Display
 
-**File**: `src/components/enablement/route-registry/ArchivedEntriesPanel.tsx`
+Since many existing entries don't have `created_by` set (they pre-date the column), enhance the source display to show more context:
 
-**Changes**:
-1. Add `onMarkAsKept` prop for direct Keep action (not just Restore)
-2. Add "Keep" button that restores AND marks as kept in one action
-3. Update bulk actions to include "Keep Selected"
-
-```typescript
-// Updated interface
-interface ArchivedEntriesPanelProps {
-  archivedEntries: OrphanEntry[];
-  isLoading: boolean;
-  onRestore: (id: string) => Promise<void>;
-  onRestoreMultiple: (ids: string[]) => Promise<void>;
-  onDeletePermanently: (id: string) => Promise<void>;
-  onDeleteMultiple: (ids: string[]) => Promise<void>;
-  onMarkAsKept: (id: string) => Promise<void>;         // NEW
-  onMarkMultipleAsKept: (ids: string[]) => Promise<void>; // NEW
-  isProcessing: boolean;
-}
-
-// Add Keep button in row actions
-<Button
-  size="sm"
-  variant="ghost"
-  className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-  onClick={() => onMarkAsKept(entry.id)}
->
-  <CheckCircle className="h-4 w-4 mr-1" />
-  Keep
-</Button>
-
-// Add to bulk actions
-<Button
-  size="sm"
-  variant="outline"
-  className="text-blue-600 border-blue-200 hover:bg-blue-50"
-  onClick={() => setConfirmDialog({ open: true, type: 'keep_bulk' })}
->
-  <CheckCircle className="h-4 w-4 mr-2" />
-  Keep Selected
-</Button>
-```
-
----
-
-### Part 5: Add Hook Helper for Restore-and-Keep
-
-**File**: `src/hooks/useOrphanActions.ts`
-
-**Changes**:
-Add a combined action that restores an archived entry AND marks it as kept:
-
-```typescript
-/**
- * Restore an archived entry and immediately mark as kept
- * (Used from Archived tab for entries that should be retained)
- */
-const restoreAndKeep = useCallback(async (orphanId: string, notes?: string): Promise<OrphanActionResult> => {
-  setIsProcessing(true);
-  try {
-    const { error } = await supabase
-      .from("application_features")
-      .update({
-        is_active: true,
-        review_status: 'kept',
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: (await supabase.auth.getUser()).data.user?.id || null,
-        review_notes: notes || 'Restored from archive and marked as kept'
-      })
-      .eq("id", orphanId);
-
-    if (error) throw error;
-
-    toast.success("Feature restored and marked as kept");
-    return { success: true, affectedCount: 1, errors: [] };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to restore and keep';
-    toast.error(message);
-    return { success: false, affectedCount: 0, errors: [message] };
-  } finally {
-    setIsProcessing(false);
-  }
-}, []);
-
-const restoreAndKeepMultiple = useCallback(async (orphanIds: string[], notes?: string): Promise<OrphanActionResult> => {
-  // Similar batch implementation
-}, []);
-```
-
----
-
-### Part 6: Update OrphanManagementPanel Integration
-
-**File**: `src/components/enablement/route-registry/OrphanManagementPanel.tsx`
-
-**Changes**:
-1. Add `deleteByFeatureCodes` hook method for batch deletes
-2. Pass new action handlers to all child panels
-3. Wire up new restore-and-keep handlers
-
-```typescript
-// Batches tab - add onDeleteBatch
-<MigrationBatchesPanel
-  batches={migrationBatches}
-  orphans={orphans}
-  onArchiveBatch={async (codes) => {
-    await archiveByFeatureCodes(codes);
-    detectOrphans();
-  }}
-  onKeepBatch={async (codes) => {
-    const ids = orphans.filter(o => codes.includes(o.featureCode)).map(o => o.id);
-    if (ids.length > 0) {
-      await markMultipleAsKept(ids);
-      detectOrphans();
-    }
-  }}
-  onDeleteBatch={async (codes) => {
-    await deleteByFeatureCodes(codes);  // NEW handler
-    detectOrphans();
-  }}
-/>
-
-// Candidates tab - add action handlers
-<RegistryCandidatesPanel
-  candidates={registryCandidates}
-  onKeep={(orphan) => setKeepDialog({ open: true, orphan })}
-  onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
-  onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
-  isProcessing={isProcessing}
-/>
-
-// Kept tab - add archive/delete handlers
-<KeptEntriesPanel
-  keptEntries={keptEntries}
-  onUndoKeep={handleUndoKeep}
-  onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
-  onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
-  isProcessing={isProcessing}
-/>
-
-// Archived tab - add keep handlers
-<ArchivedEntriesPanel
-  archivedEntries={archivedEntries}
-  isLoading={isLoading}
-  onRestore={async (id) => { ... }}
-  onRestoreMultiple={async (ids) => { ... }}
-  onDeletePermanently={async (id) => { ... }}
-  onDeleteMultiple={async (ids) => { ... }}
-  onMarkAsKept={async (id) => {
-    await restoreAndKeep(id);
-    detectOrphans();
-  }}
-  onMarkMultipleAsKept={async (ids) => {
-    await restoreAndKeepMultiple(ids);
-    detectOrphans();
-  }}
-  isProcessing={isProcessing}
-/>
-```
-
----
-
-### Part 7: Add deleteByFeatureCodes Hook Method
-
-**File**: `src/hooks/useOrphanActions.ts`
-
-```typescript
-/**
- * Delete multiple features by feature code (used for batch operations)
- */
-const deleteByFeatureCodes = useCallback(async (featureCodes: string[]): Promise<OrphanActionResult> => {
-  if (featureCodes.length === 0) {
-    toast.warning("No features to delete");
-    return { success: true, affectedCount: 0, errors: [] };
-  }
-
-  setIsProcessing(true);
-  try {
-    const { data: features, error: fetchError } = await supabase
-      .from("application_features")
-      .select("id")
-      .in("feature_code", featureCodes);
-
-    if (fetchError) throw fetchError;
-
-    if (!features || features.length === 0) {
-      toast.warning("No features found matching the codes");
-      setIsProcessing(false);
-      return { success: true, affectedCount: 0, errors: [] };
-    }
-
-    const ids = features.map(f => f.id);
-
-    const { error } = await supabase
-      .from("application_features")
-      .delete()
-      .in("id", ids);
-
-    if (error) throw error;
-
-    toast.success(`${ids.length} feature(s) deleted permanently`);
-    return { success: true, affectedCount: ids.length, errors: [] };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to delete';
-    toast.error(message);
-    return { success: false, affectedCount: 0, errors: [message] };
-  } finally {
-    setIsProcessing(false);
-  }
-}, []);
+```tsx
+{/* Show source if no creator */}
+{orphan.createdByName ? (
+  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+    <User className="h-3 w-3 mr-1" />
+    {orphan.createdByName}
+  </Badge>
+) : (
+  <Badge variant="outline" className="text-xs bg-gray-50">
+    <Database className="h-3 w-3 mr-1" />
+    {orphan.source === 'auto_migration' ? 'Auto Migration' : 
+     orphan.source === 'manual_entry' ? 'Manual Entry' :
+     orphan.source === 'registry' ? 'Registry Sync' : 'System'}
+  </Badge>
+)}
 ```
 
 ---
@@ -357,28 +171,28 @@ const deleteByFeatureCodes = useCallback(async (featureCodes: string[]): Promise
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `src/hooks/useOrphanActions.ts` | Modify | Add `deleteByFeatureCodes`, `restoreAndKeep`, `restoreAndKeepMultiple` |
-| `src/components/enablement/route-registry/MigrationBatchesPanel.tsx` | Modify | Add Delete batch action |
-| `src/components/enablement/route-registry/RegistryCandidatesPanel.tsx` | Modify | Add Keep, Archive, Delete actions |
-| `src/components/enablement/route-registry/KeptEntriesPanel.tsx` | Modify | Add Archive, Delete actions |
-| `src/components/enablement/route-registry/ArchivedEntriesPanel.tsx` | Modify | Add Keep action |
-| `src/components/enablement/route-registry/OrphanManagementPanel.tsx` | Modify | Wire up new handlers to child panels |
+| Database Migration | Create | Add `created_by` column |
+| `src/types/orphanTypes.ts` | Modify | Add `createdBy` and `createdByName` fields |
+| `src/hooks/useOrphanDetection.ts` | Modify | Fetch and map creator profiles |
+| `src/components/enablement/route-registry/MigrationBatchesPanel.tsx` | Modify | Display creator info |
+| `src/components/enablement/route-registry/RegistryCandidatesPanel.tsx` | Modify | Display creator info |
+| `src/components/enablement/route-registry/KeptEntriesPanel.tsx` | Modify | Display creator info |
+| `src/components/enablement/route-registry/ArchivedEntriesPanel.tsx` | Modify | Display creator info |
 
 ---
 
-## Expected Outcome: Industry-Aligned Action Matrix
+## Expected Outcome
 
-| Tab | Keep | Archive | Delete | Notes |
-|-----|------|---------|--------|-------|
-| **Summary** | - | - | - | Stats view (no row data) |
-| **By Module** | Yes | Yes | Yes | Complete |
-| **Duplicates** | Yes | Yes | Yes | Complete |
-| **Prefixed Variants** | Yes | Yes | Yes | Complete |
-| **Batches** | Yes (Bulk) | Yes (Bulk) | **Yes (Bulk)** | Now complete |
-| **Candidates** | **Yes** | **Yes** | **Yes** | Now complete |
-| **Kept** | Undo Keep | **Yes** | **Yes** | Now complete |
-| **Archived** | **Yes** | N/A | Yes | Now complete (Keep = Restore+Mark) |
-| **All** | Yes | Yes | Yes | Complete |
+After implementation:
+- New entries will automatically track who created them
+- All orphan management panels will display:
+  - **Creator name** (if `created_by` is set) with user icon
+  - **Source label** (Migration, Manual, Registry) as fallback for legacy entries
+- Batch headers will show unique creators for that batch
+- This enables informed decision-making about which entries to keep vs. archive
 
-This provides full **industry alignment** with consistent action availability across all management views, following enterprise HCM patterns.
+---
 
+## Important Note
+
+Existing entries will have `created_by = NULL` since this is a new column. The UI will gracefully fall back to showing the `source` field for these entries. Going forward, any code that creates new `application_features` entries should set the `created_by` field to the authenticated user's ID.
