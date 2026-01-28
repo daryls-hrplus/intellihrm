@@ -458,6 +458,87 @@ action_items: [
           HR leadership with contract termination consideration.
         </AlertDescription>
       </Alert>
+
+      {/* SLA Tracking Section */}
+      <Card className="border-l-4 border-l-green-500">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-green-600" />
+            SLA Metrics & Breach Tracking
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            The system includes dedicated tables for tracking SLA performance and breach incidents.
+          </p>
+          
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Field</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Table</TableHead>
+                <TableHead>Description</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-mono text-sm">metric_type</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell>vendor_sla_metrics</TableCell>
+                <TableCell>response_time | quality | availability | delivery</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">metric_value</TableCell>
+                <TableCell>Numeric</TableCell>
+                <TableCell>vendor_sla_metrics</TableCell>
+                <TableCell>Measured value (hours, percentage, score)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">target_value</TableCell>
+                <TableCell>Numeric</TableCell>
+                <TableCell>vendor_sla_metrics</TableCell>
+                <TableCell>Contracted SLA threshold</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">breach_type</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell>vendor_sla_breaches</TableCell>
+                <TableCell>response_time | quality | availability | delivery | other</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">severity</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell>vendor_sla_breaches</TableCell>
+                <TableCell>minor | moderate | major | critical</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">resolution_status</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell>vendor_sla_breaches</TableCell>
+                <TableCell>open | investigating | resolved | escalated</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+
+          <pre className="text-xs bg-muted p-4 rounded overflow-x-auto font-mono">{`
+SLA MONITORING INTEGRATION
+══════════════════════════
+┌─────────────────────┐     ┌─────────────────────┐
+│ vendor_sla_metrics  │────▶│ vendor_sla_breaches │
+│                     │     │                     │
+│ metric_period_start │     │ breach_date         │
+│ metric_period_end   │     │ actual_value        │
+│ metric_value        │     │ threshold_value     │
+│ target_value        │     │ severity            │
+│ is_within_sla ────────────▶ resolution_status  │
+└─────────────────────┘     └─────────────────────┘
+
+Breach triggered when: metric_value violates threshold
+Severity auto-calculated based on deviation percentage
+          `}</pre>
+        </CardContent>
+      </Card>
     </section>
   );
 }
