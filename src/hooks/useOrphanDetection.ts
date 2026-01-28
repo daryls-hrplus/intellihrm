@@ -22,6 +22,11 @@ interface RawDbFeature {
   group_code: string | null;
   group_name: string | null;
   display_order: number | null;
+  // Review tracking fields
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  review_status: 'kept' | 'needs_review' | null;
+  review_notes: string | null;
 }
 
 // Known prefixes for detecting prefixed variants (e.g., admin_announcements = announcements)
@@ -60,6 +65,7 @@ const isPrefixedVariant = (code1: string, code2: string): boolean => {
 export function useOrphanDetection() {
   const [isLoading, setIsLoading] = useState(false);
   const [orphans, setOrphans] = useState<OrphanEntry[]>([]);
+  const [keptEntries, setKeptEntries] = useState<OrphanEntry[]>([]);
   const [stats, setStats] = useState<OrphanStats | null>(null);
   const [duplicates, setDuplicates] = useState<OrphanDuplicate[]>([]);
   const [routeConflicts, setRouteConflicts] = useState<OrphanRouteConflict[]>([]);
@@ -68,7 +74,6 @@ export function useOrphanDetection() {
   const [migrationBatches, setMigrationBatches] = useState<{ timestamp: string; count: number; codes: string[] }[]>([]);
   const [registryCandidates, setRegistryCandidates] = useState<OrphanEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
-
   const { codeRoutes } = useCodeRegistryScanner();
 
   /**
@@ -178,7 +183,11 @@ export function useOrphanDetection() {
           is_active,
           group_code,
           group_name,
-          display_order
+          display_order,
+          reviewed_at,
+          reviewed_by,
+          review_status,
+          review_notes
         `)
         .order("module_code")
         .order("feature_name");
@@ -191,8 +200,15 @@ export function useOrphanDetection() {
       // Create set of code feature codes for fast lookup
       const codeFeatureSet = new Set(codeRoutes.map(r => r.featureCode));
 
-      // Find orphans (in DB but not in code)
-      const orphanFeatures = allDbFeatures.filter(f => !codeFeatureSet.has(f.feature_code));
+      // Separate kept entries from orphans (in DB but not in code)
+      const orphanFeatures = allDbFeatures.filter(f => 
+        !codeFeatureSet.has(f.feature_code) && f.review_status !== 'kept'
+      );
+      
+      // Track kept entries separately for the Kept tab
+      const keptFeatures = allDbFeatures.filter(f => 
+        !codeFeatureSet.has(f.feature_code) && f.review_status === 'kept'
+      );
 
       // Build feature name map for duplicate detection
       const nameMap = new Map<string, string[]>();
@@ -322,9 +338,40 @@ export function useOrphanDetection() {
           recommendationReason,
           groupCode: f.group_code,
           groupName: f.group_name,
-          displayOrder: f.display_order
+          displayOrder: f.display_order,
+          // Review tracking fields
+          reviewedAt: f.reviewed_at ? new Date(f.reviewed_at) : null,
+          reviewedBy: f.reviewed_by,
+          reviewStatus: f.review_status,
+          reviewNotes: f.review_notes
         };
       });
+
+      // Transform kept features to OrphanEntry format
+      const keptOrphanEntries: OrphanEntry[] = keptFeatures.map(f => ({
+        id: f.id,
+        featureCode: f.feature_code,
+        featureName: f.feature_name,
+        routePath: f.route_path,
+        moduleCode: f.module_code,
+        moduleName: getModuleName(f.module_code),
+        description: f.description,
+        source: parseSource(f.source),
+        createdAt: new Date(f.created_at),
+        isActive: f.is_active ?? true,
+        hasDuplicate: false,
+        duplicateOf: [],
+        similarTo: [],
+        recommendation: 'keep_as_planned' as const,
+        recommendationReason: 'Reviewed and intentionally retained',
+        groupCode: f.group_code,
+        groupName: f.group_name,
+        displayOrder: f.display_order,
+        reviewedAt: f.reviewed_at ? new Date(f.reviewed_at) : null,
+        reviewedBy: f.reviewed_by,
+        reviewStatus: f.review_status,
+        reviewNotes: f.review_notes
+      }));
 
       // Calculate stats
       const sourceStats: Record<OrphanSource, number> = {
@@ -430,6 +477,7 @@ export function useOrphanDetection() {
       });
 
       setOrphans(orphanEntries);
+      setKeptEntries(keptOrphanEntries);
       setStats(stats);
       setDuplicates(duplicateClusters);
       setRouteConflicts(conflicts);
@@ -439,6 +487,7 @@ export function useOrphanDetection() {
 
       return {
         orphans: orphanEntries,
+        keptEntries: keptOrphanEntries,
         stats,
         duplicates: duplicateClusters,
         routeConflicts: conflicts,
@@ -509,6 +558,7 @@ export function useOrphanDetection() {
     // State
     isLoading,
     orphans,
+    keptEntries,
     stats,
     duplicates,
     routeConflicts,
@@ -527,6 +577,7 @@ export function useOrphanDetection() {
     
     // Stats
     orphanCount: orphans.length,
+    keptCount: keptEntries.length,
     codeRouteCount: codeRoutes.length,
     prefixedVariantCount: prefixedVariants.length,
     migrationBatchCount: migrationBatches.length,

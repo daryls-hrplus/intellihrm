@@ -34,7 +34,8 @@ import {
   AlertTriangle,
   GitMerge,
   Database,
-  Plus
+  Plus,
+  CheckCircle
 } from "lucide-react";
 import { useOrphanDetection } from "@/hooks/useOrphanDetection";
 import { useOrphanActions } from "@/hooks/useOrphanActions";
@@ -42,6 +43,8 @@ import { OrphanEntry, OrphanSource, OrphanRecommendation, OrphanDuplicate } from
 import { OrphanModuleAccordion } from "./OrphanModuleAccordion";
 import { OrphanDuplicatesPanel } from "./OrphanDuplicatesPanel";
 import { OrphanActionDialog } from "./OrphanActionDialog";
+import { KeepActionDialog } from "./KeepActionDialog";
+import { KeptEntriesPanel } from "./KeptEntriesPanel";
 import { DuplicateDetailDialog } from "./DuplicateDetailDialog";
 import { PrefixedVariantsPanel } from "./PrefixedVariantsPanel";
 import { RegistryCandidatesPanel } from "./RegistryCandidatesPanel";
@@ -61,6 +64,11 @@ export function OrphanManagementPanel() {
     orphan?: OrphanEntry;
     count?: number;
   }>({ open: false, type: 'archive' });
+  const [keepDialog, setKeepDialog] = useState<{
+    open: boolean;
+    orphan?: OrphanEntry;
+    count?: number;
+  }>({ open: false });
   const [duplicateDialog, setDuplicateDialog] = useState<{
     open: boolean;
     duplicate: OrphanDuplicate | null;
@@ -69,6 +77,7 @@ export function OrphanManagementPanel() {
   const {
     isLoading,
     orphans,
+    keptEntries,
     stats,
     duplicates,
     routeConflicts,
@@ -86,8 +95,11 @@ export function OrphanManagementPanel() {
     isProcessing,
     archiveOrphan,
     deleteOrphan,
+    markAsKept,
     archiveMultiple,
     deleteMultiple,
+    markMultipleAsKept,
+    undoKeep,
     exportToCsv
   } = useOrphanActions();
 
@@ -160,6 +172,22 @@ export function OrphanManagementPanel() {
   const handleBulkDelete = async () => {
     await deleteMultiple(Array.from(selectedOrphans));
     setSelectedOrphans(new Set());
+    detectOrphans();
+  };
+
+  const handleKeep = async (orphan: OrphanEntry, notes?: string) => {
+    await markAsKept(orphan.id, notes);
+    detectOrphans();
+  };
+
+  const handleBulkKeep = async (notes?: string) => {
+    await markMultipleAsKept(Array.from(selectedOrphans), notes);
+    setSelectedOrphans(new Set());
+    detectOrphans();
+  };
+
+  const handleUndoKeep = async (orphanId: string) => {
+    await undoKeep(orphanId);
     detectOrphans();
   };
 
@@ -386,6 +414,15 @@ export function OrphanManagementPanel() {
               <Button 
                 size="sm" 
                 variant="outline"
+                className="text-green-600 border-green-200 hover:bg-green-50"
+                onClick={() => setKeepDialog({ open: true, count: selectedOrphans.size })}
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Keep Selected
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
                 onClick={() => setActionDialog({ open: true, type: 'archive_bulk', count: selectedOrphans.size })}
               >
                 <Archive className="h-4 w-4 mr-2" />
@@ -430,6 +467,10 @@ export function OrphanManagementPanel() {
           <TabsTrigger value="registry-candidates" className="gap-2">
             <Plus className="h-4 w-4" />
             Candidates ({registryCandidates.length})
+          </TabsTrigger>
+          <TabsTrigger value="kept" className="gap-2">
+            <CheckCircle className="h-4 w-4" />
+            Kept ({keptEntries.length})
           </TabsTrigger>
           <TabsTrigger value="all" className="gap-2">
             <FileWarning className="h-4 w-4" />
@@ -527,6 +568,14 @@ export function OrphanManagementPanel() {
           <RegistryCandidatesPanel candidates={registryCandidates} />
         </TabsContent>
 
+        <TabsContent value="kept" className="mt-6">
+          <KeptEntriesPanel
+            keptEntries={keptEntries}
+            onUndoKeep={handleUndoKeep}
+            isProcessing={isProcessing}
+          />
+        </TabsContent>
+
         <TabsContent value="all" className="mt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -578,6 +627,15 @@ export function OrphanManagementPanel() {
                         </p>
                       </div>
                       <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setKeepDialog({ open: true, orphan })}
+                          disabled={isProcessing}
+                          title="Mark as reviewed and keep"
+                        >
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -639,6 +697,23 @@ export function OrphanManagementPanel() {
           setDuplicateDialog({ open: false, duplicate: null });
           setActionDialog({ open: true, type: 'delete', orphan });
         }}
+      />
+
+      {/* Keep Action Dialog */}
+      <KeepActionDialog
+        open={keepDialog.open}
+        orphan={keepDialog.orphan}
+        count={keepDialog.count}
+        isProcessing={isProcessing}
+        onConfirm={async (notes) => {
+          if (keepDialog.orphan) {
+            await handleKeep(keepDialog.orphan, notes);
+          } else if (keepDialog.count) {
+            await handleBulkKeep(notes);
+          }
+          setKeepDialog({ open: false });
+        }}
+        onCancel={() => setKeepDialog({ open: false })}
       />
     </div>
   );

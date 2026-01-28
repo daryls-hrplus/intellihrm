@@ -2333,6 +2333,10 @@ export type Database = {
           last_synced_at: string | null
           module_code: string | null
           module_id: string
+          review_notes: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           role_requirements: string[] | null
           route_path: string | null
           route_validated: boolean | null
@@ -2359,6 +2363,10 @@ export type Database = {
           last_synced_at?: string | null
           module_code?: string | null
           module_id: string
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           role_requirements?: string[] | null
           route_path?: string | null
           route_validated?: boolean | null
@@ -2385,6 +2393,10 @@ export type Database = {
           last_synced_at?: string | null
           module_code?: string | null
           module_id?: string
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           role_requirements?: string[] | null
           route_path?: string | null
           route_validated?: boolean | null
