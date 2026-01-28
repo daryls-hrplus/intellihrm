@@ -68,10 +68,10 @@ export function GapSummaryCard({ summary, onViewDetails }: GapSummaryCardProps) 
   ].filter((cat) => cat.count > 0);
 
   return (
-    <Card className="border-yellow-500/20 bg-yellow-500/5">
+    <Card className="border-[hsl(var(--semantic-warning-border))] bg-[hsl(var(--semantic-warning-bg))]">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-yellow-500" />
+          <AlertCircle className="h-4 w-4 text-[hsl(var(--semantic-warning-text))]" />
           Documentation Gaps
         </CardTitle>
       </CardHeader>

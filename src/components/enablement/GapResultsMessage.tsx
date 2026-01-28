@@ -37,29 +37,29 @@ export function GapResultsMessage({
       label: "Undocumented",
       count: summary.undocumentedFeatures,
       icon: FileX,
-      bgColor: "bg-red-50 dark:bg-red-950/30",
-      textColor: "text-red-600 dark:text-red-400",
+      bgColor: "bg-[hsl(var(--semantic-error-bg))]",
+      textColor: "text-[hsl(var(--semantic-error-text))]",
     },
     {
       label: "Missing KB",
       count: summary.missingKBArticles,
       icon: FileQuestion,
-      bgColor: "bg-orange-50 dark:bg-orange-950/30",
-      textColor: "text-orange-600 dark:text-orange-400",
+      bgColor: "bg-[hsl(var(--semantic-warning-bg))]",
+      textColor: "text-[hsl(var(--semantic-warning-text))]",
     },
     {
       label: "No Quick Start",
       count: summary.missingQuickStarts,
       icon: Rocket,
-      bgColor: "bg-blue-50 dark:bg-blue-950/30",
-      textColor: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-[hsl(var(--semantic-info-bg))]",
+      textColor: "text-[hsl(var(--semantic-info-text))]",
     },
     {
       label: "Missing SOP",
       count: summary.missingSOPs,
       icon: ClipboardList,
-      bgColor: "bg-purple-50 dark:bg-purple-950/30",
-      textColor: "text-purple-600 dark:text-purple-400",
+      bgColor: "bg-[hsl(var(--semantic-neutral-bg))]",
+      textColor: "text-[hsl(var(--semantic-neutral-text))]",
     },
   ];
 
@@ -100,9 +100,9 @@ export function GapResultsMessage({
 
       {/* Orphaned warning */}
       {summary.orphanedDocumentation > 0 && (
-        <div className="flex items-center gap-2 p-2 rounded-lg bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800">
-          <AlertTriangle className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-          <span className="text-xs text-yellow-700 dark:text-yellow-300">
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-[hsl(var(--semantic-warning-bg))] border border-[hsl(var(--semantic-warning-border))]">
+          <AlertTriangle className="h-4 w-4 text-[hsl(var(--semantic-warning-text))] flex-shrink-0" />
+          <span className="text-xs text-[hsl(var(--semantic-warning-text))]">
             {summary.orphanedDocumentation} orphaned documentation section(s) referencing invalid features
           </span>
         </div>
