@@ -33,7 +33,7 @@ import { LndQuickReference } from '@/components/enablement/learning-development-
 import { LndGlossary } from '@/components/enablement/learning-development-manual/LndGlossary';
 import { LndVersionHistory } from '@/components/enablement/learning-development-manual/LndVersionHistory';
 import { LndArchitectureDiagrams } from '@/components/enablement/learning-development-manual/LndArchitectureDiagrams';
-import { LndLegacyMapping } from '@/components/enablement/learning-development-manual/LndLegacyMapping';
+import { LndLegacyMigration } from '@/components/enablement/learning-development-manual/sections/overview/LndLegacyMigration';
 
 const CHAPTER_ICONS: Record<string, React.ReactNode> = {
   'chapter-1': <BookOpen className="h-5 w-5" />,
@@ -195,7 +195,7 @@ export default function LearningDevelopmentManualPage() {
       case 'glossary':
         return <LndGlossary />;
       case 'legacy-mapping':
-        return <LndLegacyMapping />;
+        return <LndLegacyMigration />;
       case 'version-history':
         return <LndVersionHistory />;
       default:

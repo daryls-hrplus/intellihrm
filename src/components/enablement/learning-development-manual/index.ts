@@ -11,4 +11,5 @@ export { LndQuickReference } from './LndQuickReference';
 export { LndGlossary } from './LndGlossary';
 export { LndVersionHistory } from './LndVersionHistory';
 export { LndArchitectureDiagrams } from './LndArchitectureDiagrams';
-export { LndLegacyMapping } from './LndLegacyMapping';
+// Legacy mapping is now part of the overview section
+export { LndLegacyMigration } from './sections/overview/LndLegacyMigration';
