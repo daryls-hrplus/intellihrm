@@ -28,6 +28,21 @@ export const TEMPLATE_PLACEHOLDERS: TemplatePlaceholder[] = [
   { key: '{cycle_name}', label: 'Cycle Name', description: 'Appraisal/review cycle name' },
   { key: '{response_deadline}', label: 'Response Deadline', description: 'Date response is due' },
   { key: '{review_date}', label: 'Review Date', description: 'When manager submitted review' },
+  
+  // L&D / Training specific placeholders
+  { key: '{course_name}', label: 'Course Name', description: 'Name of the training course' },
+  { key: '{course_code}', label: 'Course Code', description: 'Course identifier code' },
+  { key: '{enrollment_date}', label: 'Enrollment Date', description: 'Date enrolled in course' },
+  { key: '{due_date}', label: 'Due Date', description: 'Training completion deadline' },
+  { key: '{progress_percent}', label: 'Progress %', description: 'Current completion percentage' },
+  { key: '{certificate_number}', label: 'Certificate #', description: 'Certificate number if issued' },
+  { key: '{certificate_expiry}', label: 'Certificate Expiry', description: 'Certificate expiration date' },
+  { key: '{training_provider}', label: 'Training Provider', description: 'Vendor or provider name' },
+  { key: '{session_date}', label: 'Session Date', description: 'ILT/virtual session date' },
+  { key: '{session_location}', label: 'Session Location', description: 'Training session location' },
+  { key: '{quiz_score}', label: 'Quiz Score', description: 'Quiz result score' },
+  { key: '{passing_score}', label: 'Passing Score', description: 'Required score to pass' },
+  { key: '{retakes_remaining}', label: 'Retakes Remaining', description: 'Number of quiz retakes left' },
 ];
 
 // Helper to parse first/last name from full name

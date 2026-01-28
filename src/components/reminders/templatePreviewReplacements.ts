@@ -33,6 +33,20 @@ const DEFAULT_REPLACEMENTS: Record<string, string> = {
   action_url: '#',
   portal_url: '#',
   login_url: '#',
+  // L&D / Training specific defaults
+  course_name: 'Advanced Project Management',
+  course_code: 'PM-301',
+  enrollment_date: 'January 1, 2025',
+  due_date: 'February 15, 2025',
+  progress_percent: '65',
+  certificate_number: 'CERT-2025-001234',
+  certificate_expiry: 'March 31, 2026',
+  training_provider: 'Acme Training Solutions',
+  session_date: 'January 20, 2025',
+  session_location: 'Conference Room A',
+  quiz_score: '78',
+  passing_score: '80',
+  retakes_remaining: '2',
 };
 
 /**
