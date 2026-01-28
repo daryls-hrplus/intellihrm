@@ -1,193 +1,110 @@
 
-# Fix Gap Analysis Color Contrast - Semantic Color Compliance
 
-## Problem
+# Fix Manual Version Discrepancy - Sync Database with Pre-Release Standard
 
-The Gap Analysis panels have severe readability issues due to incorrect color usage:
+## Problem Summary
 
-| Component | Current State | Issue |
-|-----------|---------------|-------|
-| Summary cards (Undocumented, Missing KB, etc.) | Solid red/orange/blue/purple backgrounds with small dark numbers | Text is nearly invisible |
-| Orphaned warning banner | Yellow background with dark text | Hard to read |
-| Category badges | Using arbitrary color classes | Inconsistent with HRMS semantic standards |
+The Content Creation Studio's Manual Content selector is displaying **outdated versions** (e.g., "v1.3.0") because it reads from the `manual_definitions` database table, which was never updated when the v1.0.0 pre-release reset was established.
+
+| Manual | Version in DB | Should Be |
+|--------|--------------|-----------|
+| Admin & Security | 1.4.0 | 1.0.0 |
+| Performance Appraisal | 1.3.0 | 1.0.0 |
+| Workforce | 1.3.0 | 1.0.0 |
+| HR Hub | 1.3.0 | 1.0.0 |
+| Goals | 1.3.0 | 1.0.0 |
+| Benefits Administrator | 1.0.0 | Already correct |
+
+### Root Cause
+
+- **Static config** (`MANUAL_CONFIGS` in `useManualPublishing.ts`): Shows correct v1.0.0
+- **Database** (`manual_definitions` table): Has old versions (1.3.0, 1.4.0)
+- **Content Creation Studio** (`ManualContentSelector`): Reads from database, shows wrong versions
+
+---
 
 ## Solution
 
-Apply the HRMS semantic color tokens defined in `src/index.css` which provide proper contrast:
+### Part 1: Database Update (Immediate Fix)
 
-```css
-/* Semantic Background Colors (lighter for badges/pills) */
---semantic-error-bg: 0 84% 97%;        /* Light red */
---semantic-warning-bg: 38 92% 95%;     /* Light amber */
---semantic-info-bg: 199 89% 96%;       /* Light blue */
---semantic-neutral-bg: 210 20% 96%;    /* Light grey */
+Run a SQL migration to reset all manual versions to `1.0.0` to align with the pre-release documentation standard.
 
-/* Semantic Text Colors (darker for readability) */
---semantic-error-text: 0 72% 40%;      /* Dark red - readable */
---semantic-warning-text: 38 80% 30%;   /* Dark amber - readable */
---semantic-info-text: 199 89% 35%;     /* Dark blue - readable */
---semantic-neutral-text: 210 16% 40%;  /* Dark grey - readable */
+```sql
+UPDATE manual_definitions
+SET current_version = '1.0.0',
+    updated_at = NOW()
+WHERE current_version != '1.0.0';
 ```
 
-### Color Mapping for Gap Categories
+This will update:
+- admin-security: 1.4.0 → 1.0.0
+- appraisals: 1.3.0 → 1.0.0
+- workforce: 1.3.0 → 1.0.0
+- hr-hub: 1.3.0 → 1.0.0
+- goals: 1.3.0 → 1.0.0
 
-| Category | Semantic Meaning | Background Token | Text Token |
-|----------|------------------|------------------|------------|
-| Undocumented | Error - Critical gap | `semantic-error-bg` | `semantic-error-text` |
-| Missing KB | Warning - Needs attention | `semantic-warning-bg` | `semantic-warning-text` |
-| No Quick Start | Info - Reference/guidance | `semantic-info-bg` | `semantic-info-text` |
-| Missing SOP | Neutral - Pending action | `semantic-neutral-bg` | `semantic-neutral-text` |
-| Orphaned | Warning - Needs attention | `semantic-warning-bg` | `semantic-warning-text` |
+### Part 2: Version Source Consistency (Long-term Fix)
+
+To prevent future discrepancies, update the `ManualContentSelector` to optionally use the `MANUAL_CONFIGS` as the source of truth for versions, with database as fallback. This ensures the UI displays consistent versions everywhere.
+
+**Option A (Recommended)**: Keep database as source but ensure future version bumps follow the version freeze logic
+
+**Option B**: Add a version override from `MANUAL_CONFIGS` when fetching manuals
 
 ---
 
-## Files to Modify
+## Implementation Steps
 
-### 1. `src/components/enablement/GapResultsMessage.tsx`
+### Step 1: Run Database Migration
 
-**Current (lines 35-64):**
-```typescript
-const categories = [
-  {
-    label: "Undocumented",
-    bgColor: "bg-red-50 dark:bg-red-950/30",
-    textColor: "text-red-600 dark:text-red-400",
-  },
-  // ... hardcoded Tailwind colors
-];
+Update all manual definitions to v1.0.0:
+
+```sql
+UPDATE manual_definitions
+SET current_version = '1.0.0',
+    updated_at = NOW()
+WHERE current_version != '1.0.0'
+  AND manual_code IN ('admin-security', 'appraisals', 'workforce', 'hr-hub', 'goals');
 ```
 
-**Updated:**
-```typescript
-const categories = [
-  {
-    label: "Undocumented",
-    // Semantic error - critical gaps
-    bgClass: "bg-[hsl(var(--semantic-error-bg))]",
-    textClass: "text-[hsl(var(--semantic-error-text))]",
-  },
-  {
-    label: "Missing KB",
-    // Semantic warning - needs attention
-    bgClass: "bg-[hsl(var(--semantic-warning-bg))]",
-    textClass: "text-[hsl(var(--semantic-warning-text))]",
-  },
-  {
-    label: "No Quick Start",
-    // Semantic info - guidance
-    bgClass: "bg-[hsl(var(--semantic-info-bg))]",
-    textClass: "text-[hsl(var(--semantic-info-text))]",
-  },
-  {
-    label: "Missing SOP",
-    // Semantic neutral - pending
-    bgClass: "bg-[hsl(var(--semantic-neutral-bg))]",
-    textClass: "text-[hsl(var(--semantic-neutral-text))]",
-  },
-];
+### Step 2: Clean Up Duplicate Entries
+
+The database query also showed some duplicate/test entries that should be cleaned up:
+- `ben_ad` (Benefits Administrator Manual) - possibly a test entry
+- `h` (HR Hub Admin Guide) - duplicate of hr-hub
+
+```sql
+DELETE FROM manual_definitions
+WHERE manual_code IN ('ben_ad', 'h');
 ```
 
-**Also update orphaned warning (lines 102-109):**
-```typescript
-<div className="flex items-center gap-2 p-2 rounded-lg 
-  bg-[hsl(var(--semantic-warning-bg))] 
-  border border-[hsl(var(--semantic-warning-border))]">
-  <AlertTriangle className="h-4 w-4 text-[hsl(var(--semantic-warning-text))] flex-shrink-0" />
-  <span className="text-xs text-[hsl(var(--semantic-warning-text))]">
-    {summary.orphanedDocumentation} orphaned section(s)...
-  </span>
-</div>
-```
+### Step 3: Verify Version Freeze Logic
+
+Ensure that when manuals are regenerated via the Content Creation Agent, the version bump respects the pre-release version freeze (only patch increments allowed during pre-release).
+
+The `useRegenerateManual` hook already supports `versionBump` parameter - this should be enforced to only allow `patch` during pre-release.
 
 ---
 
-### 2. `src/components/enablement/GapAnalysisPanel.tsx`
+## Expected Outcome
 
-**Update categories array (lines 187-223):**
-```typescript
-const categories = [
-  {
-    id: "undocumented",
-    label: "Undocumented",
-    count: summary?.undocumentedFeatures || 0,
-    icon: FileX,
-    // Use semantic error tokens
-    iconColor: "text-[hsl(var(--semantic-error-text))]",
-    badgeBg: "bg-[hsl(var(--semantic-error-bg))]",
-  },
-  {
-    id: "noKB",
-    label: "Missing KB",
-    count: summary?.missingKBArticles || 0,
-    icon: FileQuestion,
-    // Use semantic warning tokens
-    iconColor: "text-[hsl(var(--semantic-warning-text))]",
-  },
-  {
-    id: "noQuickStart",
-    label: "No Quick Start",
-    count: summary?.missingQuickStarts || 0,
-    icon: Rocket,
-    // Use semantic info tokens
-    iconColor: "text-[hsl(var(--semantic-info-text))]",
-  },
-  {
-    id: "noSOP",
-    label: "Missing SOP",
-    count: summary?.missingSOPs || 0,
-    icon: ClipboardList,
-    // Use semantic neutral tokens
-    iconColor: "text-[hsl(var(--semantic-neutral-text))]",
-  },
-  {
-    id: "orphaned",
-    label: "Orphaned",
-    count: summary?.orphanedDocumentation || 0,
-    icon: AlertTriangle,
-    // Use semantic warning tokens
-    iconColor: "text-[hsl(var(--semantic-warning-text))]",
-  },
-];
-```
+After migration:
+- Content Creation Studio shows "Performance Appraisal - Administrator Guide v1.0.0"
+- All 10 Administrator Manuals display v1.0.0
+- Duplicate/test manual entries are removed
+- Version display is consistent between:
+  - Administrator Manuals page (MANUAL_CONFIGS)
+  - Content Creation Studio (manual_definitions DB)
+  - Publishing wizard (uses both sources)
 
 ---
 
-### 3. `src/components/enablement/GapSummaryCard.tsx`
+## Files Modified
 
-**Update the card styling (line 71) and category badges:**
+| File | Changes |
+|------|---------|
+| **Database migration** | Reset `current_version` to `1.0.0` for all manuals |
+| **Database cleanup** | Remove duplicate/test manual definitions |
 
-**Current:**
-```typescript
-<Card className="border-yellow-500/20 bg-yellow-500/5">
-```
+No code file changes required - this is purely a data correction to align the database with the documented pre-release standard.
 
-**Updated:**
-```typescript
-<Card className="border-[hsl(var(--semantic-warning-border))] bg-[hsl(var(--semantic-warning-bg))]">
-```
-
-**Update the header icon (line 74):**
-```typescript
-<AlertCircle className="h-4 w-4 text-[hsl(var(--semantic-warning-text))]" />
-```
-
----
-
-## Visual Result (Expected)
-
-After fix:
-- **Undocumented**: Light red background (#FEF2F2) with dark red text (#991B1B) - high contrast
-- **Missing KB**: Light amber background (#FFFBEB) with dark amber text (#92400E) - readable
-- **No Quick Start**: Light blue background (#EFF6FF) with dark blue text (#1E40AF) - clear
-- **Missing SOP**: Light grey background (#F3F4F6) with dark grey text (#374151) - visible
-- **Orphaned warning**: Light amber with dark amber text and amber border
-
-All text will be clearly readable against their backgrounds with proper WCAG contrast ratios.
-
----
-
-## Technical Notes
-
-- Using CSS custom property syntax: `hsl(var(--semantic-*))` ensures consistency
-- Dark mode will need corresponding tokens if not already defined
-- Border colors use `--semantic-*-border` tokens for cohesive look
