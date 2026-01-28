@@ -1,18 +1,31 @@
-export { LndWorkflowCourseLifecycle } from './LndWorkflowCourseLifecycle';
+// Chapter 4: Operational Workflows - Component Exports
+// Organized by ADDIE framework sections
+
+// Section A: Learner Journey (4.1-4.6)
+export { LndWorkflowLearnerJourney } from './LndWorkflowLearnerJourney';
 export { LndWorkflowEnrollment } from './LndWorkflowEnrollment';
-export { LndWorkflowRequestGapAnalysis } from './LndWorkflowRequestGapAnalysis';
-export { LndWorkflowRequestAppraisal } from './LndWorkflowRequestAppraisal';
-export { LndWorkflowRequestSelfService } from './LndWorkflowRequestSelfService';
-export { LndWorkflowRequestOnboarding } from './LndWorkflowRequestOnboarding';
-export { LndWorkflowRequestHR } from './LndWorkflowRequestHR';
-export { LndWorkflowInvitations } from './LndWorkflowInvitations';
 export { LndWorkflowProgressTracking } from './LndWorkflowProgressTracking';
 export { LndWorkflowQuizDelivery } from './LndWorkflowQuizDelivery';
 export { LndWorkflowCompletion } from './LndWorkflowCompletion';
 export { LndWorkflowCertification } from './LndWorkflowCertification';
-export { LndWorkflowTrainingHistory } from './LndWorkflowTrainingHistory';
-export { LndWorkflowExternalRecords } from './LndWorkflowExternalRecords';
-export { LndWorkflowCalendar } from './LndWorkflowCalendar';
+
+// Section B: Training Request Lifecycle (4.7-4.13)
+export { LndWorkflowRequestSelfService } from './LndWorkflowRequestSelfService';
+export { LndWorkflowRequestGapAnalysis } from './LndWorkflowRequestGapAnalysis';
+export { LndWorkflowRequestAppraisal } from './LndWorkflowRequestAppraisal';
+export { LndWorkflowRequestOnboarding } from './LndWorkflowRequestOnboarding';
+export { LndWorkflowRequestHR } from './LndWorkflowRequestHR';
+export { LndWorkflowInvitations } from './LndWorkflowInvitations';
+export { LndWorkflowHRHubIntegration } from './LndWorkflowHRHubIntegration';
+
+// Section C: Session & Delivery Operations (4.14-4.18)
+export { LndWorkflowCourseLifecycle } from './LndWorkflowCourseLifecycle';
 export { LndWorkflowSessionManagement } from './LndWorkflowSessionManagement';
 export { LndWorkflowVirtualClassroom } from './LndWorkflowVirtualClassroom';
 export { LndWorkflowWaitlist } from './LndWorkflowWaitlist';
+export { LndWorkflowCalendar } from './LndWorkflowCalendar';
+
+// Section D: Historical Records & Transcripts (4.19-4.21)
+export { LndWorkflowTrainingHistory } from './LndWorkflowTrainingHistory';
+export { LndWorkflowExternalRecords } from './LndWorkflowExternalRecords';
+export { LndWorkflowCourseReviews } from './LndWorkflowCourseReviews';
