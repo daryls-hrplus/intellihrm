@@ -278,6 +278,9 @@ export const iconRegistry: Record<string, LucideIcon> = {
   CalendarClock,
   MousePointer,
   Radar,
+  // Vendor Management icons
+  Handshake: Building,
+  FileContract: FileText,
 };
 
 /**

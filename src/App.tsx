@@ -422,6 +422,8 @@ const App = () => (
             <Route path="/training/employee-certifications" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.EmployeeCertificationsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/training/career-paths" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingCareerPathsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/training/mentorship" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingMentorshipPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/vendors" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.VendorManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/vendors/:id" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.VendorDetailPage /></LazyPage></ProtectedRoute>} />
 
             {/* Succession Routes */}
             <Route path="/succession" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.SuccessionDashboardPage /></LazyPage></ProtectedRoute>} />

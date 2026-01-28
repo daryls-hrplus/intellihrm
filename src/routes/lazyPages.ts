@@ -286,6 +286,10 @@ export const EmployeeCertificationsPage = lazy(() => import('@/pages/training/Em
 export const TrainingCareerPathsPage = lazy(() => import('@/pages/training/TrainingCareerPathsPage'));
 export const TrainingMentorshipPage = lazy(() => import('@/pages/training/TrainingMentorshipPage'));
 
+// Vendor Management pages
+export const VendorManagementPage = lazy(() => import('@/pages/training/VendorManagementPage'));
+export const VendorDetailPage = lazy(() => import('@/pages/training/VendorDetailPage'));
+
 // Succession pages
 export const SuccessionDashboardPage = lazy(() => import('@/pages/succession/SuccessionDashboardPage'));
 export const SuccessionSetupPage = lazy(() => import('@/pages/succession/SuccessionSetupPage'));

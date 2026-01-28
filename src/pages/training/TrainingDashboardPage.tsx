@@ -35,6 +35,7 @@ import {
   Monitor,
   PenTool,
   History,
+  Building2,
 } from "lucide-react";
 
 interface Stats {
@@ -160,6 +161,8 @@ export default function TrainingDashboardPage() {
     interactive: { title: t("training.modules.interactive.title", "Interactive Training"), description: t("training.modules.interactive.description", "Video-based training with quizzes and branching paths"), href: "/training/interactive", icon: GraduationCap, color: "bg-violet-500/10 text-violet-600", tabCode: "interactive" },
     // Training History
     history: { title: t("training.modules.history.title", "Training History"), description: t("training.modules.history.description", "View complete training records and certifications"), href: "/ess/training", icon: History, color: "bg-cyan-500/10 text-cyan-600", tabCode: "history" },
+    // Vendor Management
+    vendors: { title: t("training.modules.vendors.title", "Vendor Management"), description: t("training.modules.vendors.description", "Manage external training providers and contracts"), href: "/training/vendors", icon: Building2, color: "bg-orange-500/10 text-orange-600", tabCode: "vendors" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -185,7 +188,7 @@ export default function TrainingDashboardPage() {
     },
     {
       titleKey: "L&D Setup",
-      items: filterByAccess([allModules.lms, allModules.courseCompetencies, allModules.instructors, allModules.compliance, allModules.budgets]),
+      items: filterByAccess([allModules.lms, allModules.courseCompetencies, allModules.instructors, allModules.compliance, allModules.budgets, allModules.vendors]),
     },
   ];
 
