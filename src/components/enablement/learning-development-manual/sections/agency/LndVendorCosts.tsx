@@ -318,6 +318,170 @@ BUDGET FIELDS IN training_budgets:
         </CardContent>
       </Card>
 
+      {/* Training Budgets Field Reference */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5" />
+            Field Reference: training_budgets
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Field</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Required</TableHead>
+                <TableHead>Description</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-mono text-sm">id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell><Badge variant="destructive">Auto</Badge></TableCell>
+                <TableCell>Primary key</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">company_id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>Company scope</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">department_id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell><Badge variant="outline">No</Badge></TableCell>
+                <TableCell>Department scope (null = company-wide)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">fiscal_year</TableCell>
+                <TableCell>Integer</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>Budget year (e.g., 2026)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">allocated_amount</TableCell>
+                <TableCell>Numeric</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>Total annual budget allocation</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">spent_amount</TableCell>
+                <TableCell>Numeric</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>Year-to-date actual spend</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">committed_amount</TableCell>
+                <TableCell>Numeric</TableCell>
+                <TableCell><Badge variant="destructive">Yes</Badge></TableCell>
+                <TableCell>Approved but not yet spent</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">currency</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell><Badge variant="outline">No</Badge></TableCell>
+                <TableCell>Budget currency (default: company currency)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">created_at</TableCell>
+                <TableCell>Timestamp</TableCell>
+                <TableCell><Badge variant="destructive">Auto</Badge></TableCell>
+                <TableCell>Record creation timestamp</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">updated_at</TableCell>
+                <TableCell>Timestamp</TableCell>
+                <TableCell><Badge variant="destructive">Auto</Badge></TableCell>
+                <TableCell>Last update timestamp</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          <pre className="text-xs bg-muted p-4 rounded overflow-x-auto font-mono mt-4">{`
+BUDGET AVAILABILITY CALCULATION
+═══════════════════════════════
+available_amount = allocated_amount - spent_amount - committed_amount
+
+EXAMPLE:
+Allocated: $100,000
+Spent:      $45,000  (completed training)
+Committed:  $15,000  (approved requests)
+─────────────────────
+Available:  $40,000  (for new requests)
+          `}</pre>
+        </CardContent>
+      </Card>
+
+      {/* Volume Discounts Reference */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingDown className="h-5 w-5" />
+            Field Reference: vendor_volume_discounts
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Field</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Description</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-mono text-sm">id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell>Primary key</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">vendor_id</TableCell>
+                <TableCell>UUID</TableCell>
+                <TableCell>FK to training_vendors</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">tier_name</TableCell>
+                <TableCell>Text</TableCell>
+                <TableCell>Tier label (e.g., "Gold", "Enterprise")</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">min_enrollments</TableCell>
+                <TableCell>Integer</TableCell>
+                <TableCell>Minimum enrollments for this tier</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">max_enrollments</TableCell>
+                <TableCell>Integer</TableCell>
+                <TableCell>Maximum enrollments (null = unlimited)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">discount_percentage</TableCell>
+                <TableCell>Numeric</TableCell>
+                <TableCell>Discount percent (e.g., 15.00 = 15%)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">effective_from</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Discount start date</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">effective_to</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Discount end date (null = ongoing)</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-mono text-sm">is_active</TableCell>
+                <TableCell>Boolean</TableCell>
+                <TableCell>Whether tier is currently active</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
       <Alert>
         <DollarSign className="h-4 w-4" />
         <AlertTitle>Cost Tracking Best Practice</AlertTitle>
@@ -325,6 +489,7 @@ BUDGET FIELDS IN training_budgets:
           Track both estimated and actual costs. Estimated costs (from vendor_costs) are used 
           for budget approval. Actual costs (recorded in external_training_records.actual_cost) 
           should be captured post-training for variance analysis and future budgeting accuracy.
+          Volume discounts are automatically applied when enrollment thresholds are met.
         </AlertDescription>
       </Alert>
     </section>

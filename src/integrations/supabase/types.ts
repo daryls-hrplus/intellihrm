@@ -74674,6 +74674,56 @@ export type Database = {
           },
         ]
       }
+      training_vendor_contacts: {
+        Row: {
+          contact_type: string
+          created_at: string | null
+          email: string | null
+          id: string
+          is_primary: boolean | null
+          name: string
+          notes: string | null
+          phone: string | null
+          title: string | null
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          contact_type: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          contact_type?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_vendor_contacts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_vendor_costs: {
         Row: {
           amount: number
@@ -74733,6 +74783,8 @@ export type Database = {
       }
       training_vendor_courses: {
         Row: {
+          base_currency: string | null
+          base_price: number | null
           certification_name: string | null
           certification_validity_months: number | null
           course_code: string | null
@@ -74750,6 +74802,8 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          base_currency?: string | null
+          base_price?: number | null
           certification_name?: string | null
           certification_validity_months?: number | null
           course_code?: string | null
@@ -74767,6 +74821,8 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          base_currency?: string | null
+          base_price?: number | null
           certification_name?: string | null
           certification_validity_months?: number | null
           course_code?: string | null
@@ -74879,6 +74935,7 @@ export type Database = {
         Row: {
           cancellation_deadline: string | null
           capacity: number | null
+          confirmation_deadline: string | null
           cost_per_person: number | null
           created_at: string
           currency: string | null
@@ -74889,6 +74946,7 @@ export type Database = {
           location: string | null
           location_type: string | null
           meeting_url: string | null
+          minimum_attendees: number | null
           notes: string | null
           registered_count: number
           registration_deadline: string | null
@@ -74903,6 +74961,7 @@ export type Database = {
         Insert: {
           cancellation_deadline?: string | null
           capacity?: number | null
+          confirmation_deadline?: string | null
           cost_per_person?: number | null
           created_at?: string
           currency?: string | null
@@ -74913,6 +74972,7 @@ export type Database = {
           location?: string | null
           location_type?: string | null
           meeting_url?: string | null
+          minimum_attendees?: number | null
           notes?: string | null
           registered_count?: number
           registration_deadline?: string | null
@@ -74927,6 +74987,7 @@ export type Database = {
         Update: {
           cancellation_deadline?: string | null
           capacity?: number | null
+          confirmation_deadline?: string | null
           cost_per_person?: number | null
           created_at?: string
           currency?: string | null
@@ -74937,6 +74998,7 @@ export type Database = {
           location?: string | null
           location_type?: string | null
           meeting_url?: string | null
+          minimum_attendees?: number | null
           notes?: string | null
           registered_count?: number
           registration_deadline?: string | null
@@ -74973,6 +75035,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          group_id: string | null
           id: string
           is_preferred: boolean
           last_review_date: string | null
@@ -74981,6 +75044,7 @@ export type Database = {
           notes: string | null
           payment_terms: string | null
           performance_score: number | null
+          sla_document_url: string | null
           specializations: string[] | null
           status: string
           updated_at: string
@@ -75001,6 +75065,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          group_id?: string | null
           id?: string
           is_preferred?: boolean
           last_review_date?: string | null
@@ -75009,6 +75074,7 @@ export type Database = {
           notes?: string | null
           payment_terms?: string | null
           performance_score?: number | null
+          sla_document_url?: string | null
           specializations?: string[] | null
           status?: string
           updated_at?: string
@@ -75029,6 +75095,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          group_id?: string | null
           id?: string
           is_preferred?: boolean
           last_review_date?: string | null
@@ -75037,6 +75104,7 @@ export type Database = {
           notes?: string | null
           payment_terms?: string | null
           performance_score?: number | null
+          sla_document_url?: string | null
           specializations?: string[] | null
           status?: string
           updated_at?: string
@@ -75063,6 +75131,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_vendors_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "company_groups"
             referencedColumns: ["id"]
           },
         ]
@@ -75629,6 +75704,201 @@ export type Database = {
             columns: ["new_capability_id"]
             isOneToOne: false
             referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_session_enrollments: {
+        Row: {
+          attendance_notes: string | null
+          attended: boolean | null
+          confirmed_at: string | null
+          created_at: string | null
+          employee_id: string
+          id: string
+          registered_at: string | null
+          session_id: string
+          status: string
+          training_request_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attendance_notes?: string | null
+          attended?: boolean | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          registered_at?: string | null
+          session_id: string
+          status?: string
+          training_request_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attendance_notes?: string | null
+          attended?: boolean | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          registered_at?: string | null
+          session_id?: string
+          status?: string
+          training_request_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_session_enrollments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "vendor_session_enrollments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_session_enrollments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendor_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_session_enrollments_training_request_id_fkey"
+            columns: ["training_request_id"]
+            isOneToOne: false
+            referencedRelation: "training_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_session_waitlist: {
+        Row: {
+          added_at: string | null
+          created_at: string | null
+          employee_id: string
+          expired_at: string | null
+          id: string
+          notes: string | null
+          position: number
+          promoted_at: string | null
+          session_id: string
+          status: string
+          training_request_id: string | null
+        }
+        Insert: {
+          added_at?: string | null
+          created_at?: string | null
+          employee_id: string
+          expired_at?: string | null
+          id?: string
+          notes?: string | null
+          position: number
+          promoted_at?: string | null
+          session_id: string
+          status?: string
+          training_request_id?: string | null
+        }
+        Update: {
+          added_at?: string | null
+          created_at?: string | null
+          employee_id?: string
+          expired_at?: string | null
+          id?: string
+          notes?: string | null
+          position?: number
+          promoted_at?: string | null
+          session_id?: string
+          status?: string
+          training_request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_session_waitlist_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "vendor_session_waitlist_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_session_waitlist_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendor_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_session_waitlist_training_request_id_fkey"
+            columns: ["training_request_id"]
+            isOneToOne: false
+            referencedRelation: "training_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_volume_discounts: {
+        Row: {
+          created_at: string | null
+          discount_percentage: number
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          is_active: boolean | null
+          max_enrollments: number | null
+          min_enrollments: number
+          notes: string | null
+          tier_name: string | null
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          discount_percentage: number
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_enrollments?: number | null
+          min_enrollments: number
+          notes?: string | null
+          tier_name?: string | null
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          discount_percentage?: number
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_enrollments?: number | null
+          min_enrollments?: number
+          notes?: string | null
+          tier_name?: string | null
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_volume_discounts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendors"
             referencedColumns: ["id"]
           },
         ]
