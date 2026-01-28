@@ -286,6 +286,74 @@ export function useOrphanActions() {
   }, [deleteMultiple]);
 
   /**
+   * Restore a single archived entry (set is_active = true)
+   */
+  const restoreOrphan = useCallback(async (orphanId: string): Promise<OrphanActionResult> => {
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("application_features")
+        .update({ is_active: true })
+        .eq("id", orphanId);
+
+      if (error) throw error;
+
+      const result: OrphanActionResult = {
+        success: true,
+        affectedCount: 1,
+        errors: []
+      };
+
+      setLastAction(result);
+      toast.success("Feature restored");
+
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to restore';
+      toast.error(message);
+      return { success: false, affectedCount: 0, errors: [message] };
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  /**
+   * Restore multiple archived entries
+   */
+  const restoreMultiple = useCallback(async (orphanIds: string[]): Promise<OrphanActionResult> => {
+    if (orphanIds.length === 0) {
+      return { success: true, affectedCount: 0, errors: [] };
+    }
+
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("application_features")
+        .update({ is_active: true })
+        .in("id", orphanIds);
+
+      if (error) throw error;
+
+      const result: OrphanActionResult = {
+        success: true,
+        affectedCount: orphanIds.length,
+        errors: []
+      };
+
+      setLastAction(result);
+      toast.success(`${orphanIds.length} feature(s) restored`);
+
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to restore';
+      toast.error(message);
+      return { success: false, affectedCount: 0, errors: [message] };
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  /**
    * Undo archive operation
    */
   const undoArchive = useCallback(async (token: string): Promise<boolean> => {
@@ -482,11 +550,13 @@ export function useOrphanActions() {
     archiveOrphan,
     deleteOrphan,
     markAsKept,
+    restoreOrphan,
     
     // Bulk actions
     archiveMultiple,
     deleteMultiple,
     markMultipleAsKept,
+    restoreMultiple,
     archiveBySource,
     archiveByModule,
     deleteByModule,

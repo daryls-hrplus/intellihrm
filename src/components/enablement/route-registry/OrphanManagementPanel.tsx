@@ -49,6 +49,7 @@ import { DuplicateDetailDialog } from "./DuplicateDetailDialog";
 import { PrefixedVariantsPanel } from "./PrefixedVariantsPanel";
 import { RegistryCandidatesPanel } from "./RegistryCandidatesPanel";
 import { MigrationBatchesPanel } from "./MigrationBatchesPanel";
+import { ArchivedEntriesPanel } from "./ArchivedEntriesPanel";
 import { cn } from "@/lib/utils";
 
 export function OrphanManagementPanel() {
@@ -78,6 +79,7 @@ export function OrphanManagementPanel() {
     isLoading,
     orphans,
     keptEntries,
+    archivedEntries,
     stats,
     duplicates,
     routeConflicts,
@@ -96,9 +98,11 @@ export function OrphanManagementPanel() {
     archiveOrphan,
     deleteOrphan,
     markAsKept,
+    restoreOrphan,
     archiveMultiple,
     deleteMultiple,
     markMultipleAsKept,
+    restoreMultiple,
     undoKeep,
     exportToCsv
   } = useOrphanActions();
@@ -472,6 +476,10 @@ export function OrphanManagementPanel() {
             <CheckCircle className="h-4 w-4" />
             Kept ({keptEntries.length})
           </TabsTrigger>
+          <TabsTrigger value="archived" className="gap-2">
+            <Archive className="h-4 w-4" />
+            Archived ({archivedEntries.length})
+          </TabsTrigger>
           <TabsTrigger value="all" className="gap-2">
             <FileWarning className="h-4 w-4" />
             All ({filteredOrphans.length})
@@ -669,6 +677,31 @@ export function OrphanManagementPanel() {
               </ScrollArea>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Archived Tab */}
+        <TabsContent value="archived" className="mt-6">
+          <ArchivedEntriesPanel
+            archivedEntries={archivedEntries}
+            isLoading={isLoading}
+            onRestore={async (id) => {
+              await restoreOrphan(id);
+              detectOrphans();
+            }}
+            onRestoreMultiple={async (ids) => {
+              await restoreMultiple(ids);
+              detectOrphans();
+            }}
+            onDeletePermanently={async (id) => {
+              await deleteOrphan(id);
+              detectOrphans();
+            }}
+            onDeleteMultiple={async (ids) => {
+              await deleteMultiple(ids);
+              detectOrphans();
+            }}
+            isProcessing={isProcessing}
+          />
         </TabsContent>
       </Tabs>
 
