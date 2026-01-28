@@ -46727,6 +46727,45 @@ export type Database = {
           },
         ]
       }
+      manual_feature_coverage: {
+        Row: {
+          coverage_type: string | null
+          created_at: string | null
+          feature_codes: string[]
+          id: string
+          manual_code: string
+          section_id: string
+          section_title: string | null
+          synced_from_static: boolean | null
+          updated_at: string | null
+          verified_by_human: boolean | null
+        }
+        Insert: {
+          coverage_type?: string | null
+          created_at?: string | null
+          feature_codes?: string[]
+          id?: string
+          manual_code: string
+          section_id: string
+          section_title?: string | null
+          synced_from_static?: boolean | null
+          updated_at?: string | null
+          verified_by_human?: boolean | null
+        }
+        Update: {
+          coverage_type?: string | null
+          created_at?: string | null
+          feature_codes?: string[]
+          id?: string
+          manual_code?: string
+          section_id?: string
+          section_title?: string | null
+          synced_from_static?: boolean | null
+          updated_at?: string | null
+          verified_by_human?: boolean | null
+        }
+        Relationships: []
+      }
       manual_generation_runs: {
         Row: {
           changelog: string | null
@@ -46816,6 +46855,50 @@ export type Database = {
           },
         ]
       }
+      manual_section_reviews: {
+        Row: {
+          action: string
+          action_at: string | null
+          action_by: string | null
+          id: string
+          notes: string | null
+          previous_content: Json | null
+          proposed_content: Json
+          section_id: string
+          version_number: number | null
+        }
+        Insert: {
+          action: string
+          action_at?: string | null
+          action_by?: string | null
+          id?: string
+          notes?: string | null
+          previous_content?: Json | null
+          proposed_content: Json
+          section_id: string
+          version_number?: number | null
+        }
+        Update: {
+          action?: string
+          action_at?: string | null
+          action_by?: string | null
+          id?: string
+          notes?: string | null
+          previous_content?: Json | null
+          proposed_content?: Json
+          section_id?: string
+          version_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_section_reviews_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "manual_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       manual_section_versions: {
         Row: {
           ai_model_used: string | null
@@ -46886,6 +46969,7 @@ export type Database = {
           created_at: string
           current_version: number | null
           display_order: number
+          draft_content: Json | null
           generation_hash: string | null
           id: string
           is_locked: boolean | null
@@ -46894,11 +46978,18 @@ export type Database = {
           markdown_content: string | null
           needs_regeneration: boolean
           parent_section_id: string | null
+          review_notes: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
           section_number: string
           source_feature_codes: string[]
           source_module_codes: string[]
           source_reference: string | null
           source_type: string | null
+          static_section_id: string | null
+          submitted_by: string | null
+          submitted_for_review_at: string | null
           target_roles: string[] | null
           title: string
           updated_at: string
@@ -46908,6 +46999,7 @@ export type Database = {
           created_at?: string
           current_version?: number | null
           display_order?: number
+          draft_content?: Json | null
           generation_hash?: string | null
           id?: string
           is_locked?: boolean | null
@@ -46916,11 +47008,18 @@ export type Database = {
           markdown_content?: string | null
           needs_regeneration?: boolean
           parent_section_id?: string | null
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
           section_number: string
           source_feature_codes?: string[]
           source_module_codes?: string[]
           source_reference?: string | null
           source_type?: string | null
+          static_section_id?: string | null
+          submitted_by?: string | null
+          submitted_for_review_at?: string | null
           target_roles?: string[] | null
           title: string
           updated_at?: string
@@ -46930,6 +47029,7 @@ export type Database = {
           created_at?: string
           current_version?: number | null
           display_order?: number
+          draft_content?: Json | null
           generation_hash?: string | null
           id?: string
           is_locked?: boolean | null
@@ -46938,11 +47038,18 @@ export type Database = {
           markdown_content?: string | null
           needs_regeneration?: boolean
           parent_section_id?: string | null
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
           section_number?: string
           source_feature_codes?: string[]
           source_module_codes?: string[]
           source_reference?: string | null
           source_type?: string | null
+          static_section_id?: string | null
+          submitted_by?: string | null
+          submitted_for_review_at?: string | null
           target_roles?: string[] | null
           title?: string
           updated_at?: string

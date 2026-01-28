@@ -70,7 +70,7 @@ export default function EnablementHubPage() {
     (i.workflow_status as string) === "ready_for_enablement"
   ).length;
 
-  // PRIMARY SECTIONS - Simplified to 3 clear phases (Create → Manage → Reference)
+  // PRIMARY SECTIONS - Simplified to 3 clear phases (Create → Review → Manage → Reference)
   const primarySections: ModuleSection[] = useMemo(() => [
     {
       titleKey: "1. Create",
@@ -82,6 +82,18 @@ export default function EnablementHubPage() {
           icon: Sparkles,
           color: "bg-primary/10 text-primary",
           badge: "All-in-One",
+        },
+      ],
+    },
+    {
+      titleKey: "1.5. Review & Edit",
+      items: [
+        {
+          title: "Content Review Center",
+          description: "Review, edit, and approve AI-generated content before publishing",
+          href: "/enablement/review",
+          icon: ClipboardCheck,
+          color: "bg-amber-500/10 text-amber-500",
         },
       ],
     },

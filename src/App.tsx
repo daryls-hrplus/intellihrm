@@ -597,6 +597,7 @@ const App = () => (
             <Route path="/enablement/release-calendar" element={<Navigate to="/enablement/release-center?activeTab=milestones" replace />} />
             <Route path="/enablement/settings" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementSettingsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/ai-tools" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementAIToolsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/review" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ContentReviewCenterPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/guide" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementGuidePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/artifacts" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementArtifactsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/artifacts/:id" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ArtifactDetailPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
