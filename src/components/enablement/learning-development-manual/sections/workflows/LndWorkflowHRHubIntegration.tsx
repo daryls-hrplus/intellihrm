@@ -15,11 +15,11 @@ import {
 
 export function LndWorkflowHRHubIntegration() {
   return (
-    <section className="space-y-6" id="sec-4-13" data-manual-anchor="sec-4-13">
+    <section className="space-y-6" id="sec-4-26" data-manual-anchor="sec-4-26">
       <div>
         <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
           <Workflow className="h-6 w-6 text-blue-600" />
-          4.13 HR Hub Workflow Integration
+          4.26 HR Hub Workflow Integration
         </h2>
         <p className="text-muted-foreground">
           Unified training request approval through the HR Hub workflow engine, enabling 

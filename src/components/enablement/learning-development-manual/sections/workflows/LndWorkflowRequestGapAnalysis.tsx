@@ -3,7 +3,7 @@ import { TrendingUp } from 'lucide-react';
 
 export function LndWorkflowRequestGapAnalysis() {
   return (
-    <section className="space-y-6" id="sec-4-3" data-manual-anchor="sec-4-3">
+    <section className="space-y-6" id="sec-4-21" data-manual-anchor="sec-4-21">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.3 Training Request by Gap Analysis</h2>
         <p className="text-muted-foreground">Automated training requests triggered by competency gap detection.</p>

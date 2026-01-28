@@ -12,7 +12,7 @@ import {
 
 export function LndWorkflowRequestSelfService() {
   return (
-    <section className="space-y-6" id="sec-4-5" data-manual-anchor="sec-4-5">
+    <section className="space-y-6" id="sec-4-20" data-manual-anchor="sec-4-20">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.5 Self-Service Requests</h2>
         <p className="text-muted-foreground">Employee-initiated training requests with approval workflows.</p>

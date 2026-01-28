@@ -3,7 +3,7 @@ import { UserCheck } from 'lucide-react';
 
 export function LndWorkflowRequestOnboarding() {
   return (
-    <section className="space-y-6" id="sec-4-6" data-manual-anchor="sec-4-6">
+    <section className="space-y-6" id="sec-4-23" data-manual-anchor="sec-4-23">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.6 Onboarding Requests</h2>
         <p className="text-muted-foreground">Automatic training enrollment for new hire onboarding.</p>

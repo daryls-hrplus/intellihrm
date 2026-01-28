@@ -11,7 +11,7 @@ import {
 
 export function LndWorkflowVirtualClassroom() {
   return (
-    <section className="space-y-6" id="sec-4-17" data-manual-anchor="sec-4-17">
+    <section className="space-y-6" id="sec-4-29" data-manual-anchor="sec-4-29">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.17 Virtual Classroom Operations</h2>
         <p className="text-muted-foreground">Manage virtual instructor-led training sessions.</p>

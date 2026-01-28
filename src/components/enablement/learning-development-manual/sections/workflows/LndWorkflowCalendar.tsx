@@ -3,7 +3,7 @@ import { Calendar } from 'lucide-react';
 
 export function LndWorkflowCalendar() {
   return (
-    <section className="space-y-6" id="sec-4-15" data-manual-anchor="sec-4-15">
+    <section className="space-y-6" id="sec-4-31" data-manual-anchor="sec-4-31">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.15 Calendar Operations</h2>
         <p className="text-muted-foreground">Manage training schedules and calendar integrations.</p>

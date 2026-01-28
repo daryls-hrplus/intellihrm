@@ -3,11 +3,11 @@ import { GitBranch, CheckCircle2 } from 'lucide-react';
 
 export function LndWorkflowCourseLifecycle() {
   return (
-    <section className="space-y-6" id="sec-4-1" data-manual-anchor="sec-4-1">
+    <section className="space-y-6" id="sec-4-27" data-manual-anchor="sec-4-27">
       <div>
         <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
           <GitBranch className="h-6 w-6 text-blue-600" />
-          4.1 Course Lifecycle
+          4.27 Course Lifecycle Management
         </h2>
         <p className="text-muted-foreground">
           Manage courses from draft creation through publication, maintenance, and archival.

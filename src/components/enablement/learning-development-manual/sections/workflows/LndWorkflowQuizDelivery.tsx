@@ -11,7 +11,7 @@ import {
 
 export function LndWorkflowQuizDelivery() {
   return (
-    <section className="space-y-6" id="sec-4-10" data-manual-anchor="sec-4-10">
+    <section className="space-y-6" id="sec-4-12" data-manual-anchor="sec-4-12">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.10 Quiz Delivery</h2>
         <p className="text-muted-foreground">Administer quizzes with time limits, randomization, and attempt tracking.</p>

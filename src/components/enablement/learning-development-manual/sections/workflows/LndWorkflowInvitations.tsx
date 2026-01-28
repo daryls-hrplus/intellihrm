@@ -3,7 +3,7 @@ import { Mail } from 'lucide-react';
 
 export function LndWorkflowInvitations() {
   return (
-    <section className="space-y-6" id="sec-4-8" data-manual-anchor="sec-4-8">
+    <section className="space-y-6" id="sec-4-25" data-manual-anchor="sec-4-25">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.8 Training Invitations</h2>
         <p className="text-muted-foreground">Send targeted training invitations with RSVP tracking.</p>

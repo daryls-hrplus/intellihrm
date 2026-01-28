@@ -3,7 +3,7 @@ import { CalendarDays } from 'lucide-react';
 
 export function LndWorkflowSessionManagement() {
   return (
-    <section className="space-y-6" id="sec-4-16" data-manual-anchor="sec-4-16">
+    <section className="space-y-6" id="sec-4-28" data-manual-anchor="sec-4-28">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.16 Session Management & Scheduling</h2>
         <p className="text-muted-foreground">Schedule and manage instructor-led training sessions.</p>

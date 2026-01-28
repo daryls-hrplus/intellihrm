@@ -3,7 +3,7 @@ import { ListOrdered } from 'lucide-react';
 
 export function LndWorkflowWaitlist() {
   return (
-    <section className="space-y-6" id="sec-4-18" data-manual-anchor="sec-4-18">
+    <section className="space-y-6" id="sec-4-30" data-manual-anchor="sec-4-30">
       <div>
         <h2 className="text-2xl font-bold mb-2">4.18 Waitlist Management</h2>
         <p className="text-muted-foreground">Handle session capacity overflow with automated waitlists.</p>
