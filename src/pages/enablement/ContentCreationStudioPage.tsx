@@ -17,6 +17,7 @@ import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { useApplicationModules, useApplicationFeatures } from "@/hooks/useApplicationFeatures";
 import { useContentCreationAgent, GeneratedArtifact } from "@/hooks/useContentCreationAgent";
 import { useManualSectionPreview } from "@/hooks/useManualSectionPreview";
+import { useInitializeSections } from "@/hooks/useManualGeneration";
 import { ContentCreationAgentChat } from "@/components/enablement/ContentCreationAgentChat";
 import { AgentContextPanel } from "@/components/enablement/AgentContextPanel";
 import { GeneratedArtifactList } from "@/components/enablement/GeneratedArtifactCard";
@@ -71,6 +72,22 @@ export default function ContentCreationStudioPage() {
     regenerateChapter,
     clearPreview,
   } = useManualSectionPreview();
+
+  // Initialize sections mutation
+  const { mutate: initializeSections, isPending: isInitializing } = useInitializeSections();
+
+  // Handle initialize sections
+  const handleInitializeSections = () => {
+    const manual = manuals.find(m => m.id === selectedManualId);
+    if (!manual) return;
+    
+    initializeSections({
+      manualId: selectedManualId,
+      moduleName: manual.manual_name.replace(' Manual', '').replace(' Guide', '').replace(' - Administrator', ''),
+      moduleCodes: manual.module_codes,
+      targetRoles: ['admin', 'hr_user', 'consultant']
+    });
+  };
 
   const {
     isLoading,
@@ -317,6 +334,8 @@ export default function ContentCreationStudioPage() {
                     isLoadingSections={isLoadingSections}
                     isGeneratingPreview={isGeneratingPreview}
                     isApplyingChanges={isApplying}
+                    onInitializeSections={handleInitializeSections}
+                    isInitializing={isInitializing}
                   />
                 </ScrollArea>
               </div>

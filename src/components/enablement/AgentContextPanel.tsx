@@ -55,6 +55,8 @@ interface AgentContextPanelProps {
   isLoadingSections?: boolean;
   isGeneratingPreview?: boolean;
   isApplyingChanges?: boolean;
+  onInitializeSections?: () => void;
+  isInitializing?: boolean;
 }
 
 export function AgentContextPanel({
@@ -89,6 +91,8 @@ export function AgentContextPanel({
   isLoadingSections = false,
   isGeneratingPreview = false,
   isApplyingChanges = false,
+  onInitializeSections,
+  isInitializing = false,
 }: AgentContextPanelProps) {
   // Filter features by selected module
   const filteredFeatures = selectedModule
@@ -158,10 +162,12 @@ export function AgentContextPanel({
           onPreviewChanges={onPreviewChanges}
           onRegenerateSection={onRegenerateSection}
           onRegenerateChapter={onRegenerateChapter}
+          onInitializeSections={onInitializeSections}
           isLoadingManuals={isLoadingManuals}
           isLoadingSections={isLoadingSections}
           isGeneratingPreview={isGeneratingPreview}
           isApplying={isApplyingChanges}
+          isInitializing={isInitializing}
         />
       )}
 

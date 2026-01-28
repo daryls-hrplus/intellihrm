@@ -41,12 +41,14 @@ interface ManualContentSelectorProps {
   onPreviewChanges: () => void;
   onRegenerateSection: () => void;
   onRegenerateChapter: () => void;
+  onInitializeSections?: () => void;
   
   // Loading states
   isLoadingManuals?: boolean;
   isLoadingSections?: boolean;
   isGeneratingPreview?: boolean;
   isApplying?: boolean;
+  isInitializing?: boolean;
 }
 
 export function ManualContentSelector({
@@ -63,10 +65,12 @@ export function ManualContentSelector({
   onPreviewChanges,
   onRegenerateSection,
   onRegenerateChapter,
+  onInitializeSections,
   isLoadingManuals = false,
   isLoadingSections = false,
   isGeneratingPreview = false,
   isApplying = false,
+  isInitializing = false,
 }: ManualContentSelectorProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   
@@ -142,36 +146,68 @@ export function ManualContentSelector({
               </Select>
             </div>
 
-            {/* Chapter Selector */}
+            {/* Chapter Selector or Empty State */}
             {selectedManualId && (
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground">Chapter</label>
-                <Select 
-                  value={selectedChapter || "__none__"} 
-                  onValueChange={(v) => onChapterChange(v === "__none__" ? "" : v)}
-                  disabled={isLoadingSections || chapters.length === 0}
-                >
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder={isLoadingSections ? "Loading..." : "Select a chapter..."} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Select a chapter...</SelectItem>
-                    {chapters.map((chapter) => (
-                      <SelectItem key={chapter.chapterNumber} value={chapter.chapterNumber}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-muted-foreground">
-                            {chapter.chapterNumber}.
-                          </span>
-                          <span className="truncate max-w-[200px]">{chapter.title}</span>
-                          <Badge variant="secondary" className="text-[10px] px-1 ml-auto">
-                            {chapter.sectionCount}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <>
+                {!isLoadingSections && chapters.length === 0 && onInitializeSections ? (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                          No sections found
+                        </p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                          Initialize sections from the standard template to enable AI regeneration.
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-2"
+                          onClick={onInitializeSections}
+                          disabled={isInitializing}
+                        >
+                          {isInitializing ? (
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                          ) : (
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                          )}
+                          Initialize Sections
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-xs text-muted-foreground">Chapter</label>
+                    <Select 
+                      value={selectedChapter || "__none__"} 
+                      onValueChange={(v) => onChapterChange(v === "__none__" ? "" : v)}
+                      disabled={isLoadingSections || chapters.length === 0}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder={isLoadingSections ? "Loading..." : "Select a chapter..."} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Select a chapter...</SelectItem>
+                        {chapters.map((chapter) => (
+                          <SelectItem key={chapter.chapterNumber} value={chapter.chapterNumber}>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-xs text-muted-foreground">
+                                {chapter.chapterNumber}.
+                              </span>
+                              <span className="truncate max-w-[200px]">{chapter.title}</span>
+                              <Badge variant="secondary" className="text-[10px] px-1 ml-auto">
+                                {chapter.sectionCount}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Section Selector */}
