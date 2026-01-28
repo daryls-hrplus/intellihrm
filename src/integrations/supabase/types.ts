@@ -74674,6 +74674,399 @@ export type Database = {
           },
         ]
       }
+      training_vendor_costs: {
+        Row: {
+          amount: number
+          cost_type: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          is_included: boolean
+          is_per_person: boolean
+          notes: string | null
+          vendor_course_id: string | null
+          vendor_session_id: string | null
+        }
+        Insert: {
+          amount: number
+          cost_type: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_included?: boolean
+          is_per_person?: boolean
+          notes?: string | null
+          vendor_course_id?: string | null
+          vendor_session_id?: string | null
+        }
+        Update: {
+          amount?: number
+          cost_type?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          is_included?: boolean
+          is_per_person?: boolean
+          notes?: string | null
+          vendor_course_id?: string | null
+          vendor_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_vendor_costs_vendor_course_id_fkey"
+            columns: ["vendor_course_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendor_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_vendor_costs_vendor_session_id_fkey"
+            columns: ["vendor_session_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_vendor_courses: {
+        Row: {
+          certification_name: string | null
+          certification_validity_months: number | null
+          course_code: string | null
+          course_name: string
+          created_at: string
+          delivery_method: string
+          description: string | null
+          duration_days: number | null
+          duration_hours: number | null
+          id: string
+          is_active: boolean
+          prerequisites: string | null
+          target_audience: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          certification_name?: string | null
+          certification_validity_months?: number | null
+          course_code?: string | null
+          course_name: string
+          created_at?: string
+          delivery_method?: string
+          description?: string | null
+          duration_days?: number | null
+          duration_hours?: number | null
+          id?: string
+          is_active?: boolean
+          prerequisites?: string | null
+          target_audience?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          certification_name?: string | null
+          certification_validity_months?: number | null
+          course_code?: string | null
+          course_name?: string
+          created_at?: string
+          delivery_method?: string
+          description?: string | null
+          duration_days?: number | null
+          duration_hours?: number | null
+          id?: string
+          is_active?: boolean
+          prerequisites?: string | null
+          target_audience?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_vendor_courses_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_vendor_reviews: {
+        Row: {
+          action_items: Json | null
+          created_at: string
+          delivery_score: number | null
+          findings: Json | null
+          id: string
+          next_review_date: string | null
+          overall_score: number | null
+          quality_score: number | null
+          recommendations: Json | null
+          responsiveness_score: number | null
+          review_date: string
+          review_type: string
+          reviewer_id: string | null
+          status: string
+          updated_at: string
+          value_score: number | null
+          vendor_id: string
+        }
+        Insert: {
+          action_items?: Json | null
+          created_at?: string
+          delivery_score?: number | null
+          findings?: Json | null
+          id?: string
+          next_review_date?: string | null
+          overall_score?: number | null
+          quality_score?: number | null
+          recommendations?: Json | null
+          responsiveness_score?: number | null
+          review_date: string
+          review_type: string
+          reviewer_id?: string | null
+          status?: string
+          updated_at?: string
+          value_score?: number | null
+          vendor_id: string
+        }
+        Update: {
+          action_items?: Json | null
+          created_at?: string
+          delivery_score?: number | null
+          findings?: Json | null
+          id?: string
+          next_review_date?: string | null
+          overall_score?: number | null
+          quality_score?: number | null
+          recommendations?: Json | null
+          responsiveness_score?: number | null
+          review_date?: string
+          review_type?: string
+          reviewer_id?: string | null
+          status?: string
+          updated_at?: string
+          value_score?: number | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_vendor_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "training_vendor_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_vendor_reviews_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_vendor_sessions: {
+        Row: {
+          cancellation_deadline: string | null
+          capacity: number | null
+          cost_per_person: number | null
+          created_at: string
+          currency: string | null
+          end_date: string | null
+          end_time: string | null
+          id: string
+          instructor_name: string | null
+          location: string | null
+          location_type: string | null
+          meeting_url: string | null
+          notes: string | null
+          registered_count: number
+          registration_deadline: string | null
+          start_date: string
+          start_time: string | null
+          status: string
+          timezone: string | null
+          updated_at: string
+          vendor_course_id: string
+          waitlist_count: number
+        }
+        Insert: {
+          cancellation_deadline?: string | null
+          capacity?: number | null
+          cost_per_person?: number | null
+          created_at?: string
+          currency?: string | null
+          end_date?: string | null
+          end_time?: string | null
+          id?: string
+          instructor_name?: string | null
+          location?: string | null
+          location_type?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          registered_count?: number
+          registration_deadline?: string | null
+          start_date: string
+          start_time?: string | null
+          status?: string
+          timezone?: string | null
+          updated_at?: string
+          vendor_course_id: string
+          waitlist_count?: number
+        }
+        Update: {
+          cancellation_deadline?: string | null
+          capacity?: number | null
+          cost_per_person?: number | null
+          created_at?: string
+          currency?: string | null
+          end_date?: string | null
+          end_time?: string | null
+          id?: string
+          instructor_name?: string | null
+          location?: string | null
+          location_type?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          registered_count?: number
+          registration_deadline?: string | null
+          start_date?: string
+          start_time?: string | null
+          status?: string
+          timezone?: string | null
+          updated_at?: string
+          vendor_course_id?: string
+          waitlist_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_vendor_sessions_vendor_course_id_fkey"
+            columns: ["vendor_course_id"]
+            isOneToOne: false
+            referencedRelation: "training_vendor_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_vendors: {
+        Row: {
+          accreditations: string[] | null
+          address: string | null
+          code: string
+          company_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          contract_end_date: string | null
+          contract_start_date: string | null
+          contract_value: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_preferred: boolean
+          last_review_date: string | null
+          name: string
+          next_review_date: string | null
+          notes: string | null
+          payment_terms: string | null
+          performance_score: number | null
+          specializations: string[] | null
+          status: string
+          updated_at: string
+          vendor_type: string
+          website_url: string | null
+        }
+        Insert: {
+          accreditations?: string[] | null
+          address?: string | null
+          code: string
+          company_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          contract_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_preferred?: boolean
+          last_review_date?: string | null
+          name: string
+          next_review_date?: string | null
+          notes?: string | null
+          payment_terms?: string | null
+          performance_score?: number | null
+          specializations?: string[] | null
+          status?: string
+          updated_at?: string
+          vendor_type?: string
+          website_url?: string | null
+        }
+        Update: {
+          accreditations?: string[] | null
+          address?: string | null
+          code?: string
+          company_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          contract_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_preferred?: boolean
+          last_review_date?: string | null
+          name?: string
+          next_review_date?: string | null
+          notes?: string | null
+          payment_terms?: string | null
+          performance_score?: number | null
+          specializations?: string[] | null
+          status?: string
+          updated_at?: string
+          vendor_type?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_vendors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_vendors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "training_vendors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       translation_queue: {
         Row: {
           attempts: number
