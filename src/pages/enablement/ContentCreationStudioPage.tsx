@@ -19,7 +19,7 @@ import { useContentCreationAgent, GeneratedArtifact, GapAnalysis, GapSummary } f
 import { useManualSectionPreview } from "@/hooks/useManualSectionPreview";
 import { useInitializeSections } from "@/hooks/useManualGeneration";
 import { ContentCreationAgentChat } from "@/components/enablement/ContentCreationAgentChat";
-import { AgentContextPanel } from "@/components/enablement/AgentContextPanel";
+import { AgentContextPanel, ContextMode } from "@/components/enablement/AgentContextPanel";
 import { GeneratedArtifactList } from "@/components/enablement/GeneratedArtifactCard";
 import { ContentDiffPreview } from "@/components/enablement/ContentDiffPreview";
 import { GapAnalysisPanel } from "@/components/enablement/GapAnalysisPanel";
@@ -41,6 +41,7 @@ export default function ContentCreationStudioPage() {
       selectedFeature: "",
       artifactsExpanded: true,
       showGapPanel: false,
+      contextMode: "module" as ContextMode,
     },
     syncToUrl: ["selectedModule", "selectedFeature"],
   });
@@ -138,14 +139,43 @@ export default function ContentCreationStudioPage() {
   const selectModuleValue = tabState.selectedModule || "__all__";
   const selectFeatureValue = tabState.selectedFeature || "__none__";
 
+  // Handle context mode change
+  const handleContextModeChange = (mode: ContextMode) => {
+    setTabState({ contextMode: mode });
+  };
+
+  // Handle analyze with unified context (mode-aware)
+  const handleAnalyzeWithContext = async (
+    mode: ContextMode,
+    manualId?: string,
+    moduleCode?: string
+  ) => {
+    if (mode === 'manual' && manualId) {
+      // Analyze coverage scoped to the manual's module_codes
+      await analyzeContext(undefined, { manualId });
+    } else {
+      // Analyze coverage for module or system-wide
+      await analyzeContext(moduleCode || undefined);
+    }
+  };
+
   // Handle quick actions from chat
   const handleQuickAction = async (action: string, params?: Record<string, unknown>) => {
     const moduleCode = params?.moduleCode as string || tabState.selectedModule;
     const featureCode = params?.featureCode as string || tabState.selectedFeature;
+    
+    // Build manual context if in manual mode
+    const manualContext = tabState.contextMode === 'manual' && selectedManualId
+      ? { manualId: selectedManualId }
+      : {};
 
     switch (action) {
       case 'analyze_context':
-        await analyzeContext(moduleCode || undefined);
+        if (tabState.contextMode === 'manual' && selectedManualId) {
+          await analyzeContext(undefined, { manualId: selectedManualId });
+        } else {
+          await analyzeContext(moduleCode || undefined);
+        }
         break;
       case 'identify_gaps':
         const gapResult = await identifyGaps(moduleCode || undefined);
@@ -416,6 +446,10 @@ export default function ContentCreationStudioPage() {
                     isInitializing={isInitializing}
                     gapSummary={gapAnalysis?.summary || null}
                     onViewGapDetails={handleViewGapDetails}
+                    // Unified context mode props
+                    contextMode={tabState.contextMode as ContextMode}
+                    onContextModeChange={handleContextModeChange}
+                    onAnalyzeWithContext={handleAnalyzeWithContext}
                   />
                 </ScrollArea>
               </div>
