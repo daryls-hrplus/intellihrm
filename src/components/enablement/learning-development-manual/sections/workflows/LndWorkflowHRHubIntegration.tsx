@@ -523,6 +523,268 @@ Escalation Actions (configurable per step):
         </AlertDescription>
       </Alert>
 
+      {/* L&D Notifications & Reminders Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            L&D Notification Event Types
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            The following industry-standard notification triggers are available for L&D workflows. 
+            Configure reminder rules in <strong>Admin → Reminder Management</strong> to activate.
+          </p>
+          
+          <div className="space-y-6">
+            {/* Category A: Enrollment & Progress */}
+            <div>
+              <h4 className="font-semibold mb-2 text-emerald-700 dark:text-emerald-300">
+                Enrollment & Progress (6 types)
+              </h4>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Event Code</TableHead>
+                    <TableHead>Trigger</TableHead>
+                    <TableHead>Recommended Intervals</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_ENROLLMENT_CONFIRMATION</TableCell>
+                    <TableCell>enrolled_at</TableCell>
+                    <TableCell>Immediate</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_COURSE_REMINDER</TableCell>
+                    <TableCell>due_date</TableCell>
+                    <TableCell>7, 3, 1 days before</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_ENROLLMENT_EXPIRING</TableCell>
+                    <TableCell>due_date</TableCell>
+                    <TableCell>3, 1 days before</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_OVERDUE_TRAINING</TableCell>
+                    <TableCell>due_date</TableCell>
+                    <TableCell>1, 3, 7 days after</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_PROGRESS_STALLED</TableCell>
+                    <TableCell>updated_at</TableCell>
+                    <TableCell>7, 14 days inactive</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_COURSE_COMPLETED</TableCell>
+                    <TableCell>completed_at</TableCell>
+                    <TableCell>Immediate</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Category B: Assessment & Certification */}
+            <div>
+              <h4 className="font-semibold mb-2 text-blue-700 dark:text-blue-300">
+                Assessment & Certification (5 types)
+              </h4>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Event Code</TableHead>
+                    <TableHead>Trigger</TableHead>
+                    <TableHead>Recommended Intervals</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_QUIZ_DEADLINE</TableCell>
+                    <TableCell>quiz created_at</TableCell>
+                    <TableCell>24h, 4h before</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_QUIZ_FAILED</TableCell>
+                    <TableCell>submitted_at</TableCell>
+                    <TableCell>Immediate</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_CERTIFICATE_ISSUED</TableCell>
+                    <TableCell>issued_at</TableCell>
+                    <TableCell>Immediate</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_CERTIFICATE_EXPIRING</TableCell>
+                    <TableCell>expires_at</TableCell>
+                    <TableCell>90, 60, 30, 14 days before</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">LMS_RECERTIFICATION_DUE</TableCell>
+                    <TableCell>expires_at</TableCell>
+                    <TableCell>60, 30 days before</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Category C: Training Requests */}
+            <div>
+              <h4 className="font-semibold mb-2 text-purple-700 dark:text-purple-300">
+                Training Requests & Approvals (5 types)
+              </h4>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Event Code</TableHead>
+                    <TableHead>Trigger</TableHead>
+                    <TableHead>Recipients</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">TRAINING_REQUEST_SUBMITTED</TableCell>
+                    <TableCell>created_at</TableCell>
+                    <TableCell>Employee</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">TRAINING_REQUEST_APPROVED</TableCell>
+                    <TableCell>approved_at</TableCell>
+                    <TableCell>Employee</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">TRAINING_REQUEST_REJECTED</TableCell>
+                    <TableCell>updated_at</TableCell>
+                    <TableCell>Employee</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">TRAINING_REQUEST_PENDING</TableCell>
+                    <TableCell>created_at</TableCell>
+                    <TableCell>Manager / Approvers</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">TRAINING_BUDGET_ALERT</TableCell>
+                    <TableCell>budget threshold</TableCell>
+                    <TableCell>HR / Finance</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Category D: ILT/Vendor Sessions */}
+            <div>
+              <h4 className="font-semibold mb-2 text-orange-700 dark:text-orange-300">
+                ILT & Vendor Sessions (4 types)
+              </h4>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Event Code</TableHead>
+                    <TableHead>Trigger</TableHead>
+                    <TableHead>Recommended Intervals</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">VENDOR_SESSION_REMINDER</TableCell>
+                    <TableCell>start_date</TableCell>
+                    <TableCell>7, 1 days before</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">VENDOR_SESSION_REG_DEADLINE</TableCell>
+                    <TableCell>registration_deadline</TableCell>
+                    <TableCell>3, 1 days before</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">VENDOR_SESSION_CONFIRMED</TableCell>
+                    <TableCell>enrolled_at</TableCell>
+                    <TableCell>Immediate</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">VENDOR_SESSION_CANCELLED</TableCell>
+                    <TableCell>status change</TableCell>
+                    <TableCell>Immediate</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Category E: External Training */}
+            <div>
+              <h4 className="font-semibold mb-2 text-teal-700 dark:text-teal-300">
+                External Training & Verification (3 types)
+              </h4>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Event Code</TableHead>
+                    <TableHead>Trigger</TableHead>
+                    <TableHead>Recipients</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">EXTERNAL_TRAINING_SUBMITTED</TableCell>
+                    <TableCell>created_at</TableCell>
+                    <TableCell>Employee, HR</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">EXTERNAL_TRAINING_VERIFIED</TableCell>
+                    <TableCell>status change</TableCell>
+                    <TableCell>Employee</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">EXTERNAL_CERT_EXPIRING</TableCell>
+                    <TableCell>certificate_expiry_date</TableCell>
+                    <TableCell>Employee, Manager</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Category F: Evaluation */}
+            <div>
+              <h4 className="font-semibold mb-2 text-rose-700 dark:text-rose-300">
+                Post-Training Evaluation (2 types)
+              </h4>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Event Code</TableHead>
+                    <TableHead>Trigger</TableHead>
+                    <TableHead>Recommended Intervals</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">TRAINING_EVALUATION_DUE</TableCell>
+                    <TableCell>training completed</TableCell>
+                    <TableCell>3, 1 days after</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-xs">TRAINING_EVALUATION_REMINDER</TableCell>
+                    <TableCell>incomplete evaluation</TableCell>
+                    <TableCell>7, 14 days after</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Alert className="border-green-200 bg-green-50 dark:bg-green-950/20">
+        <CheckCircle2 className="h-4 w-4 text-green-600" />
+        <AlertTitle className="text-green-800 dark:text-green-200">25 L&D Notification Types Configured</AlertTitle>
+        <AlertDescription className="text-green-700 dark:text-green-300">
+          All L&D notification event types are seeded and ready for rule configuration. Navigate to 
+          Admin → Reminder Management to create company-specific rules with custom intervals, 
+          recipients, and message templates using placeholders like <code className="bg-muted px-1 rounded">{'{course_name}'}</code>, 
+          <code className="bg-muted px-1 rounded">{'{due_date}'}</code>, and <code className="bg-muted px-1 rounded">{'{certificate_expiry}'}</code>.
+        </AlertDescription>
+      </Alert>
+
       <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200">
         <CardContent className="pt-6">
           <h4 className="font-semibold mb-2">Cross-Reference: HR Hub Manual</h4>
