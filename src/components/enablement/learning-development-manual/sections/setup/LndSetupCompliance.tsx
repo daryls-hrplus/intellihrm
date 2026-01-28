@@ -447,6 +447,58 @@ export function LndSetupCompliance() {
         title="Compliance Rule Business Rules"
       />
 
+      {/* Compliance Notification Event Types */}
+      <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Bell className="h-5 w-5 text-blue-600" />
+            Compliance Notification Event Types
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">
+            The following seeded notification event types support compliance training workflows:
+          </p>
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted">
+                  <TableHead className="font-medium">Event Code</TableHead>
+                  <TableHead className="font-medium">Purpose</TableHead>
+                  <TableHead className="font-medium">Recommended Intervals</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell><code className="bg-muted px-1 rounded text-xs">LMS_COURSE_REMINDER</code></TableCell>
+                  <TableCell className="text-sm">Remind learners of upcoming compliance deadlines</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">30, 14, 7, 3 days before</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code className="bg-muted px-1 rounded text-xs">LMS_ENROLLMENT_EXPIRING</code></TableCell>
+                  <TableCell className="text-sm">Alert when compliance enrollment nearing expiry</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">7, 3, 1 days before</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code className="bg-muted px-1 rounded text-xs">LMS_OVERDUE_TRAINING</code></TableCell>
+                  <TableCell className="text-sm">Escalate overdue compliance training</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">1, 3, 7, 14 days overdue</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code className="bg-muted px-1 rounded text-xs">LMS_CERTIFICATE_EXPIRING</code></TableCell>
+                  <TableCell className="text-sm">Alert before compliance certificate expires</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">90, 60, 30, 14 days before</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            Configure reminder rules in <strong>Admin → Reminder Management</strong>. 
+            See Section 4.13 for complete L&D event type reference.
+          </p>
+        </CardContent>
+      </Card>
+
       <TipCallout title="Compliance Management Best Practices">
         <ul className="space-y-1 mt-2">
           <li>• Start reminders early (30 days) for busy employees</li>
