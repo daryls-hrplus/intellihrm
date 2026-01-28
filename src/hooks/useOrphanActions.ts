@@ -561,6 +561,119 @@ export function useOrphanActions() {
   }, []);
 
   /**
+   * Delete multiple features by feature code (used for batch operations)
+   */
+  const deleteByFeatureCodes = useCallback(async (featureCodes: string[]): Promise<OrphanActionResult> => {
+    if (featureCodes.length === 0) {
+      toast.warning("No features to delete");
+      return { success: true, affectedCount: 0, errors: [] };
+    }
+
+    setIsProcessing(true);
+    try {
+      const { data: features, error: fetchError } = await supabase
+        .from("application_features")
+        .select("id")
+        .in("feature_code", featureCodes);
+
+      if (fetchError) throw fetchError;
+
+      if (!features || features.length === 0) {
+        toast.warning("No features found matching the codes");
+        setIsProcessing(false);
+        return { success: true, affectedCount: 0, errors: [] };
+      }
+
+      const ids = features.map(f => f.id);
+
+      const { error } = await supabase
+        .from("application_features")
+        .delete()
+        .in("id", ids);
+
+      if (error) throw error;
+
+      toast.success(`${ids.length} feature(s) deleted permanently`);
+      return { success: true, affectedCount: ids.length, errors: [] };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete';
+      toast.error(message);
+      return { success: false, affectedCount: 0, errors: [message] };
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  /**
+   * Restore an archived entry and immediately mark as kept
+   * (Used from Archived tab for entries that should be retained)
+   */
+  const restoreAndKeep = useCallback(async (orphanId: string, notes?: string): Promise<OrphanActionResult> => {
+    setIsProcessing(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from("application_features")
+        .update({
+          is_active: true,
+          review_status: 'kept',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: userData.user?.id || null,
+          review_notes: notes || 'Restored from archive and marked as kept'
+        })
+        .eq("id", orphanId);
+
+      if (error) throw error;
+
+      toast.success("Feature restored and marked as kept");
+      return { success: true, affectedCount: 1, errors: [] };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to restore and keep';
+      toast.error(message);
+      return { success: false, affectedCount: 0, errors: [message] };
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  /**
+   * Restore multiple archived entries and immediately mark as kept
+   */
+  const restoreAndKeepMultiple = useCallback(async (orphanIds: string[], notes?: string): Promise<OrphanActionResult> => {
+    if (orphanIds.length === 0) {
+      return { success: true, affectedCount: 0, errors: [] };
+    }
+
+    setIsProcessing(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from("application_features")
+        .update({
+          is_active: true,
+          review_status: 'kept',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: userData.user?.id || null,
+          review_notes: notes || 'Restored from archive and marked as kept'
+        })
+        .in("id", orphanIds);
+
+      if (error) throw error;
+
+      toast.success(`${orphanIds.length} feature(s) restored and marked as kept`);
+      return { success: true, affectedCount: orphanIds.length, errors: [] };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to restore and keep';
+      toast.error(message);
+      return { success: false, affectedCount: 0, errors: [message] };
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  /**
    * Export orphans to CSV
    */
   const exportToCsv = useCallback((orphans: Array<{
@@ -619,13 +732,16 @@ export function useOrphanActions() {
     deleteOrphan,
     markAsKept,
     restoreOrphan,
+    restoreAndKeep,
     
     // Bulk actions
     archiveMultiple,
     archiveByFeatureCodes,
     deleteMultiple,
+    deleteByFeatureCodes,
     markMultipleAsKept,
     restoreMultiple,
+    restoreAndKeepMultiple,
     archiveBySource,
     archiveByModule,
     deleteByModule,

@@ -36,6 +36,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Archive,
   RotateCcw,
   Trash2,
@@ -44,6 +50,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
 import { cn } from "@/lib/utils";
@@ -56,6 +63,8 @@ interface ArchivedEntriesPanelProps {
   onRestoreMultiple: (ids: string[]) => Promise<void>;
   onDeletePermanently: (id: string) => Promise<void>;
   onDeleteMultiple: (ids: string[]) => Promise<void>;
+  onMarkAsKept: (id: string) => Promise<void>;
+  onMarkMultipleAsKept: (ids: string[]) => Promise<void>;
   isProcessing: boolean;
 }
 
@@ -66,6 +75,8 @@ export function ArchivedEntriesPanel({
   onRestoreMultiple,
   onDeletePermanently,
   onDeleteMultiple,
+  onMarkAsKept,
+  onMarkMultipleAsKept,
   isProcessing,
 }: ArchivedEntriesPanelProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -73,7 +84,7 @@ export function ArchivedEntriesPanel({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
-    type: 'restore' | 'delete' | 'restore_bulk' | 'delete_bulk';
+    type: 'restore' | 'delete' | 'restore_bulk' | 'delete_bulk' | 'keep' | 'keep_bulk';
     entry?: OrphanEntry;
   }>({ open: false, type: 'restore' });
 
@@ -122,6 +133,11 @@ export function ArchivedEntriesPanel({
     setConfirmDialog({ open: false, type: 'delete' });
   };
 
+  const handleKeep = async (entry: OrphanEntry) => {
+    await onMarkAsKept(entry.id);
+    setConfirmDialog({ open: false, type: 'keep' });
+  };
+
   const handleBulkRestore = async () => {
     await onRestoreMultiple(Array.from(selectedIds));
     setSelectedIds(new Set());
@@ -132,6 +148,12 @@ export function ArchivedEntriesPanel({
     await onDeleteMultiple(Array.from(selectedIds));
     setSelectedIds(new Set());
     setConfirmDialog({ open: false, type: 'delete_bulk' });
+  };
+
+  const handleBulkKeep = async () => {
+    await onMarkMultipleAsKept(Array.from(selectedIds));
+    setSelectedIds(new Set());
+    setConfirmDialog({ open: false, type: 'keep_bulk' });
   };
 
   if (isLoading) {
@@ -223,6 +245,16 @@ export function ArchivedEntriesPanel({
                 <Button
                   size="sm"
                   variant="outline"
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                  onClick={() => setConfirmDialog({ open: true, type: 'keep_bulk' })}
+                  disabled={isProcessing}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Keep Selected
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   className="text-green-600 border-green-200 hover:bg-green-50"
                   onClick={() => setConfirmDialog({ open: true, type: 'restore_bulk' })}
                   disabled={isProcessing}
@@ -305,6 +337,25 @@ export function ArchivedEntriesPanel({
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                onClick={() => setConfirmDialog({ open: true, type: 'keep', entry })}
+                                disabled={isProcessing}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Keep
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Restore and mark as reviewed/kept</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -342,7 +393,12 @@ export function ArchivedEntriesPanel({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              {confirmDialog.type.includes('restore') ? (
+              {confirmDialog.type.includes('keep') ? (
+                <>
+                  <CheckCircle className="h-5 w-5 text-blue-600" />
+                  Keep Feature{confirmDialog.type === 'keep_bulk' ? 's' : ''}
+                </>
+              ) : confirmDialog.type.includes('restore') ? (
                 <>
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                   Restore Feature{confirmDialog.type === 'restore_bulk' ? 's' : ''}
@@ -355,6 +411,18 @@ export function ArchivedEntriesPanel({
               )}
             </AlertDialogTitle>
             <AlertDialogDescription>
+              {confirmDialog.type === 'keep' && confirmDialog.entry && (
+                <>
+                  This will restore <strong>{confirmDialog.entry.featureName}</strong> ({confirmDialog.entry.featureCode}) 
+                  and mark it as reviewed and kept. It will appear in the "Kept" tab.
+                </>
+              )}
+              {confirmDialog.type === 'keep_bulk' && (
+                <>
+                  This will restore {selectedIds.size} feature(s) and mark them as reviewed and kept. 
+                  They will appear in the "Kept" tab.
+                </>
+              )}
               {confirmDialog.type === 'restore' && confirmDialog.entry && (
                 <>
                   This will restore <strong>{confirmDialog.entry.featureName}</strong> ({confirmDialog.entry.featureCode}) 
@@ -383,6 +451,24 @@ export function ArchivedEntriesPanel({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
+            {confirmDialog.type === 'keep' && confirmDialog.entry && (
+              <AlertDialogAction
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => handleKeep(confirmDialog.entry!)}
+              >
+                {isProcessing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Keep
+              </AlertDialogAction>
+            )}
+            {confirmDialog.type === 'keep_bulk' && (
+              <AlertDialogAction
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleBulkKeep}
+              >
+                {isProcessing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Keep {selectedIds.size} Feature(s)
+              </AlertDialogAction>
+            )}
             {confirmDialog.type === 'restore' && confirmDialog.entry && (
               <AlertDialogAction
                 className="bg-green-600 hover:bg-green-700"

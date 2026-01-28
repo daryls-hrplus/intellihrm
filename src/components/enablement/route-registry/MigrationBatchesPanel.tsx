@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Archive, ChevronDown, Database, Clock, CheckCircle } from "lucide-react";
+import { Archive, ChevronDown, Database, Clock, CheckCircle, Trash2 } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
 import { useState } from "react";
 import { format } from "date-fns";
@@ -19,13 +19,15 @@ interface MigrationBatchesPanelProps {
   orphans: OrphanEntry[];
   onArchiveBatch: (codes: string[]) => void;
   onKeepBatch: (codes: string[]) => void;
+  onDeleteBatch: (codes: string[]) => void;
 }
 
 export function MigrationBatchesPanel({
   batches,
   orphans,
   onArchiveBatch,
-  onKeepBatch
+  onKeepBatch,
+  onDeleteBatch
 }: MigrationBatchesPanelProps) {
   const [expandedBatches, setExpandedBatches] = useState<Set<string>>(new Set());
 
@@ -133,6 +135,14 @@ export function MigrationBatchesPanel({
                           >
                             <Archive className="h-4 w-4 mr-2" />
                             Archive Entire Batch
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => onDeleteBatch(batch.codes)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Entire Batch
                           </Button>
                         </div>
                         <div className="grid gap-1 max-h-[200px] overflow-y-auto">

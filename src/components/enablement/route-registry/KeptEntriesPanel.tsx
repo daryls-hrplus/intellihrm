@@ -10,18 +10,28 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle, Undo2, User, Calendar, MessageSquare, Info } from "lucide-react";
+import { CheckCircle, Undo2, User, Calendar, MessageSquare, Info, Archive, Trash2 } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface KeptEntriesPanelProps {
   keptEntries: OrphanEntry[];
   onUndoKeep: (orphanId: string) => Promise<void>;
+  onArchive: (orphan: OrphanEntry) => void;
+  onDelete: (orphan: OrphanEntry) => void;
   isProcessing: boolean;
 }
 
 export function KeptEntriesPanel({
   keptEntries,
   onUndoKeep,
+  onArchive,
+  onDelete,
   isProcessing
 }: KeptEntriesPanelProps) {
   if (keptEntries.length === 0) {
@@ -117,16 +127,51 @@ export function KeptEntriesPanel({
                   </div>
                 </div>
                 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onUndoKeep(entry.id)}
-                  disabled={isProcessing}
-                  className="flex-shrink-0"
-                >
-                  <Undo2 className="h-4 w-4 mr-2" />
-                  Undo
-                </Button>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onUndoKeep(entry.id)}
+                    disabled={isProcessing}
+                  >
+                    <Undo2 className="h-4 w-4 mr-2" />
+                    Undo
+                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => onArchive(entry)}
+                          disabled={isProcessing}
+                        >
+                          <Archive className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Archive this entry</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => onDelete(entry)}
+                          disabled={isProcessing}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete permanently</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
             ))}
           </div>
