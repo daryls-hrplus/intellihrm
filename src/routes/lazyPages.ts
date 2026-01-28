@@ -79,6 +79,7 @@ export const DemoConversionPage = lazy(() => import('@/pages/demo/DemoConversion
 // Enablement pages
 export const EnablementHubPage = lazy(() => import('@/pages/enablement/EnablementHubPage'));
 export const ContentCreationStudioPage = lazy(() => import('@/pages/enablement/ContentCreationStudioPage'));
+export const ContentReviewCenterPage = lazy(() => import('@/pages/enablement/ContentReviewCenterPage'));
 // Deprecated: ApplicationDocsGeneratorPage, FeatureCatalogPage, FeatureDatabasePage, TemplateLibraryPage
 // These routes now redirect to consolidated pages (see App.tsx)
 export const EnablementAnalyticsPage = lazy(() => import('@/pages/enablement/EnablementAnalyticsPage'));

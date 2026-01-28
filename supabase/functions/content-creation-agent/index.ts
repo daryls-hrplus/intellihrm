@@ -328,17 +328,23 @@ serve(async (req) => {
           .from("enablement_artifacts")
           .select("feature_code, artifact_type, status, updated_at");
 
-        // OPTION A: Fetch manual sections to include in coverage calculation
+        // Fetch manual sections to include in coverage calculation
         const { data: manualSections } = await supabase
           .from("manual_sections")
           .select("id, source_module_codes")
           .not("source_module_codes", "is", null);
 
-        // Build a set of module codes that have manual sections
-        const modulesWithManualSections = new Set<string>();
-        for (const section of manualSections || []) {
-          const codes = (section.source_module_codes as string[]) || [];
-          codes.forEach(code => modulesWithManualSections.add(code));
+        // NEW: Fetch manual feature coverage mappings (Component 1 from plan)
+        const { data: manualFeatureCoverage } = await supabase
+          .from("manual_feature_coverage")
+          .select("feature_codes");
+
+        // Build set of features covered by static manuals via manual_feature_coverage
+        const featuresWithManualCoverage = new Set<string>();
+        for (const row of manualFeatureCoverage || []) {
+          (row.feature_codes || []).forEach((code: string) => 
+            featuresWithManualCoverage.add(code)
+          );
         }
 
         // Build status maps
@@ -376,14 +382,14 @@ serve(async (req) => {
 
           const status = docStatusMap.get(feature.feature_code);
           const hasArtifacts = artifactMap.has(feature.feature_code);
-          // NEW: Also consider if the module has manual sections
-          const hasManualContent = modulesWithManualSections.has(modCode);
+          // NEW: Check if feature is covered via manual_feature_coverage table
+          const hasManualFeatureCoverage = featuresWithManualCoverage.has(feature.feature_code);
           const isDocumented = status?.documentation_status === 'complete' ||
             status?.documentation_status === 'in_progress' ||
             status?.workflow_status === 'published' ||
             status?.workflow_status === 'documentation' ||
             hasArtifacts ||
-            hasManualContent;
+            hasManualFeatureCoverage;  // Updated to use feature-level coverage
 
           if (isDocumented) {
             moduleBreakdown[modCode].documented++;
