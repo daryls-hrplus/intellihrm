@@ -416,7 +416,8 @@ export default function LearningDevelopmentManualPage() {
         onOpenChange={setShowPrintPreview}
         settings={printSettings}
         brandColors={brandColors}
-        onConfigureSettings={handleOpenPrintConfig}
+        onConfigureClick={handleOpenPrintConfig}
+        totalReadTime={getLndTotalReadTime()}
       />
     </div>
   );
