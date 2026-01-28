@@ -46632,12 +46632,15 @@ export type Database = {
       }
       manual_definitions: {
         Row: {
+          badge_color: string | null
+          chapters_count: number | null
           color_class: string | null
           company_id: string | null
           created_at: string
           created_by: string | null
           current_version: string
           description: string | null
+          functional_areas: string[] | null
           generation_status: string
           href: string | null
           icon_name: string | null
@@ -46647,17 +46650,21 @@ export type Database = {
           manual_code: string
           manual_name: string
           module_codes: string[]
+          sections_count: number | null
           structure_template: string | null
           template_config: Json | null
           updated_at: string
         }
         Insert: {
+          badge_color?: string | null
+          chapters_count?: number | null
           color_class?: string | null
           company_id?: string | null
           created_at?: string
           created_by?: string | null
           current_version?: string
           description?: string | null
+          functional_areas?: string[] | null
           generation_status?: string
           href?: string | null
           icon_name?: string | null
@@ -46667,17 +46674,21 @@ export type Database = {
           manual_code: string
           manual_name: string
           module_codes?: string[]
+          sections_count?: number | null
           structure_template?: string | null
           template_config?: Json | null
           updated_at?: string
         }
         Update: {
+          badge_color?: string | null
+          chapters_count?: number | null
           color_class?: string | null
           company_id?: string | null
           created_at?: string
           created_by?: string | null
           current_version?: string
           description?: string | null
+          functional_areas?: string[] | null
           generation_status?: string
           href?: string | null
           icon_name?: string | null
@@ -46687,6 +46698,7 @@ export type Database = {
           manual_code?: string
           manual_name?: string
           module_codes?: string[]
+          sections_count?: number | null
           structure_template?: string | null
           template_config?: Json | null
           updated_at?: string

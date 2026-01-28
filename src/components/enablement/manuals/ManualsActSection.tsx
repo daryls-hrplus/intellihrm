@@ -1,18 +1,14 @@
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { 
-  type ActDefinition,
-  getActChapterCount,
-} from "@/constants/manualsStructure";
+import { type TransformedAct } from "@/hooks/useManuals";
 import { ManualCard } from "./ManualCard";
 
 interface ManualsActSectionProps {
-  act: ActDefinition;
+  act: TransformedAct;
   isExpanded: boolean;
   onToggle: () => void;
   onManualClick: (manualId: string, manualTitle: string, href: string) => void;
@@ -25,7 +21,7 @@ export function ManualsActSection({
   onManualClick,
 }: ManualsActSectionProps) {
   const IconComponent = act.icon;
-  const chapterCount = getActChapterCount(act);
+  const chapterCount = act.manuals.reduce((acc, m) => acc + m.chapters, 0);
 
   return (
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
