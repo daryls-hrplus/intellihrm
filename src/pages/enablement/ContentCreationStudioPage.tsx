@@ -3,8 +3,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sparkles,
   Bot,
@@ -19,10 +17,11 @@ import { useContentCreationAgent, GeneratedArtifact, GapAnalysis, GapSummary } f
 import { useManualSectionPreview } from "@/hooks/useManualSectionPreview";
 import { useInitializeSections } from "@/hooks/useManualGeneration";
 import { ContentCreationAgentChat } from "@/components/enablement/ContentCreationAgentChat";
-import { AgentContextPanel, ContextMode } from "@/components/enablement/AgentContextPanel";
+import { ContentCreationScopeBar } from "@/components/enablement/ContentCreationScopeBar";
+import { ContentCreationOutputPanel } from "@/components/enablement/ContentCreationOutputPanel";
 import { GeneratedArtifactList } from "@/components/enablement/GeneratedArtifactCard";
 import { ContentDiffPreview } from "@/components/enablement/ContentDiffPreview";
-import { GapAnalysisPanel } from "@/components/enablement/GapAnalysisPanel";
+import { ContextMode } from "@/components/enablement/AgentContextPanel";
 import { toast } from "sonner";
 import {
   ResizableHandle,
@@ -40,8 +39,8 @@ export default function ContentCreationStudioPage() {
       selectedModule: "",
       selectedFeature: "",
       artifactsExpanded: true,
-      showGapPanel: false,
       contextMode: "module" as ContextMode,
+      outputTab: "preview",
     },
     syncToUrl: ["selectedModule", "selectedFeature"],
   });
@@ -49,7 +48,6 @@ export default function ContentCreationStudioPage() {
   const [previewContent, setPreviewContent] = useState<string>("");
   const [previewTitle, setPreviewTitle] = useState<string>("");
   const [selectedArtifactId, setSelectedArtifactId] = useState<string>("");
-  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isDiffPreviewOpen, setIsDiffPreviewOpen] = useState(false);
   const [gapAnalysis, setGapAnalysis] = useState<{ gaps: GapAnalysis; summary: GapSummary } | null>(null);
 
@@ -102,7 +100,6 @@ export default function ContentCreationStudioPage() {
     generatedArtifacts,
     analyzeContext,
     identifyGaps,
-    suggestNextActions,
     generateManualSection,
     generateKBArticle,
     generateQuickStart,
@@ -113,29 +110,18 @@ export default function ContentCreationStudioPage() {
     removeArtifact,
   } = useContentCreationAgent();
 
-  // Load suggestions on mount
-  useEffect(() => {
-    const loadSuggestions = async () => {
-      const result = await suggestNextActions();
-      setSuggestions(result);
-    };
-    loadSuggestions();
-  }, []);
-
   // Handle module/feature selection
   const handleModuleChange = (moduleCode: string) => {
-    // Convert special values back to empty string for internal state
     const actualValue = moduleCode === "__all__" ? "" : moduleCode;
     setTabState({ selectedModule: actualValue, selectedFeature: "" });
   };
 
   const handleFeatureChange = (featureCode: string) => {
-    // Convert special values back to empty string for internal state
     const actualValue = featureCode === "__none__" ? "" : featureCode;
     setTabState({ selectedFeature: actualValue });
   };
 
-  // Convert internal state to Select-compatible values (non-empty)
+  // Convert internal state to Select-compatible values
   const selectModuleValue = tabState.selectedModule || "__all__";
   const selectFeatureValue = tabState.selectedFeature || "__none__";
 
@@ -144,18 +130,12 @@ export default function ContentCreationStudioPage() {
     setTabState({ contextMode: mode });
   };
 
-  // Handle analyze with unified context (mode-aware)
-  const handleAnalyzeWithContext = async (
-    mode: ContextMode,
-    manualId?: string,
-    moduleCode?: string
-  ) => {
-    if (mode === 'manual' && manualId) {
-      // Analyze coverage scoped to the manual's module_codes
-      await analyzeContext(undefined, { manualId });
+  // Handle analyze - respects current context mode
+  const handleAnalyze = async () => {
+    if (tabState.contextMode === 'manual' && selectedManualId) {
+      await analyzeContext(undefined, { manualId: selectedManualId });
     } else {
-      // Analyze coverage for module or system-wide
-      await analyzeContext(moduleCode || undefined);
+      await analyzeContext(tabState.selectedModule || undefined);
     }
   };
 
@@ -163,25 +143,16 @@ export default function ContentCreationStudioPage() {
   const handleQuickAction = async (action: string, params?: Record<string, unknown>) => {
     const moduleCode = params?.moduleCode as string || tabState.selectedModule;
     const featureCode = params?.featureCode as string || tabState.selectedFeature;
-    
-    // Build manual context if in manual mode
-    const manualContext = tabState.contextMode === 'manual' && selectedManualId
-      ? { manualId: selectedManualId }
-      : {};
 
     switch (action) {
       case 'analyze_context':
-        if (tabState.contextMode === 'manual' && selectedManualId) {
-          await analyzeContext(undefined, { manualId: selectedManualId });
-        } else {
-          await analyzeContext(moduleCode || undefined);
-        }
+        await handleAnalyze();
         break;
       case 'identify_gaps':
         const gapResult = await identifyGaps(moduleCode || undefined);
         if (gapResult) {
           setGapAnalysis(gapResult);
-          setTabState({ showGapPanel: true });
+          setTabState({ outputTab: 'gaps' });
         }
         break;
       case 'generate_manual_section':
@@ -190,6 +161,7 @@ export default function ContentCreationStudioPage() {
           if (result) {
             setPreviewContent(result.content);
             setPreviewTitle(result.metadata.sectionTitle);
+            setTabState({ outputTab: 'preview' });
           }
         }
         break;
@@ -199,6 +171,7 @@ export default function ContentCreationStudioPage() {
           if (result) {
             setPreviewContent(result.content || JSON.stringify(result, null, 2));
             setPreviewTitle(result.title);
+            setTabState({ outputTab: 'preview' });
           }
         }
         break;
@@ -208,6 +181,7 @@ export default function ContentCreationStudioPage() {
           if (result) {
             setPreviewContent(JSON.stringify(result, null, 2));
             setPreviewTitle(`Quick Start: ${result.moduleName}`);
+            setTabState({ outputTab: 'preview' });
           }
         }
         break;
@@ -217,12 +191,15 @@ export default function ContentCreationStudioPage() {
           if (result) {
             setPreviewContent(JSON.stringify(result, null, 2));
             setPreviewTitle(result.title);
+            setTabState({ outputTab: 'preview' });
           }
         }
         break;
-      case 'suggest_next_actions':
-        const newSuggestions = await suggestNextActions();
-        setSuggestions(newSuggestions);
+      case 'regenerate_section':
+        await regenerateSection();
+        break;
+      case 'regenerate_chapter':
+        await regenerateChapter();
         break;
     }
   };
@@ -232,6 +209,7 @@ export default function ContentCreationStudioPage() {
     setPreviewContent(artifact.content);
     setPreviewTitle(artifact.title);
     setSelectedArtifactId(artifact.id);
+    setTabState({ outputTab: 'preview' });
   };
 
   // Handle artifact copy
@@ -242,7 +220,6 @@ export default function ContentCreationStudioPage() {
   // Handle save content to artifacts
   const handleSaveContent = async () => {
     if (!previewContent) return;
-
     const artifact = generatedArtifacts.find(a => a.id === selectedArtifactId);
     if (artifact) {
       await saveArtifact(artifact);
@@ -277,6 +254,7 @@ export default function ContentCreationStudioPage() {
         if (manualResult) {
           setPreviewContent(manualResult.content);
           setPreviewTitle(manualResult.metadata.sectionTitle);
+          setTabState({ outputTab: 'preview' });
         }
         break;
       case 'kb':
@@ -284,6 +262,7 @@ export default function ContentCreationStudioPage() {
         if (kbResult) {
           setPreviewContent(kbResult.content || JSON.stringify(kbResult, null, 2));
           setPreviewTitle(kbResult.title);
+          setTabState({ outputTab: 'preview' });
         }
         break;
       case 'sop':
@@ -291,30 +270,24 @@ export default function ContentCreationStudioPage() {
         if (sopResult) {
           setPreviewContent(JSON.stringify(sopResult, null, 2));
           setPreviewTitle(sopResult.title);
+          setTabState({ outputTab: 'preview' });
         }
         break;
     }
   };
 
-  // Handle gap panel refresh - respects module filter
-  const handleRefreshGaps = async () => {
-    const result = await identifyGaps(tabState.selectedModule || undefined);
+  // Handle gap panel refresh
+  const handleRefreshGaps = async (moduleCode?: string) => {
+    const result = await identifyGaps(moduleCode);
     if (result) {
       setGapAnalysis(result);
     }
   };
 
-  // Handle dismiss gap panel
-  const handleDismissGapPanel = () => {
-    setTabState({ showGapPanel: false });
-  };
-
-  // Handle view gap details from summary - respects module filter
-  const handleViewGapDetails = async () => {
-    if (!gapAnalysis) {
-      await handleRefreshGaps();
-    }
-    setTabState({ showGapPanel: true });
+  // Handle drill into module from details
+  const handleDrillIntoModule = (moduleCode: string) => {
+    setTabState({ contextMode: 'module', selectedModule: moduleCode });
+    handleAnalyze();
   };
 
   return (
@@ -337,7 +310,7 @@ export default function ContentCreationStudioPage() {
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">Content Creation Studio</h1>
                 <p className="text-muted-foreground">
-                  AI-powered documentation agent with schema awareness and multi-format output
+                  AI-powered documentation agent with schema awareness
                 </p>
               </div>
             </div>
@@ -362,96 +335,77 @@ export default function ContentCreationStudioPage() {
           </div>
         </div>
 
+        {/* Scope Bar */}
+        <ContentCreationScopeBar
+          contextMode={tabState.contextMode as ContextMode}
+          onContextModeChange={handleContextModeChange}
+          modules={modules}
+          features={features}
+          selectedModule={selectModuleValue}
+          selectedFeature={selectFeatureValue}
+          onModuleChange={handleModuleChange}
+          onFeatureChange={handleFeatureChange}
+          manuals={manuals}
+          chapters={chapters}
+          sectionsForChapter={sectionsForChapter}
+          selectedManualId={selectedManualId}
+          selectedChapter={selectedChapter}
+          selectedSectionId={selectedSectionId}
+          onManualChange={setSelectedManualId}
+          onChapterChange={setSelectedChapter}
+          onSectionChange={setSelectedSectionId}
+          onInitializeSections={handleInitializeSections}
+          isInitializing={isInitializing}
+          isLoadingManuals={isLoadingManuals}
+          isLoadingSections={isLoadingSections}
+          analysis={contextAnalysis}
+          isAnalyzing={isLoading && currentAction === 'analyze_context'}
+          onAnalyze={handleAnalyze}
+        />
+
         {/* Main Content - Resizable Panels */}
         <div className="flex-1 min-h-0">
           <ResizablePanelGroup direction="horizontal" className="h-full">
             {/* Left Panel - Agent Chat */}
-            <ResizablePanel defaultSize={50} minSize={35}>
-              <div className="h-full flex flex-col p-4">
+            <ResizablePanel defaultSize={55} minSize={40}>
+              <div className="h-full p-4">
                 <ContentCreationAgentChat
                   messages={chatMessages}
                   isStreaming={isStreaming}
                   onSendMessage={sendChatMessage}
                   onQuickAction={handleQuickAction}
                   onClearChat={clearChat}
-                  suggestions={suggestions}
                   selectedModule={tabState.selectedModule}
                   selectedFeature={tabState.selectedFeature}
-                  gapAnalysis={gapAnalysis}
-                  onGenerateForGap={handleGenerateForGap}
-                  onViewGapDetails={handleViewGapDetails}
+                  contextMode={tabState.contextMode as ContextMode}
+                  hasSection={!!selectedSectionId}
                 />
-
-                {/* Gap Analysis Panel - Below Chat */}
-                {tabState.showGapPanel && (
-                  <div className="mt-4">
-                    <GapAnalysisPanel
-                      gaps={gapAnalysis?.gaps || null}
-                      summary={gapAnalysis?.summary || null}
-                      isLoading={isLoading && currentAction === 'identify_gaps'}
-                      onGenerateForFeature={handleGenerateForGap}
-                      onRefresh={async (moduleCode) => {
-                        const result = await identifyGaps(moduleCode);
-                        if (result) setGapAnalysis(result);
-                      }}
-                      onDismiss={handleDismissGapPanel}
-                      modules={modules}
-                      selectedModule={tabState.selectedModule}
-                      onModuleChange={(moduleCode) => setTabState({ selectedModule: moduleCode })}
-                    />
-                  </div>
-                )}
               </div>
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
-            {/* Right Panel - Context & Preview */}
-            <ResizablePanel defaultSize={35} minSize={25}>
-              <div className="h-full flex flex-col p-4">
-                <ScrollArea className="flex-1">
-                  <AgentContextPanel
-                    analysis={contextAnalysis}
-                    isLoading={isLoading && currentAction === 'analyze_context'}
-                    modules={modules}
-                    features={features}
-                    selectedModule={selectModuleValue}
-                    selectedFeature={selectFeatureValue}
-                    onModuleChange={handleModuleChange}
-                    onFeatureChange={handleFeatureChange}
-                    onRefreshAnalysis={() => analyzeContext(tabState.selectedModule || undefined)}
-                    previewContent={previewContent}
-                    previewTitle={previewTitle}
-                    onSaveContent={selectedArtifactId ? handleSaveContent : undefined}
-                    onCopyContent={previewContent ? handleCopyContent : undefined}
-                    // Manual content selection props
-                    manuals={manuals}
-                    chapters={chapters}
-                    sectionsForChapter={sectionsForChapter}
-                    selectedSection={selectedSection}
-                    selectedManualId={selectedManualId}
-                    selectedChapter={selectedChapter}
-                    selectedSectionId={selectedSectionId}
-                    onManualChange={setSelectedManualId}
-                    onChapterChange={setSelectedChapter}
-                    onSectionChange={setSelectedSectionId}
-                    onPreviewChanges={handlePreviewChanges}
-                    onRegenerateSection={regenerateSection}
-                    onRegenerateChapter={regenerateChapter}
-                    isLoadingManuals={isLoadingManuals}
-                    isLoadingSections={isLoadingSections}
-                    isGeneratingPreview={isGeneratingPreview}
-                    isApplyingChanges={isApplying}
-                    onInitializeSections={handleInitializeSections}
-                    isInitializing={isInitializing}
-                    gapSummary={gapAnalysis?.summary || null}
-                    onViewGapDetails={handleViewGapDetails}
-                    // Unified context mode props
-                    contextMode={tabState.contextMode as ContextMode}
-                    onContextModeChange={handleContextModeChange}
-                    onAnalyzeWithContext={handleAnalyzeWithContext}
-                  />
-                </ScrollArea>
+            {/* Right Panel - Output Panel */}
+            <ResizablePanel defaultSize={45} minSize={30}>
+              <div className="h-full p-4">
+                <ContentCreationOutputPanel
+                  activeTab={tabState.outputTab}
+                  onTabChange={(tab) => setTabState({ outputTab: tab })}
+                  previewContent={previewContent}
+                  previewTitle={previewTitle}
+                  onSaveContent={selectedArtifactId ? handleSaveContent : undefined}
+                  onCopyContent={previewContent ? handleCopyContent : undefined}
+                  gapAnalysis={gapAnalysis}
+                  isLoadingGaps={isLoading && currentAction === 'identify_gaps'}
+                  onGenerateForGap={handleGenerateForGap}
+                  onRefreshGaps={handleRefreshGaps}
+                  modules={modules}
+                  selectedModule={selectModuleValue}
+                  onModuleChange={handleModuleChange}
+                  analysis={contextAnalysis}
+                  contextMode={tabState.contextMode as ContextMode}
+                  onDrillIntoModule={handleDrillIntoModule}
+                />
               </div>
             </ResizablePanel>
           </ResizablePanelGroup>
@@ -472,44 +426,38 @@ export default function ContentCreationStudioPage() {
                 ) : (
                   <ChevronUp className="h-4 w-4" />
                 )}
-                Generated Content ({generatedArtifacts.length})
+                Generated Artifacts ({generatedArtifacts.length})
               </Button>
             </div>
-            
+
             {tabState.artifactsExpanded && (
               <div className="px-4 pb-4">
-                <ScrollArea className="h-[200px]">
-                  <GeneratedArtifactList
-                    artifacts={generatedArtifacts}
-                    onSave={saveArtifact}
-                    onCopy={handleArtifactCopy}
-                    onRemove={removeArtifact}
-                    onPreview={handleArtifactPreview}
-                    selectedArtifactId={selectedArtifactId}
-                  />
-                </ScrollArea>
+                <GeneratedArtifactList
+                  artifacts={generatedArtifacts}
+                  onPreview={handleArtifactPreview}
+                  onSave={saveArtifact}
+                  onRemove={removeArtifact}
+                  onCopy={handleArtifactCopy}
+                />
               </div>
             )}
           </div>
         )}
-
-        {/* Diff Preview Dialog */}
-        {previewResult && (
-          <ContentDiffPreview
-            isOpen={isDiffPreviewOpen}
-            onClose={() => {
-              setIsDiffPreviewOpen(false);
-              clearPreview();
-            }}
-            sectionTitle={previewResult.sectionInfo.title}
-            sectionNumber={previewResult.sectionInfo.sectionNumber}
-            currentContent={previewResult.currentContent}
-            proposedContent={previewResult.proposedContent}
-            onApply={handleApplyChanges}
-            isApplying={isApplying}
-          />
-        )}
       </div>
+
+      {/* Diff Preview Dialog */}
+      {previewResult && (
+        <ContentDiffPreview
+          isOpen={isDiffPreviewOpen}
+          onClose={() => setIsDiffPreviewOpen(false)}
+          currentContent={previewResult.currentContent}
+          proposedContent={previewResult.proposedContent}
+          sectionTitle={previewResult.sectionInfo.title}
+          sectionNumber={previewResult.sectionInfo.sectionNumber}
+          onApply={handleApplyChanges}
+          isApplying={isApplying}
+        />
+      )}
     </AppLayout>
   );
 }
