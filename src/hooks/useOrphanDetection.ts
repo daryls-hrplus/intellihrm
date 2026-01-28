@@ -66,6 +66,7 @@ export function useOrphanDetection() {
   const [isLoading, setIsLoading] = useState(false);
   const [orphans, setOrphans] = useState<OrphanEntry[]>([]);
   const [keptEntries, setKeptEntries] = useState<OrphanEntry[]>([]);
+  const [archivedEntries, setArchivedEntries] = useState<OrphanEntry[]>([]);
   const [stats, setStats] = useState<OrphanStats | null>(null);
   const [duplicates, setDuplicates] = useState<OrphanDuplicate[]>([]);
   const [routeConflicts, setRouteConflicts] = useState<OrphanRouteConflict[]>([]);
@@ -200,15 +201,28 @@ export function useOrphanDetection() {
       // Create set of code feature codes for fast lookup
       const codeFeatureSet = new Set(codeRoutes.map(r => r.featureCode));
 
-      // Separate kept entries from orphans (in DB but not in code)
-      const orphanFeatures = allDbFeatures.filter(f => 
-        !codeFeatureSet.has(f.feature_code) && f.review_status !== 'kept'
+      // Separate active features into categories:
+      // 1. Orphans - not in code, active, not kept
+      // 2. Kept - not in code, active, review_status = 'kept'
+      // 3. Archived - is_active = false (regardless of code match)
+      const activeOrphanFeatures = allDbFeatures.filter(f => 
+        f.is_active !== false && 
+        !codeFeatureSet.has(f.feature_code) && 
+        f.review_status !== 'kept'
       );
       
       // Track kept entries separately for the Kept tab
       const keptFeatures = allDbFeatures.filter(f => 
-        !codeFeatureSet.has(f.feature_code) && f.review_status === 'kept'
+        f.is_active !== false &&
+        !codeFeatureSet.has(f.feature_code) && 
+        f.review_status === 'kept'
       );
+
+      // Track archived entries (is_active = false)
+      const archivedFeatures = allDbFeatures.filter(f => f.is_active === false);
+
+      // Use active orphans for analysis
+      const orphanFeatures = activeOrphanFeatures;
 
       // Build feature name map for duplicate detection
       const nameMap = new Map<string, string[]>();
@@ -476,8 +490,35 @@ export function useOrphanDetection() {
         }
       });
 
+      // Transform archived features to OrphanEntry format
+      const archivedOrphanEntries: OrphanEntry[] = archivedFeatures.map(f => ({
+        id: f.id,
+        featureCode: f.feature_code,
+        featureName: f.feature_name,
+        routePath: f.route_path,
+        moduleCode: f.module_code,
+        moduleName: getModuleName(f.module_code),
+        description: f.description,
+        source: parseSource(f.source),
+        createdAt: new Date(f.created_at),
+        isActive: false,
+        hasDuplicate: false,
+        duplicateOf: [],
+        similarTo: [],
+        recommendation: 'archive' as const,
+        recommendationReason: 'Archived feature',
+        groupCode: f.group_code,
+        groupName: f.group_name,
+        displayOrder: f.display_order,
+        reviewedAt: f.reviewed_at ? new Date(f.reviewed_at) : null,
+        reviewedBy: f.reviewed_by,
+        reviewStatus: f.review_status,
+        reviewNotes: f.review_notes
+      }));
+
       setOrphans(orphanEntries);
       setKeptEntries(keptOrphanEntries);
+      setArchivedEntries(archivedOrphanEntries);
       setStats(stats);
       setDuplicates(duplicateClusters);
       setRouteConflicts(conflicts);
@@ -488,6 +529,7 @@ export function useOrphanDetection() {
       return {
         orphans: orphanEntries,
         keptEntries: keptOrphanEntries,
+        archivedEntries: archivedOrphanEntries,
         stats,
         duplicates: duplicateClusters,
         routeConflicts: conflicts,
@@ -559,6 +601,7 @@ export function useOrphanDetection() {
     isLoading,
     orphans,
     keptEntries,
+    archivedEntries,
     stats,
     duplicates,
     routeConflicts,
@@ -578,6 +621,7 @@ export function useOrphanDetection() {
     // Stats
     orphanCount: orphans.length,
     keptCount: keptEntries.length,
+    archivedCount: archivedEntries.length,
     codeRouteCount: codeRoutes.length,
     prefixedVariantCount: prefixedVariants.length,
     migrationBatchCount: migrationBatches.length,
