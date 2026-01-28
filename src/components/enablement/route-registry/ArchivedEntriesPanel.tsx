@@ -51,6 +51,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   CheckCircle,
+  User,
+  Database,
 } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
 import { cn } from "@/lib/utils";
@@ -325,9 +327,24 @@ export function ArchivedEntriesPanel({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">
-                        {entry.moduleCode || 'unassigned'}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          {entry.moduleCode || 'unassigned'}
+                        </Badge>
+                        {entry.createdByName ? (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            <User className="h-3 w-3 mr-1" />
+                            {entry.createdByName}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs bg-muted">
+                            <Database className="h-3 w-3 mr-1" />
+                            {entry.source === 'auto_migration' ? 'Migr.' : 
+                             entry.source === 'manual_entry' ? 'Manual' :
+                             entry.source === 'registry' ? 'Reg.' : 'Sys'}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       {entry.routePath || '-'}

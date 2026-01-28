@@ -27,6 +27,8 @@ interface RawDbFeature {
   reviewed_by: string | null;
   review_status: 'kept' | 'needs_review' | null;
   review_notes: string | null;
+  // Creator tracking
+  created_by: string | null;
 }
 
 // Known prefixes for detecting prefixed variants (e.g., admin_announcements = announcements)
@@ -188,7 +190,8 @@ export function useOrphanDetection() {
           reviewed_at,
           reviewed_by,
           review_status,
-          review_notes
+          review_notes,
+          created_by
         `)
         .order("module_code")
         .order("feature_name");
@@ -196,6 +199,21 @@ export function useOrphanDetection() {
       if (dbError) throw dbError;
 
       const allDbFeatures = (dbFeatures || []) as RawDbFeature[];
+
+      // Fetch creator profiles for all unique created_by IDs
+      const creatorIds = [...new Set(
+        allDbFeatures.map(f => f.created_by).filter((id): id is string => !!id)
+      )];
+      
+      let creatorMap = new Map<string, string>();
+      if (creatorIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", creatorIds);
+        
+        profiles?.forEach(p => creatorMap.set(p.id, p.full_name || 'Unknown'));
+      }
       setTotalDbFeatures(allDbFeatures.length);
 
       // Create set of code feature codes for fast lookup
@@ -357,7 +375,10 @@ export function useOrphanDetection() {
           reviewedAt: f.reviewed_at ? new Date(f.reviewed_at) : null,
           reviewedBy: f.reviewed_by,
           reviewStatus: f.review_status,
-          reviewNotes: f.review_notes
+          reviewNotes: f.review_notes,
+          // Creator tracking
+          createdBy: f.created_by,
+          createdByName: f.created_by ? creatorMap.get(f.created_by) || null : null
         };
       });
 
@@ -384,7 +405,10 @@ export function useOrphanDetection() {
         reviewedAt: f.reviewed_at ? new Date(f.reviewed_at) : null,
         reviewedBy: f.reviewed_by,
         reviewStatus: f.review_status,
-        reviewNotes: f.review_notes
+        reviewNotes: f.review_notes,
+        // Creator tracking
+        createdBy: f.created_by,
+        createdByName: f.created_by ? creatorMap.get(f.created_by) || null : null
       }));
 
       // Calculate stats
@@ -513,7 +537,10 @@ export function useOrphanDetection() {
         reviewedAt: f.reviewed_at ? new Date(f.reviewed_at) : null,
         reviewedBy: f.reviewed_by,
         reviewStatus: f.review_status,
-        reviewNotes: f.review_notes
+        reviewNotes: f.review_notes,
+        // Creator tracking
+        createdBy: f.created_by,
+        createdByName: f.created_by ? creatorMap.get(f.created_by) || null : null
       }));
 
       setOrphans(orphanEntries);

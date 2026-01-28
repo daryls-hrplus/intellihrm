@@ -2319,6 +2319,7 @@ export type Database = {
       application_features: {
         Row: {
           created_at: string
+          created_by: string | null
           description: string | null
           display_order: number | null
           feature_category: string | null
@@ -2349,6 +2350,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           display_order?: number | null
           feature_category?: string | null
@@ -2379,6 +2381,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           display_order?: number | null
           feature_category?: string | null
@@ -2408,6 +2411,20 @@ export type Database = {
           workflow_steps?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "application_features_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "application_features_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "application_features_module_id_fkey"
             columns: ["module_id"]
