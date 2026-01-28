@@ -15,13 +15,14 @@ import {
 import { useTabState } from "@/hooks/useTabState";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { useApplicationModules, useApplicationFeatures } from "@/hooks/useApplicationFeatures";
-import { useContentCreationAgent, GeneratedArtifact } from "@/hooks/useContentCreationAgent";
+import { useContentCreationAgent, GeneratedArtifact, GapAnalysis, GapSummary } from "@/hooks/useContentCreationAgent";
 import { useManualSectionPreview } from "@/hooks/useManualSectionPreview";
 import { useInitializeSections } from "@/hooks/useManualGeneration";
 import { ContentCreationAgentChat } from "@/components/enablement/ContentCreationAgentChat";
 import { AgentContextPanel } from "@/components/enablement/AgentContextPanel";
 import { GeneratedArtifactList } from "@/components/enablement/GeneratedArtifactCard";
 import { ContentDiffPreview } from "@/components/enablement/ContentDiffPreview";
+import { GapAnalysisPanel } from "@/components/enablement/GapAnalysisPanel";
 import { toast } from "sonner";
 import {
   ResizableHandle,
@@ -39,6 +40,7 @@ export default function ContentCreationStudioPage() {
       selectedModule: "",
       selectedFeature: "",
       artifactsExpanded: true,
+      showGapPanel: false,
     },
     syncToUrl: ["selectedModule", "selectedFeature"],
   });
@@ -48,6 +50,7 @@ export default function ContentCreationStudioPage() {
   const [selectedArtifactId, setSelectedArtifactId] = useState<string>("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isDiffPreviewOpen, setIsDiffPreviewOpen] = useState(false);
+  const [gapAnalysis, setGapAnalysis] = useState<{ gaps: GapAnalysis; summary: GapSummary } | null>(null);
 
   // Manual section preview hook
   const {
@@ -145,7 +148,11 @@ export default function ContentCreationStudioPage() {
         await analyzeContext(moduleCode || undefined);
         break;
       case 'identify_gaps':
-        await identifyGaps();
+        const gapResult = await identifyGaps();
+        if (gapResult) {
+          setGapAnalysis(gapResult);
+          setTabState({ showGapPanel: true });
+        }
         break;
       case 'generate_manual_section':
         if (featureCode) {
@@ -232,6 +239,54 @@ export default function ContentCreationStudioPage() {
     setIsDiffPreviewOpen(false);
   };
 
+  // Handle gap panel generate action
+  const handleGenerateForGap = async (featureCode: string, type: 'kb' | 'manual' | 'sop') => {
+    switch (type) {
+      case 'manual':
+        const manualResult = await generateManualSection({ featureCode });
+        if (manualResult) {
+          setPreviewContent(manualResult.content);
+          setPreviewTitle(manualResult.metadata.sectionTitle);
+        }
+        break;
+      case 'kb':
+        const kbResult = await generateKBArticle({ featureCode });
+        if (kbResult) {
+          setPreviewContent(kbResult.content || JSON.stringify(kbResult, null, 2));
+          setPreviewTitle(kbResult.title);
+        }
+        break;
+      case 'sop':
+        const sopResult = await generateSOP(featureCode);
+        if (sopResult) {
+          setPreviewContent(JSON.stringify(sopResult, null, 2));
+          setPreviewTitle(sopResult.title);
+        }
+        break;
+    }
+  };
+
+  // Handle gap panel refresh
+  const handleRefreshGaps = async () => {
+    const result = await identifyGaps();
+    if (result) {
+      setGapAnalysis(result);
+    }
+  };
+
+  // Handle dismiss gap panel
+  const handleDismissGapPanel = () => {
+    setTabState({ showGapPanel: false });
+  };
+
+  // Handle view gap details from summary
+  const handleViewGapDetails = () => {
+    if (!gapAnalysis) {
+      handleRefreshGaps();
+    }
+    setTabState({ showGapPanel: true });
+  };
+
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -292,14 +347,31 @@ export default function ContentCreationStudioPage() {
                   suggestions={suggestions}
                   selectedModule={tabState.selectedModule}
                   selectedFeature={tabState.selectedFeature}
+                  gapAnalysis={gapAnalysis}
+                  onGenerateForGap={handleGenerateForGap}
+                  onViewGapDetails={handleViewGapDetails}
                 />
+
+                {/* Gap Analysis Panel - Below Chat */}
+                {tabState.showGapPanel && (
+                  <div className="mt-4">
+                    <GapAnalysisPanel
+                      gaps={gapAnalysis?.gaps || null}
+                      summary={gapAnalysis?.summary || null}
+                      isLoading={isLoading && currentAction === 'identify_gaps'}
+                      onGenerateForFeature={handleGenerateForGap}
+                      onRefresh={handleRefreshGaps}
+                      onDismiss={handleDismissGapPanel}
+                    />
+                  </div>
+                )}
               </div>
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
             {/* Right Panel - Context & Preview */}
-            <ResizablePanel defaultSize={50} minSize={30}>
+            <ResizablePanel defaultSize={35} minSize={25}>
               <div className="h-full flex flex-col p-4">
                 <ScrollArea className="flex-1">
                   <AgentContextPanel
@@ -336,6 +408,8 @@ export default function ContentCreationStudioPage() {
                     isApplyingChanges={isApplying}
                     onInitializeSections={handleInitializeSections}
                     isInitializing={isInitializing}
+                    gapSummary={gapAnalysis?.summary || null}
+                    onViewGapDetails={handleViewGapDetails}
                   />
                 </ScrollArea>
               </div>

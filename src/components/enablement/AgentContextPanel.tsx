@@ -15,11 +15,12 @@ import {
   ChevronRight,
   Loader2,
 } from "lucide-react";
-import { ContextAnalysis } from "@/hooks/useContentCreationAgent";
+import { ContextAnalysis, GapSummary } from "@/hooks/useContentCreationAgent";
 import { ApplicationModule, ApplicationFeature } from "@/hooks/useApplicationFeatures";
 import { ManualDefinition, ManualSection } from "@/hooks/useManualGeneration";
 import { ChapterInfo } from "@/hooks/useChapterGeneration";
 import { ManualContentSelector } from "./ManualContentSelector";
+import { GapSummaryCard } from "./GapSummaryCard";
 import { cn } from "@/lib/utils";
 import { markdownToHtml } from "@/lib/utils/markdown";
 
@@ -57,6 +58,9 @@ interface AgentContextPanelProps {
   isApplyingChanges?: boolean;
   onInitializeSections?: () => void;
   isInitializing?: boolean;
+  // Gap summary
+  gapSummary?: GapSummary | null;
+  onViewGapDetails?: () => void;
 }
 
 export function AgentContextPanel({
@@ -93,6 +97,8 @@ export function AgentContextPanel({
   isApplyingChanges = false,
   onInitializeSections,
   isInitializing = false,
+  gapSummary,
+  onViewGapDetails,
 }: AgentContextPanelProps) {
   // Filter features by selected module
   const filteredFeatures = selectedModule
@@ -169,6 +175,11 @@ export function AgentContextPanel({
           isApplying={isApplyingChanges}
           isInitializing={isInitializing}
         />
+      )}
+
+      {/* Gap Summary Card */}
+      {gapSummary && onViewGapDetails && (
+        <GapSummaryCard summary={gapSummary} onViewDetails={onViewGapDetails} />
       )}
 
       {/* Coverage Stats */}

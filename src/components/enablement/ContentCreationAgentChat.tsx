@@ -19,8 +19,9 @@ import {
   Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ChatMessage, ActionSuggestion } from "@/hooks/useContentCreationAgent";
+import { ChatMessage, ActionSuggestion, GapAnalysis, GapSummary } from "@/hooks/useContentCreationAgent";
 import ReactMarkdown from "react-markdown";
+import { GapResultsMessage } from "./GapResultsMessage";
 
 interface ContentCreationAgentChatProps {
   messages: ChatMessage[];
@@ -31,6 +32,9 @@ interface ContentCreationAgentChatProps {
   suggestions?: ActionSuggestion[];
   selectedModule?: string;
   selectedFeature?: string;
+  gapAnalysis?: { gaps: GapAnalysis; summary: GapSummary } | null;
+  onGenerateForGap?: (featureCode: string, type: 'kb' | 'manual' | 'sop') => void;
+  onViewGapDetails?: () => void;
 }
 
 const QUICK_ACTIONS = [
@@ -85,6 +89,9 @@ export function ContentCreationAgentChat({
   suggestions = [],
   selectedModule,
   selectedFeature,
+  gapAnalysis,
+  onGenerateForGap,
+  onViewGapDetails,
 }: ContentCreationAgentChatProps) {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -276,6 +283,21 @@ export function ContentCreationAgentChat({
           )}
         </div>
       </ScrollArea>
+
+      {/* Gap Analysis Results - Inline Display */}
+      {gapAnalysis && onGenerateForGap && onViewGapDetails && (
+        <>
+          <Separator />
+          <div className="p-3 flex-shrink-0">
+            <GapResultsMessage
+              gaps={gapAnalysis.gaps}
+              summary={gapAnalysis.summary}
+              onGenerateForFeature={onGenerateForGap}
+              onViewFullAnalysis={onViewGapDetails}
+            />
+          </div>
+        </>
+      )}
 
       {/* AI Suggestions from Analysis */}
       {suggestions.length > 0 && (
