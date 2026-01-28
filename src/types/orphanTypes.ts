@@ -8,6 +8,8 @@
 export type OrphanSource = 'auto_migration' | 'manual_entry' | 'registry' | 'unknown';
 export type OrphanRecommendation = 'keep_as_planned' | 'archive' | 'delete' | 'merge' | 'review';
 
+export type ReviewStatus = 'kept' | 'needs_review' | null;
+
 export interface OrphanEntry {
   id: string;
   featureCode: string;
@@ -29,6 +31,11 @@ export interface OrphanEntry {
   groupCode: string | null;
   groupName: string | null;
   displayOrder: number | null;
+  // Review/Keep tracking fields
+  reviewedAt: Date | null;
+  reviewedBy: string | null;
+  reviewStatus: ReviewStatus;
+  reviewNotes: string | null;
 }
 
 export interface OrphanDuplicate {

@@ -310,9 +310,119 @@ export function useOrphanActions() {
       toast.error("Failed to undo");
       return false;
     } finally {
-      setIsProcessing(false);
+    setIsProcessing(false);
     }
   }, [undoState]);
+
+  /**
+   * Mark a single orphan as reviewed and kept
+   */
+  const markAsKept = useCallback(async (orphanId: string, notes?: string): Promise<OrphanActionResult> => {
+    setIsProcessing(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from("application_features")
+        .update({ 
+          review_status: 'kept',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: userData.user?.id,
+          review_notes: notes || null
+        })
+        .eq("id", orphanId);
+
+      if (error) throw error;
+
+      const result: OrphanActionResult = {
+        success: true,
+        affectedCount: 1,
+        errors: []
+      };
+
+      setLastAction(result);
+      toast.success("Feature marked as reviewed and kept");
+
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to mark as kept';
+      toast.error(message);
+      return { success: false, affectedCount: 0, errors: [message] };
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  /**
+   * Mark multiple orphans as kept
+   */
+  const markMultipleAsKept = useCallback(async (orphanIds: string[], notes?: string): Promise<OrphanActionResult> => {
+    if (orphanIds.length === 0) {
+      return { success: true, affectedCount: 0, errors: [] };
+    }
+
+    setIsProcessing(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from("application_features")
+        .update({ 
+          review_status: 'kept',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: userData.user?.id,
+          review_notes: notes || null
+        })
+        .in("id", orphanIds);
+
+      if (error) throw error;
+
+      const result: OrphanActionResult = {
+        success: true,
+        affectedCount: orphanIds.length,
+        errors: []
+      };
+
+      setLastAction(result);
+      toast.success(`${orphanIds.length} feature(s) marked as kept`);
+
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to mark as kept';
+      toast.error(message);
+      return { success: false, affectedCount: 0, errors: [message] };
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  /**
+   * Undo keep action (reset review status)
+   */
+  const undoKeep = useCallback(async (orphanId: string): Promise<boolean> => {
+    setIsProcessing(true);
+    try {
+      const { error } = await supabase
+        .from("application_features")
+        .update({ 
+          review_status: null,
+          reviewed_at: null,
+          reviewed_by: null,
+          review_notes: null
+        })
+        .eq("id", orphanId);
+
+      if (error) throw error;
+
+      toast.success("Keep status removed - feature returned to orphan list");
+      return true;
+    } catch (err) {
+      toast.error("Failed to undo keep action");
+      return false;
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
 
   /**
    * Export orphans to CSV
@@ -371,16 +481,19 @@ export function useOrphanActions() {
     // Single actions
     archiveOrphan,
     deleteOrphan,
+    markAsKept,
     
     // Bulk actions
     archiveMultiple,
     deleteMultiple,
+    markMultipleAsKept,
     archiveBySource,
     archiveByModule,
     deleteByModule,
     
     // Utilities
     undoArchive,
+    undoKeep,
     exportToCsv
   };
 }
