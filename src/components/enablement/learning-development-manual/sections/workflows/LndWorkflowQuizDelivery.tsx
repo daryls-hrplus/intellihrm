@@ -1,5 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, Bell } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export function LndWorkflowQuizDelivery() {
   return (
@@ -53,6 +61,47 @@ Learner Starts Quiz
     ▼         ▼
 Certificate  Retry (if attempts remain)
           `}</pre>
+        </CardContent>
+      </Card>
+      {/* Notification Integration */}
+      <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Bell className="h-5 w-5 text-blue-600" />
+            Assessment Notifications
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">
+            The following notification event types support assessment workflows:
+          </p>
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted">
+                  <TableHead className="font-medium">Event Code</TableHead>
+                  <TableHead className="font-medium">Trigger</TableHead>
+                  <TableHead className="font-medium">Placeholders</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell><code className="bg-muted px-1 rounded text-xs">LMS_QUIZ_DEADLINE</code></TableCell>
+                  <TableCell className="text-sm">Quiz submission deadline approaching</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{'{course_name}'}, {'{due_date}'}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code className="bg-muted px-1 rounded text-xs">LMS_QUIZ_FAILED</code></TableCell>
+                  <TableCell className="text-sm">Quiz failed with retakes available</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{'{quiz_score}'}, {'{passing_score}'}, {'{retakes_remaining}'}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            Configure reminder rules in <strong>Admin → Reminder Management</strong>. 
+            See Section 4.13 for complete event type reference.
+          </p>
         </CardContent>
       </Card>
     </section>
