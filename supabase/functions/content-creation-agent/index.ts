@@ -495,11 +495,11 @@ serve(async (req) => {
           staleContent: staleContent.slice(0, 10),
         };
 
-        // Manual section coverage stats
+        // Manual feature coverage stats (via manual_feature_coverage table)
         const manualSectionCoverage = {
-          totalModulesWithSections: modulesWithManualSections.size,
+          totalFeaturesWithCoverage: featuresWithManualCoverage.size,
           totalSections: manualSections?.length || 0,
-          modulesWithContent: Array.from(modulesWithManualSections),
+          featuresWithCoverage: Array.from(featuresWithManualCoverage),
         };
 
         return new Response(
