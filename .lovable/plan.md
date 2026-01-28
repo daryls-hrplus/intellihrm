@@ -1,140 +1,111 @@
 
-# Fix Chapter Selection in Content Creation Studio
+# Sync Manual Structure and Update Feature Documentation Status
 
 ## Problem Summary
 
-The Content Creation Studio cannot display chapters for the "Performance Appraisal - Administrator Guide" because:
+The Coverage panel shows **0%** and **4 gaps** for the Appraisals module because:
 
-1. **Database has no sections**: The `manual_sections` table has 0 rows for the Appraisals manual (`id: 7405b449-6cd0-4c37-9a1e-d6ed23b9c1ea`)
-2. **Content lives in static TypeScript**: The actual manual structure is defined in `APPRAISALS_MANUAL_STRUCTURE` in `src/types/adminManual.ts` (8 chapters, ~100+ sections)
-3. **Hook queries wrong source**: `useManualSectionPreview` calls `useManualSections(manualId)` which queries the empty database table
+1. The `manual_sections` table has **0 rows** for the Appraisals manual (despite the static `APPRAISALS_MANUAL_STRUCTURE` existing in TypeScript)
+2. The `enablement_content_status` records for all 4 Appraisal features show `documentation_status: 'not_started'`
+3. The coverage calculation only considers features with `documentation_status === 'complete'` or `workflow_status === 'published'`
 
-Only 2 manuals have database sections:
-- Benefits Administrator Manual (35 sections)
-- HR Hub Admin Guide (35 sections)
+## Solution Overview
 
----
+Implement **both options** as requested:
 
-## Root Cause
-
-The Content Creation Studio uses `useManualSections()` which queries `manual_sections` table, but the Appraisals manual content was never synced to this table. The static `APPRAISALS_MANUAL_STRUCTURE` in `src/types/adminManual.ts` contains 8 chapters with subsections, but this isn't being used by the Studio.
+1. **Option A**: When manual sections are initialized, update the coverage calculation to also check for existing `manual_sections` records
+2. **Option B**: Automatically update related features' `documentation_status` to reflect the presence of manual sections
 
 ---
 
-## Solution Options
+## Implementation Plan
 
-### Option A: Sync Static Structure to Database (Recommended)
-Initialize the `manual_sections` table with the content from `APPRAISALS_MANUAL_STRUCTURE`. This ensures the Content Creation Studio has chapters to select.
+### Part 1: Enhance the Initialize Sections Edge Function
 
-**Implementation:**
-1. Create a utility function that converts `APPRAISALS_MANUAL_STRUCTURE` to database section format
-2. Call the `initialize-manual-sections` edge function with proper mapping
-3. Alternatively, create a direct sync script
+Modify `initialize-manual-sections/index.ts` to also update the `enablement_content_status` table for related features.
 
-**Changes Required:**
-- Add a "Sync Structure" button in the Manual Content selector when no sections exist
-- Call `useInitializeSections` mutation to populate the database from the static structure
-
-### Option B: Support Both Static and Database Sources
-Modify `useManualSectionPreview` to fallback to static structures when database is empty.
-
-**Changes Required:**
-- Detect if `manual_sections` returns empty for specific manual codes
-- Fall back to `APPRAISALS_MANUAL_STRUCTURE` for appraisals, similar static for other manuals
-- Map static structure to `ChapterInfo[]` format
-
----
-
-## Recommended Implementation: Option A
-
-This is the cleaner approach because:
-1. The database becomes the single source of truth
-2. AI regeneration can update database sections
-3. Version tracking and change detection work properly
-4. No special-case handling needed for different manuals
-
-### Step 1: Add Helper to Detect Empty Manual
-
-Update `ManualContentSelector.tsx` to show a sync prompt when manual has no sections:
+**Changes:**
+- After creating manual sections, fetch features that match the module codes
+- Upsert `enablement_content_status` records with `documentation_status: 'in_progress'` for each feature
+- This ensures that when sections exist, the features are marked as having documentation work in progress
 
 ```typescript
-// When chapters.length === 0 and selectedManualId exists
-<div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-  <p className="text-sm text-amber-800 mb-2">
-    This manual has no sections in the database yet.
-  </p>
-  <Button size="sm" onClick={handleInitializeSections}>
-    Initialize Sections
-  </Button>
-</div>
+// After creating sections, update related feature documentation status
+const { data: relatedFeatures } = await supabase
+  .from('application_features')
+  .select('feature_code, application_modules!inner(module_code)')
+  .in('application_modules.module_code', moduleCodes);
+
+if (relatedFeatures && relatedFeatures.length > 0) {
+  for (const feature of relatedFeatures) {
+    const moduleCode = (feature.application_modules as any)?.module_code;
+    await supabase
+      .from('enablement_content_status')
+      .upsert({
+        feature_code: feature.feature_code,
+        module_code: moduleCode,
+        documentation_status: 'in_progress',
+        workflow_status: 'documentation',
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'feature_code',
+        ignoreDuplicates: false
+      });
+  }
+}
 ```
 
-### Step 2: Update ContentCreationStudioPage
+### Part 2: Enhance Coverage Calculation
 
-Add initialization capability:
+Modify `content-creation-agent/index.ts` in the `analyze_context` action to also consider `manual_sections` when determining if a feature is documented.
+
+**Changes:**
+- Fetch `manual_sections` grouped by source module codes
+- When calculating `isDocumented`, also check if the feature's module has manual sections
 
 ```typescript
-const { mutate: initializeSections, isPending: isInitializing } = useInitializeSections();
+// Fetch manual sections coverage
+const { data: manualSections } = await supabase
+  .from('manual_sections')
+  .select('id, source_module_codes')
+  .not('source_module_codes', 'is', null);
 
-const handleInitializeSections = () => {
-  const manual = manuals.find(m => m.id === selectedManualId);
-  if (!manual) return;
-  
-  initializeSections({
-    manualId: selectedManualId,
-    moduleName: manual.manual_name,
-    moduleCodes: manual.module_codes,
-    targetRoles: ['admin', 'hr_user', 'consultant']
-  });
-};
+// Build a set of module codes that have manual sections
+const modulesWithManualSections = new Set<string>();
+for (const section of manualSections || []) {
+  const codes = (section.source_module_codes as string[]) || [];
+  codes.forEach(code => modulesWithManualSections.add(code));
+}
+
+// In the coverage loop, update isDocumented check:
+const hasManualContent = modulesWithManualSections.has(modCode);
+const isDocumented = 
+  status?.documentation_status === 'complete' ||
+  status?.workflow_status === 'published' ||
+  hasArtifacts ||
+  hasManualContent; // NEW: Consider manual sections
 ```
 
-### Step 3: Pass Handler to ManualContentSelector
+### Part 3: Add Manual Count to Coverage Response
+
+Add a new field to the coverage analysis response showing manual section coverage.
 
 ```typescript
-<ManualContentSelector
-  // ... existing props
-  onInitializeSections={handleInitializeSections}
-  isInitializing={isInitializing}
-  hasSections={chapters.length > 0}
-/>
+// Add to response
+manualSectionCoverage: {
+  totalModulesWithSections: modulesWithManualSections.size,
+  totalSections: manualSections?.length || 0,
+  modulesWithContent: Array.from(modulesWithManualSections)
+}
 ```
 
-### Step 4: Update ManualContentSelector UI
+### Part 4: Update UI to Show Manual Section Coverage
 
-Add empty state with initialization action:
+Update `AgentContextPanel.tsx` to display manual section coverage in the stats.
 
-```typescript
-{selectedManualId && !isLoadingSections && chapters.length === 0 && (
-  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-    <div className="flex items-start gap-2">
-      <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
-      <div className="flex-1">
-        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-          No sections found
-        </p>
-        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-          Initialize sections from the standard template to enable AI regeneration.
-        </p>
-        <Button
-          size="sm"
-          variant="outline"
-          className="mt-2"
-          onClick={onInitializeSections}
-          disabled={isInitializing}
-        >
-          {isInitializing ? (
-            <Loader2 className="h-3 w-3 animate-spin mr-1" />
-          ) : (
-            <RefreshCw className="h-3 w-3 mr-1" />
-          )}
-          Initialize Sections
-        </Button>
-      </div>
-    </div>
-  </div>
-)}
-```
+**Changes:**
+- Add a new stat row showing "Manual Sections" count when available
+- Show which modules have manual documentation vs which don't
 
 ---
 
@@ -142,46 +113,42 @@ Add empty state with initialization action:
 
 | File | Changes |
 |------|---------|
-| `src/components/enablement/ManualContentSelector.tsx` | Add empty state with initialization prompt, new props for `onInitializeSections`, `isInitializing`, `hasSections` |
-| `src/pages/enablement/ContentCreationStudioPage.tsx` | Add `useInitializeSections` mutation, create handler, pass to `ManualContentSelector` via `AgentContextPanel` |
-| `src/components/enablement/AgentContextPanel.tsx` | Pass through new initialization props to `ManualContentSelector` |
+| `supabase/functions/initialize-manual-sections/index.ts` | Add upsert for `enablement_content_status` with `documentation_status: 'in_progress'` after creating sections |
+| `supabase/functions/content-creation-agent/index.ts` | Update `analyze_context` to include `manual_sections` in coverage calculation |
+| `src/components/enablement/AgentContextPanel.tsx` | (Optional) Add visual indicator for manual section coverage |
+
+---
+
+## Expected Outcome
+
+**After Implementation:**
+
+1. **Initialize Sections** for Appraisals manual → Creates ~30 sections in `manual_sections`
+2. The 4 Appraisal features get their `documentation_status` updated to `'in_progress'`
+3. Coverage panel refreshes and shows:
+   - **25% - 100%** coverage (depending on exact calculation logic)
+   - **0-4 gaps** (instead of 4)
+4. The Coverage calculation now considers both `enablement_content_status` AND `manual_sections`
 
 ---
 
 ## Database Impact
 
-After initialization, the `manual_sections` table will be populated with ~100+ rows for the Appraisals manual, matching the structure in `APPRAISALS_MANUAL_STRUCTURE`. This enables:
-- Chapter dropdown to populate correctly
-- Section selection to work
-- Preview Changes and Regenerate actions to function
-- AI-powered content updates
+- **`manual_sections`**: Will be populated with standard structure sections (~30-35 rows per manual)
+- **`enablement_content_status`**: Existing `not_started` records will be updated to `in_progress`
 
 ---
 
-## Expected User Experience
+## Alternative: Immediate Database Fix
 
-**Before Fix:**
-1. User selects "Performance Appraisal - Administrator Guide"
-2. Chapter dropdown shows "Select a chapter..." but clicking does nothing
-3. No sections available for regeneration
-
-**After Fix:**
-1. User selects "Performance Appraisal - Administrator Guide"  
-2. UI shows "No sections found. Initialize sections from standard template."
-3. User clicks "Initialize Sections"
-4. ~100 sections are created in database
-5. Chapter dropdown now populates with 8 chapters
-6. User can select chapter, then section, and use AI regeneration
-
----
-
-## Alternative Quick Fix
-
-If immediate functionality is needed before full implementation, manually run the section initialization:
+If you want to immediately fix the coverage without waiting for code changes, we can run a database update to mark the 4 Appraisal features as having documentation:
 
 ```sql
--- This would need to be done via the edge function
--- Call: initialize-manual-sections with manualId for appraisals
+UPDATE enablement_content_status 
+SET documentation_status = 'in_progress',
+    workflow_status = 'documentation',
+    updated_at = NOW()
+WHERE module_code = 'appraisals';
 ```
 
-Or trigger via the existing "Start Bulk Generation" button which should call the initialization edge function.
+This would show the features as "in progress" rather than gaps, while the full solution adds the proper sync logic.
