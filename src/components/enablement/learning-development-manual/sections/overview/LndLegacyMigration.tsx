@@ -68,7 +68,7 @@ export function LndLegacyMigration() {
         </div>
 
         <p className="text-muted-foreground mb-6">
-          Organizations migrating from HRplus Training or similar legacy systems will find this mapping guide 
+          Organizations migrating from legacy training management systems will find this mapping guide 
           essential for understanding how existing concepts translate to Intelli HRM L&D. This section covers 
           entity mappings, new capabilities, and migration considerations.
         </p>
@@ -86,7 +86,7 @@ export function LndLegacyMigration() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left p-3 font-semibold">Legacy (HRplus)</th>
+                      <th className="text-left p-3 font-semibold">Legacy System</th>
                       <th className="text-left p-3 font-semibold">Intelli HRM</th>
                       <th className="text-left p-3 font-semibold">Status</th>
                       <th className="text-left p-3 font-semibold">Notes</th>
