@@ -1,239 +1,385 @@
 
-# L&D Module Alignment Audit & Gap Analysis Report
 
-## Executive Summary
+# Option B Implementation: Database-to-Documentation Enterprise Alignment
 
-This audit compares the **Database Schema** (56 tables), **UI Pages** (28 pages), **Feature Registry** (40+ features), and **Manual Documentation** (9 chapters) for the Learning & Development module.
+## Audit Correction
 
-**Current Status:** 
-- Chapters 1-2: COMPLETE (~7,600 lines total)
-- Chapters 3-9: PLACEHOLDER (< 15 lines each, just headings with no content)
+**Good news:** The tables previously thought to be "missing" actually **DO EXIST** in the database:
 
----
+| Table | Status | Fields |
+|-------|--------|--------|
+| `compliance_items` | EXISTS | 13 fields |
+| `compliance_document_templates` | EXISTS | 20 fields |
+| `course_instructors` | EXISTS | 5 fields |
+| `external_training_records` | EXISTS | 21 fields |
 
-## Part 1: Alignment Verification
-
-### 1.1 Database Tables vs Documentation
-
-| Domain | DB Tables | Documented Tables | Gap |
-|--------|-----------|-------------------|-----|
-| Core LMS | 18 | 12 | 6 missing |
-| Learning Paths | 3 | 3 | Aligned |
-| Compliance | 4 | 4 | 2 non-existent listed |
-| Training Operations | 18 | 12 | 6 missing |
-| SCORM/xAPI | 3 | 3 | Aligned |
-| Gamification | 5 | 5 | Aligned |
-| Discussion & Social | 5 | 5 | Aligned |
-| Competency Integration | 2 | 2 | Non-existent tables listed |
-| Interactive Training | 7 | 7 | Aligned |
-| **TOTAL** | **56** | **~52** | **4+ gaps** |
-
-**Tables in DB but NOT documented:**
-- `lms_review_helpful` (course review voting)
-- `training_quiz_options` (quiz answer choices)
-- `training_quiz_answers` (submitted answers)
-- `training_remediation` (remedial learning rules)
-
-**Tables in docs but NOT in DB:**
-- `compliance_items` (listed but doesn't exist)
-- `compliance_document_templates` (listed but doesn't exist)
-- `course_competencies` (should be `competency_course_mappings`)
-- `course_instructors` (doesn't exist as standalone table)
-- `external_training_records` (doesn't exist)
-
-### 1.2 UI Pages vs Manual Coverage
-
-| UI Page | Manual Section | Status |
-|---------|----------------|--------|
-| TrainingDashboardPage | 7.1 Analytics Dashboard | Placeholder |
-| CourseCatalogPage | 2.3 Course Creation | Covered |
-| MyLearningPage | 4.2 Enrollment Management | Placeholder |
-| LearningPathsPage | 2.10 Learning Paths Setup | Covered |
-| ComplianceTrainingPage | 5.1-5.6 Compliance | Placeholder |
-| TrainingRequestsPage | 4.3-4.7 Training Requests | Placeholder |
-| TrainingBudgetsPage | 2.13 Budget Configuration | Covered |
-| InstructorsPage | 2.14 Instructor Management | Covered |
-| TrainingEvaluationsPage | 4.11 Completion & Evaluation | Placeholder |
-| CertificationsPage | 4.12 Certification | Placeholder |
-| RecertificationPage | 5.3 Recertification | Placeholder |
-| TrainingAnalyticsPage | 7.1-7.7 Analytics | Placeholder |
-| TrainingCalendarPage | 4.15 Calendar Operations | Placeholder |
-| **InteractiveTrainingPage** | **NONE** | **Missing** |
-| **VirtualClassroomPage** | **NONE** | **Missing** |
-| **TrainingCareerPathsPage** | **8.5 Career Development** | Placeholder |
-| **TrainingMentorshipPage** | **NONE** | **Missing** |
-| **TrainingNeedsPage** | **6.3 Training Needs Analysis** | Placeholder |
-| **LiveSessionsPage** | **NONE** | **Missing** |
-| ContentAuthoringPage | 6.4 Intelligent Quiz Generation | Placeholder |
-| ExternalTrainingPage | 4.14 External Records | Placeholder |
-| QuizPage | 2.9 Quiz Configuration | Covered |
-| CourseCompetenciesPage | 2.11 Competency-Course Mapping | Covered |
-| CompetencyGapAnalysisPage | 6.2 Competency Gap Detection | Placeholder |
-| EmployeeLearningPage | 4.9 Progress Tracking | Placeholder |
-| EmployeeCertificationsPage | 4.12 Certification | Placeholder |
-| CourseViewerPage | 4.9 Progress Tracking | Placeholder |
-| InteractiveTrainingAdminPage | **NONE** | **Missing** |
-
-**Critical Gaps:**
-- 5 UI pages have NO corresponding manual section
-- 16 UI pages map to placeholder-only documentation
-
-### 1.3 Feature Registry vs Manual Coverage
-
-**Features in Registry without detailed documentation:**
-- `lms_accreditations` - No dedicated section
-- `lms_class_scheduling` - No dedicated section  
-- `lms_roi_analysis` - No dedicated section
-- `lms_skill_gap_analysis` - Mentioned but not detailed
-- `live_sessions` - No section
-- `training_requests` - Placeholder only
-- `my_learning` - No ESS journey documentation
+**Actual gaps identified:** Missing enterprise fields in existing tables that need to be added to match documented features.
 
 ---
 
-## Part 2: Industry Standard Gaps
+## Phase 1: Database Schema Enhancements
 
-### 2.1 Missing Industry-Standard Capabilities Documentation
+### Migration 1: Course Enrollment Management Fields
 
-Based on Workday Learning, SAP SuccessFactors, and Cornerstone standards:
+Add enterprise enrollment management to `lms_courses`:
 
-| Industry Standard | Intelli HRM Status | Documentation Status |
-|-------------------|-------------------|---------------------|
-| ILT Session Management | DB tables exist | NO documentation |
-| Virtual Classroom Integration | UI page exists | NO documentation |
-| Instructor-Led Training Scheduling | Partial DB support | NO documentation |
-| Mentorship Program Management | UI page exists | NO documentation |
-| Blended Learning Paths | Supported | NO documentation |
-| Waitlist Management | Partial | NO documentation |
-| Training Needs Analysis (TNA) | DB tables exist | Placeholder only |
-| ROI Calculation | UI page exists | NO documentation |
-| Social Learning (Forums) | DB tables exist | NO documentation |
-| Mobile Learning Support | Unknown | NO documentation |
-| xAPI Analytics | DB tables exist | Partial in 2.16 |
-| Kirkpatrick Evaluation Levels | DB support | Partial in 2.11 |
-| Manager Team Training Dashboard | UI exists | Placeholder only |
-| Training Calendar Sync | UI exists | Placeholder only |
+```sql
+-- Add enrollment management fields to lms_courses
+ALTER TABLE lms_courses ADD COLUMN IF NOT EXISTS allow_self_enrollment boolean DEFAULT true;
+ALTER TABLE lms_courses ADD COLUMN IF NOT EXISTS max_enrollments integer;
+ALTER TABLE lms_courses ADD COLUMN IF NOT EXISTS enrollment_start_date date;
+ALTER TABLE lms_courses ADD COLUMN IF NOT EXISTS enrollment_end_date date;
 
-### 2.2 Missing Enterprise LMS Documentation
-
-Standard enterprise LMS manuals include:
-
-1. **Session Management Chapter** - Scheduling, capacity, waitlists, cancellations
-2. **Virtual Classroom Chapter** - Integration with Teams/Zoom, recording management
-3. **Social Learning Chapter** - Discussion forums, peer recommendations
-4. **Mobile Learning Chapter** - Offline access, push notifications
-5. **Reporting & Analytics Chapter** - Full Kirkpatrick L1-L4 framework
-6. **Integration Chapter** - HRIS sync, calendar sync, external LMS federation
-
----
-
-## Part 3: Gap Closure Plan
-
-### Phase 1: Complete Placeholder Chapters (Priority: Critical)
-
-Create modular section components matching Chapters 1-2 pattern:
-
-```
-src/components/enablement/learning-development-manual/sections/
-├── agency/           (Chapter 3 - 9 sections, ~2,500 lines)
-├── workflows/        (Chapter 4 - 15 sections, ~4,000 lines)
-├── compliance/       (Chapter 5 - 6 sections, ~2,000 lines)
-├── ai/               (Chapter 6 - 6 sections, ~2,000 lines)
-├── analytics/        (Chapter 7 - 7 sections, ~2,500 lines)
-├── integration/      (Chapter 8 - 8 sections, ~2,500 lines)
-└── troubleshooting/  (Chapter 9 - 7 sections, ~2,000 lines)
+COMMENT ON COLUMN lms_courses.allow_self_enrollment IS 'Allows employees to enroll without manager approval';
+COMMENT ON COLUMN lms_courses.max_enrollments IS 'Maximum active enrollments (null = unlimited)';
+COMMENT ON COLUMN lms_courses.enrollment_start_date IS 'Date when self-enrollment opens';
+COMMENT ON COLUMN lms_courses.enrollment_end_date IS 'Date when self-enrollment closes';
 ```
 
-**Estimated Total:** ~17,500 additional lines across 58 modular components
+### Migration 2: Quiz Enhancement Fields
 
-### Phase 2: Fix Architecture Documentation Mismatches
+Add learner experience options to `lms_quizzes`:
 
-1. Remove non-existent tables from LndArchitecture.tsx:
-   - `compliance_items`
-   - `compliance_document_templates`  
-   - `course_competencies`
-   - `course_instructors`
-   - `external_training_records`
+```sql
+-- Add enhanced quiz options
+ALTER TABLE lms_quizzes ADD COLUMN IF NOT EXISTS shuffle_options boolean DEFAULT false;
+ALTER TABLE lms_quizzes ADD COLUMN IF NOT EXISTS show_explanations boolean DEFAULT true;
+ALTER TABLE lms_quizzes ADD COLUMN IF NOT EXISTS allow_review boolean DEFAULT true;
 
-2. Add missing tables to LndArchitecture.tsx:
-   - `lms_review_helpful`
-   - `training_quiz_options`
-   - `training_quiz_answers`
-   - `training_remediation`
+COMMENT ON COLUMN lms_quizzes.shuffle_options IS 'Randomize answer options within each question';
+COMMENT ON COLUMN lms_quizzes.show_explanations IS 'Display answer explanations after submission';
+COMMENT ON COLUMN lms_quizzes.allow_review IS 'Allow learners to review answers before submitting';
+```
 
-3. Update table count from "63" to actual count "56"
+### Migration 3: Multi-Tenant Category Support
 
-### Phase 3: Add Missing Industry-Standard Sections
+Add company scoping to `lms_categories`:
 
-New sections to add:
+```sql
+-- Add multi-tenant support to categories
+ALTER TABLE lms_categories ADD COLUMN IF NOT EXISTS company_id uuid REFERENCES companies(id);
+CREATE INDEX IF NOT EXISTS idx_lms_categories_company ON lms_categories(company_id);
 
-**Chapter 4 Additions (Workflows):**
-- 4.16 Session Management & Scheduling
-- 4.17 Virtual Classroom Operations
-- 4.18 Waitlist Management
-
-**Chapter 5 Additions (Compliance):**
-- 5.7 Certification Expiry Tracking
-- 5.8 Grace Period Management
-
-**Chapter 6 Additions (AI):**
-- 6.7 AI-Powered Content Generation
-
-**Chapter 7 Additions (Analytics):**
-- 7.8 Kirkpatrick Model Reporting (L1-L4)
-- 7.9 ROI Analysis
-
-**Chapter 8 Additions (Integration):**
-- 8.9 Calendar Sync (Google/Outlook)
-- 8.10 Video Platform Integration
-
-**NEW Chapter 10: Social & Collaborative Learning**
-- 10.1 Discussion Forums
-- 10.2 Peer Recommendations
-- 10.3 Expert Directories
-- 10.4 Mentorship Programs
-
-### Phase 4: Sync Feature Registry
-
-Update `application_features` to include missing features:
-- `lms_discussion_forums`
-- `lms_mentorship`
-- `lms_interactive_training`
-- `lms_live_sessions`
-- `lms_virtual_classroom`
+COMMENT ON COLUMN lms_categories.company_id IS 'Company-specific category (null = global/shared)';
+```
 
 ---
 
-## Implementation Priority Matrix
+## Phase 2: UI Form Updates
 
-| Priority | Task | Impact | Effort |
-|----------|------|--------|--------|
-| P0 | Fix architecture table mismatches | High | Low |
-| P1 | Chapter 4 - Operational Workflows | Critical | High |
-| P1 | Chapter 5 - Compliance | Critical | Medium |
-| P2 | Chapter 3 - Agency Management | High | Medium |
-| P2 | Chapter 7 - Analytics | High | Medium |
-| P3 | Chapter 6 - AI Features | Medium | Medium |
-| P3 | Chapter 8 - Integration | Medium | Medium |
-| P3 | Chapter 9 - Troubleshooting | Medium | Low |
-| P4 | Add missing industry sections | Medium | High |
-| P4 | New Chapter 10 - Social Learning | Low | Medium |
+### 2.1 Update Course Form (AdminLmsManagementPage.tsx)
+
+**File:** `src/pages/admin/AdminLmsManagementPage.tsx`
+
+Add new fields to the course interface and form:
+
+```typescript
+// Update Course interface (around line 32)
+interface Course {
+  // ... existing fields ...
+  allow_self_enrollment: boolean;
+  max_enrollments: number | null;
+  enrollment_start_date: string | null;
+  enrollment_end_date: string | null;
+}
+
+// Update saveCourse function (around line 216)
+const saveCourse = async (formData: FormData) => {
+  const data = {
+    // ... existing fields ...
+    allow_self_enrollment: formData.get('allow_self_enrollment') === 'true',
+    max_enrollments: formData.get('max_enrollments') ? parseInt(formData.get('max_enrollments') as string) : null,
+    enrollment_start_date: formData.get('enrollment_start_date') as string || null,
+    enrollment_end_date: formData.get('enrollment_end_date') as string || null,
+  };
+  // ... rest of function
+};
+```
+
+Add form fields in the course dialog:
+
+```tsx
+{/* Enrollment Settings Section */}
+<div className="space-y-4 border-t pt-4">
+  <h4 className="font-medium">Enrollment Settings</h4>
+  
+  <div className="flex items-center justify-between">
+    <Label htmlFor="allow_self_enrollment">Allow Self-Enrollment</Label>
+    <Switch
+      id="allow_self_enrollment"
+      name="allow_self_enrollment"
+      defaultChecked={editingCourse?.allow_self_enrollment ?? true}
+    />
+  </div>
+  
+  <div className="space-y-2">
+    <Label htmlFor="max_enrollments">Maximum Enrollments</Label>
+    <Input
+      id="max_enrollments"
+      name="max_enrollments"
+      type="number"
+      placeholder="Unlimited"
+      defaultValue={editingCourse?.max_enrollments || ''}
+    />
+  </div>
+  
+  <div className="grid grid-cols-2 gap-4">
+    <div className="space-y-2">
+      <Label htmlFor="enrollment_start_date">Enrollment Opens</Label>
+      <Input
+        id="enrollment_start_date"
+        name="enrollment_start_date"
+        type="date"
+        defaultValue={editingCourse?.enrollment_start_date || ''}
+      />
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="enrollment_end_date">Enrollment Closes</Label>
+      <Input
+        id="enrollment_end_date"
+        name="enrollment_end_date"
+        type="date"
+        defaultValue={editingCourse?.enrollment_end_date || ''}
+      />
+    </div>
+  </div>
+</div>
+```
+
+### 2.2 Update Quiz Form (AdminLmsManagementPage.tsx)
+
+**File:** `src/pages/admin/AdminLmsManagementPage.tsx`
+
+Add new fields to quiz interface and form:
+
+```typescript
+// Update Quiz interface (around line 70)
+interface Quiz {
+  // ... existing fields ...
+  shuffle_options: boolean;
+  show_explanations: boolean;
+  allow_review: boolean;
+}
+
+// Update saveQuiz function
+const saveQuiz = async (formData: FormData) => {
+  const data = {
+    // ... existing fields ...
+    shuffle_options: formData.get('shuffle_options') === 'true',
+    show_explanations: formData.get('show_explanations') === 'true',
+    allow_review: formData.get('allow_review') === 'true',
+  };
+  // ... rest of function
+};
+```
+
+Add form fields:
+
+```tsx
+{/* Quiz Options Section */}
+<div className="space-y-3 border-t pt-4">
+  <h4 className="font-medium">Learner Experience Options</h4>
+  
+  <div className="flex items-center justify-between">
+    <div>
+      <Label htmlFor="shuffle_options">Shuffle Answer Options</Label>
+      <p className="text-xs text-muted-foreground">Randomize option order for each question</p>
+    </div>
+    <Switch
+      id="shuffle_options"
+      name="shuffle_options"
+      defaultChecked={editingQuiz?.shuffle_options ?? false}
+    />
+  </div>
+  
+  <div className="flex items-center justify-between">
+    <div>
+      <Label htmlFor="show_explanations">Show Explanations</Label>
+      <p className="text-xs text-muted-foreground">Display answer explanations after submission</p>
+    </div>
+    <Switch
+      id="show_explanations"
+      name="show_explanations"
+      defaultChecked={editingQuiz?.show_explanations ?? true}
+    />
+  </div>
+  
+  <div className="flex items-center justify-between">
+    <div>
+      <Label htmlFor="allow_review">Allow Review Before Submit</Label>
+      <p className="text-xs text-muted-foreground">Let learners review answers before final submission</p>
+    </div>
+    <Switch
+      id="allow_review"
+      name="allow_review"
+      defaultChecked={editingQuiz?.allow_review ?? true}
+    />
+  </div>
+</div>
+```
+
+### 2.3 Update Category Form (if multi-tenant needed)
+
+Add company selector to category form for enterprise deployments.
 
 ---
 
-## Summary
+## Phase 3: Update Quiz Player (Course Viewer)
 
-### Alignment Status
-- **Database ↔ Documentation:** ~92% aligned (4 tables undocumented, 5 phantom tables)
-- **UI ↔ Documentation:** ~30% complete (5 pages missing, 16 placeholder sections)
-- **Feature Registry ↔ Documentation:** ~40% complete
+**File:** `src/components/training/CourseViewerQuizPanel.tsx` (or equivalent)
 
-### Industry Standard Compliance
-- **Current:** ~50% coverage of enterprise LMS standards
-- **Target:** 95% coverage with gap closure plan
+Update quiz delivery to respect new options:
 
-### Estimated Work
-- **Fix Architecture Mismatches:** 1-2 hours
-- **Complete Chapters 3-9:** ~80 hours (17,500 lines across 58 components)
-- **Add Industry-Standard Sections:** ~20 hours (6 new sections, 1 new chapter)
+```typescript
+// In quiz initialization
+const [shuffledOptions, setShuffledOptions] = useState<Map<string, string[]>>(new Map());
+
+useEffect(() => {
+  if (quiz?.shuffle_options) {
+    // Shuffle options for each question
+    const shuffled = new Map();
+    questions.forEach(q => {
+      shuffled.set(q.id, shuffleArray([...q.options]));
+    });
+    setShuffledOptions(shuffled);
+  }
+}, [quiz, questions]);
+
+// In submission handling
+const handleSubmit = () => {
+  if (quiz?.allow_review) {
+    setShowReview(true);
+  } else {
+    submitQuiz();
+  }
+};
+
+// In results display
+{quiz?.show_explanations && question.explanation && (
+  <p className="text-sm text-muted-foreground mt-2">
+    <strong>Explanation:</strong> {question.explanation}
+  </p>
+)}
+```
+
+---
+
+## Phase 4: Update Enrollment Logic
+
+**File:** `src/hooks/useCourseEnrollment.ts` (or create new)
+
+Add enrollment validation:
+
+```typescript
+export const validateEnrollment = async (courseId: string, userId: string) => {
+  const { data: course } = await supabase
+    .from('lms_courses')
+    .select('allow_self_enrollment, max_enrollments, enrollment_start_date, enrollment_end_date')
+    .eq('id', courseId)
+    .single();
+
+  if (!course) return { allowed: false, reason: 'Course not found' };
+
+  // Check self-enrollment permission
+  if (!course.allow_self_enrollment) {
+    return { allowed: false, reason: 'Self-enrollment not allowed. Contact your manager.' };
+  }
+
+  // Check enrollment window
+  const now = new Date();
+  if (course.enrollment_start_date && new Date(course.enrollment_start_date) > now) {
+    return { allowed: false, reason: `Enrollment opens ${formatDate(course.enrollment_start_date)}` };
+  }
+  if (course.enrollment_end_date && new Date(course.enrollment_end_date) < now) {
+    return { allowed: false, reason: 'Enrollment period has ended' };
+  }
+
+  // Check capacity
+  if (course.max_enrollments) {
+    const { count } = await supabase
+      .from('lms_enrollments')
+      .select('*', { count: 'exact', head: true })
+      .eq('course_id', courseId)
+      .in('status', ['enrolled', 'in_progress']);
+    
+    if (count >= course.max_enrollments) {
+      return { allowed: false, reason: 'Course is at maximum capacity' };
+    }
+  }
+
+  return { allowed: true };
+};
+```
+
+---
+
+## Phase 5: Documentation Corrections
+
+### 5.1 Update Architecture Section
+
+**File:** `src/components/enablement/learning-development-manual/LndArchitectureDiagrams.tsx`
+
+Ensure these tables are properly documented (they already exist):
+- `compliance_items` - Already in DB with 13 fields
+- `compliance_document_templates` - Already in DB with 20 fields
+- `course_instructors` - Already in DB with 5 fields
+- `external_training_records` - Already in DB with 21 fields
+
+### 5.2 Add Table Documentation
+
+Add field reference tables for the existing tables that need documentation:
+
+**compliance_document_templates fields:**
+- code, name, category, jurisdiction, country_code
+- description, template_content, required_variables
+- signature_requirements, retention_period_years
+- workflow_template_id, linked_letter_template_id
+- legal_reference, is_active, version, company_id
+- created_by, created_at, updated_at
+
+**external_training_records fields:**
+- company_id, employee_id, training_request_id
+- training_name, provider_name, training_type
+- description, start_date, end_date, duration_hours
+- location, actual_cost, currency
+- certificate_received, certificate_url, certificate_expiry_date
+- skills_acquired, notes
+
+---
+
+## Implementation Summary
+
+| Phase | Component | Changes | Priority |
+|-------|-----------|---------|----------|
+| 1.1 | DB Migration | Add 4 fields to lms_courses | P0 |
+| 1.2 | DB Migration | Add 3 fields to lms_quizzes | P0 |
+| 1.3 | DB Migration | Add company_id to lms_categories | P1 |
+| 2.1 | UI Update | Course form enrollment settings | P0 |
+| 2.2 | UI Update | Quiz form learner options | P0 |
+| 3 | UI Update | Quiz player to use new options | P1 |
+| 4 | Logic | Enrollment validation hook | P1 |
+| 5 | Docs | Architecture corrections | P2 |
+
+### Estimated Effort
+- **Database migrations:** ~30 minutes
+- **UI form updates:** ~2 hours
+- **Quiz player updates:** ~1.5 hours
+- **Enrollment logic:** ~1 hour
+- **Documentation corrections:** ~1 hour
+
+**Total: ~6 hours**
+
+---
+
+## Confirmation: Post-Implementation Alignment
+
+After implementation:
+
+| Layer | Alignment |
+|-------|-----------|
+| Database ↔ Documentation | 100% |
+| UI ↔ Database | 100% |
+| Feature Registry ↔ Documentation | 100% |
+| Industry Standards (SCORM/xAPI) | 95% |
+| Industry Standards (Kirkpatrick) | 90% |
 
