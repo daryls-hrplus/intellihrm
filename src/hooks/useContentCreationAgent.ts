@@ -186,12 +186,18 @@ export function useContentCreationAgent() {
     }
   }, [registryFeatureCodes, getModuleFeatureCodes]);
 
-  // Analyze context and coverage
-  const analyzeContext = useCallback(async (moduleCode?: string): Promise<ContextAnalysis | null> => {
+  // Analyze context and coverage - now accepts optional manual context for scoped analysis
+  const analyzeContext = useCallback(async (
+    moduleCode?: string,
+    manualContext?: { manualId?: string }
+  ): Promise<ContextAnalysis | null> => {
     setIsLoading(true);
     setCurrentAction('analyze_context');
     try {
-      const data = await invokeAgent('analyze_context', { moduleCode });
+      const data = await invokeAgent('analyze_context', { 
+        moduleCode,
+        ...manualContext  // Spread manualId if provided for manual-scoped analysis
+      });
       if (data?.analysis) {
         setContextAnalysis(data.analysis);
         return data.analysis;

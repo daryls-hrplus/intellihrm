@@ -41,6 +41,7 @@ interface AgentRequest {
     chatMessage?: string;
     conversationHistory?: Array<{ role: string; content: string }>;
     registryFeatureCodes?: string[];  // Feature codes from FEATURE_REGISTRY for consistent analysis
+    manualId?: string;  // Manual ID for scoped coverage analysis
   };
 }
 
@@ -277,6 +278,21 @@ serve(async (req) => {
       // ==================== ANALYZE CONTEXT ====================
       case 'analyze_context': {
         const registryCodes = context.registryFeatureCodes;
+        const manualId = context.manualId as string | undefined;
+        
+        // If manual is selected, get its module_codes for scoped analysis
+        let moduleCodesFilter: string[] | null = null;
+        if (manualId) {
+          const { data: manual } = await supabase
+            .from("manual_definitions")
+            .select("module_codes")
+            .eq("id", manualId)
+            .single();
+          
+          if (manual?.module_codes && manual.module_codes.length > 0) {
+            moduleCodesFilter = manual.module_codes;
+          }
+        }
         
         // Fetch all features with module info
         let featuresQuery = supabase
@@ -292,7 +308,10 @@ serve(async (req) => {
           featuresQuery = featuresQuery.in("feature_code", registryCodes);
         }
 
-        if (context.moduleCode) {
+        // Apply module filter: manual's module_codes take priority, then single moduleCode
+        if (moduleCodesFilter && moduleCodesFilter.length > 0) {
+          featuresQuery = featuresQuery.in("application_modules.module_code", moduleCodesFilter);
+        } else if (context.moduleCode) {
           featuresQuery = featuresQuery.eq("application_modules.module_code", context.moduleCode);
         }
 
