@@ -565,7 +565,7 @@ export function OrphanManagementPanel() {
                           {getSourceBadge(orphan.source)}
                           {getRecommendationBadge(orphan.recommendation)}
                         </div>
-                        <p className="text-sm text-muted-foreground truncate mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {orphan.featureName}
                         </p>
                         {orphan.routePath && (
@@ -573,7 +573,7 @@ export function OrphanManagementPanel() {
                             {orphan.routePath}
                           </p>
                         )}
-                        <p className="text-xs text-muted-foreground mt-1 italic">
+                        <p className="text-xs text-muted-foreground mt-1 italic whitespace-normal">
                           {orphan.recommendationReason}
                         </p>
                       </div>
