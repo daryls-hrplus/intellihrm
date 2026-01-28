@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Archive, ChevronDown, Database, Clock } from "lucide-react";
+import { Archive, ChevronDown, Database, Clock, CheckCircle } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
 import { useState } from "react";
 import { format } from "date-fns";
@@ -18,12 +18,14 @@ interface MigrationBatchesPanelProps {
   batches: MigrationBatch[];
   orphans: OrphanEntry[];
   onArchiveBatch: (codes: string[]) => void;
+  onKeepBatch: (codes: string[]) => void;
 }
 
 export function MigrationBatchesPanel({
   batches,
   orphans,
-  onArchiveBatch
+  onArchiveBatch,
+  onKeepBatch
 }: MigrationBatchesPanelProps) {
   const [expandedBatches, setExpandedBatches] = useState<Set<string>>(new Set());
 
@@ -114,7 +116,16 @@ export function MigrationBatchesPanel({
                   <CollapsibleContent>
                     <CardContent className="pt-0">
                       <div className="space-y-2">
-                        <div className="flex justify-end mb-3">
+                        <div className="flex justify-end gap-2 mb-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-green-600 border-green-200 hover:bg-green-50"
+                            onClick={() => onKeepBatch(batch.codes)}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Keep Entire Batch
+                          </Button>
                           <Button 
                             variant="outline" 
                             size="sm"

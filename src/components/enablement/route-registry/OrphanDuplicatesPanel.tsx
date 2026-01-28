@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Archive, Trash2, ExternalLink, Copy, GitMerge, Route } from "lucide-react";
+import { Archive, Trash2, ExternalLink, Copy, GitMerge, Route, CheckCircle } from "lucide-react";
 import { OrphanEntry, OrphanDuplicate, OrphanRouteConflict } from "@/types/orphanTypes";
 
 interface OrphanDuplicatesPanelProps {
@@ -25,6 +25,7 @@ interface OrphanDuplicatesPanelProps {
   routeConflicts: OrphanRouteConflict[];
   onArchive: (orphan: OrphanEntry) => void;
   onDelete: (orphan: OrphanEntry) => void;
+  onKeep: (orphan: OrphanEntry) => void;
   onViewDuplicate: (duplicate: OrphanDuplicate) => void;
 }
 
@@ -33,6 +34,7 @@ export function OrphanDuplicatesPanel({
   routeConflicts,
   onArchive,
   onDelete,
+  onKeep,
   onViewDuplicate
 }: OrphanDuplicatesPanelProps) {
   if (duplicates.length === 0 && routeConflicts.length === 0) {
@@ -129,6 +131,15 @@ export function OrphanDuplicatesPanel({
                                   <Button
                                     variant="ghost"
                                     size="icon"
+                                    className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    onClick={() => onKeep(entry)}
+                                    title="Mark as reviewed and keep"
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
                                     className="h-8 w-8"
                                     onClick={() => onArchive(entry)}
                                     title="Archive"
@@ -219,6 +230,15 @@ export function OrphanDuplicatesPanel({
                               </TableCell>
                               <TableCell>
                                 <div className="flex gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    onClick={() => onKeep(entry)}
+                                    title="Mark as reviewed and keep"
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                  </Button>
                                   <Button
                                     variant="ghost"
                                     size="icon"
