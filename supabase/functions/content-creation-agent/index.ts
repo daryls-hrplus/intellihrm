@@ -301,6 +301,19 @@ serve(async (req) => {
           .from("enablement_artifacts")
           .select("feature_code, artifact_type, status, updated_at");
 
+        // OPTION A: Fetch manual sections to include in coverage calculation
+        const { data: manualSections } = await supabase
+          .from("manual_sections")
+          .select("id, source_module_codes")
+          .not("source_module_codes", "is", null);
+
+        // Build a set of module codes that have manual sections
+        const modulesWithManualSections = new Set<string>();
+        for (const section of manualSections || []) {
+          const codes = (section.source_module_codes as string[]) || [];
+          codes.forEach(code => modulesWithManualSections.add(code));
+        }
+
         // Build status maps
         const docStatusMap = new Map(
           (contentStatus || []).map(c => [c.feature_code, c])
@@ -336,9 +349,14 @@ serve(async (req) => {
 
           const status = docStatusMap.get(feature.feature_code);
           const hasArtifacts = artifactMap.has(feature.feature_code);
+          // NEW: Also consider if the module has manual sections
+          const hasManualContent = modulesWithManualSections.has(modCode);
           const isDocumented = status?.documentation_status === 'complete' ||
+            status?.documentation_status === 'in_progress' ||
             status?.workflow_status === 'published' ||
-            hasArtifacts;
+            status?.workflow_status === 'documentation' ||
+            hasArtifacts ||
+            hasManualContent;
 
           if (isDocumented) {
             moduleBreakdown[modCode].documented++;
@@ -444,11 +462,19 @@ serve(async (req) => {
           staleContent: staleContent.slice(0, 10),
         };
 
+        // Manual section coverage stats
+        const manualSectionCoverage = {
+          totalModulesWithSections: modulesWithManualSections.size,
+          totalSections: manualSections?.length || 0,
+          modulesWithContent: Array.from(modulesWithManualSections),
+        };
+
         return new Response(
           JSON.stringify({ 
             success: true, 
             analysis,
-            documentationHealth
+            documentationHealth,
+            manualSectionCoverage
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
