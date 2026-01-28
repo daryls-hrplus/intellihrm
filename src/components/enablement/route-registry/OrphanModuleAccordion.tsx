@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Archive, Trash2, ExternalLink, FolderOpen, Copy } from "lucide-react";
+import { Archive, Trash2, ExternalLink, FolderOpen, Copy, CheckCircle } from "lucide-react";
 import { OrphanEntry, OrphanSource, OrphanRecommendation, OrphanDuplicate } from "@/types/orphanTypes";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,7 @@ interface OrphanModuleAccordionProps {
   onToggleSelection: (id: string) => void;
   onArchive: (orphan: OrphanEntry) => void;
   onDelete: (orphan: OrphanEntry) => void;
+  onKeep: (orphan: OrphanEntry) => void;
   onViewDuplicate: (duplicate: OrphanDuplicate) => void;
   duplicates: OrphanDuplicate[];
   getRecommendationBadge: (recommendation: OrphanRecommendation) => React.ReactNode;
@@ -51,6 +52,7 @@ export function OrphanModuleAccordion({
   onToggleSelection,
   onArchive,
   onDelete,
+  onKeep,
   onViewDuplicate,
   duplicates,
   getRecommendationBadge,
@@ -186,6 +188,15 @@ export function OrphanModuleAccordion({
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                            onClick={() => onKeep(orphan)}
+                            title="Mark as reviewed and keep"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"

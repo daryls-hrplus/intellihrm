@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Archive, Trash2, GitMerge } from "lucide-react";
+import { Archive, Trash2, GitMerge, CheckCircle } from "lucide-react";
 import { OrphanDuplicate, OrphanEntry } from "@/types/orphanTypes";
 import { cn } from "@/lib/utils";
 
@@ -10,12 +10,14 @@ interface PrefixedVariantsPanelProps {
   prefixedVariants: OrphanDuplicate[];
   onArchive: (orphan: OrphanEntry) => void;
   onDelete: (orphan: OrphanEntry) => void;
+  onKeep: (orphan: OrphanEntry) => void;
 }
 
 export function PrefixedVariantsPanel({
   prefixedVariants,
   onArchive,
-  onDelete
+  onDelete,
+  onKeep
 }: PrefixedVariantsPanelProps) {
   if (prefixedVariants.length === 0) {
     return (
@@ -92,8 +94,18 @@ export function PrefixedVariantsPanel({
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                            onClick={() => onKeep(entry)}
+                            title="Mark as reviewed and keep"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
                             onClick={() => onArchive(entry)}
+                            title="Archive"
                           >
                             <Archive className="h-4 w-4" />
                           </Button>
@@ -102,6 +114,7 @@ export function PrefixedVariantsPanel({
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
                             onClick={() => onDelete(entry)}
+                            title="Delete"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

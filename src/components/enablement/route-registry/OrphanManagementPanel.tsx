@@ -525,6 +525,7 @@ export function OrphanManagementPanel() {
             onToggleSelection={toggleSelection}
             onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
             onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
+            onKeep={(orphan) => setKeepDialog({ open: true, orphan })}
             onViewDuplicate={(duplicate) => setDuplicateDialog({ open: true, duplicate })}
             duplicates={duplicates}
             getRecommendationBadge={getRecommendationBadge}
@@ -538,6 +539,7 @@ export function OrphanManagementPanel() {
             routeConflicts={routeConflicts}
             onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
             onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
+            onKeep={(orphan) => setKeepDialog({ open: true, orphan })}
             onViewDuplicate={(duplicate) => setDuplicateDialog({ open: true, duplicate })}
           />
         </TabsContent>
@@ -547,6 +549,7 @@ export function OrphanManagementPanel() {
             prefixedVariants={prefixedVariants}
             onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
             onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
+            onKeep={(orphan) => setKeepDialog({ open: true, orphan })}
           />
         </TabsContent>
 
@@ -558,6 +561,13 @@ export function OrphanManagementPanel() {
               const ids = orphans.filter(o => codes.includes(o.featureCode)).map(o => o.id);
               if (ids.length > 0) {
                 await archiveMultiple(ids);
+                detectOrphans();
+              }
+            }}
+            onKeepBatch={async (codes) => {
+              const ids = orphans.filter(o => codes.includes(o.featureCode)).map(o => o.id);
+              if (ids.length > 0) {
+                await markMultipleAsKept(ids);
                 detectOrphans();
               }
             }}
