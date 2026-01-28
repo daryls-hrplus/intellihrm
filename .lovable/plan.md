@@ -1,305 +1,139 @@
 
-
-# Add "Keep" Action to All Orphan Views
+# Fix Chapter Selection in Content Creation Studio
 
 ## Problem Summary
 
-The "Keep" (mark as reviewed and retained) action was only implemented in the main orphan list but is missing from four other key views:
+The Content Creation Studio cannot display chapters for the "Performance Appraisal - Administrator Guide" because:
 
-| View | Current Actions | Missing |
-|------|----------------|---------|
-| **Migration Batches** | Archive Batch | Keep, Keep Batch |
-| **Duplicate Feature Names** | Archive, Delete | Keep |
-| **By Module Accordion** | Archive, Delete | Keep |
-| **Prefixed Variants** | Archive, Delete | Keep |
+1. **Database has no sections**: The `manual_sections` table has 0 rows for the Appraisals manual (`id: 7405b449-6cd0-4c37-9a1e-d6ed23b9c1ea`)
+2. **Content lives in static TypeScript**: The actual manual structure is defined in `APPRAISALS_MANUAL_STRUCTURE` in `src/types/adminManual.ts` (8 chapters, ~100+ sections)
+3. **Hook queries wrong source**: `useManualSectionPreview` calls `useManualSections(manualId)` which queries the empty database table
 
-This creates an inconsistent experience where administrators cannot mark entries as "intentionally kept" from specialized views.
-
----
-
-## Solution
-
-Add the "Keep" action to all four components by:
-1. Adding `onKeep` callback prop to each component
-2. Adding a Keep button (green CheckCircle icon) alongside existing Archive/Delete buttons
-3. For batch views, also add "Keep Entire Batch" option
+Only 2 manuals have database sections:
+- Benefits Administrator Manual (35 sections)
+- HR Hub Admin Guide (35 sections)
 
 ---
 
-## File Changes
+## Root Cause
 
-### 1. MigrationBatchesPanel.tsx
+The Content Creation Studio uses `useManualSections()` which queries `manual_sections` table, but the Appraisals manual content was never synced to this table. The static `APPRAISALS_MANUAL_STRUCTURE` in `src/types/adminManual.ts` contains 8 chapters with subsections, but this isn't being used by the Studio.
 
-**Add props:**
+---
+
+## Solution Options
+
+### Option A: Sync Static Structure to Database (Recommended)
+Initialize the `manual_sections` table with the content from `APPRAISALS_MANUAL_STRUCTURE`. This ensures the Content Creation Studio has chapters to select.
+
+**Implementation:**
+1. Create a utility function that converts `APPRAISALS_MANUAL_STRUCTURE` to database section format
+2. Call the `initialize-manual-sections` edge function with proper mapping
+3. Alternatively, create a direct sync script
+
+**Changes Required:**
+- Add a "Sync Structure" button in the Manual Content selector when no sections exist
+- Call `useInitializeSections` mutation to populate the database from the static structure
+
+### Option B: Support Both Static and Database Sources
+Modify `useManualSectionPreview` to fallback to static structures when database is empty.
+
+**Changes Required:**
+- Detect if `manual_sections` returns empty for specific manual codes
+- Fall back to `APPRAISALS_MANUAL_STRUCTURE` for appraisals, similar static for other manuals
+- Map static structure to `ChapterInfo[]` format
+
+---
+
+## Recommended Implementation: Option A
+
+This is the cleaner approach because:
+1. The database becomes the single source of truth
+2. AI regeneration can update database sections
+3. Version tracking and change detection work properly
+4. No special-case handling needed for different manuals
+
+### Step 1: Add Helper to Detect Empty Manual
+
+Update `ManualContentSelector.tsx` to show a sync prompt when manual has no sections:
+
 ```typescript
-interface MigrationBatchesPanelProps {
-  batches: MigrationBatch[];
-  orphans: OrphanEntry[];
-  onArchiveBatch: (codes: string[]) => void;
-  onKeepBatch: (codes: string[]) => void;  // NEW
-}
-```
-
-**Add "Keep Entire Batch" button (line 117-125):**
-```typescript
-<div className="flex justify-end gap-2 mb-3">
-  <Button 
-    variant="outline" 
-    size="sm"
-    className="text-green-600 border-green-200 hover:bg-green-50"
-    onClick={() => onKeepBatch(batch.codes)}
-  >
-    <CheckCircle className="h-4 w-4 mr-2" />
-    Keep Entire Batch
-  </Button>
-  <Button 
-    variant="outline" 
-    size="sm"
-    onClick={() => onArchiveBatch(batch.codes)}
-  >
-    <Archive className="h-4 w-4 mr-2" />
-    Archive Entire Batch
+// When chapters.length === 0 and selectedManualId exists
+<div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+  <p className="text-sm text-amber-800 mb-2">
+    This manual has no sections in the database yet.
+  </p>
+  <Button size="sm" onClick={handleInitializeSections}>
+    Initialize Sections
   </Button>
 </div>
 ```
 
-**Import CheckCircle:**
+### Step 2: Update ContentCreationStudioPage
+
+Add initialization capability:
+
 ```typescript
-import { Archive, ChevronDown, Database, Clock, CheckCircle } from "lucide-react";
+const { mutate: initializeSections, isPending: isInitializing } = useInitializeSections();
+
+const handleInitializeSections = () => {
+  const manual = manuals.find(m => m.id === selectedManualId);
+  if (!manual) return;
+  
+  initializeSections({
+    manualId: selectedManualId,
+    moduleName: manual.manual_name,
+    moduleCodes: manual.module_codes,
+    targetRoles: ['admin', 'hr_user', 'consultant']
+  });
+};
 ```
 
----
+### Step 3: Pass Handler to ManualContentSelector
 
-### 2. OrphanDuplicatesPanel.tsx
-
-**Add prop:**
 ```typescript
-interface OrphanDuplicatesPanelProps {
-  duplicates: OrphanDuplicate[];
-  routeConflicts: OrphanRouteConflict[];
-  onArchive: (orphan: OrphanEntry) => void;
-  onDelete: (orphan: OrphanEntry) => void;
-  onKeep: (orphan: OrphanEntry) => void;  // NEW
-  onViewDuplicate: (duplicate: OrphanDuplicate) => void;
-}
+<ManualContentSelector
+  // ... existing props
+  onInitializeSections={handleInitializeSections}
+  isInitializing={isInitializing}
+  hasSections={chapters.length > 0}
+/>
 ```
 
-**Add Keep button in duplicate entries table (lines 128-147):**
+### Step 4: Update ManualContentSelector UI
+
+Add empty state with initialization action:
+
 ```typescript
-<TableCell>
-  <div className="flex gap-1">
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
-      onClick={() => onKeep(entry)}
-      title="Mark as reviewed and keep"
-    >
-      <CheckCircle className="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8"
-      onClick={() => onArchive(entry)}
-      title="Archive"
-    >
-      <Archive className="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8 text-destructive hover:text-destructive"
-      onClick={() => onDelete(entry)}
-      title="Delete"
-    >
-      <Trash2 className="h-4 w-4" />
-    </Button>
-  </div>
-</TableCell>
-```
-
-**Add same Keep button in route conflicts table (lines 221-240)**
-
-**Import CheckCircle:**
-```typescript
-import { Archive, Trash2, ExternalLink, Copy, GitMerge, Route, CheckCircle } from "lucide-react";
-```
-
----
-
-### 3. OrphanModuleAccordion.tsx
-
-**Add prop:**
-```typescript
-interface OrphanModuleAccordionProps {
-  moduleGroups: ModuleGroup[];
-  selectedOrphans: Set<string>;
-  onToggleSelection: (id: string) => void;
-  onArchive: (orphan: OrphanEntry) => void;
-  onDelete: (orphan: OrphanEntry) => void;
-  onKeep: (orphan: OrphanEntry) => void;  // NEW
-  onViewDuplicate: (duplicate: OrphanDuplicate) => void;
-  duplicates: OrphanDuplicate[];
-  getRecommendationBadge: (recommendation: OrphanRecommendation) => React.ReactNode;
-  getSourceBadge: (source: OrphanSource) => React.ReactNode;
-}
-```
-
-**Add Keep button in actions column (lines 188-206):**
-```typescript
-<TableCell>
-  <div className="flex gap-1">
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
-      onClick={() => onKeep(orphan)}
-      title="Mark as reviewed and keep"
-    >
-      <CheckCircle className="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8"
-      onClick={() => onArchive(orphan)}
-      title="Archive (soft delete)"
-    >
-      <Archive className="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8 text-destructive hover:text-destructive"
-      onClick={() => onDelete(orphan)}
-      title="Delete permanently"
-    >
-      <Trash2 className="h-4 w-4" />
-    </Button>
-  </div>
-</TableCell>
-```
-
-**Import CheckCircle:**
-```typescript
-import { Archive, Trash2, ExternalLink, FolderOpen, Copy, CheckCircle } from "lucide-react";
-```
-
----
-
-### 4. PrefixedVariantsPanel.tsx
-
-**Add prop:**
-```typescript
-interface PrefixedVariantsPanelProps {
-  prefixedVariants: OrphanDuplicate[];
-  onArchive: (orphan: OrphanEntry) => void;
-  onDelete: (orphan: OrphanEntry) => void;
-  onKeep: (orphan: OrphanEntry) => void;  // NEW
-}
-```
-
-**Add Keep button (lines 83-100):**
-```typescript
-{cluster.suggestedPrimary !== entry.featureCode && (
-  <div className="flex gap-1">
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
-      onClick={() => onKeep(entry)}
-      title="Mark as reviewed and keep"
-    >
-      <CheckCircle className="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8"
-      onClick={() => onArchive(entry)}
-    >
-      <Archive className="h-4 w-4" />
-    </Button>
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-8 w-8 text-destructive hover:text-destructive"
-      onClick={() => onDelete(entry)}
-    >
-      <Trash2 className="h-4 w-4" />
-    </Button>
+{selectedManualId && !isLoadingSections && chapters.length === 0 && (
+  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+    <div className="flex items-start gap-2">
+      <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
+      <div className="flex-1">
+        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+          No sections found
+        </p>
+        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+          Initialize sections from the standard template to enable AI regeneration.
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="mt-2"
+          onClick={onInitializeSections}
+          disabled={isInitializing}
+        >
+          {isInitializing ? (
+            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+          ) : (
+            <RefreshCw className="h-3 w-3 mr-1" />
+          )}
+          Initialize Sections
+        </Button>
+      </div>
+    </div>
   </div>
 )}
-```
-
-**Import CheckCircle:**
-```typescript
-import { Archive, Trash2, GitMerge, CheckCircle } from "lucide-react";
-```
-
----
-
-### 5. OrphanManagementPanel.tsx
-
-**Update component usages to pass `onKeep` handler:**
-
-```typescript
-// For By Module tab:
-<OrphanModuleAccordion
-  moduleGroups={moduleGroups}
-  selectedOrphans={selectedOrphans}
-  onToggleSelection={toggleSelection}
-  onArchive={(o) => setActionDialog({ open: true, type: 'archive', orphan: o })}
-  onDelete={(o) => setActionDialog({ open: true, type: 'delete', orphan: o })}
-  onKeep={(o) => setKeepDialog({ open: true, orphan: o })}  // NEW
-  onViewDuplicate={(d) => setDuplicateDialog({ open: true, duplicate: d })}
-  duplicates={duplicates}
-  getRecommendationBadge={getRecommendationBadge}
-  getSourceBadge={getSourceBadge}
-/>
-
-// For Duplicates tab:
-<OrphanDuplicatesPanel
-  duplicates={duplicates}
-  routeConflicts={routeConflicts}
-  onArchive={(o) => setActionDialog({ open: true, type: 'archive', orphan: o })}
-  onDelete={(o) => setActionDialog({ open: true, type: 'delete', orphan: o })}
-  onKeep={(o) => setKeepDialog({ open: true, orphan: o })}  // NEW
-  onViewDuplicate={(d) => setDuplicateDialog({ open: true, duplicate: d })}
-/>
-
-// For Prefixed Variants tab:
-<PrefixedVariantsPanel
-  prefixedVariants={prefixedVariants}
-  onArchive={(o) => setActionDialog({ open: true, type: 'archive', orphan: o })}
-  onDelete={(o) => setActionDialog({ open: true, type: 'delete', orphan: o })}
-  onKeep={(o) => setKeepDialog({ open: true, orphan: o })}  // NEW
-/>
-
-// For Migration Batches tab:
-<MigrationBatchesPanel
-  batches={migrationBatches}
-  orphans={orphans}
-  onArchiveBatch={handleBatchArchive}
-  onKeepBatch={handleBatchKeep}  // NEW
-/>
-```
-
-**Add batch keep handler:**
-```typescript
-const handleBatchKeep = async (codes: string[]) => {
-  // Find orphan IDs by feature codes
-  const orphanIds = orphans
-    .filter(o => codes.includes(o.featureCode))
-    .map(o => o.id);
-  
-  if (orphanIds.length > 0) {
-    setKeepDialog({ open: true, count: orphanIds.length });
-    // Store codes for the dialog to use
-    setBatchKeepCodes(codes);
-  }
-};
 ```
 
 ---
@@ -308,26 +142,46 @@ const handleBatchKeep = async (codes: string[]) => {
 
 | File | Changes |
 |------|---------|
-| `src/components/enablement/route-registry/MigrationBatchesPanel.tsx` | Add `onKeepBatch` prop, "Keep Entire Batch" button |
-| `src/components/enablement/route-registry/OrphanDuplicatesPanel.tsx` | Add `onKeep` prop, Keep buttons in both tables |
-| `src/components/enablement/route-registry/OrphanModuleAccordion.tsx` | Add `onKeep` prop, Keep button in actions column |
-| `src/components/enablement/route-registry/PrefixedVariantsPanel.tsx` | Add `onKeep` prop, Keep button for non-primary entries |
-| `src/components/enablement/route-registry/OrphanManagementPanel.tsx` | Pass `onKeep` handlers to all child components |
+| `src/components/enablement/ManualContentSelector.tsx` | Add empty state with initialization prompt, new props for `onInitializeSections`, `isInitializing`, `hasSections` |
+| `src/pages/enablement/ContentCreationStudioPage.tsx` | Add `useInitializeSections` mutation, create handler, pass to `ManualContentSelector` via `AgentContextPanel` |
+| `src/components/enablement/AgentContextPanel.tsx` | Pass through new initialization props to `ManualContentSelector` |
 
 ---
 
-## Visual Result
+## Database Impact
 
-After implementation, all views will have consistent actions:
+After initialization, the `manual_sections` table will be populated with ~100+ rows for the Appraisals manual, matching the structure in `APPRAISALS_MANUAL_STRUCTURE`. This enables:
+- Chapter dropdown to populate correctly
+- Section selection to work
+- Preview Changes and Regenerate actions to function
+- AI-powered content updates
 
-| View | Actions Available |
-|------|-------------------|
-| Migration Batches | Keep Batch, Archive Batch |
-| Duplicate Names | Keep, Archive, Delete |
-| By Module | Keep, Archive, Delete |
-| Prefixed Variants | Keep, Archive, Delete |
-| Registry Candidates | Keep, Archive, Delete |
-| All Orphans | Keep, Archive, Delete |
+---
 
-Each "Keep" button will trigger the existing `KeepActionDialog` for notes and confirmation.
+## Expected User Experience
 
+**Before Fix:**
+1. User selects "Performance Appraisal - Administrator Guide"
+2. Chapter dropdown shows "Select a chapter..." but clicking does nothing
+3. No sections available for regeneration
+
+**After Fix:**
+1. User selects "Performance Appraisal - Administrator Guide"  
+2. UI shows "No sections found. Initialize sections from standard template."
+3. User clicks "Initialize Sections"
+4. ~100 sections are created in database
+5. Chapter dropdown now populates with 8 chapters
+6. User can select chapter, then section, and use AI regeneration
+
+---
+
+## Alternative Quick Fix
+
+If immediate functionality is needed before full implementation, manually run the section initialization:
+
+```sql
+-- This would need to be done via the edge function
+-- Call: initialize-manual-sections with manualId for appraisals
+```
+
+Or trigger via the existing "Start Bulk Generation" button which should call the initialization edge function.
