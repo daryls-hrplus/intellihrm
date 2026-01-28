@@ -186,6 +186,53 @@ serve(async (req) => {
       })
       .eq('id', manualId);
 
+    // OPTION B: Update related features' documentation status to 'in_progress'
+    const effectiveModuleCodes = moduleCodes.length > 0 ? moduleCodes : manual.module_codes || [];
+    
+    if (effectiveModuleCodes.length > 0) {
+      // Fetch features that match the module codes
+      const { data: relatedFeatures, error: featuresError } = await supabase
+        .from('application_features')
+        .select(`
+          feature_code,
+          application_modules!inner(module_code)
+        `)
+        .in('application_modules.module_code', effectiveModuleCodes);
+
+      if (featuresError) {
+        console.warn('Warning: Could not fetch related features:', featuresError.message);
+      } else if (relatedFeatures && relatedFeatures.length > 0) {
+        console.log(`Found ${relatedFeatures.length} related features to update documentation status`);
+        
+        // Upsert enablement_content_status for each feature
+        const statusUpserts = relatedFeatures.map((feature) => {
+          // The inner join returns the module directly, but TypeScript sees it as potential array
+          const appMod = feature.application_modules as unknown as { module_code: string };
+          const moduleCode = appMod?.module_code || effectiveModuleCodes[0];
+          return {
+            feature_code: feature.feature_code,
+            module_code: moduleCode,
+            documentation_status: 'in_progress',
+            workflow_status: 'documentation',
+            updated_at: new Date().toISOString(),
+          };
+        });
+
+        const { error: upsertError } = await supabase
+          .from('enablement_content_status')
+          .upsert(statusUpserts, {
+            onConflict: 'feature_code',
+            ignoreDuplicates: false,
+          });
+
+        if (upsertError) {
+          console.warn('Warning: Could not update feature documentation status:', upsertError.message);
+        } else {
+          console.log(`Updated documentation status for ${statusUpserts.length} features`);
+        }
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
