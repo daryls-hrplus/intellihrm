@@ -1,246 +1,384 @@
 
-# Fix Code Registry Source and Enable Accurate Orphan Categorization
+# Add "Keep/Retain" Action to Orphan Management
 
-## Problem Summary
+## Overview
 
-The orphan detection system **already has the intelligence** to categorize orphans into:
-1. **Duplicates** (merge)
-2. **Legacy/Auto-migrated** (archive)
-3. **Legitimate granular features** (keep)
-
-However, it's producing **incorrect results** because it compares database entries against a **static hardcoded array of 62 routes** instead of the actual `FEATURE_REGISTRY` with **261 features**.
+This plan adds an explicit **"Mark as Reviewed"** (Keep) action to the orphan management system, allowing administrators to intentionally flag database entries as reviewed and retained. This prevents legitimate features from appearing in future orphan scans and creates an audit trail.
 
 ---
 
-## Current vs Expected State
+## Current State Analysis
 
-| Metric | Current (Wrong) | After Fix |
-|--------|-----------------|-----------|
-| Code baseline | 62 static routes | 261 registry features |
-| True orphans | Shown as 817 | ~576 (837 DB - 261 registry) |
-| Synced features | Shown as 20 | ~250+ |
-| False positives | ~200 features incorrectly flagged | 0 |
+### What Exists Today
+| Action | Database Effect | UI Available |
+|--------|----------------|--------------|
+| **Archive** | Sets `is_active = false` | Yes |
+| **Delete** | Permanently removes row | Yes |
+| **Keep** | None - no way to mark as reviewed | **Missing** |
+
+### The Problem
+- Entries marked as "Keep" recommendation still appear in every scan
+- No audit trail of who reviewed and approved retention
+- Administrators must re-review the same orphans repeatedly
+- No way to distinguish "not yet reviewed" from "reviewed and intentional"
 
 ---
 
-## Implementation Plan
+## Solution Design
 
-### Phase 1: Fix the Source of Truth
+### Database Changes
 
-**File**: `src/hooks/useCodeRegistryScanner.ts`
+Add a new column to `application_features` table:
 
-Replace the static `CODE_ROUTES` array (lines 13-118) with dynamic extraction from `FEATURE_REGISTRY`:
+| Column | Type | Default | Purpose |
+|--------|------|---------|---------|
+| `reviewed_at` | `timestamp with time zone` | `null` | When the entry was reviewed |
+| `reviewed_by` | `uuid` | `null` | Who reviewed (references auth.users) |
+| `review_status` | `text` | `null` | 'kept', 'needs_review', null |
+| `review_notes` | `text` | `null` | Optional reason for keeping |
+
+**SQL Migration:**
+```sql
+ALTER TABLE public.application_features
+ADD COLUMN reviewed_at timestamp with time zone,
+ADD COLUMN reviewed_by uuid REFERENCES auth.users(id),
+ADD COLUMN review_status text CHECK (review_status IN ('kept', 'needs_review')),
+ADD COLUMN review_notes text;
+```
+
+---
+
+### Code Changes
+
+#### 1. Update Types (`src/types/orphanTypes.ts`)
+
+Add review-related fields to `OrphanEntry`:
 
 ```typescript
-import { FEATURE_REGISTRY } from "@/lib/featureRegistry";
+export interface OrphanEntry {
+  // ... existing fields ...
+  
+  // New review fields
+  reviewedAt: Date | null;
+  reviewedBy: string | null;
+  reviewStatus: 'kept' | 'needs_review' | null;
+  reviewNotes: string | null;
+}
+```
 
-// Build code routes dynamically from FEATURE_REGISTRY
-const codeRoutes = useMemo((): CodeRegistryEntry[] => {
-  const entries: CodeRegistryEntry[] = [];
-  
-  FEATURE_REGISTRY.forEach(module => {
-    // Add all features from all groups
-    module.groups.forEach(group => {
-      group.features.forEach(feature => {
-        entries.push({
-          pageName: feature.name,
-          routePath: feature.routePath,
-          moduleCode: module.code,
-          featureCode: feature.code,  // Direct mapping
-          hasProtection: true,
-          requiredRoles: feature.roleRequirements || [],
-          protectedModuleCode: module.code,
-          sourceFile: "featureRegistry.ts"
-        });
-      });
-    });
-  });
-  
-  return entries;
+---
+
+#### 2. Update useOrphanDetection Hook
+
+**File:** `src/hooks/useOrphanDetection.ts`
+
+**Changes:**
+1. Add `reviewed_at`, `reviewed_by`, `review_status`, `review_notes` to the SELECT query
+2. Filter out entries where `review_status = 'kept'` from orphan results (unless showing all)
+3. Add optional `includeReviewed` parameter to `detectOrphans()`
+
+```typescript
+// In detectOrphans query:
+const { data: dbFeatures } = await supabase
+  .from("application_features")
+  .select(`
+    id,
+    feature_code,
+    // ... existing fields ...
+    reviewed_at,
+    reviewed_by,
+    review_status,
+    review_notes
+  `)
+  .order("module_code");
+
+// Filter out reviewed entries from orphan detection
+const orphanFeatures = allDbFeatures.filter(f => 
+  !codeFeatureSet.has(f.feature_code) && 
+  f.review_status !== 'kept'  // Exclude already-reviewed entries
+);
+```
+
+---
+
+#### 3. Update useOrphanActions Hook
+
+**File:** `src/hooks/useOrphanActions.ts`
+
+**Add new functions:**
+
+```typescript
+/**
+ * Mark an orphan as reviewed and kept
+ */
+const markAsKept = useCallback(async (
+  orphanId: string, 
+  notes?: string
+): Promise<OrphanActionResult> => {
+  setIsProcessing(true);
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    
+    const { error } = await supabase
+      .from("application_features")
+      .update({ 
+        review_status: 'kept',
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: userData.user?.id,
+        review_notes: notes || null
+      })
+      .eq("id", orphanId);
+
+    if (error) throw error;
+
+    toast.success("Feature marked as reviewed and kept");
+    return { success: true, affectedCount: 1, errors: [] };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to mark as kept';
+    toast.error(message);
+    return { success: false, affectedCount: 0, errors: [message] };
+  } finally {
+    setIsProcessing(false);
+  }
+}, []);
+
+/**
+ * Bulk mark orphans as kept
+ */
+const markMultipleAsKept = useCallback(async (
+  orphanIds: string[],
+  notes?: string
+): Promise<OrphanActionResult> => {
+  // Similar implementation with .in("id", orphanIds)
+}, []);
+
+/**
+ * Undo keep action (reset review status)
+ */
+const undoKeep = useCallback(async (orphanId: string): Promise<boolean> => {
+  // Sets review_status, reviewed_at, reviewed_by back to null
 }, []);
 ```
 
-**Impact**: The `useOrphanDetection` hook already uses `codeRoutes` from this scanner, so fixing the source immediately fixes all downstream calculations.
-
 ---
 
-### Phase 2: Enhance Duplicate Detection for Prefixed Variants
+#### 4. Update OrphanManagementPanel UI
 
-The current duplicate detection only matches exact `feature_name`. We need to also detect **prefixed variants** like:
+**File:** `src/components/enablement/route-registry/OrphanManagementPanel.tsx`
 
-| Pattern | Examples |
-|---------|----------|
-| `admin_{base}` | `admin_announcements` = `announcements` |
-| `ess_{base}` | `ess_leave` = `leave` |
-| `mss_{base}` | `mss_approvals` = `approvals` |
-| `{module}_{base}` | `payroll_audit_trail` = `audit_trail` |
+**Changes:**
 
-**File**: `src/hooks/useOrphanDetection.ts`
-
-Add prefix-aware duplicate detection:
-
+1. **Add "Kept" tab** to show entries that were marked as reviewed:
 ```typescript
-// New: Detect prefixed duplicates
-const KNOWN_PREFIXES = ['admin_', 'ess_', 'mss_', 'emp_', 'payroll_', 'perf_', 
-                         'recruit_', 'succ_', 'ben_', 'comp_', 'lms_', 'hse_',
-                         'wf_', 'hub_', 'enbl_', 'onb_', 'er_', 'rpt_', 'prop_'];
-
-const getBaseCode = (code: string): string => {
-  for (const prefix of KNOWN_PREFIXES) {
-    if (code.startsWith(prefix)) {
-      return code.slice(prefix.length);
-    }
-  }
-  return code;
-};
-
-// In duplicate detection logic:
-const baseCode = getBaseCode(f.feature_code);
-const prefixedVariants = orphanFeatures
-  .filter(other => {
-    const otherBase = getBaseCode(other.feature_code);
-    return otherBase === baseCode && other.feature_code !== f.feature_code;
-  })
-  .map(v => v.feature_code);
-```
-
----
-
-### Phase 3: Add Migration Batch Detection
-
-Identify entries created in the same second as likely auto-migrations:
-
-```typescript
-// Detect batch-created entries (same timestamp = migration)
-const batchTimestamps = new Map<string, string[]>();
-orphanFeatures.forEach(f => {
-  const timestamp = new Date(f.created_at).toISOString().slice(0, 19);
-  if (!batchTimestamps.has(timestamp)) {
-    batchTimestamps.set(timestamp, []);
-  }
-  batchTimestamps.get(timestamp)!.push(f.feature_code);
-});
-
-// Mark entries from large batches (>10) as auto_migration
-const autoMigratedCodes = new Set<string>();
-batchTimestamps.forEach((codes, timestamp) => {
-  if (codes.length > 10) {
-    codes.forEach(code => autoMigratedCodes.add(code));
-  }
-});
-```
-
----
-
-### Phase 4: Add UI Enhancements to OrphanManagementPanel
-
-**File**: `src/components/enablement/route-registry/OrphanManagementPanel.tsx`
-
-Add new views:
-
-1. **Prefixed Variants Tab**: Shows all `admin_X` / `ess_X` patterns with their base equivalents
-2. **Batch Import Tab**: Groups orphans by creation timestamp to identify migration batches
-3. **Registry Candidates Tab**: Shows orphans with valid routes that could be added to `FEATURE_REGISTRY`
-
-```typescript
-// Add tab for registry candidates
-<TabsTrigger value="registry-candidates">
-  <Plus className="h-4 w-4 mr-2" />
-  Registry Candidates
-  <Badge variant="secondary" className="ml-2">
-    {orphans.filter(o => o.recommendation === 'keep_as_planned').length}
-  </Badge>
+<TabsTrigger value="kept" className="gap-2">
+  <CheckCircle className="h-4 w-4" />
+  Kept ({keptCount})
 </TabsTrigger>
 ```
 
+2. **Add Keep button** next to Archive/Delete buttons:
+```typescript
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={() => setActionDialog({ open: true, type: 'keep', orphan })}
+  disabled={isProcessing}
+  title="Mark as reviewed and keep"
+>
+  <CheckCircle className="h-4 w-4 text-green-600" />
+</Button>
+```
+
+3. **Add bulk "Keep Selected" action** in selection bar:
+```typescript
+<Button 
+  size="sm" 
+  variant="outline"
+  onClick={() => setActionDialog({ open: true, type: 'keep_bulk', count: selectedOrphans.size })}
+>
+  <CheckCircle className="h-4 w-4 mr-2" />
+  Keep Selected
+</Button>
+```
+
+4. **Toggle to show/hide kept entries:**
+```typescript
+<Switch 
+  checked={showKept} 
+  onCheckedChange={setShowKept}
+/>
+<Label>Show previously reviewed entries</Label>
+```
+
 ---
 
-### Phase 5: Add Bulk Actions for Each Category
+#### 5. Create KeepActionDialog Component
 
-Add one-click bulk actions:
+**File:** `src/components/enablement/route-registry/KeepActionDialog.tsx`
 
-| Category | Action | Implementation |
-|----------|--------|----------------|
-| Prefixed Duplicates | "Delete all variants, keep base" | Bulk delete where `feature_code` starts with prefix |
-| Auto-Migration Batch | "Archive entire batch" | Archive by `created_at` timestamp |
-| Registry Candidates | "Add to FEATURE_REGISTRY" | Generate registry entries for selected |
+A dialog for confirming "Keep" actions with optional notes:
+
+```typescript
+interface KeepActionDialogProps {
+  open: boolean;
+  orphan?: OrphanEntry;
+  count?: number;
+  isProcessing: boolean;
+  onConfirm: (notes?: string) => Promise<void>;
+  onCancel: () => void;
+}
+
+export function KeepActionDialog({...props}) {
+  const [notes, setNotes] = useState("");
+  
+  return (
+    <Dialog>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <CheckCircle className="text-green-600" />
+            Mark as Reviewed & Keep
+          </DialogTitle>
+        </DialogHeader>
+        
+        {/* Show feature details */}
+        <div className="space-y-2">
+          <Badge>{orphan.featureCode}</Badge>
+          <p>{orphan.featureName}</p>
+        </div>
+        
+        {/* Optional notes */}
+        <div>
+          <Label>Reason for keeping (optional)</Label>
+          <Textarea 
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="e.g., Planned for Q2 release..."
+          />
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button onClick={() => onConfirm(notes)} className="bg-green-600">
+            <CheckCircle className="mr-2" />
+            Mark as Kept
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
 
 ---
 
-## Files to Modify
+#### 6. Add "Kept" Tab Content
+
+Show reviewed entries with:
+- Feature details
+- Who reviewed and when
+- Review notes
+- Option to "Un-keep" (reset review status)
+
+```typescript
+<TabsContent value="kept">
+  <Card>
+    <CardHeader>
+      <CardTitle>Reviewed & Kept Features</CardTitle>
+      <CardDescription>
+        These entries were reviewed and intentionally kept in the database.
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      {keptEntries.map(entry => (
+        <div key={entry.id} className="flex items-center justify-between">
+          <div>
+            <code>{entry.featureCode}</code>
+            <p>{entry.featureName}</p>
+            {entry.reviewNotes && (
+              <p className="text-sm italic">"{entry.reviewNotes}"</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Reviewed by {entry.reviewedBy} on {format(entry.reviewedAt, 'PPP')}
+            </p>
+          </div>
+          <Button variant="ghost" onClick={() => undoKeep(entry.id)}>
+            <Undo className="h-4 w-4" />
+            Undo
+          </Button>
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+</TabsContent>
+```
+
+---
+
+## Files to Modify/Create
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `src/hooks/useCodeRegistryScanner.ts` | **REWRITE** | Replace static array with `FEATURE_REGISTRY` extraction |
-| `src/hooks/useOrphanDetection.ts` | **MODIFY** | Add prefix-aware duplicate detection + batch detection |
-| `src/components/enablement/route-registry/OrphanManagementPanel.tsx` | **MODIFY** | Add new tabs for categories |
-| `src/components/enablement/route-registry/PrefixedVariantsPanel.tsx` | **CREATE** | UI for prefixed variant analysis |
-| `src/components/enablement/route-registry/RegistryCandidatesPanel.tsx` | **CREATE** | UI for suggesting registry additions |
+| **Database** | MIGRATE | Add `reviewed_at`, `reviewed_by`, `review_status`, `review_notes` columns |
+| `src/types/orphanTypes.ts` | MODIFY | Add review fields to OrphanEntry interface |
+| `src/hooks/useOrphanDetection.ts` | MODIFY | Query new fields, filter out kept entries |
+| `src/hooks/useOrphanActions.ts` | MODIFY | Add `markAsKept()`, `markMultipleAsKept()`, `undoKeep()` functions |
+| `src/components/enablement/route-registry/OrphanManagementPanel.tsx` | MODIFY | Add Keep button, Kept tab, toggle for showing kept |
+| `src/components/enablement/route-registry/KeepActionDialog.tsx` | CREATE | Dialog for confirming keep action with notes |
+| `src/components/enablement/route-registry/KeptEntriesPanel.tsx` | CREATE | Panel showing reviewed/kept entries |
 
 ---
 
-## Expected Outcomes After Implementation
+## User Experience
 
-### Accurate Counts
+### Before
+1. Administrator sees 500+ orphans
+2. Reviews each one, decides to keep some
+3. Next scan: same 500+ orphans appear again
+4. No memory of previous review decisions
 
-| Metric | Value |
-|--------|-------|
-| Registry Features | 261 |
-| Database Features | 837 |
-| True Orphans | ~576 |
-| Prefixed Duplicates | ~100-150 (estimate) |
-| Legacy/Migration | ~200-300 (estimate) |
-| Registry Candidates | ~100-200 (estimate) |
-
-### Categorization Breakdown (Estimated)
-
-| Category | Count | Recommended Action |
-|----------|-------|-------------------|
-| **True Duplicates** (exact name match) | ~50 | Merge: keep one, delete others |
-| **Prefixed Variants** (admin_X = X) | ~100 | Review: delete variant OR keep if different context |
-| **Auto-Migration Batch** | ~200 | Archive: bulk archive old batches |
-| **Legacy/Stale** | ~100 | Delete: entries >6 months with no description |
-| **Registry Candidates** | ~126 | Add to Registry: have route + description |
+### After
+1. Administrator sees 500+ orphans
+2. Reviews each one, clicks "Keep" for legitimate entries
+3. Enters optional note: "Planned for Q3 release"
+4. Next scan: only unreviewed orphans appear
+5. Can view "Kept" tab to see all approved entries
+6. Full audit trail: who kept what, when, and why
 
 ---
 
-## Technical Details
+## Industry Alignment
 
-### Why This Works
+This approach matches enterprise HRMS standards:
 
-1. **Existing Logic is Sound**: The `useOrphanDetection` hook already has:
-   - Levenshtein similarity matching
-   - Source classification (`auto_migration`, `manual_entry`)
-   - Age-based staleness detection
-   - Route presence validation
-   - Recommendation engine
-
-2. **Only the Baseline is Wrong**: By fixing `useCodeRegistryScanner` to read from `FEATURE_REGISTRY`, all downstream calculations become accurate.
-
-3. **No Database Changes Required**: All detection is done client-side against existing data.
+| Feature | SAP SuccessFactors | Workday | HRplus (After) |
+|---------|-------------------|---------|----------------|
+| Explicit "Keep" action | Yes | Yes | Yes |
+| Review audit trail | Yes | Yes | Yes |
+| Notes/justification | Yes | Yes | Yes |
+| Hide reviewed items | Yes | Yes | Yes |
+| Bulk keep | Yes | Yes | Yes |
+| Undo capability | Limited | Yes | Yes |
 
 ---
 
-## Validation
+## Summary Stats After Implementation
 
-After implementation, the Route Registry should show:
+The Orphan Management panel will show:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          CODE REGISTRY (FIXED)                              │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Registry Features: 261                                                     │
-│  Database Features: 837                                                     │
-│  Synced: 250+                                                               │
-│  True Orphans: ~576                                                         │
-│                                                                             │
-│  ORPHAN BREAKDOWN:                                                          │
-│  ├── Duplicates (merge): 50                                                 │
-│  ├── Prefixed Variants (review): 100                                        │
-│  ├── Auto-Migration (archive): 200                                          │
-│  ├── Legacy/Stale (delete): 100                                             │
-│  └── Registry Candidates (keep): 126                                        │
-│                                                                             │
-│  [Run Analysis] [Export Report] [Bulk Cleanup]                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  DB Features: 837  |  Registry: 261  |  Synced: 250            │
+│  Orphans: 350      |  Kept: 226      |  Total Unreviewed: 350  │
+├─────────────────────────────────────────────────────────────────┤
+│  Tabs: Summary | By Module | Duplicates | Batches | Kept       │
+│        ────────────────────────────────────         ^^^^ NEW   │
+│                                                                 │
+│  [☑] Show previously reviewed entries                          │
+│                                                                 │
+│  Each orphan row:                                               │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ admin_leave_calendar  [Archive] [Keep ✓] [Delete]       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
 ```
