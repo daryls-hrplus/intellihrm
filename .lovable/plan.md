@@ -1,341 +1,249 @@
 
+# Enablement Hub UX Enhancement Plan: Industry-Aligned Improvements
 
-# Consolidated Implementation Plan: Unified Enablement Documentation System
+## Current State Assessment
 
-## Executive Summary
+Based on my exploration, the Enablement Hub has:
+- **Strengths**: Clear 4-phase workflow (Create → Review → Release → Library), AI integration, comprehensive stats, contextual help panel
+- **Gaps**: No guided onboarding wizard, workflow linearity not visually reinforced, phase transitions unclear, user context not leveraged for personalization
 
-Three separate plans have been proposed to fix the Content Creation Studio. This consolidated plan ensures **zero gaps** by unifying them into a coherent implementation with clear data flow across all phases.
+## Industry Alignment Analysis
+
+### Enterprise Content Management Best Practices (SAP, Workday, ServiceNow)
+
+| Pattern | Industry Leader | Current State | Recommendation |
+|---------|-----------------|---------------|----------------|
+| **Progressive Disclosure** | Notion, Confluence | Accordion sections | ✓ Already good |
+| **Guided First-Run** | SAP SuccessFactors | Welcome banner | Upgrade to interactive wizard |
+| **Workflow Visualization** | ServiceNow | Text labels (1, 1.5, 2, 3) | Visual stepper with connectors |
+| **Contextual Recommendations** | Workday | Static list | AI-driven "What's Next" |
+| **Status-Based Navigation** | Jira | All items visible | Highlight actionable items |
+| **Empty State Guidance** | Notion | Basic message | Task-oriented empty states |
 
 ---
 
-## Current State Analysis
+## Recommended Enhancements
 
-### What Exists Today
+### Enhancement 1: Visual Workflow Stepper (Priority: High)
 
-| System | State | Problem |
-|--------|-------|---------|
-| **Static Manuals** | 95+ sections per manual in TypeScript (`APPRAISALS_MANUAL_STRUCTURE`) | Rich content, but invisible to database/agent |
-| **Database Sections** | 35 generic placeholders in `manual_sections` | Empty `source_feature_codes[]`, no content, wrong titles |
-| **Gap Analysis** | Checks `enablement_content_status` + artifacts | Never finds manual sections → false gaps |
-| **Publishing** | Publishes from `manual_sections.content` | Content column is `{}` → nothing to publish |
-| **Review Workflow** | Exists for Tours (`review_status` column) | Missing for manual sections entirely |
+Replace the current accordion-based phases with a horizontal visual stepper showing workflow progression.
 
-### Data Flow Gap
+**Design Pattern**: Linear stepper with status indicators (like SAP SuccessFactors)
 
 ```text
-STATIC TS CONTENT                    DATABASE SYSTEM
-┌────────────────────┐              ┌────────────────────┐
-│ APPRAISALS_MANUAL_ │              │ manual_sections    │
-│ STRUCTURE          │      ╳       │ (35 placeholders)  │
-│ - sec-2-5: Forms   │   NO SYNC    │ - 2.2: Setup?      │
-│ - sec-2-6: Cycles  │              │ - source_codes=[]  │
-│ - 95+ rich sections│              │ - content={}       │
-└────────────────────┘              └────────────────────┘
-         ↓                                   ↓
-    Renders in UI                     Agent queries this
-    (What user sees)                  (Reports false gaps)
+Current Design:
+┌─────────────────┐  ┌─────────────────┐
+│ 1. Create       │  │ 1.5. Review     │
+│ ┌─────────────┐ │  │ ┌─────────────┐ │
+│ │ Studio      │ │  │ │ Review Ctr  │ │
+│ └─────────────┘ │  │ └─────────────┘ │
+└─────────────────┘  └─────────────────┘
+
+Proposed Design:
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ○ CREATE  ━━━━━━━➤  ○ REVIEW  ━━━━━━━➤  ◉ RELEASE  ━━━━━━━➤  ○ LIBRARY │
+│  870 items         12 pending          Ready to publish     10 manuals   │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
----
+**Implementation**:
+- New component: `EnablementWorkflowStepper.tsx`
+- Shows count badges for each phase
+- Highlights current recommended action
+- Clicking a phase expands its tools below
 
-## Consolidated Solution: 4 Integrated Components
+### Enhancement 2: Interactive Onboarding Wizard (Priority: High)
 
-### Component 1: Feature Coverage Bridge Table
+Create a first-run wizard that guides new users through the complete workflow once.
 
-**Purpose**: Link static manual sections to feature codes so gap analysis recognizes existing documentation.
+**Design Pattern**: Multi-step modal wizard (like ManualCreationWizard pattern already in codebase)
 
-**New Table**: `manual_feature_coverage`
+**Wizard Steps**:
+1. **Welcome** - Explain the 4-phase workflow with animation
+2. **Quick Setup Check** - Verify prerequisites (modules defined, features registered)
+3. **First Content Generation** - Guided creation of a sample KB article
+4. **Review Process Demo** - Show how to approve content
+5. **Publishing Preview** - Explain how to publish to Help Center
 
-```sql
-CREATE TABLE manual_feature_coverage (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  manual_code TEXT NOT NULL,
-  section_id TEXT NOT NULL,           -- e.g., 'sec-2-5' from static structure
-  section_title TEXT,                 -- For display/audit
-  feature_codes TEXT[] NOT NULL DEFAULT '{}',
-  coverage_type TEXT DEFAULT 'documented',  -- documented, mentioned, related
-  synced_from_static BOOLEAN DEFAULT true,
-  verified_by_human BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE(manual_code, section_id)
-);
+**Trigger Conditions**:
+- First visit to Enablement Hub
+- OR zero published content AND zero pending reviews
+- Dismissable with "Skip" or "Don't show again"
 
-CREATE INDEX idx_mfc_feature_codes ON manual_feature_coverage USING GIN (feature_codes);
-```
+**Component**: `EnablementOnboardingWizard.tsx` (extends existing FirstTimeUserDetector pattern)
 
-**Seed Data** (Appraisals example):
-```sql
-INSERT INTO manual_feature_coverage (manual_code, section_id, section_title, feature_codes) VALUES
-  ('appraisals', 'sec-2-2', 'Rating Scales Configuration', ARRAY['perf_rating_scales']),
-  ('appraisals', 'sec-2-4', 'Competency Framework Configuration', ARRAY['perf_competency_framework', 'admin_competencies']),
-  ('appraisals', 'sec-2-5', 'Appraisal Form Templates', ARRAY['appraisal_forms', 'perf_appraisal_forms']),
-  ('appraisals', 'sec-2-6', 'Appraisal Cycles', ARRAY['appraisal_cycles', 'perf_appraisal_cycles']),
-  ('appraisals', 'sec-3-calibration', 'Calibration Sessions', ARRAY['calibration', 'perf_calibration']);
-```
+### Enhancement 3: AI-Powered "Recommended Next Actions" Card (Priority: Medium)
 
----
+Replace static workflow sections with an intelligent "What's Next" card that adapts based on current state.
 
-### Component 2: Content Review Lifecycle Columns
-
-**Purpose**: Add human review phase before content reaches end users.
-
-**Schema Changes to `manual_sections`**:
-
-```sql
-ALTER TABLE manual_sections
-ADD COLUMN IF NOT EXISTS review_status TEXT DEFAULT 'draft'
-  CHECK (review_status IN ('draft', 'pending_review', 'in_review', 'approved', 'rejected', 'published')),
-ADD COLUMN IF NOT EXISTS draft_content JSONB DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS reviewer_id UUID REFERENCES auth.users(id),
-ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS review_notes TEXT,
-ADD COLUMN IF NOT EXISTS submitted_for_review_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS submitted_by UUID REFERENCES auth.users(id),
-ADD COLUMN IF NOT EXISTS static_section_id TEXT;  -- Links to APPRAISALS_MANUAL_STRUCTURE.id
-```
-
-**Audit Trail Table**:
-
-```sql
-CREATE TABLE manual_section_reviews (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  section_id UUID NOT NULL REFERENCES manual_sections(id) ON DELETE CASCADE,
-  previous_content JSONB,
-  proposed_content JSONB NOT NULL,
-  action TEXT NOT NULL CHECK (action IN ('submitted', 'approved', 'rejected', 'edited', 'published')),
-  action_by UUID REFERENCES auth.users(id),
-  action_at TIMESTAMPTZ DEFAULT now(),
-  notes TEXT,
-  version_number INTEGER DEFAULT 1
-);
-```
-
----
-
-### Component 3: Content Creation Agent Updates
-
-**Purpose**: Fix gap analysis to recognize all documentation sources.
-
-**File**: `supabase/functions/content-creation-agent/index.ts`
-
-**Changes**:
-
-1. **In `analyze_context` action** (~line 380):
+**Logic**:
 ```typescript
-// NEW: Fetch manual feature coverage mappings
-const { data: manualCoverage } = await supabase
-  .from("manual_feature_coverage")
-  .select("feature_codes");
-
-// Build set of features covered by static manuals
-const featuresWithManualCoverage = new Set<string>();
-for (const row of manualCoverage || []) {
-  (row.feature_codes || []).forEach(code => 
-    featuresWithManualCoverage.add(code)
-  );
-}
-
-// UPDATE isDocumented check (line 381-386)
-const isDocumented = status?.documentation_status === 'complete' ||
-  status?.documentation_status === 'in_progress' ||
-  status?.workflow_status === 'published' ||
-  status?.workflow_status === 'documentation' ||
-  hasArtifacts ||
-  hasManualContent ||
-  featuresWithManualCoverage.has(feature.feature_code);  // NEW
-```
-
-2. **In `identify_gaps` action** (~line 913):
-```typescript
-// Same pattern - add manual coverage check
-const isDocumented = status?.documentation_status === 'complete' ||
-  status?.workflow_status === 'published' ||
-  types.size > 0 ||
-  featuresWithManualCoverage.has(feature.feature_code);  // NEW
-```
-
-3. **Manual-scoped analysis** (already partially implemented):
-```typescript
-// If manualId is provided, use manual's module_codes for filtering
-if (context.manualId) {
-  const { data: manual } = await supabase
-    .from("manual_definitions")
-    .select("module_codes, manual_code")
-    .eq("id", context.manualId)
-    .single();
-    
-  // Filter features AND get coverage for this specific manual
-  const { data: manualSpecificCoverage } = await supabase
-    .from("manual_feature_coverage")
-    .select("feature_codes")
-    .eq("manual_code", manual.manual_code);
-}
-```
-
----
-
-### Component 4: Content Review Center (New Page)
-
-**Purpose**: Intermediate review phase between CREATE and RELEASE.
-
-**New Files**:
-
-| File | Purpose |
-|------|---------|
-| `src/pages/enablement/ContentReviewCenterPage.tsx` | Main review hub with pending queue |
-| `src/components/enablement/ContentReviewPanel.tsx` | Side-by-side diff editor sheet |
-| `src/components/enablement/PendingReviewQueue.tsx` | List of sections awaiting review |
-| `src/hooks/useContentReview.ts` | Approve/reject/edit operations |
-
-**Integration Points**:
-
-1. **EnablementHubPage.tsx** - Add Phase 1.5:
-```typescript
-{
-  titleKey: "1.5. Review & Edit",
-  items: [{
-    title: "Content Review Center",
-    description: "Review AI-generated content before publishing",
-    href: "/enablement/review",
-    icon: ClipboardCheck,
-    badge: pendingCount > 0 ? `${pendingCount} pending` : undefined,
-  }],
-},
-```
-
-2. **ManualPublishService.ts** - Guard publishing:
-```typescript
-static async getPublishableSections(manualId: string): Promise<ManualSection[]> {
-  const { data } = await supabase
-    .from('manual_sections')
-    .select('*')
-    .eq('manual_id', manualId)
-    .in('review_status', ['approved', 'published'])  // NEW FILTER
-    .order('display_order');
-  return data || [];
-}
-```
-
-3. **useManualSectionPreview.ts** - Save as draft:
-```typescript
-const applyChanges = async (saveAsDraft = true) => {
-  if (saveAsDraft) {
-    await supabase.from('manual_sections').update({
-      draft_content: { markdown: proposedContent },
-      review_status: 'pending_review',
-      submitted_for_review_at: new Date().toISOString(),
-    }).eq('id', sectionId);
-  } else {
-    // Direct apply (for already-approved content)
+const getRecommendedAction = () => {
+  if (pendingReviewCount > 5) {
+    return { 
+      action: "Review pending content",
+      description: "You have 12 items awaiting approval",
+      href: "/enablement/review",
+      priority: "high"
+    };
   }
+  if (approvedButUnpublished > 10) {
+    return {
+      action: "Publish to Help Center",
+      description: "20 approved sections ready to publish",
+      href: "/enablement/release-center?activeTab=publishing",
+      priority: "medium"
+    };
+  }
+  if (gapPercentage > 30) {
+    return {
+      action: "Generate missing documentation",
+      description: "45 features lack documentation",
+      href: "/enablement/create",
+      priority: "medium"
+    };
+  }
+  return {
+    action: "Everything's up to date!",
+    description: "All content is reviewed and published",
+    priority: "success"
+  };
 };
 ```
 
+**Component**: `RecommendedNextActions.tsx`
+
+### Enhancement 4: Phase Transition Banners (Priority: Medium)
+
+Add contextual banners that appear when user completes a phase and should move to the next.
+
+**Examples**:
+- After generating 5+ articles: "Ready to review? 5 items are pending approval →"
+- After approving 10+ sections: "Ready to publish? 10 approved sections waiting →"
+- After first publish: "Congratulations! View your content in Help Center →"
+
+**Component**: `PhaseTransitionBanner.tsx`
+
+### Enhancement 5: Enhanced Stats with Workflow Context (Priority: Low)
+
+Update the 3-stat cards to show workflow progression rather than just counts.
+
+**Current**:
+| Content Created | Ready to Publish | Published |
+|-----------------|------------------|-----------|
+| 870             | 0                | 0         |
+
+**Proposed**:
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│  WORKFLOW PROGRESS                                    View Details  │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Draft → [████████████░░░░] 12 pending → [░░░░░░░░░░░░] 0 published│
+│           review                           to KB                   │
+│                                                                     │
+│  870 total content items • 85% reviewed • 0% published             │
+└────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
-## Complete Data Flow After Implementation
+## Implementation Priority Matrix
+
+| Enhancement | Impact | Effort | Priority |
+|-------------|--------|--------|----------|
+| Visual Workflow Stepper | High (clarity) | Medium | 1 |
+| Onboarding Wizard | High (adoption) | Medium | 2 |
+| Recommended Next Actions | Medium (guidance) | Low | 3 |
+| Phase Transition Banners | Medium (flow) | Low | 4 |
+| Enhanced Stats | Low (visual) | Low | 5 |
+
+---
+
+## Technical Architecture
+
+### New Components to Create
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| `EnablementWorkflowStepper.tsx` | Visual phase stepper | `src/components/enablement/` |
+| `EnablementOnboardingWizard.tsx` | First-run wizard | `src/components/enablement/` |
+| `RecommendedNextActions.tsx` | AI-driven suggestions | `src/components/enablement/` |
+| `PhaseTransitionBanner.tsx` | Phase completion prompts | `src/components/enablement/` |
+
+### Hooks to Create
+
+| Hook | Purpose |
+|------|---------|
+| `useEnablementProgress.ts` | Calculate workflow progress across all phases |
+| `useEnablementRecommendations.ts` | Generate AI-powered next action suggestions |
+
+### Files to Modify
+
+| File | Changes |
+|------|---------|
+| `EnablementHubPage.tsx` | Add WorkflowStepper, RecommendedActions, conditional wizard |
+| `EnablementWelcomeBanner.tsx` | Update to trigger wizard instead of static content |
+| `useEnablementData.ts` | Add pending review count, approved count queries |
+
+---
+
+## Mockup: Enhanced Enablement Hub
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  1. CREATE                                                                      │
-│  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │  Content Creation Studio                                                    │ │
-│  │  • Agent queries manual_feature_coverage → correct coverage %              │ │
-│  │  • Generates content → saves to draft_content, review_status='pending'    │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                      ↓                                          │
+│  ⊞ Enablement Content Hub                  [Workflow Guide] [⚡New Features] [+ Create Content] │
+│  Create, manage, and publish documentation with AI assistance                                  │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  1.5. REVIEW & EDIT (NEW)                                                       │
-│  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │  Content Review Center                                                      │ │
-│  │  • Shows all pending_review sections                                        │ │
-│  │  • Side-by-side current vs proposed                                         │ │
-│  │  • Approve → review_status='approved', content=draft_content                │ │
-│  │  • Reject → review_status='rejected', back to creator                       │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                      ↓                                          │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│  2. MANAGE & RELEASE                                                            │
-│  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │  Release Command Center                                                     │ │
-│  │  • Publishing tab shows only approved sections                              │ │
-│  │  • Coverage % reflects manual_feature_coverage + enablement_content_status  │ │
-│  │  • Publish → KB articles created, review_status='published'                 │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                      ↓                                          │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│  3. REFERENCE LIBRARY                                                           │
-│  ┌────────────────────────────────────────────────────────────────────────────┐ │
-│  │  Help Center (End Users)                                                    │ │
-│  │  • Only sees published content from approved sections                       │ │
-│  │  • KB articles with source_manual_id for traceability                       │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │  WORKFLOW PHASES                                                         │   │
+│  │                                                                          │   │
+│  │  ① CREATE     →     ② REVIEW     →     ③ RELEASE     →     ④ LIBRARY   │   │
+│  │    870 items        ⚠️ 12 pending       Ready              10 manuals    │   │
+│  │                     ↑ ACTION NEEDED                                      │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │  ⚡ RECOMMENDED ACTION                                                   │   │
+│  │                                                                          │   │
+│  │  🔍 Review pending content                                              │   │
+│  │  12 AI-generated sections are awaiting your approval.                   │   │
+│  │  Review them to maintain content quality before publishing.             │   │
+│  │                                                                          │   │
+│  │  [Go to Content Review Center →]                                        │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ┌─────────────────────────────────┐  ┌─────────────────────────────────┐      │
+│  │  📊 Content Status              │  │  🚀 Active Release              │      │
+│  │                                 │  │                                 │      │
+│  │  [████████████░░░░] 85%         │  │  2026.1 - Q1 2026              │      │
+│  │  reviewed                       │  │  Status: planning • 0 features │      │
+│  │                                 │  │                                 │      │
+│  │  870 created • 12 pending       │  │  [View Release →]              │      │
+│  └─────────────────────────────────┘  └─────────────────────────────────┘      │
+│                                                                                 │
+│  ▼ TOOLS BY PHASE (Expandable sections below)                                  │
+│                                                                                 │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐                      │
+│  │ ① Create               │  │ ② Review & Edit        │                      │
+│  │ • Content Creation     │  │ • Content Review Center │                      │
+│  │   Studio              │  │   12 pending            │                      │
+│  └─────────────────────────┘  └─────────────────────────┘                      │
+│                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Gap Verification Checklist
+## Summary
 
-| Requirement | Addressed By | Integration Point |
-|-------------|--------------|-------------------|
-| Static manuals recognized as documentation | Component 1: manual_feature_coverage | Agent gap analysis queries this table |
-| False gaps eliminated | Component 3: Agent updates | isDocumented now checks manual coverage |
-| Manual-scoped coverage analysis | Component 3: manualId context | Already in hooks, agent extended |
-| Human review before publish | Component 2: review_status column | ManualPublishService filters by approved |
-| Audit trail for reviews | Component 2: manual_section_reviews | Tracks all approve/reject actions |
-| Content Review UI | Component 4: ContentReviewCenterPage | New page with pending queue |
-| Enablement Hub integration | Component 4: Hub updates | Phase 1.5 added to navigation |
-| Sync between systems | Component 1 + 2: static_section_id | Links DB rows to static structure IDs |
-| Coverage % accuracy everywhere | All components | Same source (manual_feature_coverage) |
+The recommended approach is **NOT a blocking wizard**, but rather:
 
----
+1. **Visual clarity** - Show workflow as a connected stepper
+2. **Smart guidance** - AI-driven "What's Next" recommendations
+3. **Gentle onboarding** - Optional first-run wizard (dismissable)
+4. **Progressive disclosure** - Keep advanced tools hidden until needed
 
-## Implementation Sequence
-
-| Step | Component | Dependencies | Effort |
-|------|-----------|--------------|--------|
-| 1 | Create `manual_feature_coverage` table | None | Migration |
-| 2 | Seed mappings for all 10 manuals | Step 1 | Data entry |
-| 3 | Update content-creation-agent gap logic | Step 1 | Edge function |
-| 4 | Add review columns to manual_sections | None | Migration |
-| 5 | Create manual_section_reviews table | Step 4 | Migration |
-| 6 | Create ContentReviewCenterPage + components | Steps 4, 5 | UI |
-| 7 | Update useManualSectionPreview (save as draft) | Step 4 | Hook |
-| 8 | Update ManualPublishService (approved filter) | Step 4 | Service |
-| 9 | Update EnablementHubPage (Phase 1.5) | Step 6 | UI |
-| 10 | Deploy edge function | Step 3 | Deploy |
-
----
-
-## Files to Create/Modify
-
-| File | Action | Purpose |
-|------|--------|---------|
-| `supabase/migrations/xxx_add_manual_feature_coverage.sql` | Create | Coverage bridge table + seed data |
-| `supabase/migrations/xxx_add_section_review_columns.sql` | Create | Review lifecycle columns + audit table |
-| `supabase/functions/content-creation-agent/index.ts` | Modify | Query manual_feature_coverage in gap logic |
-| `src/pages/enablement/ContentReviewCenterPage.tsx` | Create | Review hub page |
-| `src/components/enablement/ContentReviewPanel.tsx` | Create | Side-by-side editor |
-| `src/components/enablement/PendingReviewQueue.tsx` | Create | Pending items list |
-| `src/hooks/useContentReview.ts` | Create | Approve/reject operations |
-| `src/hooks/useManualSectionPreview.ts` | Modify | Add saveAsDraft option |
-| `src/services/kb/ManualPublishService.ts` | Modify | Filter for approved sections |
-| `src/pages/enablement/EnablementHubPage.tsx` | Modify | Add Phase 1.5 navigation |
-| `src/App.tsx` | Modify | Add /enablement/review route |
-
----
-
-## Expected Outcomes
-
-| Metric | Before | After |
-|--------|--------|-------|
-| Appraisals Forms gap status | "4 gaps - undocumented" | "Documented via sec-2-5" |
-| Appraisals coverage | ~6% (false) | ~85% (accurate) |
-| Content reaching users without review | Possible | Impossible (requires approval) |
-| Gap analysis consistency | Different per page | Same everywhere |
-| Audit trail for content | None | Complete history |
-
-This consolidated plan ensures all three requirements work together with no gaps in the workflow.
+This aligns with enterprise UX best practices from SAP SuccessFactors, Workday, and Notion while maintaining the existing architecture and avoiding overwhelming users with mandatory steps.
 
