@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle, Undo2, User, Calendar, MessageSquare, Info, Archive, Trash2 } from "lucide-react";
+import { CheckCircle, Undo2, User, Calendar, MessageSquare, Info, Archive, Trash2, Database } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
 import {
   Tooltip,
@@ -90,6 +90,19 @@ export function KeptEntriesPanel({
                     {entry.moduleCode && (
                       <Badge variant="outline" className="text-xs">
                         {entry.moduleCode}
+                      </Badge>
+                    )}
+                    {entry.createdByName ? (
+                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                        <User className="h-3 w-3 mr-1" />
+                        Created by {entry.createdByName}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs bg-muted">
+                        <Database className="h-3 w-3 mr-1" />
+                        {entry.source === 'auto_migration' ? 'Migration' : 
+                         entry.source === 'manual_entry' ? 'Manual' :
+                         entry.source === 'registry' ? 'Registry' : 'System'}
                       </Badge>
                     )}
                   </div>

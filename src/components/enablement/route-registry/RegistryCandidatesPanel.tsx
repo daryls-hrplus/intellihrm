@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, FileCode, ExternalLink, CheckCircle, Archive, Trash2 } from "lucide-react";
+import { Plus, FileCode, ExternalLink, CheckCircle, Archive, Trash2, User, Database } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
 import {
   Tooltip,
@@ -102,6 +102,19 @@ export function RegistryCandidatesPanel({
                             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                               Registry Candidate
                             </Badge>
+                            {entry.createdByName ? (
+                              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                <User className="h-3 w-3 mr-1" />
+                                {entry.createdByName}
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs bg-muted">
+                                <Database className="h-3 w-3 mr-1" />
+                                {entry.source === 'auto_migration' ? 'Migration' : 
+                                 entry.source === 'manual_entry' ? 'Manual' :
+                                 entry.source === 'registry' ? 'Registry' : 'System'}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm font-medium mt-1">
                             {entry.featureName}

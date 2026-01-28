@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Archive, ChevronDown, Database, Clock, CheckCircle, Trash2 } from "lucide-react";
+import { Archive, ChevronDown, Database, Clock, CheckCircle, Trash2, User } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
 import { useState } from "react";
 import { format } from "date-fns";
@@ -88,6 +88,11 @@ export function MigrationBatchesPanel({
             const batchOrphans = orphans.filter(o => batch.codes.includes(o.featureCode));
             const formattedDate = format(new Date(batch.timestamp), "MMM d, yyyy 'at' HH:mm:ss");
             const isExpanded = expandedBatches.has(batch.timestamp);
+            
+            // Get unique creators for this batch
+            const batchCreators = new Set(
+              batchOrphans.map(o => o.createdByName).filter((name): name is string => !!name)
+            );
 
             return (
               <Card key={index}>
@@ -101,6 +106,13 @@ export function MigrationBatchesPanel({
                             <CardTitle className="text-base">{formattedDate}</CardTitle>
                             <CardDescription className="text-xs mt-1">
                               {batch.count} features created simultaneously
+                              {batchCreators.size > 0 && (
+                                <span className="flex items-center gap-1 mt-1">
+                                  <User className="h-3 w-3" />
+                                  By: {Array.from(batchCreators).slice(0, 3).join(', ')}
+                                  {batchCreators.size > 3 && ` +${batchCreators.size - 3} more`}
+                                </span>
+                              )}
                             </CardDescription>
                           </div>
                         </div>
@@ -154,7 +166,20 @@ export function MigrationBatchesPanel({
                               <code className="font-mono text-xs truncate flex-1">
                                 {orphan.featureCode}
                               </code>
-                              <Badge variant="outline" className="text-xs ml-2">
+                              {orphan.createdByName ? (
+                                <Badge variant="outline" className="text-xs mx-2 bg-blue-50 text-blue-700 border-blue-200">
+                                  <User className="h-3 w-3 mr-1" />
+                                  {orphan.createdByName}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-xs mx-2 bg-muted">
+                                  <Database className="h-3 w-3 mr-1" />
+                                  {orphan.source === 'auto_migration' ? 'Migration' : 
+                                   orphan.source === 'manual_entry' ? 'Manual' :
+                                   orphan.source === 'registry' ? 'Registry' : 'System'}
+                                </Badge>
+                              )}
+                              <Badge variant="outline" className="text-xs">
                                 {orphan.moduleCode || 'unassigned'}
                               </Badge>
                             </div>

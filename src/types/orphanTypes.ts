@@ -36,6 +36,9 @@ export interface OrphanEntry {
   reviewedBy: string | null;
   reviewStatus: ReviewStatus;
   reviewNotes: string | null;
+  // Creator tracking
+  createdBy: string | null;
+  createdByName: string | null;
 }
 
 export interface OrphanDuplicate {
