@@ -13,6 +13,7 @@ import {
   Grid3X3,
   TrendingUp,
   Heart,
+  GraduationCap,
   type LucideIcon,
 } from "lucide-react";
 import type { FunctionalArea } from "@/constants/manualsStructure";
@@ -29,6 +30,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Grid3X3,
   TrendingUp,
   Heart,
+  GraduationCap,
 };
 
 // Act metadata (static - defines the journey structure)
@@ -141,14 +143,16 @@ export const ACT_METADATA = [
       { title: "Feedback", description: "360-degree multi-rater insights" },
       { title: "Succession", description: "Pipeline and readiness planning" },
       { title: "Career", description: "Paths and development plans" },
+      { title: "Learning", description: "LMS, courses, and compliance training" },
     ],
     outcomes: [
       "Culture of continuous feedback",
       "Aligned goals across the organization",
       "Strong leadership pipeline",
       "Clear career progression paths",
+      "Comprehensive learning management",
     ],
-    manualCodes: ["appraisals", "goals", "feedback-360", "succession", "career-development"],
+    manualCodes: ["appraisals", "goals", "feedback-360", "succession", "career-development", "learning-development"],
   },
 ];
 
