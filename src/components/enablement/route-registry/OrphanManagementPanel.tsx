@@ -99,11 +99,14 @@ export function OrphanManagementPanel() {
     deleteOrphan,
     markAsKept,
     restoreOrphan,
+    restoreAndKeep,
     archiveMultiple,
     archiveByFeatureCodes,
+    deleteByFeatureCodes,
     deleteMultiple,
     markMultipleAsKept,
     restoreMultiple,
+    restoreAndKeepMultiple,
     undoKeep,
     exportToCsv
   } = useOrphanActions();
@@ -577,17 +580,29 @@ export function OrphanManagementPanel() {
                 detectOrphans();
               }
             }}
+            onDeleteBatch={async (codes) => {
+              await deleteByFeatureCodes(codes);
+              detectOrphans();
+            }}
           />
         </TabsContent>
 
         <TabsContent value="registry-candidates" className="mt-6">
-          <RegistryCandidatesPanel candidates={registryCandidates} />
+          <RegistryCandidatesPanel
+            candidates={registryCandidates}
+            onKeep={(orphan) => setKeepDialog({ open: true, orphan })}
+            onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
+            onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
+            isProcessing={isProcessing}
+          />
         </TabsContent>
 
         <TabsContent value="kept" className="mt-6">
           <KeptEntriesPanel
             keptEntries={keptEntries}
             onUndoKeep={handleUndoKeep}
+            onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
+            onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
             isProcessing={isProcessing}
           />
         </TabsContent>
@@ -696,6 +711,14 @@ export function OrphanManagementPanel() {
             }}
             onDeleteMultiple={async (ids) => {
               await deleteMultiple(ids);
+              detectOrphans();
+            }}
+            onMarkAsKept={async (id) => {
+              await restoreAndKeep(id);
+              detectOrphans();
+            }}
+            onMarkMultipleAsKept={async (ids) => {
+              await restoreAndKeepMultiple(ids);
               detectOrphans();
             }}
             isProcessing={isProcessing}

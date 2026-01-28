@@ -2,15 +2,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, FileCode, ExternalLink } from "lucide-react";
+import { Plus, FileCode, ExternalLink, CheckCircle, Archive, Trash2 } from "lucide-react";
 import { OrphanEntry } from "@/types/orphanTypes";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface RegistryCandidatesPanelProps {
   candidates: OrphanEntry[];
+  onKeep: (orphan: OrphanEntry) => void;
+  onArchive: (orphan: OrphanEntry) => void;
+  onDelete: (orphan: OrphanEntry) => void;
+  isProcessing?: boolean;
 }
 
 export function RegistryCandidatesPanel({
-  candidates
+  candidates,
+  onKeep,
+  onArchive,
+  onDelete,
+  isProcessing = false
 }: RegistryCandidatesPanelProps) {
   const groupedByModule = candidates.reduce((acc, candidate) => {
     const module = candidate.moduleCode || 'unassigned';
@@ -104,7 +118,59 @@ export function RegistryCandidatesPanel({
                             </p>
                           )}
                         </div>
-                        <FileCode className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        <div className="flex items-center gap-1">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => onKeep(entry)}
+                                  disabled={isProcessing}
+                                >
+                                  <CheckCircle className="h-4 w-4 text-green-600" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Mark as reviewed and keep</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => onArchive(entry)}
+                                  disabled={isProcessing}
+                                >
+                                  <Archive className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Archive this entry</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => onDelete(entry)}
+                                  disabled={isProcessing}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete permanently</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       </div>
                     </div>
                   ))}
