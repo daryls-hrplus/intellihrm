@@ -101,10 +101,11 @@ export function useOrphanActions() {
   }, []);
 
   /**
-   * Archive multiple orphans
+   * Archive multiple orphans by ID
    */
   const archiveMultiple = useCallback(async (orphanIds: string[]): Promise<OrphanActionResult> => {
     if (orphanIds.length === 0) {
+      toast.warning("No features to archive");
       return { success: true, affectedCount: 0, errors: [] };
     }
 
@@ -133,6 +134,73 @@ export function useOrphanActions() {
 
       setLastAction(result);
       toast.success(`${orphanIds.length} feature(s) archived`, {
+        action: {
+          label: "Undo",
+          onClick: () => undoArchive(undoToken)
+        }
+      });
+
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to archive';
+      toast.error(message);
+      return { success: false, affectedCount: 0, errors: [message] };
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
+
+  /**
+   * Archive multiple features by feature code (used for batch operations)
+   */
+  const archiveByFeatureCodes = useCallback(async (featureCodes: string[]): Promise<OrphanActionResult> => {
+    if (featureCodes.length === 0) {
+      toast.warning("No features to archive");
+      return { success: true, affectedCount: 0, errors: [] };
+    }
+
+    setIsProcessing(true);
+    try {
+      // First get the IDs for the feature codes
+      const { data: features, error: fetchError } = await supabase
+        .from("application_features")
+        .select("id")
+        .in("feature_code", featureCodes)
+        .eq("is_active", true);
+
+      if (fetchError) throw fetchError;
+
+      if (!features || features.length === 0) {
+        toast.warning("No active features found matching the codes");
+        setIsProcessing(false);
+        return { success: true, affectedCount: 0, errors: [] };
+      }
+
+      const ids = features.map(f => f.id);
+
+      const { error } = await supabase
+        .from("application_features")
+        .update({ is_active: false })
+        .in("id", ids);
+
+      if (error) throw error;
+
+      const undoToken = crypto.randomUUID();
+      setUndoState({
+        token: undoToken,
+        archivedIds: ids,
+        expiresAt: new Date(Date.now() + 30000)
+      });
+
+      const result: OrphanActionResult = {
+        success: true,
+        affectedCount: ids.length,
+        errors: [],
+        undoToken
+      };
+
+      setLastAction(result);
+      toast.success(`${ids.length} feature(s) archived`, {
         action: {
           label: "Undo",
           onClick: () => undoArchive(undoToken)
@@ -554,6 +622,7 @@ export function useOrphanActions() {
     
     // Bulk actions
     archiveMultiple,
+    archiveByFeatureCodes,
     deleteMultiple,
     markMultipleAsKept,
     restoreMultiple,

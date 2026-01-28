@@ -100,6 +100,7 @@ export function OrphanManagementPanel() {
     markAsKept,
     restoreOrphan,
     archiveMultiple,
+    archiveByFeatureCodes,
     deleteMultiple,
     markMultipleAsKept,
     restoreMultiple,
@@ -566,11 +567,8 @@ export function OrphanManagementPanel() {
             batches={migrationBatches}
             orphans={orphans}
             onArchiveBatch={async (codes) => {
-              const ids = orphans.filter(o => codes.includes(o.featureCode)).map(o => o.id);
-              if (ids.length > 0) {
-                await archiveMultiple(ids);
-                detectOrphans();
-              }
+              await archiveByFeatureCodes(codes);
+              detectOrphans();
             }}
             onKeepBatch={async (codes) => {
               const ids = orphans.filter(o => codes.includes(o.featureCode)).map(o => o.id);
