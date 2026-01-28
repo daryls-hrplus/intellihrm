@@ -148,7 +148,7 @@ export default function ContentCreationStudioPage() {
         await analyzeContext(moduleCode || undefined);
         break;
       case 'identify_gaps':
-        const gapResult = await identifyGaps();
+        const gapResult = await identifyGaps(moduleCode || undefined);
         if (gapResult) {
           setGapAnalysis(gapResult);
           setTabState({ showGapPanel: true });
@@ -266,9 +266,9 @@ export default function ContentCreationStudioPage() {
     }
   };
 
-  // Handle gap panel refresh
+  // Handle gap panel refresh - respects module filter
   const handleRefreshGaps = async () => {
-    const result = await identifyGaps();
+    const result = await identifyGaps(tabState.selectedModule || undefined);
     if (result) {
       setGapAnalysis(result);
     }
@@ -279,10 +279,10 @@ export default function ContentCreationStudioPage() {
     setTabState({ showGapPanel: false });
   };
 
-  // Handle view gap details from summary
-  const handleViewGapDetails = () => {
+  // Handle view gap details from summary - respects module filter
+  const handleViewGapDetails = async () => {
     if (!gapAnalysis) {
-      handleRefreshGaps();
+      await handleRefreshGaps();
     }
     setTabState({ showGapPanel: true });
   };
@@ -360,8 +360,14 @@ export default function ContentCreationStudioPage() {
                       summary={gapAnalysis?.summary || null}
                       isLoading={isLoading && currentAction === 'identify_gaps'}
                       onGenerateForFeature={handleGenerateForGap}
-                      onRefresh={handleRefreshGaps}
+                      onRefresh={async (moduleCode) => {
+                        const result = await identifyGaps(moduleCode);
+                        if (result) setGapAnalysis(result);
+                      }}
                       onDismiss={handleDismissGapPanel}
+                      modules={modules}
+                      selectedModule={tabState.selectedModule}
+                      onModuleChange={(moduleCode) => setTabState({ selectedModule: moduleCode })}
                     />
                   </div>
                 )}

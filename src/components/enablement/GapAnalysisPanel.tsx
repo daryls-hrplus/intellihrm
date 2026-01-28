@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   FileX,
   FileQuestion,
@@ -18,9 +19,11 @@ import {
   Loader2,
   X,
   Sparkles,
+  Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GapAnalysis, GapSummary } from "@/hooks/useContentCreationAgent";
+import { ApplicationModule } from "@/hooks/useApplicationFeatures";
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,8 +35,11 @@ interface GapAnalysisPanelProps {
   summary: GapSummary | null;
   isLoading: boolean;
   onGenerateForFeature: (featureCode: string, type: 'kb' | 'manual' | 'sop') => void;
-  onRefresh: () => void;
+  onRefresh: (moduleCode?: string) => void;
   onDismiss: () => void;
+  modules?: ApplicationModule[];
+  selectedModule?: string;
+  onModuleChange?: (moduleCode: string) => void;
 }
 
 interface GapItemProps {
@@ -171,8 +177,12 @@ export function GapAnalysisPanel({
   onGenerateForFeature,
   onRefresh,
   onDismiss,
+  modules = [],
+  selectedModule = "",
+  onModuleChange,
 }: GapAnalysisPanelProps) {
   const [activeTab, setActiveTab] = useState("undocumented");
+  const [localModuleFilter, setLocalModuleFilter] = useState(selectedModule);
 
   const categories = [
     {
@@ -218,6 +228,16 @@ export function GapAnalysisPanel({
     return null;
   }
 
+  // Handle module filter change
+  const handleModuleFilterChange = (value: string) => {
+    const moduleCode = value === "__all__" ? "" : value;
+    setLocalModuleFilter(moduleCode);
+    if (onModuleChange) {
+      onModuleChange(moduleCode);
+    }
+    onRefresh(moduleCode || undefined);
+  };
+
   return (
     <Card className="border-primary/20">
       <CardHeader className="pb-3">
@@ -230,6 +250,7 @@ export function GapAnalysisPanel({
               <CardTitle className="text-base">Gap Analysis</CardTitle>
               <p className="text-xs text-muted-foreground">
                 {isLoading ? "Analyzing..." : `${totalGaps} total gaps found`}
+                {localModuleFilter && ` in ${localModuleFilter}`}
               </p>
             </div>
           </div>
@@ -237,7 +258,7 @@ export function GapAnalysisPanel({
             <Button
               variant="ghost"
               size="sm"
-              onClick={onRefresh}
+              onClick={() => onRefresh(localModuleFilter || undefined)}
               disabled={isLoading}
               className="h-7 w-7 p-0"
             >
@@ -257,6 +278,29 @@ export function GapAnalysisPanel({
             </Button>
           </div>
         </div>
+
+        {/* Module Filter */}
+        {modules.length > 0 && (
+          <div className="mt-3 flex items-center gap-2">
+            <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+            <Select 
+              value={localModuleFilter || "__all__"} 
+              onValueChange={handleModuleFilterChange}
+            >
+              <SelectTrigger className="h-8 flex-1">
+                <SelectValue placeholder="Filter by module" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All Modules</SelectItem>
+                {modules.map((mod) => (
+                  <SelectItem key={mod.id} value={mod.module_code || mod.id}>
+                    {mod.module_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="pt-0">

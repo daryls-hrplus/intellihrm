@@ -827,14 +827,22 @@ Generate a formal SOP JSON structure:
 
       // ==================== IDENTIFY GAPS ====================
       case 'identify_gaps': {
-        // Get all features
-        const { data: features } = await supabase
+        const moduleCodeFilter = context.moduleCode;
+        
+        // Get all features (optionally filtered by module)
+        let featuresQuery = supabase
           .from("application_features")
           .select(`
             feature_code, feature_name, description,
             application_modules!inner(module_code, module_name)
           `)
           .eq("is_active", true);
+
+        if (moduleCodeFilter) {
+          featuresQuery = featuresQuery.eq("application_modules.module_code", moduleCodeFilter);
+        }
+
+        const { data: features } = await featuresQuery;
 
         // Get documentation status
         const { data: contentStatus } = await supabase

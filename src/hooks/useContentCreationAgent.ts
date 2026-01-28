@@ -312,18 +312,19 @@ export function useContentCreationAgent() {
     }
   }, [invokeAgent]);
 
-  // Identify gaps (now includes orphaned documentation)
-  const identifyGaps = useCallback(async (): Promise<{ gaps: GapAnalysis; summary: GapSummary } | null> => {
+  // Identify gaps (now includes orphaned documentation and module filter)
+  const identifyGaps = useCallback(async (moduleCode?: string): Promise<{ gaps: GapAnalysis; summary: GapSummary } | null> => {
     setIsLoading(true);
     setCurrentAction('identify_gaps');
     try {
-      const data = await invokeAgent('identify_gaps', {});
+      const data = await invokeAgent('identify_gaps', { moduleCode });
       if (data?.gaps) {
         const orphanedCount = data.summary?.orphanedDocumentation || 0;
+        const filterMsg = moduleCode ? ` in ${moduleCode}` : '';
         if (orphanedCount > 0) {
-          toast.warning(`Found ${orphanedCount} orphaned documentation section(s)`);
+          toast.warning(`Found ${orphanedCount} orphaned documentation section(s)${filterMsg}`);
         } else {
-          toast.success(`Found ${data.summary?.undocumentedFeatures || 0} undocumented features`);
+          toast.success(`Found ${data.summary?.undocumentedFeatures || 0} undocumented features${filterMsg}`);
         }
         return { gaps: data.gaps, summary: data.summary };
       }
