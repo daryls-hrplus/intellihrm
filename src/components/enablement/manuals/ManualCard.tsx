@@ -2,14 +2,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { 
-  FUNCTIONAL_AREAS, 
-  type ManualDefinition,
-} from "@/constants/manualsStructure";
+import { FUNCTIONAL_AREAS } from "@/constants/manualsStructure";
+import { type TransformedManual } from "@/hooks/useManuals";
 import { ReleaseStatusBadge } from "../ReleaseStatusBadge";
 
 interface ManualCardProps {
-  manual: ManualDefinition;
+  manual: TransformedManual;
   onClick: () => void;
 }
 

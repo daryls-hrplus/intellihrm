@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen,
   ArrowRight,
@@ -14,33 +15,33 @@ import {
   FunctionalAreaFilter,
   ManualsActSection,
 } from "@/components/enablement/manuals";
-import {
-  type FunctionalArea,
-  MANUALS_BY_ACT,
-  getFilteredActsWithManuals,
-  getFilteredChapterCount,
-  getFilteredManualCount,
-  getTotalChapters,
-  getAllManuals,
-} from "@/constants/manualsStructure";
+import { type FunctionalArea } from "@/constants/manualsStructure";
+import { useManuals, ACT_METADATA } from "@/hooks/useManuals";
 
 export default function ManualsIndexPage() {
   const { navigateToRecord, navigateToList } = useWorkspaceNavigation();
+  const { 
+    manualsByAct, 
+    totalChapters, 
+    totalManuals, 
+    getActsFiltered, 
+    getFilteredCounts,
+    isLoading 
+  } = useManuals();
   
   const [tabState, setTabState] = useTabState({
     defaultState: {
       activeFunctionalArea: "all" as FunctionalArea | "all",
-      expandedActs: MANUALS_BY_ACT.map(a => a.id),
+      expandedActs: ACT_METADATA.map(a => a.id),
     },
   });
 
   const { activeFunctionalArea, expandedActs } = tabState;
   
-  const filteredActs = getFilteredActsWithManuals(activeFunctionalArea);
-  const filteredChapters = getFilteredChapterCount(activeFunctionalArea);
-  const filteredManuals = getFilteredManualCount(activeFunctionalArea);
-  const totalChapters = getTotalChapters();
-  const totalManuals = getAllManuals().length;
+  const filteredActs = getActsFiltered(activeFunctionalArea);
+  const counts = getFilteredCounts(activeFunctionalArea);
+  const filteredChapters = counts.chapters;
+  const filteredManuals = counts.manuals;
 
   const handleFilterChange = (filter: FunctionalArea | "all") => {
     setTabState({ activeFunctionalArea: filter });
@@ -158,15 +159,31 @@ export default function ManualsIndexPage() {
 
         {/* Acts with Manuals */}
         <div className="space-y-4">
-          {filteredActs.map((act) => (
-            <ManualsActSection
-              key={act.id}
-              act={act}
-              isExpanded={expandedActs.includes(act.id)}
-              onToggle={() => handleToggleAct(act.id)}
-              onManualClick={handleManualClick}
-            />
-          ))}
+          {isLoading ? (
+            // Loading skeletons
+            Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="p-6">
+                <div className="flex items-start gap-4">
+                  <Skeleton className="h-12 w-12 rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                </div>
+              </Card>
+            ))
+          ) : (
+            filteredActs.map((act) => (
+              <ManualsActSection
+                key={act.id}
+                act={act}
+                isExpanded={expandedActs.includes(act.id)}
+                onToggle={() => handleToggleAct(act.id)}
+                onManualClick={handleManualClick}
+              />
+            ))
+          )}
         </div>
 
         {/* Quick Links */}

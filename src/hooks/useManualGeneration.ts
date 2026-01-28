@@ -16,6 +16,12 @@ export interface ManualDefinition {
   icon_name: string | null;
   color_class: string | null;
   href: string | null;
+  // Rich metadata fields
+  sections_count: number;
+  chapters_count: number;
+  functional_areas: string[];
+  badge_color: string | null;
+  // Timestamps
   created_at: string;
   updated_at: string;
 }
