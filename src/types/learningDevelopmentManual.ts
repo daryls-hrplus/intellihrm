@@ -305,106 +305,125 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
   },
 
   // ==========================================================================
-  // CHAPTER 3: TRAINING AGENCY MANAGEMENT (~60 min)
+  // CHAPTER 3: EXTERNAL TRAINING & VENDOR MANAGEMENT (~90 min)
   // ==========================================================================
   {
     id: 'chapter-3',
     sectionNumber: '3',
-    title: 'Training Agency Management',
-    description: 'External training provider management including agency setup, course linking, scheduling, costs, and multi-company sharing.',
+    title: 'External Training & Vendor Management',
+    description: 'Enterprise vendor lifecycle management including selection, onboarding, course catalogs, session scheduling, cost tracking, performance reviews, and multi-company sharing.',
     contentLevel: 'procedure',
-    estimatedReadTime: 60,
+    estimatedReadTime: 90,
     targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
     subsections: [
       {
         id: 'sec-3-1',
         sectionNumber: '3.1',
-        title: 'Training Agency Concepts',
-        description: 'External provider management, accreditation tracking, and vendor relationships',
+        title: 'External Training & Vendor Concepts',
+        description: 'Vendor lifecycle methodology, tier classification, and data model overview',
         contentLevel: 'concept',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Managing Training Agencies'
+        industryContext: { benchmark: 'Workday vendor lifecycle methodology' }
       },
       {
         id: 'sec-3-2',
         sectionNumber: '3.2',
-        title: 'Agency Setup',
-        description: 'Create agency profiles with contact information, ratings, and preferred vendor status',
+        title: 'Vendor Registry & Classification',
+        description: 'Create vendor profiles with tiered classification (Strategic/Operational/Transactional)',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'How to Set Up Training Agencies'
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-3-3',
         sectionNumber: '3.3',
-        title: 'Agency-Course Linking',
-        description: 'Associate external courses with agencies, including delivery methods and scheduling',
+        title: 'Vendor Selection & Onboarding',
+        description: 'Selection criteria, weighted scoring, due diligence, and contract setup',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'How to Link an Agency to a Course'
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-3-4',
         sectionNumber: '3.4',
-        title: 'Course Dates & Sessions',
-        description: 'Schedule agency courses, registration deadlines, and class size limits',
+        title: 'Vendor Course Catalog',
+        description: 'Configure vendor courses with delivery methods, certifications, and prerequisites',
         contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Enter Course Details'
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-3-5',
         sectionNumber: '3.5',
-        title: 'Course Costs Configuration',
-        description: 'Per-person and fixed costs, currency handling, and cost type breakdown',
+        title: 'Session Scheduling & Capacity',
+        description: 'Schedule sessions with capacity limits, waitlists, and registration deadlines',
         contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['Admin'],
-        legacyReference: 'Enter Course Costs'
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-3-6',
         sectionNumber: '3.6',
-        title: 'Agency Certificates',
-        description: 'External certification definitions, validity periods, and renewal tracking',
+        title: 'Cost Management & Budgets',
+        description: 'Configure itemized costs, multi-currency pricing, and budget integration',
         contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Enter Certificates'
+        estimatedReadTime: 7,
+        targetRoles: ['Admin']
       },
       {
         id: 'sec-3-7',
         sectionNumber: '3.7',
-        title: 'Competencies to be Gained',
-        description: 'Map learning outcomes and competencies gained from agency courses',
+        title: 'Training Request Workflow',
+        description: 'Request lifecycle, approval chains, and source-based request types',
         contentLevel: 'procedure',
-        estimatedReadTime: 5,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Competencies to be Gained'
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
       },
       {
         id: 'sec-3-8',
         sectionNumber: '3.8',
-        title: 'Multi-Company Agency Sharing',
-        description: 'Configure agency access across multiple companies in a group',
+        title: 'External Training Records',
+        description: 'Record completed external training with certificates and skills acquired',
         contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['Admin'],
-        legacyReference: 'Company using Agency'
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-3-9',
         sectionNumber: '3.9',
-        title: 'Agency Ratings & Reviews',
-        description: 'Quality assessment, preferred vendor designation, and performance tracking',
+        title: 'Vendor Performance Management',
+        description: 'Reviews, scorecards, KPIs, and improvement tracking',
         contentLevel: 'procedure',
-        estimatedReadTime: 7,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Agency Rating'
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-3-10',
+        sectionNumber: '3.10',
+        title: 'Certifications & Credentials',
+        description: 'External certification tracking, expiry management, and renewal workflows',
+        contentLevel: 'procedure',
+        estimatedReadTime: 5,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-3-11',
+        sectionNumber: '3.11',
+        title: 'Multi-Company Vendor Sharing',
+        description: 'Group-level vendor relationships and volume discount tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 5,
+        targetRoles: ['Admin']
+      },
+      {
+        id: 'sec-3-12',
+        sectionNumber: '3.12',
+        title: 'Integration with Training Needs',
+        description: 'Gap-based vendor recommendations and AI-powered course matching',
+        contentLevel: 'procedure',
+        estimatedReadTime: 5,
+        targetRoles: ['Admin', 'L&D Admin']
       }
     ]
   },

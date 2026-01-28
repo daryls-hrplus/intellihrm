@@ -1,21 +1,54 @@
-import { Building } from 'lucide-react';
+import { Building2 } from 'lucide-react';
+import {
+  LndVendorConcepts,
+  LndVendorRegistry,
+  LndVendorSelection,
+  LndVendorCourses,
+  LndVendorSessions,
+  LndVendorCosts,
+  LndTrainingRequests,
+  LndExternalRecords,
+  LndVendorPerformance,
+  LndExternalCertifications,
+  LndVendorSharing,
+  LndVendorIntegration
+} from './sections/agency';
 
 export function LndAgencySection() {
   return (
-    <div className="space-y-8">
-      <section id="sec-3-1" data-manual-anchor="sec-3-1">
-        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <Building className="h-6 w-6 text-emerald-600" />
-          3.1 Training Agency Concepts
-        </h2>
-        <p className="text-muted-foreground">External training agencies provide courses outside your internal LMS. Track vendors, ratings, certifications, and costs.</p>
-      </section>
-      {['3.2 Agency Setup', '3.3 Agency-Course Linking', '3.4 Course Dates & Sessions', '3.5 Course Costs', '3.6 Agency Certificates', '3.7 Competencies to be Gained', '3.8 Multi-Company Sharing', '3.9 Agency Ratings'].map((title, i) => (
-        <section key={title} id={`sec-3-${i+2}`} data-manual-anchor={`sec-3-${i+2}`}>
-          <h2 className="text-2xl font-bold mb-4">{title}</h2>
-          <p className="text-muted-foreground">Configure external training providers via Training Agencies management. Reference legacy documentation for detailed field mappings.</p>
-        </section>
-      ))}
+    <div className="space-y-12">
+      {/* Chapter Header */}
+      <div className="border-b pb-6">
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          <Building2 className="h-8 w-8 text-emerald-600" />
+          Chapter 3: External Training & Vendor Management
+        </h1>
+        <p className="text-muted-foreground mt-2 max-w-3xl">
+          Comprehensive guide to managing external training vendors, course catalogs, 
+          session scheduling, cost tracking, and performance management. Follows 
+          industry-standard vendor lifecycle methodology aligned with Workday and 
+          Cornerstone best practices.
+        </p>
+        <div className="flex gap-2 mt-4">
+          <span className="text-sm bg-muted px-3 py-1 rounded-full">12 Sections</span>
+          <span className="text-sm bg-muted px-3 py-1 rounded-full">~90 min read</span>
+          <span className="text-sm bg-muted px-3 py-1 rounded-full">5 Database Tables</span>
+        </div>
+      </div>
+
+      {/* All 12 Sections */}
+      <LndVendorConcepts />
+      <LndVendorRegistry />
+      <LndVendorSelection />
+      <LndVendorCourses />
+      <LndVendorSessions />
+      <LndVendorCosts />
+      <LndTrainingRequests />
+      <LndExternalRecords />
+      <LndVendorPerformance />
+      <LndExternalCertifications />
+      <LndVendorSharing />
+      <LndVendorIntegration />
     </div>
   );
 }
