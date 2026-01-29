@@ -136,6 +136,245 @@ export type Database = {
         }
         Relationships: []
       }
+      adaptive_learner_progress: {
+        Row: {
+          actual_pace_multiplier: number | null
+          adaptations_applied: Json | null
+          adaptive_path_id: string
+          completed_at: string | null
+          created_at: string
+          current_node_id: string | null
+          employee_id: string
+          engagement_score: number | null
+          id: string
+          last_activity_at: string | null
+          mastery_scores: Json | null
+          path_history: Json | null
+          predicted_completion_date: string | null
+          risk_flags: Json | null
+          started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_pace_multiplier?: number | null
+          adaptations_applied?: Json | null
+          adaptive_path_id: string
+          completed_at?: string | null
+          created_at?: string
+          current_node_id?: string | null
+          employee_id: string
+          engagement_score?: number | null
+          id?: string
+          last_activity_at?: string | null
+          mastery_scores?: Json | null
+          path_history?: Json | null
+          predicted_completion_date?: string | null
+          risk_flags?: Json | null
+          started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_pace_multiplier?: number | null
+          adaptations_applied?: Json | null
+          adaptive_path_id?: string
+          completed_at?: string | null
+          created_at?: string
+          current_node_id?: string | null
+          employee_id?: string
+          engagement_score?: number | null
+          id?: string
+          last_activity_at?: string | null
+          mastery_scores?: Json | null
+          path_history?: Json | null
+          predicted_completion_date?: string | null
+          risk_flags?: Json | null
+          started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adaptive_learner_progress_adaptive_path_id_fkey"
+            columns: ["adaptive_path_id"]
+            isOneToOne: false
+            referencedRelation: "adaptive_learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adaptive_learner_progress_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "adaptive_learner_progress_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      adaptive_learning_paths: {
+        Row: {
+          adaptation_strategy: string | null
+          ai_model_id: string | null
+          base_path_id: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          enable_remediation: boolean | null
+          enable_skip_ahead: boolean | null
+          id: string
+          is_active: boolean | null
+          max_retry_attempts: number | null
+          metadata: Json | null
+          min_mastery_threshold: number | null
+          path_name: string
+          updated_at: string
+        }
+        Insert: {
+          adaptation_strategy?: string | null
+          ai_model_id?: string | null
+          base_path_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          enable_remediation?: boolean | null
+          enable_skip_ahead?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          max_retry_attempts?: number | null
+          metadata?: Json | null
+          min_mastery_threshold?: number | null
+          path_name: string
+          updated_at?: string
+        }
+        Update: {
+          adaptation_strategy?: string | null
+          ai_model_id?: string | null
+          base_path_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          enable_remediation?: boolean | null
+          enable_skip_ahead?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          max_retry_attempts?: number | null
+          metadata?: Json | null
+          min_mastery_threshold?: number | null
+          path_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adaptive_learning_paths_ai_model_id_fkey"
+            columns: ["ai_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_model_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adaptive_learning_paths_base_path_id_fkey"
+            columns: ["base_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adaptive_learning_paths_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adaptive_learning_paths_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "adaptive_learning_paths_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      adaptive_path_rules: {
+        Row: {
+          action_config: Json
+          adaptive_path_id: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          rule_name: string
+          rule_type: string
+          target_course_id: string | null
+          target_module_id: string | null
+          trigger_condition: Json
+          updated_at: string
+        }
+        Insert: {
+          action_config?: Json
+          adaptive_path_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          rule_name: string
+          rule_type: string
+          target_course_id?: string | null
+          target_module_id?: string | null
+          trigger_condition?: Json
+          updated_at?: string
+        }
+        Update: {
+          action_config?: Json
+          adaptive_path_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          rule_name?: string
+          rule_type?: string
+          target_course_id?: string | null
+          target_module_id?: string | null
+          trigger_condition?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adaptive_path_rules_adaptive_path_id_fkey"
+            columns: ["adaptive_path_id"]
+            isOneToOne: false
+            referencedRelation: "adaptive_learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adaptive_path_rules_target_course_id_fkey"
+            columns: ["target_course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adaptive_path_rules_target_module_id_fkey"
+            columns: ["target_module_id"]
+            isOneToOne: false
+            referencedRelation: "lms_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_agent_alerts: {
         Row: {
           actual_value: number | null
@@ -907,6 +1146,196 @@ export type Database = {
             columns: ["participant_id"]
             isOneToOne: false
             referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_generated_questions: {
+        Row: {
+          ai_confidence_score: number | null
+          bloom_level: string | null
+          correct_answer: string | null
+          correct_option_index: number | null
+          created_at: string
+          difficulty_score: number | null
+          explanation: string | null
+          id: string
+          is_approved: boolean | null
+          is_edited: boolean | null
+          options: Json | null
+          order_index: number | null
+          original_text: string | null
+          question_text: string
+          question_type: string | null
+          quiz_id: string
+          source_excerpt: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          bloom_level?: string | null
+          correct_answer?: string | null
+          correct_option_index?: number | null
+          created_at?: string
+          difficulty_score?: number | null
+          explanation?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_edited?: boolean | null
+          options?: Json | null
+          order_index?: number | null
+          original_text?: string | null
+          question_text: string
+          question_type?: string | null
+          quiz_id: string
+          source_excerpt?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          bloom_level?: string | null
+          correct_answer?: string | null
+          correct_option_index?: number | null
+          created_at?: string
+          difficulty_score?: number | null
+          explanation?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_edited?: boolean | null
+          options?: Json | null
+          order_index?: number | null
+          original_text?: string | null
+          question_text?: string
+          question_type?: string | null
+          quiz_id?: string
+          source_excerpt?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_generated_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "ai_generated_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_generated_quizzes: {
+        Row: {
+          ai_confidence_score: number | null
+          ai_model_used: string | null
+          approved_at: string | null
+          approved_by: string | null
+          bloom_taxonomy_distribution: Json | null
+          company_id: string | null
+          course_id: string | null
+          created_at: string
+          created_by: string | null
+          difficulty_level: string | null
+          generated_at: string | null
+          generation_status: string | null
+          id: string
+          lesson_id: string | null
+          question_count: number | null
+          quiz_title: string
+          rejection_reason: string | null
+          source_content: string | null
+          source_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          ai_model_used?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          bloom_taxonomy_distribution?: Json | null
+          company_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          difficulty_level?: string | null
+          generated_at?: string | null
+          generation_status?: string | null
+          id?: string
+          lesson_id?: string | null
+          question_count?: number | null
+          quiz_title: string
+          rejection_reason?: string | null
+          source_content?: string | null
+          source_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          ai_model_used?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          bloom_taxonomy_distribution?: Json | null
+          company_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          difficulty_level?: string | null
+          generated_at?: string | null
+          generation_status?: string | null
+          id?: string
+          lesson_id?: string | null
+          question_count?: number | null
+          quiz_title?: string
+          rejection_reason?: string | null
+          source_content?: string | null
+          source_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_generated_quizzes_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "ai_generated_quizzes_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generated_quizzes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generated_quizzes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generated_quizzes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "ai_generated_quizzes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generated_quizzes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lms_lessons"
             referencedColumns: ["id"]
           },
         ]
@@ -9377,6 +9806,182 @@ export type Database = {
           },
         ]
       }
+      chatbot_conversations: {
+        Row: {
+          company_id: string | null
+          courses_referenced: string[] | null
+          created_at: string
+          employee_id: string
+          ended_at: string | null
+          escalated_to_human: boolean | null
+          escalation_reason: string | null
+          feedback_text: string | null
+          id: string
+          message_count: number | null
+          satisfaction_rating: number | null
+          session_id: string
+          started_at: string | null
+          topics_discussed: string[] | null
+        }
+        Insert: {
+          company_id?: string | null
+          courses_referenced?: string[] | null
+          created_at?: string
+          employee_id: string
+          ended_at?: string | null
+          escalated_to_human?: boolean | null
+          escalation_reason?: string | null
+          feedback_text?: string | null
+          id?: string
+          message_count?: number | null
+          satisfaction_rating?: number | null
+          session_id: string
+          started_at?: string | null
+          topics_discussed?: string[] | null
+        }
+        Update: {
+          company_id?: string | null
+          courses_referenced?: string[] | null
+          created_at?: string
+          employee_id?: string
+          ended_at?: string | null
+          escalated_to_human?: boolean | null
+          escalation_reason?: string | null
+          feedback_text?: string | null
+          id?: string
+          message_count?: number | null
+          satisfaction_rating?: number | null
+          session_id?: string
+          started_at?: string | null
+          topics_discussed?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chatbot_conversations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "chatbot_conversations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chatbot_knowledge_index: {
+        Row: {
+          chunk_index: number | null
+          company_id: string | null
+          content_chunk: string
+          created_at: string
+          embedding_model: string | null
+          id: string
+          last_indexed_at: string | null
+          metadata: Json | null
+          source_id: string | null
+          source_title: string
+          source_type: string
+          updated_at: string
+        }
+        Insert: {
+          chunk_index?: number | null
+          company_id?: string | null
+          content_chunk: string
+          created_at?: string
+          embedding_model?: string | null
+          id?: string
+          last_indexed_at?: string | null
+          metadata?: Json | null
+          source_id?: string | null
+          source_title: string
+          source_type: string
+          updated_at?: string
+        }
+        Update: {
+          chunk_index?: number | null
+          company_id?: string | null
+          content_chunk?: string
+          created_at?: string
+          embedding_model?: string | null
+          id?: string
+          last_indexed_at?: string | null
+          metadata?: Json | null
+          source_id?: string | null
+          source_title?: string
+          source_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_knowledge_index_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chatbot_messages: {
+        Row: {
+          content: string
+          context_sources: Json | null
+          conversation_id: string
+          created_at: string
+          entities_extracted: Json | null
+          id: string
+          intent_detected: string | null
+          response_time_ms: number | null
+          role: string
+          tokens_used: number | null
+          was_helpful: boolean | null
+        }
+        Insert: {
+          content: string
+          context_sources?: Json | null
+          conversation_id: string
+          created_at?: string
+          entities_extracted?: Json | null
+          id?: string
+          intent_detected?: string | null
+          response_time_ms?: number | null
+          role: string
+          tokens_used?: number | null
+          was_helpful?: boolean | null
+        }
+        Update: {
+          content?: string
+          context_sources?: Json | null
+          conversation_id?: string
+          created_at?: string
+          entities_extracted?: Json | null
+          id?: string
+          intent_detected?: string | null
+          response_time_ms?: number | null
+          role?: string
+          tokens_used?: number | null
+          was_helpful?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chatbot_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_provisioning_tasks: {
         Row: {
           completed_at: string | null
@@ -12655,6 +13260,118 @@ export type Database = {
             columns: ["skill_id"]
             isOneToOne: false
             referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      completion_risk_predictions: {
+        Row: {
+          ai_model_version: string | null
+          company_id: string | null
+          course_id: string | null
+          created_at: string
+          days_behind_schedule: number | null
+          employee_id: string
+          engagement_trend: string | null
+          enrollment_id: string | null
+          expires_at: string | null
+          id: string
+          intervention_recommended: string | null
+          last_activity_at: string | null
+          learning_path_id: string | null
+          predicted_completion_date: string | null
+          predicted_completion_probability: number | null
+          prediction_date: string | null
+          risk_factors: Json
+          risk_level: string
+          risk_score: number
+          updated_at: string
+        }
+        Insert: {
+          ai_model_version?: string | null
+          company_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          days_behind_schedule?: number | null
+          employee_id: string
+          engagement_trend?: string | null
+          enrollment_id?: string | null
+          expires_at?: string | null
+          id?: string
+          intervention_recommended?: string | null
+          last_activity_at?: string | null
+          learning_path_id?: string | null
+          predicted_completion_date?: string | null
+          predicted_completion_probability?: number | null
+          prediction_date?: string | null
+          risk_factors?: Json
+          risk_level: string
+          risk_score: number
+          updated_at?: string
+        }
+        Update: {
+          ai_model_version?: string | null
+          company_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          days_behind_schedule?: number | null
+          employee_id?: string
+          engagement_trend?: string | null
+          enrollment_id?: string | null
+          expires_at?: string | null
+          id?: string
+          intervention_recommended?: string | null
+          last_activity_at?: string | null
+          learning_path_id?: string | null
+          predicted_completion_date?: string | null
+          predicted_completion_probability?: number | null
+          prediction_date?: string | null
+          risk_factors?: Json
+          risk_level?: string
+          risk_score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "completion_risk_predictions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "completion_risk_predictions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "completion_risk_predictions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "completion_risk_predictions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "completion_risk_predictions_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "lms_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "completion_risk_predictions_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
             referencedColumns: ["id"]
           },
         ]
@@ -41999,6 +42716,98 @@ export type Database = {
           },
         ]
       }
+      learning_chatbot_config: {
+        Row: {
+          ai_model_id: string | null
+          allowed_topics: string[] | null
+          chatbot_name: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          enable_course_search: boolean | null
+          enable_progress_queries: boolean | null
+          enable_skill_recommendations: boolean | null
+          escalation_keywords: string[] | null
+          id: string
+          is_active: boolean | null
+          max_context_messages: number | null
+          personality_prompt: string | null
+          response_style: string | null
+          restricted_topics: string[] | null
+          updated_at: string
+          welcome_message: string | null
+        }
+        Insert: {
+          ai_model_id?: string | null
+          allowed_topics?: string[] | null
+          chatbot_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          enable_course_search?: boolean | null
+          enable_progress_queries?: boolean | null
+          enable_skill_recommendations?: boolean | null
+          escalation_keywords?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          max_context_messages?: number | null
+          personality_prompt?: string | null
+          response_style?: string | null
+          restricted_topics?: string[] | null
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Update: {
+          ai_model_id?: string | null
+          allowed_topics?: string[] | null
+          chatbot_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          enable_course_search?: boolean | null
+          enable_progress_queries?: boolean | null
+          enable_skill_recommendations?: boolean | null
+          escalation_keywords?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          max_context_messages?: number | null
+          personality_prompt?: string | null
+          response_style?: string | null
+          restricted_topics?: string[] | null
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_chatbot_config_ai_model_id_fkey"
+            columns: ["ai_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_model_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_chatbot_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_chatbot_config_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "learning_chatbot_config_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_path_courses: {
         Row: {
           course_id: string
@@ -64220,6 +65029,155 @@ export type Database = {
           },
         ]
       }
+      risk_alert_rules: {
+        Row: {
+          alert_recipients: string[] | null
+          applies_to_compliance: boolean | null
+          applies_to_mandatory: boolean | null
+          applies_to_optional: boolean | null
+          auto_intervention_type: string | null
+          company_id: string | null
+          cooldown_hours: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          notification_channel: string | null
+          risk_threshold: number
+          rule_name: string
+          updated_at: string
+        }
+        Insert: {
+          alert_recipients?: string[] | null
+          applies_to_compliance?: boolean | null
+          applies_to_mandatory?: boolean | null
+          applies_to_optional?: boolean | null
+          auto_intervention_type?: string | null
+          company_id?: string | null
+          cooldown_hours?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          notification_channel?: string | null
+          risk_threshold?: number
+          rule_name: string
+          updated_at?: string
+        }
+        Update: {
+          alert_recipients?: string[] | null
+          applies_to_compliance?: boolean | null
+          applies_to_mandatory?: boolean | null
+          applies_to_optional?: boolean | null
+          auto_intervention_type?: string | null
+          company_id?: string | null
+          cooldown_hours?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          notification_channel?: string | null
+          risk_threshold?: number
+          rule_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_alert_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_alert_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "risk_alert_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_interventions: {
+        Row: {
+          created_at: string
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          intervention_status: string | null
+          intervention_type: string
+          message_sent: string | null
+          message_template: string | null
+          outcome: string | null
+          outcome_notes: string | null
+          prediction_id: string
+          recipient_response: string | null
+          scheduled_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          intervention_status?: string | null
+          intervention_type: string
+          message_sent?: string | null
+          message_template?: string | null
+          outcome?: string | null
+          outcome_notes?: string | null
+          prediction_id: string
+          recipient_response?: string | null
+          scheduled_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          intervention_status?: string | null
+          intervention_type?: string
+          message_sent?: string | null
+          message_template?: string | null
+          outcome?: string | null
+          outcome_notes?: string | null
+          prediction_id?: string
+          recipient_response?: string | null
+          scheduled_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_interventions_executed_by_fkey"
+            columns: ["executed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "risk_interventions_executed_by_fkey"
+            columns: ["executed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_interventions_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "completion_risk_predictions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_company_access: {
         Row: {
           company_id: string
@@ -68432,6 +69390,138 @@ export type Database = {
             columns: ["proficiency_scale_id"]
             isOneToOne: false
             referencedRelation: "proficiency_scales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skills_transfer_assessments: {
+        Row: {
+          assessment_date: string
+          assessment_type: string
+          barriers_identified: string[] | null
+          company_id: string | null
+          competency_id: string | null
+          course_id: string | null
+          created_at: string
+          employee_id: string
+          enablers_identified: string[] | null
+          evidence_attachments: Json | null
+          evidence_notes: string | null
+          follow_up_interval_days: number | null
+          id: string
+          learning_path_id: string | null
+          manager_id: string | null
+          manager_validated: boolean | null
+          post_training_score: number | null
+          pre_training_score: number | null
+          transfer_index: number | null
+          transfer_score: number | null
+          updated_at: string
+          validated_at: string | null
+        }
+        Insert: {
+          assessment_date?: string
+          assessment_type: string
+          barriers_identified?: string[] | null
+          company_id?: string | null
+          competency_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          employee_id: string
+          enablers_identified?: string[] | null
+          evidence_attachments?: Json | null
+          evidence_notes?: string | null
+          follow_up_interval_days?: number | null
+          id?: string
+          learning_path_id?: string | null
+          manager_id?: string | null
+          manager_validated?: boolean | null
+          post_training_score?: number | null
+          pre_training_score?: number | null
+          transfer_index?: number | null
+          transfer_score?: number | null
+          updated_at?: string
+          validated_at?: string | null
+        }
+        Update: {
+          assessment_date?: string
+          assessment_type?: string
+          barriers_identified?: string[] | null
+          company_id?: string | null
+          competency_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          employee_id?: string
+          enablers_identified?: string[] | null
+          evidence_attachments?: Json | null
+          evidence_notes?: string | null
+          follow_up_interval_days?: number | null
+          id?: string
+          learning_path_id?: string | null
+          manager_id?: string | null
+          manager_validated?: boolean | null
+          post_training_score?: number | null
+          pre_training_score?: number | null
+          transfer_index?: number | null
+          transfer_score?: number | null
+          updated_at?: string
+          validated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skills_transfer_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skills_transfer_assessments_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skills_transfer_assessments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skills_transfer_assessments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "skills_transfer_assessments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skills_transfer_assessments_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skills_transfer_assessments_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "skills_transfer_assessments_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -75599,6 +76689,165 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "company_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfer_benchmarks: {
+        Row: {
+          avg_transfer_index: number | null
+          benchmark_type: string | null
+          company_id: string | null
+          competency_id: string | null
+          course_id: string | null
+          created_at: string
+          data_source: string | null
+          department_id: string | null
+          id: string
+          is_current: boolean | null
+          job_id: string | null
+          measurement_period_end: string | null
+          measurement_period_start: string | null
+          median_transfer_index: number | null
+          percentile_25: number | null
+          percentile_75: number | null
+          sample_size: number | null
+          time_to_proficiency_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_transfer_index?: number | null
+          benchmark_type?: string | null
+          company_id?: string | null
+          competency_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          data_source?: string | null
+          department_id?: string | null
+          id?: string
+          is_current?: boolean | null
+          job_id?: string | null
+          measurement_period_end?: string | null
+          measurement_period_start?: string | null
+          median_transfer_index?: number | null
+          percentile_25?: number | null
+          percentile_75?: number | null
+          sample_size?: number | null
+          time_to_proficiency_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_transfer_index?: number | null
+          benchmark_type?: string | null
+          company_id?: string | null
+          competency_id?: string | null
+          course_id?: string | null
+          created_at?: string
+          data_source?: string | null
+          department_id?: string | null
+          id?: string
+          is_current?: boolean | null
+          job_id?: string | null
+          measurement_period_end?: string | null
+          measurement_period_start?: string | null
+          median_transfer_index?: number | null
+          percentile_25?: number | null
+          percentile_75?: number | null
+          sample_size?: number | null
+          time_to_proficiency_days?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_benchmarks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_benchmarks_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_benchmarks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_benchmarks_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_benchmarks_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "seat_occupancy_summary"
+            referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "transfer_benchmarks_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfer_follow_ups: {
+        Row: {
+          assessment_id: string
+          completed_date: string | null
+          created_at: string
+          follow_up_number: number
+          id: string
+          improvement_from_baseline: number | null
+          notes: string | null
+          scheduled_date: string
+          status: string | null
+          transfer_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          completed_date?: string | null
+          created_at?: string
+          follow_up_number?: number
+          id?: string
+          improvement_from_baseline?: number | null
+          notes?: string | null
+          scheduled_date: string
+          status?: string | null
+          transfer_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          completed_date?: string | null
+          created_at?: string
+          follow_up_number?: number
+          id?: string
+          improvement_from_baseline?: number | null
+          notes?: string | null
+          scheduled_date?: string
+          status?: string | null
+          transfer_score?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_follow_ups_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "skills_transfer_assessments"
             referencedColumns: ["id"]
           },
         ]
