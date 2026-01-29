@@ -1083,83 +1083,208 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
   },
 
   // ==========================================================================
-  // CHAPTER 7: ANALYTICS & REPORTING (~50 min)
+  // CHAPTER 7: ANALYTICS & REPORTING (~120 min)
+  // Industry-aligned: Workday Learning Analytics, SAP SuccessFactors LMS Reporting, Docebo Analytics
   // ==========================================================================
   {
     id: 'chapter-7',
     sectionNumber: '7',
     title: 'Analytics & Reporting',
-    description: 'Training analytics, learner progress reports, effectiveness metrics, and budget utilization.',
+    description: 'Enterprise training analytics covering dashboards, Kirkpatrick evaluation, ROI analysis, compliance reporting, and AI-powered insights.',
     contentLevel: 'procedure',
-    estimatedReadTime: 50,
-    targetRoles: ['Admin', 'L&D Admin', 'HR Partner', 'Manager'],
+    estimatedReadTime: 120,
+    targetRoles: ['Admin', 'L&D Admin', 'HR Partner', 'Manager', 'Executive'],
     subsections: [
+      // Section A: Executive Dashboards (7.1-7.3)
       {
         id: 'sec-7-1',
         sectionNumber: '7.1',
         title: 'Training Analytics Dashboard',
-        description: 'KPIs, completion rates, time-to-completion, and satisfaction scores',
+        description: 'Central analytics hub with 8 KPI cards, enrollment trends, completion rates, and budget utilization via TrainingAnalytics.tsx',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Reports, Pivots'
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'L&D Admin', 'Executive'],
+        legacyReference: 'Reports, Pivots',
+        sectionGroup: { code: 'A', title: 'Executive Dashboards', range: '7.1-7.3' }
       },
       {
         id: 'sec-7-2',
         sectionNumber: '7.2',
-        title: 'Learner Progress Reports',
-        description: 'Individual progress tracking, learning history, and certification status',
+        title: 'KPI Card Configuration',
+        description: 'Configuring dashboard metrics: total courses, enrollments, completion rate, avg quiz score, certifications, training hours, compliance rate, budget used',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'Manager'],
-        legacyReference: 'Training History'
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'A', title: 'Executive Dashboards', range: '7.1-7.3' }
       },
       {
         id: 'sec-7-3',
         sectionNumber: '7.3',
-        title: 'Course Effectiveness Metrics',
-        description: 'Quiz scores, completion rates, evaluation feedback, and NPS tracking',
+        title: 'Executive Summary Views',
+        description: 'Role-based dashboard views for C-suite with strategic metrics vs operational details for HR partners',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Course Evaluation'
+        targetRoles: ['Executive', 'HR Partner'],
+        sectionGroup: { code: 'A', title: 'Executive Dashboards', range: '7.1-7.3' }
       },
+      // Section B: Learner Analytics (7.4-7.6)
       {
         id: 'sec-7-4',
         sectionNumber: '7.4',
-        title: 'Budget Utilization Reports',
-        description: 'Spending vs. budget, cost-per-learner analysis, and ROI calculations',
+        title: 'Learner Progress Reports',
+        description: 'Individual progress tracking via lms_enrollments (status, progress_percentage, started_at, completed_at) with learning history timeline',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['Admin', 'HR Partner']
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Manager', 'Employee'],
+        legacyReference: 'Training History',
+        sectionGroup: { code: 'B', title: 'Learner Analytics', range: '7.4-7.6' }
       },
       {
         id: 'sec-7-5',
         sectionNumber: '7.5',
-        title: 'Compliance Reporting',
-        description: 'Mandatory training status, overdue alerts, and audit-ready reports',
+        title: 'Certification Tracking',
+        description: 'Certificate issuance and expiry monitoring via lms_certificates with verification_code validation and renewal alerts',
         contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin']
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin', 'Manager'],
+        sectionGroup: { code: 'B', title: 'Learner Analytics', range: '7.4-7.6' }
       },
       {
         id: 'sec-7-6',
         sectionNumber: '7.6',
-        title: 'Manager Team Training View',
-        description: 'Team completion status, overdue training, and expiring certifications',
+        title: 'Quiz Performance Analytics',
+        description: 'Quiz attempt analysis via lms_quiz_attempts (score, max_score, percentage, passed, time_spent_seconds, attempt_number)',
         contentLevel: 'procedure',
-        estimatedReadTime: 5,
-        targetRoles: ['Manager']
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'B', title: 'Learner Analytics', range: '7.4-7.6' }
       },
+      // Section C: Course Effectiveness (7.7-7.9) - Kirkpatrick Model
       {
         id: 'sec-7-7',
         sectionNumber: '7.7',
-        title: 'AI-Powered BI Reports',
-        description: 'AIModuleReportBuilder integration for custom report generation',
+        title: 'Course Effectiveness Metrics',
+        description: 'Holistic course quality via completion rates, quiz scores, evaluation feedback, and NPS tracking per course',
         contentLevel: 'procedure',
-        estimatedReadTime: 5,
-        targetRoles: ['Admin'],
-        legacyReference: 'HRplus BI'
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin'],
+        legacyReference: 'Course Evaluation',
+        sectionGroup: { code: 'C', title: 'Course Effectiveness (Kirkpatrick)', range: '7.7-7.9' }
+      },
+      {
+        id: 'sec-7-8',
+        sectionNumber: '7.8',
+        title: 'Kirkpatrick Model Reporting',
+        description: 'Four-level evaluation framework via training_evaluations: Level 1 (Reaction), Level 2 (Learning), Level 3 (Behavior), Level 4 (Results)',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'C', title: 'Course Effectiveness (Kirkpatrick)', range: '7.7-7.9' }
+      },
+      {
+        id: 'sec-7-9',
+        sectionNumber: '7.9',
+        title: 'Training ROI Analysis',
+        description: 'Return on investment calculation: (training_budgets.spent_amount vs skills_transfer_assessments outcomes) with cost-per-learner and business impact metrics',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner', 'Executive'],
+        sectionGroup: { code: 'C', title: 'Course Effectiveness (Kirkpatrick)', range: '7.7-7.9' }
+      },
+      // Section D: Financial Analytics (7.10-7.11)
+      {
+        id: 'sec-7-10',
+        sectionNumber: '7.10',
+        title: 'Budget Utilization Reports',
+        description: 'Financial tracking via training_budgets (allocated_amount, spent_amount, currency) with department-level breakdown and fiscal year comparison',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HR Partner', 'Executive'],
+        sectionGroup: { code: 'D', title: 'Financial Analytics', range: '7.10-7.11' }
+      },
+      {
+        id: 'sec-7-11',
+        sectionNumber: '7.11',
+        title: 'Cost-Per-Learner Analysis',
+        description: 'Training cost efficiency: total spend / unique learners with category breakdown and vendor cost comparison',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'D', title: 'Financial Analytics', range: '7.10-7.11' }
+      },
+      // Section E: Compliance Analytics (7.12-7.13)
+      {
+        id: 'sec-7-12',
+        sectionNumber: '7.12',
+        title: 'Compliance Reporting',
+        description: 'Mandatory training status via compliance_training_assignments with overdue alerts, escalation tracking, and audit-ready exports',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin', 'Compliance Officer'],
+        sectionGroup: { code: 'E', title: 'Compliance Analytics', range: '7.12-7.13' }
+      },
+      {
+        id: 'sec-7-13',
+        sectionNumber: '7.13',
+        title: 'Regulatory Audit Exports',
+        description: 'Generating audit-ready reports with compliance_audit_log evidence, checksum verification, and regulatory format templates',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Compliance Officer'],
+        sectionGroup: { code: 'E', title: 'Compliance Analytics', range: '7.12-7.13' }
+      },
+      // Section F: Manager & Team Views (7.14-7.15)
+      {
+        id: 'sec-7-14',
+        sectionNumber: '7.14',
+        title: 'Manager Team Training View',
+        description: 'Team training dashboard via ManagerTeamTrainingCard with completion status, overdue tracking, and expiring certifications for direct reports',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Manager'],
+        sectionGroup: { code: 'F', title: 'Manager & Team Views', range: '7.14-7.15' }
+      },
+      {
+        id: 'sec-7-15',
+        sectionNumber: '7.15',
+        title: 'Department Rollup Reports',
+        description: 'Aggregated department-level analytics with cross-team comparison, skill gap heatmaps, and training investment allocation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Manager', 'HR Partner'],
+        sectionGroup: { code: 'F', title: 'Manager & Team Views', range: '7.14-7.15' }
+      },
+      // Section G: Advanced Analytics & AI (7.16-7.18)
+      {
+        id: 'sec-7-16',
+        sectionNumber: '7.16',
+        title: 'AI-Powered BI Reports',
+        description: 'Natural language report generation via AIModuleReportBuilder with banded and BI report types for training module',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin'],
+        legacyReference: 'HRplus BI',
+        sectionGroup: { code: 'G', title: 'Advanced Analytics & AI', range: '7.16-7.18' }
+      },
+      {
+        id: 'sec-7-17',
+        sectionNumber: '7.17',
+        title: 'Scheduled Reports Configuration',
+        description: 'Automated report delivery setup with recipient lists, frequency (daily/weekly/monthly), and format options (PDF, Excel, CSV)',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'G', title: 'Advanced Analytics & AI', range: '7.16-7.18' }
+      },
+      {
+        id: 'sec-7-18',
+        sectionNumber: '7.18',
+        title: 'Custom Report Builder',
+        description: 'Ad-hoc report creation with drag-drop field selection, filter configuration, and visualization options via saved_report_configs',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'G', title: 'Advanced Analytics & AI', range: '7.16-7.18' }
       }
     ]
   },
