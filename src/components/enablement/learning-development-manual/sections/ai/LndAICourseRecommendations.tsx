@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Target, Database, Navigation, CheckCircle, BookOpen } from 'lucide-react';
+import { Target, Database, Navigation, CheckCircle, BookOpen, Info } from 'lucide-react';
 
 export function LndAICourseRecommendations() {
   return (
@@ -30,7 +30,26 @@ export function LndAICourseRecommendations() {
         </CardContent>
       </Card>
 
-      {/* Database Schema */}
+      {/* Note about tables */}
+      <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Info className="h-4 w-4 text-blue-600" />
+            Related Tables
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            The system uses two complementary tables for course-competency relationships:
+          </p>
+          <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+            <li><code className="text-xs bg-muted px-1 py-0.5 rounded">competency_course_mappings</code> - Admin-configured mappings for gap-triggered recommendations</li>
+            <li><code className="text-xs bg-muted px-1 py-0.5 rounded">course_competencies</code> - Course-level competency tags managed by course authors</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      {/* Database Schema: competency_course_mappings */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -49,6 +68,16 @@ export function LndAICourseRecommendations() {
                 </tr>
               </thead>
               <tbody className="text-muted-foreground">
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">id</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3">Primary key</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">company_id</td>
+                  <td className="py-2 px-3">FK → companies</td>
+                  <td className="py-2 px-3">Company scope for RLS</td>
+                </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">competency_id</td>
                   <td className="py-2 px-3">FK → competencies</td>
@@ -79,14 +108,74 @@ export function LndAICourseRecommendations() {
                   <td className="py-2 px-3">number (1-5)</td>
                   <td className="py-2 px-3">Expected proficiency after completion</td>
                 </tr>
-                <tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">notes</td>
                   <td className="py-2 px-3">text</td>
                   <td className="py-2 px-3">Administrator notes on mapping rationale</td>
                 </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">created_by</td>
+                  <td className="py-2 px-3">FK → profiles</td>
+                  <td className="py-2 px-3">User who created the mapping</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono text-xs">created_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">Record creation timestamp</td>
+                </tr>
               </tbody>
             </table>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Database Schema: course_competencies */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Database className="h-4 w-4 text-primary" />
+            Database Schema: course_competencies
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="text-left py-2 px-3 font-medium">Field</th>
+                  <th className="text-left py-2 px-3 font-medium">Type</th>
+                  <th className="text-left py-2 px-3 font-medium">Purpose</th>
+                </tr>
+              </thead>
+              <tbody className="text-muted-foreground">
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">id</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3">Primary key</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">course_id</td>
+                  <td className="py-2 px-3">FK → lms_courses</td>
+                  <td className="py-2 px-3">Associated course</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">competency_id</td>
+                  <td className="py-2 px-3">FK → competencies</td>
+                  <td className="py-2 px-3">Tagged competency</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono text-xs">proficiency_level</td>
+                  <td className="py-2 px-3">number (1-5)</td>
+                  <td className="py-2 px-3">Proficiency level this course targets</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            <strong>Note:</strong> This table is managed via the Course Competencies tab in the Training module 
+            and is used for course discovery. The recommendation engine primarily uses <code className="text-xs">competency_course_mappings</code> 
+            for gap-triggered suggestions.
+          </p>
         </CardContent>
       </Card>
 
@@ -108,7 +197,7 @@ export function LndAICourseRecommendations() {
             <pre>{`Recommendation Algorithm:
 
 1. Identify employee skill gap:
-   └── employee_skill_gaps.capability_name → competency match
+   └── employee_skill_gaps.capability_id → competency match
 
 2. Find mapped courses:
    └── competency_course_mappings WHERE competency_id = matched_competency
@@ -122,7 +211,7 @@ export function LndAICourseRecommendations() {
    └── course rating / completion rate (third)
 
 5. Return recommendations:
-   └── Ordered list with reasoning`}</pre>
+   └── Ordered list with reasoning (ai_explainability_logs)`}</pre>
           </div>
         </CardContent>
       </Card>
@@ -137,9 +226,9 @@ export function LndAICourseRecommendations() {
         </CardHeader>
         <CardContent>
           <div className="bg-muted/30 rounded-lg p-4 font-mono text-xs">
-            <pre>{`Training → Course Competencies (Tab)
+            <pre>{`Learning & Development → Course Competencies (Tab)
 │
-├── Mapping List:
+├── Competency Mappings (competency_course_mappings):
 │   ├── Filter by: Competency, Course Type (internal/vendor)
 │   ├── Add New Mapping (button)
 │   └── Edit/Delete existing mappings
@@ -152,6 +241,10 @@ export function LndAICourseRecommendations() {
 │   ├── Set Target Proficiency (1-5 slider)
 │   ├── Is Mandatory (checkbox)
 │   └── Notes (textarea)
+│
+├── Course Competency Tags (course_competencies):
+│   ├── Managed per-course in course editor
+│   └── Tag competencies with proficiency levels
 │
 └── Bulk Import:
     └── CSV upload for mass mapping creation`}</pre>
@@ -222,6 +315,10 @@ export function LndAICourseRecommendations() {
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
               <span>Course completion updates employee competency profile automatically</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span>created_by tracks admin who configured the mapping for audit</span>
             </li>
           </ul>
         </CardContent>

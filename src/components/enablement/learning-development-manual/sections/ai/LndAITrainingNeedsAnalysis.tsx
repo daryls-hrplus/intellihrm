@@ -50,9 +50,24 @@ export function LndAITrainingNeedsAnalysis() {
               </thead>
               <tbody className="text-muted-foreground">
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono text-xs">analysis_name</td>
+                  <td className="py-2 px-3 font-mono text-xs">id</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3">Primary key</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">company_id</td>
+                  <td className="py-2 px-3">FK → companies</td>
+                  <td className="py-2 px-3">Company scope for RLS</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">name</td>
                   <td className="py-2 px-3">string</td>
-                  <td className="py-2 px-3">Descriptive name for the analysis</td>
+                  <td className="py-2 px-3">Analysis name/title</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">description</td>
+                  <td className="py-2 px-3">text</td>
+                  <td className="py-2 px-3">Detailed description of analysis scope</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">analysis_type</td>
@@ -63,6 +78,11 @@ export function LndAITrainingNeedsAnalysis() {
                   <td className="py-2 px-3 font-mono text-xs">department_id</td>
                   <td className="py-2 px-3">FK → departments</td>
                   <td className="py-2 px-3">Target department (for departmental type)</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">analysis_date</td>
+                  <td className="py-2 px-3">date</td>
+                  <td className="py-2 px-3">Date when analysis was conducted</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">analysis_period_start</td>
@@ -84,10 +104,15 @@ export function LndAITrainingNeedsAnalysis() {
                   <td className="py-2 px-3">JSONB</td>
                   <td className="py-2 px-3">AI-generated or manual recommendations</td>
                 </tr>
-                <tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">status</td>
                   <td className="py-2 px-3">enum</td>
                   <td className="py-2 px-3">draft | in_progress | completed</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono text-xs">created_at / updated_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">Audit timestamps</td>
                 </tr>
               </tbody>
             </table>
@@ -115,14 +140,29 @@ export function LndAITrainingNeedsAnalysis() {
               </thead>
               <tbody className="text-muted-foreground">
                 <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">id</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3">Primary key</td>
+                </tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">employee_id</td>
                   <td className="py-2 px-3">FK → profiles</td>
                   <td className="py-2 px-3">Employee with the training need</td>
                 </tr>
                 <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">company_id</td>
+                  <td className="py-2 px-3">FK → companies</td>
+                  <td className="py-2 px-3">Company scope for RLS</td>
+                </tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">skill_gap_description</td>
                   <td className="py-2 px-3">string</td>
                   <td className="py-2 px-3">Free-text description of the gap</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">notes</td>
+                  <td className="py-2 px-3">text</td>
+                  <td className="py-2 px-3">Additional notes or context</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">priority</td>
@@ -137,7 +177,12 @@ export function LndAITrainingNeedsAnalysis() {
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">recommended_course_id</td>
                   <td className="py-2 px-3">FK → lms_courses</td>
-                  <td className="py-2 px-3">AI-suggested course</td>
+                  <td className="py-2 px-3">AI-suggested internal course</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">recommended_training</td>
+                  <td className="py-2 px-3">text</td>
+                  <td className="py-2 px-3">Free-text training recommendation (for external/custom)</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">target_date</td>
@@ -145,14 +190,24 @@ export function LndAITrainingNeedsAnalysis() {
                   <td className="py-2 px-3">Target completion date</td>
                 </tr>
                 <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">addressed_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">When need was resolved</td>
+                </tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">analysis_id</td>
                   <td className="py-2 px-3">FK → training_needs_analysis</td>
                   <td className="py-2 px-3">Parent analysis reference</td>
                 </tr>
-                <tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">status</td>
                   <td className="py-2 px-3">enum</td>
                   <td className="py-2 px-3">identified | planned | in_progress | addressed</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono text-xs">created_at / updated_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">Audit timestamps</td>
                 </tr>
               </tbody>
             </table>
@@ -211,7 +266,7 @@ export function LndAITrainingNeedsAnalysis() {
         </CardHeader>
         <CardContent>
           <div className="bg-muted/30 rounded-lg p-4 font-mono text-xs">
-            <pre>{`Training → Training Needs (Tab)
+            <pre>{`Learning & Development → Training Needs (Tab)
 │
 ├── Analyses List:
 │   ├── Create New Analysis (button)
@@ -220,6 +275,7 @@ export function LndAITrainingNeedsAnalysis() {
 │
 ├── Analysis Detail:
 │   ├── Overview & metadata
+│   ├── Description (editable text)
 │   ├── Findings (JSONB editor)
 │   ├── Recommendations (JSONB editor)
 │   └── Status workflow
@@ -243,7 +299,8 @@ export function LndAITrainingNeedsAnalysis() {
 ┌────────────┐    ┌─────────┐    ┌─────────────┐    ┌───────────┐
 │ identified │ →  │ planned │ →  │ in_progress │ →  │ addressed │
 └────────────┘    └─────────┘    └─────────────┘    └───────────┘
-     │                 │                │
+     │                 │                │                │
+     │                 │                │                └── addressed_at = NOW()
      │                 │                └── Course enrolled & started
      │                 └── Course assigned, awaiting enrollment
      └── Gap identified, awaiting action planning
@@ -282,6 +339,10 @@ Analysis Status Flow:
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
               <span>Training needs automatically update status when linked course is completed</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span>addressed_at is auto-populated when status changes to "addressed"</span>
             </li>
           </ul>
         </CardContent>
