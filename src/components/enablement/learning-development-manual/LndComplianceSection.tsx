@@ -1,7 +1,7 @@
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Scale, Users, BarChart3, Bell, FileSearch } from 'lucide-react';
+import { Shield, Scale, Users, BarChart3, Bell, FileSearch, Globe } from 'lucide-react';
 
 // Section A: Compliance Program Framework (5.1-5.3)
 import { LndComplianceOverview } from './sections/compliance/LndComplianceOverview';
@@ -19,6 +19,24 @@ import { LndComplianceDashboardAnalytics } from './sections/compliance/LndCompli
 import { LndComplianceRiskIndicators } from './sections/compliance/LndComplianceRiskIndicators';
 import { LndComplianceManagerView } from './sections/compliance/LndComplianceManagerView';
 import { LndComplianceExecutiveReports } from './sections/compliance/LndComplianceExecutiveReports';
+
+// Section D: Escalation & Enforcement (5.12-5.15)
+import { LndComplianceEscalationRules } from './sections/compliance/LndComplianceEscalationRules';
+import { LndComplianceGracePeriodOps } from './sections/compliance/LndComplianceGracePeriodOps';
+import { LndComplianceNonCompliance } from './sections/compliance/LndComplianceNonCompliance';
+import { LndComplianceHRIntervention } from './sections/compliance/LndComplianceHRIntervention';
+
+// Section E: Audit & Reporting (5.16-5.19)
+import { LndComplianceAuditTrailSection } from './sections/compliance/LndComplianceAuditTrailSection';
+import { LndComplianceRegulatoryReports } from './sections/compliance/LndComplianceRegulatoryReports';
+import { LndComplianceEvidencePackage } from './sections/compliance/LndComplianceEvidencePackage';
+import { LndComplianceHistoricalRecords } from './sections/compliance/LndComplianceHistoricalRecords';
+
+// Section F: HSE & Industry Compliance (5.20-5.23)
+import { LndComplianceHSEIntegration } from './sections/compliance/LndComplianceHSEIntegration';
+import { LndComplianceIncidentTraining } from './sections/compliance/LndComplianceIncidentTraining';
+import { LndComplianceOSHA } from './sections/compliance/LndComplianceOSHA';
+import { LndComplianceCaribbean } from './sections/compliance/LndComplianceCaribbean';
 
 export function LndComplianceSection() {
   return (
@@ -110,7 +128,7 @@ export function LndComplianceSection() {
       <Separator />
       <LndComplianceExecutiveReports />
 
-      {/* Placeholder for Sections D, E, F - To be completed */}
+      {/* Section D: Escalation & Enforcement */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -119,11 +137,18 @@ export function LndComplianceSection() {
           </div>
           <CardDescription>Escalation rules, grace periods, non-compliance, and HR intervention</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Documentation in progress. See Section 5.7 for status lifecycle including escalation triggers.</p>
-        </CardContent>
       </Card>
 
+      <Separator />
+      <LndComplianceEscalationRules />
+      <Separator />
+      <LndComplianceGracePeriodOps />
+      <Separator />
+      <LndComplianceNonCompliance />
+      <Separator />
+      <LndComplianceHRIntervention />
+
+      {/* Section E: Audit & Reporting */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -132,26 +157,36 @@ export function LndComplianceSection() {
           </div>
           <CardDescription>Audit trail, regulatory reports, evidence packages, and historical records</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Documentation in progress. See Section 5.11 for executive reporting capabilities.</p>
-        </CardContent>
       </Card>
 
+      <Separator />
+      <LndComplianceAuditTrailSection />
+      <Separator />
+      <LndComplianceRegulatoryReports />
+      <Separator />
+      <LndComplianceEvidencePackage />
+      <Separator />
+      <LndComplianceHistoricalRecords />
+
+      {/* Section F: HSE & Industry Compliance */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-amber-500" />
+            <Globe className="h-5 w-5 text-amber-500" />
             <CardTitle className="text-lg">Section F: HSE & Industry Compliance (5.20-5.23)</CardTitle>
           </div>
           <CardDescription>HSE integration, incident-triggered training, OSHA, and Caribbean regional requirements</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Documentation in progress. HSE integration details are referenced throughout Sections A-C. 
-            See Chapter 8 Integration Section for HSE module data flow architecture.
-          </p>
-        </CardContent>
       </Card>
+
+      <Separator />
+      <LndComplianceHSEIntegration />
+      <Separator />
+      <LndComplianceIncidentTraining />
+      <Separator />
+      <LndComplianceOSHA />
+      <Separator />
+      <LndComplianceCaribbean />
     </div>
   );
 }
