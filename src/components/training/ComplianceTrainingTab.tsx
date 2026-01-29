@@ -10,10 +10,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Pencil, AlertTriangle, CheckCircle, Clock, BarChart3, Settings, Upload, CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { differenceInDays } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { ComplianceRiskDashboard } from "./compliance/ComplianceRiskDashboard";
+import { ComplianceEscalationRulesAdmin } from "./compliance/ComplianceEscalationRulesAdmin";
+import { ComplianceBulkOperations } from "./compliance/ComplianceBulkOperations";
+import { ComplianceGracePeriodExtension } from "./compliance/ComplianceGracePeriodExtension";
+import { ComplianceExemptionRequest } from "./compliance/ComplianceExemptionRequest";
 
 interface ComplianceTrainingTabProps {
   companyId: string;
@@ -47,7 +53,7 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"requirements" | "assignments">("requirements");
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -57,7 +63,6 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
     grace_period_days: "30",
     applies_to_all: true,
   });
-
   useEffect(() => {
     if (companyId) {
       loadData();
@@ -184,158 +189,173 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Total Assignments</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{stats.total}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Completed</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold text-green-600">{stats.completed}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Overdue</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold text-red-600">{stats.overdue}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Due This Week</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold text-yellow-600">{stats.dueSoon}</div></CardContent>
-        </Card>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="dashboard" className="flex items-center gap-1">
+            <BarChart3 className="h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="requirements">Requirements</TabsTrigger>
+          <TabsTrigger value="assignments">Assignments</TabsTrigger>
+          <TabsTrigger value="bulk" className="flex items-center gap-1">
+            <Upload className="h-4 w-4" />
+            Bulk Ops
+          </TabsTrigger>
+          <TabsTrigger value="extensions" className="flex items-center gap-1">
+            <CalendarPlus className="h-4 w-4" />
+            Extensions
+          </TabsTrigger>
+          <TabsTrigger value="escalation" className="flex items-center gap-1">
+            <Settings className="h-4 w-4" />
+            Escalation
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="flex gap-2">
-        <Button variant={activeTab === "requirements" ? "default" : "outline"} onClick={() => setActiveTab("requirements")}>Requirements</Button>
-        <Button variant={activeTab === "assignments" ? "default" : "outline"} onClick={() => setActiveTab("assignments")}>Assignments</Button>
-      </div>
+        <TabsContent value="dashboard" className="mt-6">
+          <ComplianceRiskDashboard companyId={companyId} />
+        </TabsContent>
 
-      {activeTab === "requirements" && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Compliance Training Requirements</CardTitle>
-            <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
-              <DialogTrigger asChild>
-                <Button><Plus className="h-4 w-4 mr-2" />Add Requirement</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{editingId ? "Edit Requirement" : "Add Requirement"}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Name *</Label>
-                    <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Description</Label>
-                    <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Course *</Label>
-                    <Select value={formData.course_id} onValueChange={(v) => setFormData({ ...formData, course_id: v })}>
-                      <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
-                      <SelectContent>
-                        {courses.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+        <TabsContent value="requirements" className="mt-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Compliance Training Requirements</CardTitle>
+              <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
+                <DialogTrigger asChild>
+                  <Button><Plus className="h-4 w-4 mr-2" />Add Requirement</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{editingId ? "Edit Requirement" : "Add Requirement"}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label>Renewal Frequency (months)</Label>
-                      <Input type="number" value={formData.frequency_months} onChange={(e) => setFormData({ ...formData, frequency_months: e.target.value })} placeholder="Leave empty for one-time" />
+                      <Label>Name *</Label>
+                      <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Grace Period (days)</Label>
-                      <Input type="number" value={formData.grace_period_days} onChange={(e) => setFormData({ ...formData, grace_period_days: e.target.value })} />
+                      <Label>Description</Label>
+                      <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Course *</Label>
+                      <Select value={formData.course_id} onValueChange={(v) => setFormData({ ...formData, course_id: v })}>
+                        <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
+                        <SelectContent>
+                          {courses.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Renewal Frequency (months)</Label>
+                        <Input type="number" value={formData.frequency_months} onChange={(e) => setFormData({ ...formData, frequency_months: e.target.value })} placeholder="Leave empty for one-time" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Grace Period (days)</Label>
+                        <Input type="number" value={formData.grace_period_days} onChange={(e) => setFormData({ ...formData, grace_period_days: e.target.value })} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Checkbox id="is_mandatory" checked={formData.is_mandatory} onCheckedChange={(c) => setFormData({ ...formData, is_mandatory: !!c })} />
+                        <Label htmlFor="is_mandatory">Mandatory</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox id="applies_to_all" checked={formData.applies_to_all} onCheckedChange={(c) => setFormData({ ...formData, applies_to_all: !!c })} />
+                        <Label htmlFor="applies_to_all">Applies to all employees</Label>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Checkbox id="is_mandatory" checked={formData.is_mandatory} onCheckedChange={(c) => setFormData({ ...formData, is_mandatory: !!c })} />
-                      <Label htmlFor="is_mandatory">Mandatory</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Checkbox id="applies_to_all" checked={formData.applies_to_all} onCheckedChange={(c) => setFormData({ ...formData, applies_to_all: !!c })} />
-                      <Label htmlFor="applies_to_all">Applies to all employees</Label>
-                    </div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <Button variant="outline" onClick={closeDialog}>Cancel</Button>
+                    <Button onClick={handleSubmit}>{editingId ? "Update" : "Create"}</Button>
                   </div>
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button variant="outline" onClick={closeDialog}>Cancel</Button>
-                  <Button onClick={handleSubmit}>{editingId ? "Update" : "Create"}</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Frequency</TableHead>
-                  <TableHead>Grace Period</TableHead>
-                  <TableHead>Scope</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {trainings.map((t) => (
-                  <TableRow key={t.id}>
-                    <TableCell className="font-medium">{t.name}</TableCell>
-                    <TableCell>{t.course?.title}</TableCell>
-                    <TableCell>{t.frequency_months ? `Every ${t.frequency_months} months` : "One-time"}</TableCell>
-                    <TableCell>{t.grace_period_days} days</TableCell>
-                    <TableCell><Badge variant={t.applies_to_all ? "default" : "secondary"}>{t.applies_to_all ? "All Employees" : "Selected"}</Badge></TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(t)}><Pencil className="h-4 w-4" /></Button>
-                    </TableCell>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Frequency</TableHead>
+                    <TableHead>Grace Period</TableHead>
+                    <TableHead>Scope</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-                {trainings.length === 0 && (
-                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No compliance requirements</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+                </TableHeader>
+                <TableBody>
+                  {trainings.map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell className="font-medium">{t.name}</TableCell>
+                      <TableCell>{t.course?.title}</TableCell>
+                      <TableCell>{t.frequency_months ? `Every ${t.frequency_months} months` : "One-time"}</TableCell>
+                      <TableCell>{t.grace_period_days} days</TableCell>
+                      <TableCell><Badge variant={t.applies_to_all ? "default" : "secondary"}>{t.applies_to_all ? "All Employees" : "Selected"}</Badge></TableCell>
+                      <TableCell>
+                        <Button size="sm" variant="ghost" onClick={() => openEdit(t)}><Pencil className="h-4 w-4" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {trainings.length === 0 && (
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No compliance requirements</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {activeTab === "assignments" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Training Assignments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Training</TableHead>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Completed</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assignments.map((a) => (
-                  <TableRow key={a.id}>
-                    <TableCell>{a.employee?.full_name}</TableCell>
-                    <TableCell>{a.compliance?.name}</TableCell>
-                    <TableCell>{formatDateForDisplay(a.due_date, "MMM d, yyyy")}</TableCell>
-                    <TableCell>{getStatusBadge(a.status, a.due_date)}</TableCell>
-                    <TableCell>{a.completed_at ? formatDateForDisplay(a.completed_at, "MMM d, yyyy") : "-"}</TableCell>
+        <TabsContent value="assignments" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Training Assignments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Training</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Completed</TableHead>
                   </TableRow>
-                ))}
-                {assignments.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No assignments</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+                </TableHeader>
+                <TableBody>
+                  {assignments.map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell>{a.employee?.full_name}</TableCell>
+                      <TableCell>{a.compliance?.name}</TableCell>
+                      <TableCell>{formatDateForDisplay(a.due_date, "MMM d, yyyy")}</TableCell>
+                      <TableCell>{getStatusBadge(a.status, a.due_date)}</TableCell>
+                      <TableCell>{a.completed_at ? formatDateForDisplay(a.completed_at, "MMM d, yyyy") : "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                  {assignments.length === 0 && (
+                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No assignments</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="bulk" className="mt-6">
+          <ComplianceBulkOperations companyId={companyId} onComplete={loadData} />
+        </TabsContent>
+
+        <TabsContent value="extensions" className="mt-6">
+          <ComplianceGracePeriodExtension companyId={companyId} isManager={true} />
+        </TabsContent>
+
+        <TabsContent value="escalation" className="mt-6">
+          <ComplianceEscalationRulesAdmin companyId={companyId} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
