@@ -77,7 +77,7 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
     // @ts-ignore - Supabase type instantiation issue
     const assignmentsRes = await supabase
       .from("compliance_training_assignments")
-      .select("*, compliance:compliance_training(name), employee:profiles(full_name)")
+      .select("*, compliance:compliance_training(name), employee:profiles!compliance_training_assignments_employee_id_fkey(full_name)")
       .order("due_date");
     
     // @ts-ignore - Supabase type instantiation issue
