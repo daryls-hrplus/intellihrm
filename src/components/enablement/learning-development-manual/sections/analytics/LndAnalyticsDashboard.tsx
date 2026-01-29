@@ -202,7 +202,7 @@ export function LndAnalyticsKPICards() {
           </FeatureCard>
           <FeatureCard variant="info" icon={DollarSign} title="Budget Used">
             <p className="text-sm mt-2">Percentage of training budget spent</p>
-            <code className="text-xs block mt-1">spent_amount / total_budget × 100</code>
+            <code className="text-xs block mt-1">spent_amount / allocated_amount × 100</code>
           </FeatureCard>
         </FeatureCardGrid>
       </section>

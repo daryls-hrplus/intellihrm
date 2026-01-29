@@ -18,3 +18,9 @@ export { LndAnalyticsManagerTeamView, LndAnalyticsDepartmentRollup } from './Lnd
 
 // Section G: Advanced Analytics & AI
 export { LndAnalyticsAIPoweredBI, LndAnalyticsScheduledReports, LndAnalyticsCustomReportBuilder } from './LndAnalyticsAdvanced';
+
+// Section H: Technical Analytics
+export { LndAnalyticsScormXapi } from './LndAnalyticsScormXapi';
+export { LndAnalyticsGamification } from './LndAnalyticsGamification';
+export { LndAnalyticsLearningPaths } from './LndAnalyticsLearningPaths';
+export { LndAnalyticsExternalTraining } from './LndAnalyticsExternalTraining';

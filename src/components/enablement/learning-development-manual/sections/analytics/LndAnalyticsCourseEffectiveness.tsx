@@ -92,6 +92,68 @@ export function LndAnalyticsCourseEffectiveness() {
         alt="Course list with effectiveness scores, trend sparklines, and action recommendations"
       />
 
+      <section>
+        <h3 className="text-lg font-semibold mb-3">lms_course_reviews Table</h3>
+        <Card>
+          <CardContent className="pt-4">
+            <p className="text-sm text-muted-foreground mb-3">
+              Learner feedback collection for satisfaction metrics:
+            </p>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Field</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell><code>id</code></TableCell>
+                  <TableCell>uuid (PK)</TableCell>
+                  <TableCell>Unique review identifier</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>course_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Reference to lms_courses.id</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>user_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Reference to profiles.id (reviewer)</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>rating</code></TableCell>
+                  <TableCell>integer (1-5)</TableCell>
+                  <TableCell>Star rating for satisfaction score</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>review_text</code></TableCell>
+                  <TableCell>text</TableCell>
+                  <TableCell>Optional written feedback</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>is_anonymous</code></TableCell>
+                  <TableCell>boolean</TableCell>
+                  <TableCell>Whether review is anonymous</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>helpful_count</code></TableCell>
+                  <TableCell>integer</TableCell>
+                  <TableCell>Number of "helpful" votes from other learners</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>created_at</code></TableCell>
+                  <TableCell>timestamptz</TableCell>
+                  <TableCell>Review submission timestamp</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </section>
+
       <TipCallout title="Course Improvement Actions">
         Courses scoring below thresholds trigger automatic recommendations:
         content review, instructor feedback, or retirement consideration.
