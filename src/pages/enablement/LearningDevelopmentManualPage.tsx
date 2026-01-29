@@ -12,9 +12,9 @@ import {
   FileText, Layers, Settings, PlayCircle, Brain, BarChart3,
   Link2, AlertTriangle, BookOpen, Eye,
   CheckCircle, Circle, ArrowLeft, Shield,
-  GraduationCap, Building, Workflow, ClipboardCheck, Network
+  GraduationCap, Building, Workflow, ClipboardCheck, Network, FolderOpen
 } from 'lucide-react';
-import { LND_MANUAL_STRUCTURE, getLndTotalReadTime, getLndTotalSections } from '@/types/learningDevelopmentManual';
+import { LND_MANUAL_STRUCTURE, getLndTotalReadTime, getLndTotalSections, LndSection } from '@/types/learningDevelopmentManual';
 import { useManualPrintSettings } from '@/hooks/useManualPrintSettings';
 import { PrintConfigDialog } from '@/components/enablement/manual/print/PrintConfigDialog';
 import { ManualPrintPreview } from '@/components/enablement/manual/print/ManualPrintPreview';
@@ -35,6 +35,36 @@ import { LndVersionHistory } from '@/components/enablement/learning-development-
 import { LndArchitectureDiagrams } from '@/components/enablement/learning-development-manual/LndArchitectureDiagrams';
 import { LndLegacyMigration } from '@/components/enablement/learning-development-manual/sections/overview/LndLegacyMigration';
 
+// Helper function to group subsections by sectionGroup
+function groupSubsectionsByGroup(subsections: LndSection[] | undefined) {
+  if (!subsections) return { groups: [], ungrouped: [] };
+  
+  const groups: Map<string, { code: string; title: string; range: string; items: LndSection[] }> = new Map();
+  const ungrouped: LndSection[] = [];
+  
+  subsections.forEach(sub => {
+    if (sub.sectionGroup) {
+      const key = sub.sectionGroup.code;
+      if (!groups.has(key)) {
+        groups.set(key, {
+          code: sub.sectionGroup.code,
+          title: sub.sectionGroup.title,
+          range: sub.sectionGroup.range,
+          items: []
+        });
+      }
+      groups.get(key)!.items.push(sub);
+    } else {
+      ungrouped.push(sub);
+    }
+  });
+  
+  // Sort groups alphabetically by code
+  const sortedGroups = Array.from(groups.values()).sort((a, b) => a.code.localeCompare(b.code));
+  
+  return { groups: sortedGroups, ungrouped };
+}
+
 const CHAPTER_ICONS: Record<string, React.ReactNode> = {
   'chapter-1': <BookOpen className="h-5 w-5" />,
   'chapter-2': <Settings className="h-5 w-5" />,
@@ -52,6 +82,7 @@ export default function LearningDevelopmentManualPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('chapter-1');
   const [expandedSections, setExpandedSections] = useState<string[]>(['chapter-1']);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const [completedSections, setCompletedSections] = useState<string[]>([]);
   const [showPrintConfig, setShowPrintConfig] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -140,6 +171,13 @@ export default function LearningDevelopmentManualPage() {
     setExpandedSections((prev) => {
       if (open) return prev.includes(sectionId) ? prev : [...prev, sectionId];
       return prev.filter((id) => id !== sectionId);
+    });
+  };
+
+  const setGroupExpanded = (groupKey: string, open: boolean) => {
+    setExpandedGroups((prev) => {
+      if (open) return prev.includes(groupKey) ? prev : [...prev, groupKey];
+      return prev.filter((id) => id !== groupKey);
     });
   };
 
@@ -315,24 +353,111 @@ export default function LearningDevelopmentManualPage() {
                         {section.subsections && (
                           <CollapsibleContent>
                             <div className="ml-6 mt-1 space-y-1 border-l pl-3">
-                              {section.subsections.map((sub) => (
-                                <button
-                                  key={sub.id}
-                                  className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors
-                                    ${selectedSectionId === sub.id 
-                                      ? 'bg-primary/10 text-primary font-medium' 
-                                      : 'hover:bg-muted text-muted-foreground'
-                                    }`}
-                                  onClick={() => scrollToSection(sub.id)}
-                                >
-                                  {completedSections.includes(sub.id) ? (
-                                    <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
-                                  ) : (
-                                    <Circle className="h-3 w-3 flex-shrink-0" />
-                                  )}
-                                  <span className="break-words">{sub.sectionNumber} {sub.title}</span>
-                                </button>
-                              ))}
+                              {(() => {
+                                const { groups, ungrouped } = groupSubsectionsByGroup(section.subsections);
+                                
+                                // If no groups, render flat list
+                                if (groups.length === 0) {
+                                  return section.subsections.map((sub) => (
+                                    <button
+                                      key={sub.id}
+                                      className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors
+                                        ${selectedSectionId === sub.id 
+                                          ? 'bg-primary/10 text-primary font-medium' 
+                                          : 'hover:bg-muted text-muted-foreground'
+                                        }`}
+                                      onClick={() => scrollToSection(sub.id)}
+                                    >
+                                      {completedSections.includes(sub.id) ? (
+                                        <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                                      ) : (
+                                        <Circle className="h-3 w-3 flex-shrink-0" />
+                                      )}
+                                      <span className="break-words">{sub.sectionNumber} {sub.title}</span>
+                                    </button>
+                                  ));
+                                }
+                                
+                                // Render grouped subsections with collapsible headers
+                                return (
+                                  <>
+                                    {groups.map((group) => {
+                                      const groupKey = `${section.id}-group-${group.code}`;
+                                      const isGroupExpanded = expandedGroups.includes(groupKey);
+                                      const isAnyItemSelected = group.items.some(item => selectedSectionId === item.id);
+                                      
+                                      return (
+                                        <Collapsible
+                                          key={groupKey}
+                                          open={isGroupExpanded}
+                                          onOpenChange={(open) => setGroupExpanded(groupKey, open)}
+                                        >
+                                          <CollapsibleTrigger asChild>
+                                            <button
+                                              className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors font-medium
+                                                ${isAnyItemSelected 
+                                                  ? 'bg-primary/5 text-primary' 
+                                                  : 'hover:bg-muted text-foreground'
+                                                }`}
+                                            >
+                                              <FolderOpen className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                              <span className="flex-1 break-words">
+                                                {group.code}. {group.title}
+                                              </span>
+                                              <span className="text-muted-foreground text-[10px]">({group.range})</span>
+                                              {isGroupExpanded 
+                                                ? <ChevronDown className="h-3 w-3 flex-shrink-0" />
+                                                : <ChevronRight className="h-3 w-3 flex-shrink-0" />
+                                              }
+                                            </button>
+                                          </CollapsibleTrigger>
+                                          <CollapsibleContent>
+                                            <div className="ml-4 mt-1 space-y-0.5 border-l pl-2">
+                                              {group.items.map((sub) => (
+                                                <button
+                                                  key={sub.id}
+                                                  className={`w-full flex items-center gap-2 p-1 rounded text-left text-xs transition-colors
+                                                    ${selectedSectionId === sub.id 
+                                                      ? 'bg-primary/10 text-primary font-medium' 
+                                                      : 'hover:bg-muted text-muted-foreground'
+                                                    }`}
+                                                  onClick={() => scrollToSection(sub.id)}
+                                                >
+                                                  {completedSections.includes(sub.id) ? (
+                                                    <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                                                  ) : (
+                                                    <Circle className="h-3 w-3 flex-shrink-0" />
+                                                  )}
+                                                  <span className="break-words">{sub.sectionNumber} {sub.title}</span>
+                                                </button>
+                                              ))}
+                                            </div>
+                                          </CollapsibleContent>
+                                        </Collapsible>
+                                      );
+                                    })}
+                                    {/* Render any ungrouped subsections after groups */}
+                                    {ungrouped.map((sub) => (
+                                      <button
+                                        key={sub.id}
+                                        className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors
+                                          ${selectedSectionId === sub.id 
+                                            ? 'bg-primary/10 text-primary font-medium' 
+                                            : 'hover:bg-muted text-muted-foreground'
+                                          }`}
+                                        onClick={() => scrollToSection(sub.id)}
+                                      >
+                                        {completedSections.includes(sub.id) ? (
+                                          <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                                        ) : (
+                                          <Circle className="h-3 w-3 flex-shrink-0" />
+                                        )}
+                                        <span className="break-words">{sub.sectionNumber} {sub.title}</span>
+                                      </button>
+                                    ))}
+                                  </>
+                                );
+                              })()}
                             </div>
                           </CollapsibleContent>
                         )}
