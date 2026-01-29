@@ -960,72 +960,124 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
   },
 
   // ==========================================================================
-  // CHAPTER 6: AI FEATURES & INTELLIGENCE (~55 min)
+  // CHAPTER 6: AI FEATURES & INTELLIGENCE (~95 min)
   // ==========================================================================
   {
     id: 'chapter-6',
     sectionNumber: '6',
     title: 'AI Features & Intelligence',
-    description: 'AI-powered recommendations, gap analysis, training needs forecasting, and intelligent automation.',
+    description: 'AI-powered recommendations, gap analysis, training needs forecasting, adaptive learning, chatbot assistant, and intelligent automation.',
     contentLevel: 'concept',
-    estimatedReadTime: 55,
+    estimatedReadTime: 95,
     targetRoles: ['Admin', 'Consultant', 'L&D Admin'],
     subsections: [
+      // Section A: Gap Analysis & Recommendations
       {
         id: 'sec-6-1',
         sectionNumber: '6.1',
         title: 'AI-Powered Course Recommendations',
-        description: 'Skill gap analysis driving personalized learning suggestions',
+        description: 'Skill gap analysis driving personalized learning suggestions via competency_course_mappings',
         contentLevel: 'concept',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Automated Gap Analysis'
+        legacyReference: 'Automated Gap Analysis',
+        sectionGroup: { code: 'A', title: 'Gap Analysis & Recommendations', range: '6.1-6.3' }
       },
       {
         id: 'sec-6-2',
         sectionNumber: '6.2',
         title: 'Competency Gap Detection',
-        description: 'Automated gap identification comparing job requirements to employee skills',
+        description: 'Automated gap identification comparing job requirements to employee skills via employee_skill_gaps',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'HR Partner'],
-        legacyReference: 'Job Gap Analysis'
+        legacyReference: 'Job Gap Analysis',
+        sectionGroup: { code: 'A', title: 'Gap Analysis & Recommendations', range: '6.1-6.3' }
       },
       {
         id: 'sec-6-3',
         sectionNumber: '6.3',
         title: 'Training Needs Analysis',
-        description: 'AI-driven needs forecasting, department-level insights, and budget impact',
+        description: 'AI-driven needs forecasting, department-level insights, and budget impact via training_needs_analysis',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'A', title: 'Gap Analysis & Recommendations', range: '6.1-6.3' }
       },
+      // Section B: Content Generation
       {
         id: 'sec-6-4',
         sectionNumber: '6.4',
         title: 'Intelligent Quiz Generation',
-        description: 'AI-assisted question creation, difficulty calibration, and bank optimization',
+        description: 'AI-assisted question creation with Bloom\'s taxonomy alignment via ai_generated_quizzes and ai_generated_questions',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin']
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'B', title: 'Content Generation', range: '6.4' }
       },
+      // Section C: Adaptive Learning
       {
         id: 'sec-6-5',
         sectionNumber: '6.5',
-        title: 'Learning Analytics Predictions',
-        description: 'Completion probability scoring, at-risk learner identification, and intervention triggers',
-        contentLevel: 'concept',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'L&D Admin']
+        title: 'Adaptive Learning Paths',
+        description: 'Performance-based path adaptation with skip/remediate rules via adaptive_learning_paths, adaptive_path_rules, adaptive_learner_progress',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'C', title: 'Adaptive Learning', range: '6.5' }
       },
+      // Section D: Learning Assistant
       {
         id: 'sec-6-6',
         sectionNumber: '6.6',
+        title: 'Learning Chatbot Assistant',
+        description: 'Conversational AI for course discovery, progress queries, and skill recommendations via learning_chatbot_config, chatbot_conversations, chatbot_messages',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'D', title: 'Learning Assistant', range: '6.6' }
+      },
+      // Section E: Risk & Analytics
+      {
+        id: 'sec-6-7',
+        sectionNumber: '6.7',
+        title: 'Completion Risk Predictions',
+        description: 'At-risk learner identification with automated interventions via completion_risk_predictions, risk_interventions, risk_alert_rules',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'L&D Admin', 'Manager'],
+        sectionGroup: { code: 'E', title: 'Risk & Analytics', range: '6.7-6.8' }
+      },
+      {
+        id: 'sec-6-8',
+        sectionNumber: '6.8',
+        title: 'Skills Transfer Index',
+        description: 'Post-training impact measurement with transfer assessments and benchmarks via skills_transfer_assessments, transfer_benchmarks, transfer_follow_ups',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'E', title: 'Risk & Analytics', range: '6.7-6.8' }
+      },
+      // Section F: Governance
+      {
+        id: 'sec-6-9',
+        sectionNumber: '6.9',
         title: 'AI Governance & Explainability',
-        description: 'ISO 42001 alignment, model transparency, bias monitoring, and human oversight',
+        description: 'ISO 42001 alignment, model transparency, bias monitoring, and human oversight via ai_model_registry, ai_governance_metrics',
         contentLevel: 'reference',
-        estimatedReadTime: 7,
-        targetRoles: ['Admin', 'Consultant']
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant'],
+        sectionGroup: { code: 'F', title: 'Governance & Compliance', range: '6.9-6.10' }
+      },
+      {
+        id: 'sec-6-10',
+        sectionNumber: '6.10',
+        title: 'AI Agent Framework',
+        description: 'Agent configuration, capabilities, execution tracking, and performance metrics via ai_agents, ai_agent_capabilities, ai_agent_executions',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant'],
+        sectionGroup: { code: 'F', title: 'Governance & Compliance', range: '6.9-6.10' }
       }
     ]
   },
