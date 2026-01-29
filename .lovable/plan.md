@@ -1,43 +1,49 @@
 
-
-# Chapter 6: AI-Powered Learning Intelligence - Comprehensive Audit
+# Chapter 7: Analytics & Reporting - Comprehensive Audit Report
 
 ## Executive Summary
 
-This audit compares the current Chapter 6 documentation (8 sections) against the actual database schema, UI components, and industry-standard AI LMS features. The documentation was recently restructured from placeholder stubs to detailed sections, but several gaps remain.
+This audit compares the updated Chapter 7 documentation (18 sections, ~120 min) against the actual database schema, UI components, and industry-standard LMS analytics patterns. While the recent update significantly improved coverage, several gaps remain that require attention.
 
 ---
 
 ## Part 1: Documentation vs. Database Schema Gap Analysis
 
-### 1.1 Tables Documented vs. Actual Schema Fields
+### 1.1 Tables Documented vs. Actual Schema
 
-| Table | Documented Fields | Actual DB Fields | Missing from Docs |
-|-------|------------------|------------------|-------------------|
-| **employee_skill_gaps** | 11 fields | 18 fields | `capability_id`, `detected_at`, `addressed_at`, `company_id`, `created_at`, `updated_at` |
-| **training_needs** | 8 fields | 16 fields | `notes`, `recommended_training`, `addressed_at`, `company_id`, `created_at`, `updated_at` |
-| **training_needs_analysis** | 8 fields | 13 fields | `analysis_date`, `description`, `name`, `company_id`, `created_at`, `updated_at` |
-| **competency_course_mappings** | 7 fields | 10 fields | `company_id`, `created_at`, `created_by` |
-| **ai_explainability_logs** | 8 fields | 13 fields | `explanation_generated`, `company_id`, `created_at` |
-| **ai_governance_metrics** | 8 fields | 17 fields | `avg_risk_score`, `high_risk_interactions`, `drift_threshold_breached`, `drift_alert_sent_at`, `performance_drift_score`, `model_version` |
-| **ai_model_registry** | 11 fields | 22 fields | `audit_findings`, `data_retention_policy`, `fairness_metrics`, `fairness_score`, `is_active`, `last_fairness_audit`, `model_card`, `company_id`, `created_at`, `updated_at` |
+| Documented Table | Doc Fields | Actual Fields | Missing from Docs |
+|-----------------|-----------|---------------|-------------------|
+| **lms_enrollments** | 5 fields | 12 fields | `user_id`, `enrolled_by`, `course_id`, `company_id`, `created_at`, `updated_at` |
+| **lms_certificates** | 5 fields | 10 fields | `enrollment_id`, `course_id`, `user_id`, `created_at` |
+| **lms_quiz_attempts** | 7 fields | 14 fields | `quiz_id`, `enrollment_id`, `started_at`, `submitted_at`, `created_at` |
+| **training_budgets** | 6 fields | 10 fields | `department_id`, `notes`, `created_at`, `updated_at` (NOTE: Doc shows `total_budget` but DB has `allocated_amount`) |
+| **training_evaluations** | 4 fields | 9 fields | `id`, `company_id`, `name`, `description`, `is_active`, `created_at`, `updated_at` |
+| **compliance_audit_log** | 7 fields | 18 fields | `event_category`, `entity_type`, `actor_type`, `actor_name`, `actor_role`, `change_summary`, `ip_address`, `user_agent`, `session_id`, `metadata`, `sequence_number` |
 
-### 1.2 Tables NOT Documented (Gap)
+### 1.2 Tables NOT Documented in Chapter 7 (Critical Gap)
 
-The following AI-related tables exist in the database but are NOT documented in Chapter 6:
+| Table | Purpose | Analytics Value | Recommendation |
+|-------|---------|-----------------|----------------|
+| `training_analytics` | Event-level analytics tracking | Session/engagement tracking | Add to 7.4 Learner Analytics |
+| `lms_course_reviews` | Course ratings and reviews | Satisfaction metrics source | Add to 7.7 Course Effectiveness |
+| `lms_scorm_tracking` | SCORM completion data | Detailed xAPI/SCORM analytics | Add new section 7.X |
+| `lms_xapi_statements` | Experience API statements | Advanced learning analytics | Add new section 7.X |
+| `lms_user_points` | Gamification points | Engagement metrics | Add to 7.4 or new gamification section |
+| `lms_user_badges` | Badge achievements | Motivation analytics | Add to 7.4 or new gamification section |
+| `lms_leaderboards` | Leaderboard configuration | Gamification analytics | Add to gamification section |
+| `lms_lesson_progress` | Granular lesson tracking | Detailed progress analytics | Add to 7.4 Learner Progress |
+| `external_training_records` | External training data | Complete training history | Add to 7.4 |
+| `learning_path_enrollments` | Learning path tracking | Path completion analytics | Add to 7.4 |
+| `skills_transfer_assessments` | Level 3/4 Kirkpatrick data | ROI/transfer analytics | Mentioned in 7.9 but schema not shown |
+| `completion_risk_predictions` | AI risk predictions | Predictive analytics | Mentioned but schema not documented |
+| `transfer_benchmarks` | Industry benchmarks | Comparison metrics | Not documented |
 
-| Table | Purpose | Recommendation |
-|-------|---------|----------------|
-| `ai_bias_incidents` | Bias detection and incident tracking (18 fields) | Add to Section 6.7 |
-| `ai_human_overrides` | Human override audit trail (12 fields) | Add to Section 6.7 |
-| `ai_interaction_logs` | AI interaction logging (14 fields) | Add to Section 6.7 |
-| `ai_agents` | AI agent configuration (24 fields) | Add new subsection |
-| `ai_agent_capabilities` | Agent capability registry | Add new subsection |
-| `ai_agent_executions` | Agent execution logs | Add new subsection |
-| `ai_agent_metrics` | Agent performance metrics | Add new subsection |
-| `ai_guardrails_config` | Guardrail configuration | Add to Section 6.7 |
-| `development_themes` | AI-generated development themes (16 fields) | **Currently undocumented in L&D chapter** |
-| `ai_explainability_records` | Extended explainability | Add to Section 6.7 |
+### 1.3 Field Name Discrepancies (Data Accuracy Issue)
+
+| Section | Documented Field | Actual DB Field | Impact |
+|---------|-----------------|-----------------|--------|
+| 7.10 Budget Reports | `total_budget` | `allocated_amount` | Query examples will fail |
+| 7.2 KPIs | `training_budgets.total_budget` | `training_budgets.allocated_amount` | KPI calculation example incorrect |
 
 ---
 
@@ -45,132 +51,146 @@ The following AI-related tables exist in the database but are NOT documented in 
 
 ### 2.1 UI Components Documented vs. Actual Implementation
 
-| Section | Documented UI Path | Actual UI Component | Gap Status |
-|---------|-------------------|---------------------|------------|
-| 6.2 Skill Gap Detection | `Training → Gap Analysis → Employee Gaps` | `EmployeeSkillGapsTab.tsx` (247 lines), `MySkillGapsPage.tsx` (ESS) | **Path incorrect** - actual path is `ESS → My Skill Gaps` or `Employee Profile → Skill Gaps Tab` |
-| 6.3 Training Needs | `Training → Training Needs (Tab)` | `TrainingNeedsTab.tsx` (448 lines) | **Correct** - accessed via `/training/needs` |
-| 6.4 Course Recommendations | `Training → Course Competencies (Tab)` | `CourseCompetenciesTab.tsx` (265 lines) | **Path incorrect** - uses `course_competencies` table, not `competency_course_mappings` |
-| 6.5 Learning Analytics | `Training → Analytics` | `TrainingAnalytics.tsx` (471 lines), `TrainingAnalyticsPage.tsx` | **Correct** |
-| 6.7 AI Governance | `Admin → AI Governance` | `AIGovernancePage.tsx` (370 lines) | **Correct** but missing component details |
-| 6.8 Model Registry | `Admin → AI Governance → Model Registry` | `AIModelRegistryPanel.tsx` (156 lines) | **Correct** |
+| Section | Documented UI | Actual Component | Gap Status |
+|---------|--------------|------------------|------------|
+| 7.1 Dashboard | `TrainingAnalytics.tsx` | `TrainingAnalytics.tsx` (471 lines) | **Correct** but missing tab details |
+| 7.14 Manager View | `ManagerTeamTrainingCard.tsx` | `ManagerTeamTrainingCard.tsx` (403 lines) | **Correct** |
+| 7.16 AI Reports | `AIModuleReportBuilder` | `AIModuleReportBuilder.tsx` (790 lines) | **Correct** but missing PII masking |
+| 7.17 Scheduled | Generic description | `ScheduledOrgReports.tsx` (400+ lines) | **Missing specific component reference** |
 
 ### 2.2 UI Components NOT Documented
 
-| Component | Location | Functionality | Gap |
-|-----------|----------|---------------|-----|
-| `AIExplainabilityPanel.tsx` | 258 lines | Explainability log viewer with confidence scores | Should be in 6.7 |
-| `BiasIncidentPanel.tsx` | 278 lines | Bias incident tracking/remediation | Should be in 6.7 |
-| `AIHumanReviewQueue.tsx` | AI Governance | Pending human review queue | Should be in 6.7 |
-| `AIGuardrailsConfigPanel.tsx` | AI Governance | Guardrail configuration | Not documented |
-| `AIScheduledJobsPanel.tsx` | AI Governance | Scheduled AI jobs | Not documented |
-| `AIComplianceReportsPanel.tsx` | AI Governance | Compliance reporting | Not documented |
-| `AIAuditTrailPanel.tsx` | AI Governance | Human override audit trail | Should be in 6.7 |
-| `SkillGapActionCard.tsx` | Performance | Gap action cards with IDP linking | Not documented |
-| `GoalSkillGapCard.tsx` | Performance | Goal-based skill gap analysis | Not documented |
+| Component | Location | Functionality | Should Be In |
+|-----------|----------|---------------|--------------|
+| `CompletionRiskDashboard.tsx` | training/ai-features | 460 lines - Risk prediction UI with interventions | Section 7.7 or new AI section |
+| `SkillsTransferDashboard.tsx` | training/ai-features | 550 lines - Level 3/4 Kirkpatrick tracking | Section 7.8/7.9 |
+| `AIQuizGeneratorPanel.tsx` | training/ai-features | AI quiz generation | Chapter 6 (AI section) |
+| `AdaptivePathConfigPanel.tsx` | training/ai-features | Adaptive learning paths | Chapter 6 |
+| `LearningChatWidget.tsx` | training/ai-features | Learning chatbot | Chapter 6 |
+| `TrainingEvaluationsTab.tsx` | training | Post-training evaluations | Section 7.8 Kirkpatrick |
+
+### 2.3 Missing UI Documentation Details
+
+The documentation mentions UI components but lacks:
+- PII masking controls in AI Report Builder (added recently)
+- Permission-based filtering in analytics
+- Export format options (PDF, Excel, CSV)
+- Chart type configurations
 
 ---
 
 ## Part 3: Industry Standard Gap Analysis
 
-### 3.1 Features Present but Underdocumented
+### 3.1 Features Implemented but Under-Documented
 
-| Industry Feature | Benchmark (Cornerstone/Docebo) | Current Implementation | Documentation Gap |
-|-----------------|--------------------------------|------------------------|-------------------|
-| **AI-Generated Development Themes** | Automated theme extraction | `development_themes` table with `ai_generated`, `confidence_score` | **Not documented at all** |
-| **Human Override Workflow** | Mandatory for high-risk | `ai_human_overrides` + `AIHumanReviewQueue.tsx` | Mentioned but UI not detailed |
-| **Bias Detection & Remediation** | Incident tracking | `ai_bias_incidents` + `BiasIncidentPanel.tsx` | Table fields not documented |
-| **AI Agent Framework** | Agent-based AI | `ai_agents`, `ai_agent_capabilities`, `ai_agent_executions` (4 tables) | **Not documented** |
-| **Guardrails Configuration** | Risk-based guardrails | `ai_guardrails_config` table | **Not documented** |
-| **Performance Drift Monitoring** | Model performance tracking | `ai_governance_metrics.performance_drift_score` | Field not documented |
+| Industry Feature | Benchmark | Current Implementation | Documentation Gap |
+|-----------------|-----------|------------------------|-------------------|
+| **SCORM Tracking Analytics** | Cornerstone, Docebo | `lms_scorm_tracking` (15+ fields) | **Not documented** |
+| **xAPI Statement Analytics** | Rustici, xAPI.com | `lms_xapi_statements` table | **Not documented** |
+| **Gamification Analytics** | Docebo, TalentLMS | `lms_user_points`, `lms_user_badges`, `lms_leaderboards` | **Not documented** |
+| **Learning Path Analytics** | Workday, SAP | `learning_path_enrollments` | **Not documented** |
+| **External Training Tracking** | Workday | `external_training_records` (21 fields) | **Not documented** |
+| **Course Review Analytics** | Udemy, LinkedIn Learning | `lms_course_reviews` (11 fields) | **Not documented** |
+| **Lesson-Level Progress** | Cornerstone | `lms_lesson_progress` | **Not documented** |
 
-### 3.2 Industry Features NOT Implemented (Future Roadmap)
+### 3.2 Industry Features with Partial Documentation
 
-| Feature | Industry Reference | Status | Documentation |
-|---------|-------------------|--------|---------------|
-| AI Quiz Generation | Articulate Rise, Docebo | Planned (Q1 2025 per docs) | Correctly marked as "Planned" |
-| Adaptive Learning Paths | Cornerstone AI | Not implemented | Not documented (correctly) |
-| Chatbot Learning Assistant | Docebo AI | Not implemented | Not documented (correctly) |
-| Completion Risk Prediction | Workday | Not implemented | Correctly marked as "Planned" |
-| Skills Transfer Index | SAP SuccessFactors | Not implemented | Correctly marked as "Planned" |
+| Feature | Industry Standard | Current State | Gap |
+|---------|------------------|---------------|-----|
+| **Kirkpatrick Level 3 (Behavior)** | 30/60/90-day manager assessments | `skills_transfer_assessments` implemented | UI component `SkillsTransferDashboard.tsx` not documented |
+| **Kirkpatrick Level 4 (Results)** | Business KPI correlation | `transfer_benchmarks` implemented | Table schema not in docs |
+| **Completion Risk Prediction** | Cornerstone, Docebo AI | `completion_risk_predictions` + `risk_interventions` + `risk_alert_rules` | Only mentioned, no schema details |
+
+### 3.3 Industry Features NOT Implemented (Roadmap Items)
+
+| Feature | Industry Reference | Status | Priority |
+|---------|-------------------|--------|----------|
+| **Learning Impact Analytics** | Degreed, EdCast | Not implemented | Medium |
+| **Social Learning Analytics** | LinkedIn Learning | Partial (discussions exist) | Low |
+| **Content Engagement Heatmaps** | Articulate Rise | Not implemented | Medium |
+| **Cohort Comparison Reports** | Workday | Not implemented | Medium |
+| **Mobile Learning Analytics** | Cornerstone Mobile | Not implemented | Low |
 
 ---
 
 ## Part 4: Gap Closure Plan
 
-### Phase 1: Schema Documentation Completeness (Priority: High)
-
+### Phase 1: Critical Schema Documentation (Priority: HIGH)
 **Estimated Effort: 2-3 hours**
 
-1. **Update Section 6.2 (Skill Gap Detection)**
-   - Add missing fields: `capability_id`, `detected_at`, `addressed_at`, `company_id`
-   - Fix UI navigation path: `ESS → My Skill Gaps` or `Employee Profile → Skill Gaps Tab`
-   - Document `useSkillGapManagement.ts` hook functions
+1. **Fix Field Name Discrepancy (URGENT)**
+   - Update 7.10 to use `allocated_amount` instead of `total_budget`
+   - Update 7.2 KPI calculation examples
 
-2. **Update Section 6.3 (Training Needs Analysis)**
-   - Add missing fields: `notes`, `recommended_training`, `description`, `analysis_date`
-   - Document status workflow fields completely
+2. **Add Missing Fields to Documented Tables**
+   - lms_enrollments: Add `user_id`, `enrolled_by`, `course_id`
+   - lms_certificates: Add `enrollment_id`, `course_id`, `user_id`
+   - training_evaluations: Add full schema (currently only 4 fields shown)
+   - compliance_audit_log: Add remaining 11 fields
 
-3. **Update Section 6.4 (Course Recommendations)**
-   - Add missing fields: `company_id`, `created_by`
-   - Clarify distinction between `competency_course_mappings` and `course_competencies` tables
-   - Fix table reference (documentation references wrong table)
+3. **Document Undocumented Analytics Tables**
+   - Add `training_analytics` table schema to Section 7.4
+   - Add `lms_lesson_progress` to Section 7.4
+   - Add `lms_course_reviews` to Section 7.7
 
-4. **Update Section 6.7 (AI Governance)**
-   - Add complete `ai_bias_incidents` schema (18 fields)
-   - Add complete `ai_human_overrides` schema (12 fields)
-   - Add complete `ai_interaction_logs` schema (14 fields)
-   - Add `ai_guardrails_config` table reference
-   - Add missing `ai_governance_metrics` fields (drift monitoring)
+### Phase 2: New Sections for Implemented Features (Priority: HIGH)
+**Estimated Effort: 3-4 hours**
 
-5. **Update Section 6.8 (Model Registry)**
-   - Add missing fields: `fairness_metrics`, `fairness_score`, `model_card`, `audit_findings`
-   - Document fairness auditing capabilities
+1. **Add Section 7.19: SCORM/xAPI Analytics**
+   - Document `lms_scorm_tracking` schema (15 fields)
+   - Document `lms_xapi_statements` schema
+   - Add CMI data model reference
+   - Link to Chapter 2.13 SCORM Setup
 
-### Phase 2: UI Component Documentation (Priority: High)
+2. **Add Section 7.20: Gamification Analytics**
+   - Document `lms_user_points` schema
+   - Document `lms_user_badges` schema
+   - Document `lms_leaderboards` schema
+   - Document `lms_point_transactions` for audit trail
 
+3. **Add Section 7.21: Learning Path Analytics**
+   - Document `learning_path_enrollments` schema
+   - Add path completion rate calculations
+   - Add milestone tracking
+
+4. **Add Section 7.22: External Training Analytics**
+   - Document `external_training_records` schema (21 fields)
+   - Add integration with training budgets
+   - Add cost tracking for external training
+
+### Phase 3: UI Component Documentation Updates (Priority: MEDIUM)
 **Estimated Effort: 2-3 hours**
 
-1. **Update Section 6.7 to document actual UI components:**
-   - `AIExplainabilityPanel.tsx` - Log viewer with confidence breakdown
-   - `BiasIncidentPanel.tsx` - Incident tabs (Open/Investigating/Resolved)
-   - `AIHumanReviewQueue.tsx` - Pending review queue
-   - `AIGuardrailsConfigPanel.tsx` - Guardrail configuration
-   - `AIAuditTrailPanel.tsx` - Override audit trail
+1. **Update Section 7.8 (Kirkpatrick)**
+   - Add `SkillsTransferDashboard.tsx` component reference
+   - Document pre/post assessment workflow
+   - Add barrier/enabler tracking UI
 
-2. **Update Section 6.2 to document actual UI paths:**
-   - ESS My Skill Gaps page (`/ess/skill-gaps`)
-   - Employee Profile Skill Gaps Tab
-   - Manager Team Skill Gap View
+2. **Update Section 7.9 (ROI Analysis)**
+   - Add `skills_transfer_assessments` full schema
+   - Add `transfer_benchmarks` table reference
+   - Document transfer_index calculation
 
-3. **Add subsection for Development Themes (6.3a or merge into 6.2):**
-   - Document `development_themes` table integration
-   - AI-generated themes from 360 feedback
-   - Confirmation workflow
+3. **Add Completion Risk UI to Section 7.7**
+   - Document `CompletionRiskDashboard.tsx` (460 lines)
+   - Add `risk_interventions` table schema
+   - Add `risk_alert_rules` configuration
 
-### Phase 3: Add Missing Section for AI Agent Framework (Priority: Medium)
+4. **Update Section 7.17 (Scheduled Reports)**
+   - Add specific reference to `ScheduledOrgReports.tsx`
+   - Document `scheduled_org_reports` table schema
+   - Add recipient configuration details
 
-**Estimated Effort: 1-2 hours**
+### Phase 4: Update TOC with New Sections (Priority: MEDIUM)
+**Estimated Effort: 1 hour**
 
-**Proposal: Add Section 6.9 "AI Agent Configuration"**
+Add sections 7.19-7.22 to `learningDevelopmentManual.ts`:
+- 7.19: SCORM/xAPI Analytics (Section Group H: Technical Analytics)
+- 7.20: Gamification Analytics (Section Group H)
+- 7.21: Learning Path Analytics (Section Group B extension)
+- 7.22: External Training Analytics (Section Group B extension)
 
-Content:
-- `ai_agents` table schema (24 fields)
-- `ai_agent_capabilities` table
-- `ai_agent_executions` for tracking
-- `ai_agent_metrics` for performance monitoring
-- Configuration workflow for L&D-specific agents
-
-### Phase 4: Navigation Path Corrections (Priority: High)
-
-**Estimated Effort: 30 minutes**
-
-Fix the following navigation paths in documentation:
-
-| Section | Current (Wrong) | Correct Path |
-|---------|-----------------|--------------|
-| 6.2 | `Training → Gap Analysis → Employee Gaps` | `ESS → My Skill Gaps` OR `Workforce → Employee → Skill Gaps Tab` |
-| 6.4 | References `competency_course_mappings` | Should also reference `course_competencies` table |
-| 6.7 | `Admin → AI Governance` | Correct, but add tab references (Reviews, Bias, Models, etc.) |
+Update total estimated read time from 120 to ~150 minutes.
 
 ---
 
@@ -178,21 +198,45 @@ Fix the following navigation paths in documentation:
 
 | Gap Type | Count | Priority |
 |----------|-------|----------|
-| Missing DB fields in documented tables | 40+ fields | High |
-| Undocumented tables | 10 tables | High |
-| Incorrect UI navigation paths | 3 paths | High |
-| Undocumented UI components | 9 components | Medium |
-| Industry features not implemented | 5 features | Low (future roadmap) |
+| Missing DB fields in documented tables | 35+ fields | HIGH |
+| Undocumented tables | 13 tables | HIGH |
+| Field name discrepancies | 2 critical | URGENT |
+| Undocumented UI components | 4 major components | MEDIUM |
+| Industry features not documented | 7 features | MEDIUM |
+| Industry features not implemented | 5 features | LOW (roadmap) |
 
 ---
 
 ## Recommended Implementation Order
 
-1. **Phase 1a**: Fix critical schema gaps in Sections 6.2, 6.3, 6.4 (tables already documented but incomplete)
-2. **Phase 1b**: Add undocumented governance tables to Section 6.7 (`ai_bias_incidents`, `ai_human_overrides`, `ai_interaction_logs`)
-3. **Phase 2**: Add UI component documentation for AI Governance panels
-4. **Phase 3**: Add Section 6.9 for AI Agent Framework
-5. **Phase 4**: Fix navigation paths and cross-references
+1. **URGENT (Day 1)**: Fix `total_budget` → `allocated_amount` discrepancy in 7.2, 7.10
+2. **Phase 1a (Day 1-2)**: Add missing fields to existing table schemas
+3. **Phase 1b (Day 2)**: Document undocumented tables used in analytics
+4. **Phase 2 (Day 3-4)**: Create new sections 7.19-7.22
+5. **Phase 3 (Day 4-5)**: Update UI component documentation
+6. **Phase 4 (Day 5)**: Update TOC and cross-references
 
-**Total Estimated Effort: 6-8 hours**
+**Total Estimated Effort: 8-12 hours**
 
+---
+
+## Technical Implementation Notes
+
+### Schema Changes Needed: None
+All gaps are documentation-only; no database migrations required.
+
+### Files to Create
+- `LndAnalyticsScormXapi.tsx` (Section 7.19)
+- `LndAnalyticsGamification.tsx` (Section 7.20)
+- `LndAnalyticsLearningPaths.tsx` (Section 7.21)
+- `LndAnalyticsExternalTraining.tsx` (Section 7.22)
+
+### Files to Update
+- `LndAnalyticsDashboard.tsx` - Add missing lms_enrollments fields
+- `LndAnalyticsCourseEffectiveness.tsx` - Add lms_course_reviews
+- `LndAnalyticsLearner.tsx` - Add lms_lesson_progress, training_analytics
+- `LndAnalyticsCompliance.tsx` - Add full compliance_audit_log schema
+- `LndAnalyticsAdvanced.tsx` - Add ScheduledOrgReports.tsx reference
+- `index.ts` - Export new components
+- `LndAnalyticsSection.tsx` - Add new sections to render
+- `learningDevelopmentManual.ts` - Add sections 7.19-7.22 to TOC
