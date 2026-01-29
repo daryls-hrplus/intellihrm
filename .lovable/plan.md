@@ -1,371 +1,151 @@
 
-# L&D Manual Chapter 5: Compliance Training - Comprehensive Restructuring Plan
-## Including HSE (Health & Safety) Integration
+# Implementation Plan: L&D Manual Chapter 5 - Sections D, E, F (5.12-5.23)
+
+## Summary
+
+Create the remaining 12 comprehensive documentation components for Chapter 5 (Compliance Training), completing Sections D, E, and F as per the approved plan. This includes full HSE integration documentation with database field references.
 
 ---
 
-## Executive Summary
-
-Chapter 5 (Compliance Training) currently has **8 placeholder sections** with minimal content. More critically, **HSE (Health & Safety) compliance integration is completely undocumented** despite significant functionality existing in the database:
-
-### Critical HSE Integration Gaps Discovered
-
-| Integration Point | Database Evidence | Documentation Status |
-|-------------------|-------------------|---------------------|
-| `hse_safety_training.lms_course_id` | Links HSE requirements to LMS courses | **NOT DOCUMENTED** |
-| `hse_training_records` table | 15 fields for safety training tracking | **NOT DOCUMENTED** |
-| Safety-to-Compliance workflow | Product capabilities shows data flow | **NOT IN L&D MANUAL** |
-| Incident → Training triggers | Corrective action training referenced | **NOT DOCUMENTED** |
-| OSHA/regulatory training | Database supports is_osha_reportable | **NOT DOCUMENTED** |
-
----
-
-## Current State Analysis
-
-### Existing Content (Minimal Placeholders)
-
-```
-Section 5.1 - Compliance Framework (1 paragraph)
-Section 5.2 - Target Audience Rules (1 paragraph)
-Section 5.3 - Recertification Management (1 paragraph)
-Section 5.4 - Compliance Dashboard (1 paragraph)
-Section 5.5 - Audit Trail (1 paragraph)
-Section 5.6 - Regional Variations (1 paragraph)
-Section 5.7 - Certification Expiry Tracking (1 paragraph)
-Section 5.8 - Grace Period Management (1 paragraph)
-```
-
-### HSE Tables Requiring Documentation
-
-**hse_safety_training (17 fields)**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Unique identifier |
-| company_id | UUID FK | Multi-tenant isolation |
-| training_type | TEXT | induction, refresher, specialized, certification |
-| title | TEXT | Training requirement name |
-| code | TEXT | Unique code (e.g., HSE-FORK-001) |
-| description | TEXT | Training description |
-| is_mandatory | BOOLEAN | Required for role/department |
-| frequency_months | INT | Recertification frequency |
-| duration_hours | DECIMAL | Expected training duration |
-| **lms_course_id** | **UUID FK** | **Links to lms_courses (KEY INTEGRATION)** |
-| applicable_departments | ARRAY | Target departments |
-| applicable_positions | ARRAY | Target job positions |
-| is_active | BOOLEAN | Active status |
-| start_date | DATE | Requirement effective date |
-| end_date | DATE | Requirement expiry |
-
-**hse_training_records (15 fields)**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | UUID | Unique record |
-| training_id | UUID FK | Reference to hse_safety_training |
-| employee_id | UUID FK | Trained employee |
-| company_id | UUID FK | Multi-tenant isolation |
-| training_date | DATE | Completion date |
-| expiry_date | DATE | Certification expiry |
-| status | TEXT | scheduled, in_progress, completed, expired, failed |
-| score | DECIMAL | Assessment score |
-| pass_mark | DECIMAL | Required passing score |
-| certificate_number | TEXT | Certificate ID |
-| trainer_name | TEXT | Instructor name |
-| notes | TEXT | Training notes |
-| attachments | JSONB | Supporting documents |
-
----
-
-## Proposed Chapter 5 Structure (23 Sections)
-
-### Section A: Compliance Program Framework (5.1-5.3)
-
-| Section | Title | Content Focus |
-|---------|-------|---------------|
-| 5.1 | Regulatory Compliance Overview | Framework, governance, regulatory drivers |
-| 5.2 | Compliance Training Categories | Mandatory, recommended, role-based, HSE-linked |
-| 5.3 | Compliance Calendar & Deadlines | Annual planning, deadline management |
-
-### Section B: Assignment Management (5.4-5.7)
-
-| Section | Title | Content Focus |
-|---------|-------|---------------|
-| 5.4 | Bulk Assignment Operations | Mass assignment, import/export |
-| 5.5 | Individual Assignment Management | Single employee assignments |
-| 5.6 | Exemption Request Workflow | Exemption requests, approval process |
-| 5.7 | Assignment Status Lifecycle | Field reference: `compliance_training_assignments` |
-
-### Section C: Monitoring & Dashboards (5.8-5.11)
-
-| Section | Title | Content Focus |
-|---------|-------|---------------|
-| 5.8 | Compliance Dashboard Analytics | Dashboard metrics, visualization |
-| 5.9 | Risk Indicators & Alerts | Risk scoring, early warning |
-| 5.10 | Manager Compliance View | MSS team compliance portal |
-| 5.11 | Executive Compliance Reports | C-suite reporting |
+## Files to Create
 
 ### Section D: Escalation & Enforcement (5.12-5.15)
 
-| Section | Title | Content Focus |
-|---------|-------|---------------|
-| 5.12 | Escalation Rules & Tiers | Notification chains, SLAs |
-| 5.13 | Grace Period Operations | Extensions, tracking |
-| 5.14 | Non-Compliance Consequences | Policy enforcement |
-| 5.15 | HR Intervention Workflows | Disciplinary linkage |
+| File | Section | Key Content |
+|------|---------|-------------|
+| `LndComplianceEscalationRules.tsx` | 5.12 | Escalation tier configuration (1-4), SLA definitions, notification chains, escalation_level field tracking |
+| `LndComplianceGracePeriodOps.tsx` | 5.13 | Grace period configuration, extension requests, time tracking, manager override workflows |
+| `LndComplianceNonCompliance.tsx` | 5.14 | Non-compliance consequences matrix, policy enforcement actions, system flags, HR linkage |
+| `LndComplianceHRIntervention.tsx` | 5.15 | HR workflow integration, disciplinary linkage, intervention tracking, escalation resolution |
 
 ### Section E: Audit & Reporting (5.16-5.19)
 
-| Section | Title | Content Focus |
-|---------|-------|---------------|
-| 5.16 | Compliance Audit Trail | Audit log structure, retention |
-| 5.17 | Regulatory Report Generation | OSHA 300A, standard templates |
-| 5.18 | Evidence Package Preparation | Audit preparation |
-| 5.19 | Historical Compliance Records | Archival, GDPR compliance |
+| File | Section | Key Content |
+|------|---------|-------------|
+| `LndComplianceAuditTrail.tsx` | 5.16 | Audit log schema, retention policies, tamper-proof logging, query patterns |
+| `LndComplianceRegulatoryReports.tsx` | 5.17 | OSHA 300A integration, standard report templates, export formats, scheduling |
+| `LndComplianceEvidencePackage.tsx` | 5.18 | Audit preparation workflows, evidence assembly, documentation packages, regulator interface |
+| `LndComplianceHistoricalRecords.tsx` | 5.19 | Data archival, retention schedules, GDPR compliance, historical query access |
 
-### Section F: HSE & Industry Compliance (5.20-5.23) - **NEW**
+### Section F: HSE & Industry Compliance (5.20-5.23)
 
-| Section | Title | Content Focus |
-|---------|-------|---------------|
-| **5.20** | **HSE Training Integration** | **hse_safety_training ↔ lms_courses linkage** |
-| **5.21** | **Incident-Triggered Training** | **Corrective action training workflows** |
-| **5.22** | **OSHA & Safety Certification** | **OSHA 10/30, safety cert tracking** |
-| **5.23** | **Caribbean Regional Requirements** | **Caribbean labor law compliance** |
+| File | Section | Key Content |
+|------|---------|-------------|
+| `LndComplianceHSEIntegration.tsx` | 5.20 | **Full HSE-LMS bidirectional integration**: `hse_safety_training` (17 fields) ↔ `lms_courses` linkage, `hse_training_records` (15 fields) sync with `lms_enrollments` |
+| `LndComplianceIncidentTraining.tsx` | 5.21 | **Incident-triggered training**: `hse_incidents.corrective_actions` → training request workflow, remedial training automation |
+| `LndComplianceOSHA.tsx` | 5.22 | **OSHA certification tracking**: `hse_osha_logs` (22 fields), OSHA 10/30-Hour, `is_osha_reportable` flag integration, OSHA 300A report generation |
+| `LndComplianceCaribbean.tsx` | 5.23 | Caribbean regional requirements: Jamaica OSHA Act, Trinidad OSH Act, Barbados Safety & Health at Work Act, regional calendar compliance |
 
 ---
 
-## Section F: HSE Integration (Detailed Specifications)
+## Files to Modify
 
-### 5.20 HSE Training Integration
+### 1. `sections/compliance/index.ts`
+Add 12 new exports for Sections D-F:
+```typescript
+// Section D: Escalation & Enforcement (5.12-5.15)
+export { LndComplianceEscalationRules } from './LndComplianceEscalationRules';
+export { LndComplianceGracePeriodOps } from './LndComplianceGracePeriodOps';
+export { LndComplianceNonCompliance } from './LndComplianceNonCompliance';
+export { LndComplianceHRIntervention } from './LndComplianceHRIntervention';
 
-**Purpose:** Document the bidirectional link between HSE safety requirements and the LMS
+// Section E: Audit & Reporting (5.16-5.19)
+export { LndComplianceAuditTrail } from './LndComplianceAuditTrail';
+export { LndComplianceRegulatoryReports } from './LndComplianceRegulatoryReports';
+export { LndComplianceEvidencePackage } from './LndComplianceEvidencePackage';
+export { LndComplianceHistoricalRecords } from './LndComplianceHistoricalRecords';
 
-**Database Field Reference:**
-
-```text
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                     HSE ↔ LMS INTEGRATION ARCHITECTURE                           │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                  │
-│   hse_safety_training                    lms_courses                            │
-│   ┌─────────────────────┐                ┌─────────────────────┐                │
-│   │ id                  │                │ id                  │                │
-│   │ title               │                │ title               │                │
-│   │ training_type       │                │ course_type         │                │
-│   │ is_mandatory        │                │ is_compliance       │                │
-│   │ frequency_months    │                │ validity_months     │                │
-│   │ applicable_depts    │                │ target_audience     │                │
-│   │ ────────────────────│                │                     │                │
-│   │ lms_course_id  ─────┼───────────────▶│ (linked course)     │                │
-│   └─────────────────────┘                └─────────────────────┘                │
-│          │                                          │                            │
-│          │                                          │                            │
-│          ▼                                          ▼                            │
-│   hse_training_records                   lms_enrollments                        │
-│   ┌─────────────────────┐                ┌─────────────────────┐                │
-│   │ employee_id         │                │ employee_id         │                │
-│   │ training_date       │◀──────────────▶│ enrolled_at         │                │
-│   │ expiry_date         │    SYNC        │ completed_at        │                │
-│   │ status              │                │ status              │                │
-│   │ certificate_number  │                │ certificate_id (FK) │                │
-│   └─────────────────────┘                └─────────────────────┘                │
-│                                                                                  │
-└─────────────────────────────────────────────────────────────────────────────────┘
+// Section F: HSE & Industry Compliance (5.20-5.23)
+export { LndComplianceHSEIntegration } from './LndComplianceHSEIntegration';
+export { LndComplianceIncidentTraining } from './LndComplianceIncidentTraining';
+export { LndComplianceOSHA } from './LndComplianceOSHA';
+export { LndComplianceCaribbean } from './LndComplianceCaribbean';
 ```
 
-**Configuration Workflow:**
+### 2. `LndComplianceSection.tsx`
+Replace placeholder Cards (lines 113-154) with actual component imports and renders for Sections D, E, and F.
+
+---
+
+## Database Tables Documented
+
+| Table | Fields | Section |
+|-------|--------|---------|
+| `hse_safety_training` | 17 fields | 5.20 |
+| `hse_training_records` | 15 fields | 5.20, 5.21 |
+| `hse_incidents` | 30+ fields | 5.21 |
+| `hse_osha_logs` | 22 fields | 5.22 |
+
+---
+
+## Component Content Standards
+
+Each component will include:
+
+1. **Learning Objectives** (3-5 bullets)
+2. **Database Field Reference Table** (where applicable)
+3. **ASCII Workflow/Architecture Diagrams**
+4. **Step-by-Step Configuration Procedures**
+5. **Business Rules & Validation Logic**
+6. **Notification Event Integration**
+7. **Access Control Matrix** (role-based permissions)
+
+---
+
+## Technical Implementation Details
+
+### Section 5.20: HSE Training Integration
 
 ```text
-Navigation: Admin → LMS Management → Courses → [Course] → HSE Linkage
+hse_safety_training.lms_course_id ──FK──> lms_courses.id
 
-Step 1: Create or select LMS course (e.g., "Forklift Safety Certification")
-Step 2: In HSE → Safety Training, create requirement
-Step 3: Set lms_course_id to link the LMS course
-Step 4: Define applicable_departments and applicable_positions
-Step 5: Set frequency_months for recertification cycle
-
-Result: 
-├── Employees matching criteria auto-assigned
-├── LMS enrollment created when HSE assignment created
-├── Completion syncs to hse_training_records
-└── Expiry tracked in both systems
+Sync Flow:
+1. HSE Officer creates safety training requirement
+2. Links to LMS course via lms_course_id
+3. System auto-assigns employees matching:
+   - applicable_departments[]
+   - applicable_positions[]
+4. LMS enrollment created with source='hse'
+5. Completion syncs back to hse_training_records
+6. Expiry tracked in both systems (frequency_months)
 ```
 
-### 5.21 Incident-Triggered Training
-
-**Purpose:** Document remedial training triggered by safety incidents
-
-**Workflow:**
+### Section 5.21: Incident-Triggered Training
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                     INCIDENT → TRAINING WORKFLOW                                 │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                  │
-│   Incident Reported (hse_incidents)                                             │
-│         │                                                                        │
-│         ▼                                                                        │
-│   ┌─────────────────┐                                                            │
-│   │ Investigation   │                                                            │
-│   │ Complete        │                                                            │
-│   └────────┬────────┘                                                            │
-│            │                                                                     │
-│            ▼                                                                     │
-│   ┌─────────────────────────────────────────────────────────────────────────┐   │
-│   │ Corrective Actions Defined (hse_incidents.corrective_actions)            │   │
-│   │                                                                          │   │
-│   │ Options:                                                                 │   │
-│   │ ├── Remedial training for involved employee(s)                          │   │
-│   │ ├── Department-wide refresher training                                  │   │
-│   │ ├── Site-wide safety stand-down                                         │   │
-│   │ └── Updated procedure training                                          │   │
-│   └─────────────────────────────────────────────────────────────────────────┘   │
-│            │                                                                     │
-│            ▼                                                                     │
-│   ┌─────────────────┐                                                            │
-│   │ Training Request │  Source: incident                                         │
-│   │ Created          │  Reference: incident_id                                   │
-│   └────────┬────────┘                                                            │
-│            │                                                                     │
-│            ▼                                                                     │
-│   ┌─────────────────┐                                                            │
-│   │ LMS Enrollment  │  Priority: High                                            │
-│   │ Auto-Created    │  Due date: per policy                                      │
-│   └────────┬────────┘                                                            │
-│            │                                                                     │
-│            ▼                                                                     │
-│   ┌─────────────────┐                                                            │
-│   │ Completion      │  Syncs back to incident record                             │
-│   │ Tracked         │  Closes corrective action                                  │
-│   └─────────────────┘                                                            │
-│                                                                                  │
-└─────────────────────────────────────────────────────────────────────────────────┘
+hse_incidents.corrective_actions → training_requests
+
+Trigger Conditions:
+- Near-miss incidents: Auto-enroll in safety refresher
+- Recordable injuries: Mandatory retraining
+- OSHA reportable: Full certification review
+
+Fields Used:
+- hse_incidents.incident_type
+- hse_incidents.corrective_actions
+- hse_incidents.is_osha_reportable
+- hse_incidents.is_recordable
 ```
 
-**Integration with Appraisal Rules (training_remediation):**
+### Section 5.22: OSHA & Safety Certification
 
 ```text
-Database: training_remediation
-├── trigger_condition: 'incident_type=near_miss'
-├── remediation_course_id: UUID of safety refresher
-├── is_active: true
-└── auto_enroll: true
+hse_osha_logs Schema (22 fields):
+- log_year, establishment_name, naics_code
+- total_deaths, total_days_away, total_job_transfer
+- injury_cases (JSONB), illness_cases (JSONB)
+- certification_date, certified_by, status
 
-Result: Near-miss incidents auto-trigger safety refresher enrollment
-```
-
-### 5.22 OSHA & Safety Certification
-
-**Purpose:** Document OSHA-specific training requirements and certification tracking
-
-**OSHA Training Requirements:**
-
-| Training | Requirement | Frequency | LMS Integration |
-|----------|-------------|-----------|-----------------|
-| OSHA 10-Hour | General industry workers | One-time | Linked course |
-| OSHA 30-Hour | Supervisors/managers | One-time | Linked course |
-| Hazard Communication | All employees | Annual | Auto-recert |
-| Lockout/Tagout (LOTO) | Affected employees | Annual | Practical assessment |
-| Confined Space | Permit-required areas | Annual | Certification |
-| Bloodborne Pathogens | At-risk employees | Annual | Auto-recert |
-| Forklift Certification | Operators | 3 years | Practical + theory |
-
-**OSHA Log Integration:**
-
-```text
-hse_osha_logs ↔ hse_training_records
-
-Training gaps flagged in OSHA 300A report generation
-├── Missing required training = compliance gap
-├── Expired certifications = audit finding
-└── Incident without prior training = investigation trigger
-```
-
-### 5.23 Caribbean Regional Requirements
-
-**Purpose:** Document Caribbean-specific safety training requirements
-
-| Jurisdiction | Requirement | Regulatory Body |
-|--------------|-------------|-----------------|
-| Jamaica | OSHA (Jamaica) Act | Ministry of Labour |
-| Trinidad | OSH Act 2004 | OSHA Trinidad |
-| Barbados | Safety & Health at Work Act | Labour Department |
-| Dominican Republic | Código de Trabajo | SISALRIL |
-| Eastern Caribbean | Harmonized OECS standards | OECS Commission |
-
-**Regional Configuration:**
-
-```text
-compliance_training.region_code = 'JM' | 'TT' | 'BB' | 'DO' | 'OECS'
-
-Each region can have:
-├── Different frequency requirements
-├── Localized course content
-├── Region-specific certification bodies
-└── Local regulatory deadlines
+Integration: Training gaps flagged in OSHA 300A generation
 ```
 
 ---
 
-## Implementation Files
+## Summary
 
-### Files to Create (23 new components)
-
-| File Path | Section |
-|-----------|---------|
-| `sections/compliance/LndComplianceOverview.tsx` | 5.1 Regulatory Compliance Overview |
-| `sections/compliance/LndComplianceCategories.tsx` | 5.2 Compliance Training Categories |
-| `sections/compliance/LndComplianceCalendar.tsx` | 5.3 Compliance Calendar & Deadlines |
-| `sections/compliance/LndComplianceBulkAssignments.tsx` | 5.4 Bulk Assignment Operations |
-| `sections/compliance/LndComplianceIndividualAssignments.tsx` | 5.5 Individual Assignment Management |
-| `sections/compliance/LndComplianceExemptions.tsx` | 5.6 Exemption Request Workflow |
-| `sections/compliance/LndComplianceStatusLifecycle.tsx` | 5.7 Assignment Status Lifecycle |
-| `sections/compliance/LndComplianceDashboardAnalytics.tsx` | 5.8 Dashboard Analytics |
-| `sections/compliance/LndComplianceRiskIndicators.tsx` | 5.9 Risk Indicators & Alerts |
-| `sections/compliance/LndComplianceManagerView.tsx` | 5.10 Manager Compliance View |
-| `sections/compliance/LndComplianceExecutiveReports.tsx` | 5.11 Executive Compliance Reports |
-| `sections/compliance/LndComplianceEscalationRules.tsx` | 5.12 Escalation Rules & Tiers |
-| `sections/compliance/LndComplianceGracePeriodOps.tsx` | 5.13 Grace Period Operations |
-| `sections/compliance/LndComplianceNonCompliance.tsx` | 5.14 Non-Compliance Consequences |
-| `sections/compliance/LndComplianceHRIntervention.tsx` | 5.15 HR Intervention Workflows |
-| `sections/compliance/LndComplianceAuditTrail.tsx` | 5.16 Audit Trail |
-| `sections/compliance/LndComplianceRegulatoryReports.tsx` | 5.17 Regulatory Report Generation |
-| `sections/compliance/LndComplianceEvidencePackage.tsx` | 5.18 Evidence Package Preparation |
-| `sections/compliance/LndComplianceHistoricalRecords.tsx` | 5.19 Historical Compliance Records |
-| **`sections/compliance/LndComplianceHSEIntegration.tsx`** | **5.20 HSE Training Integration** |
-| **`sections/compliance/LndComplianceIncidentTraining.tsx`** | **5.21 Incident-Triggered Training** |
-| **`sections/compliance/LndComplianceOSHA.tsx`** | **5.22 OSHA & Safety Certification** |
-| `sections/compliance/LndComplianceCaribbean.tsx` | 5.23 Caribbean Regional Requirements |
-
-### Files to Modify
-
-| File Path | Action |
-|-----------|--------|
-| `sections/compliance/index.ts` | Add 23 new exports |
-| `sections/compliance/LndComplianceComponents.tsx` | Delete (replace with individual files) |
-| `LndComplianceSection.tsx` | Restructure to render sections A-F |
-
-### Also Update Integration Chapter (Chapter 8)
-
-Add new section to document HSE bidirectional data flow:
-
-| File Path | Section |
-|-----------|---------|
-| `sections/integration/LndIntegrationHSE.tsx` | **8.11 HSE Module Integration** |
-
----
-
-## Summary of Changes
-
-| Category | Count | Description |
-|----------|-------|-------------|
-| Delete Placeholders | 8 | Remove minimal placeholder components |
-| Create New Sections | 23 | Full documentation with field references |
-| HSE-Specific Sections | 4 | Dedicated HSE integration documentation |
-| Database Tables Documented | 6 | `compliance_training`, `hse_safety_training`, `hse_training_records`, etc. |
-| Integration Flows Documented | 3 | HSE→LMS, Incident→Training, OSHA→Compliance |
-
-### Final Chapter Structure
-
-**From:** 8 placeholder sections (no HSE)
-**To:** 23 comprehensive sections including full HSE integration (Section F: 5.20-5.23)
+| Category | Count |
+|----------|-------|
+| New Components | 12 |
+| Modified Files | 2 |
+| Database Tables Documented | 4 |
+| Total Chapter 5 Sections | 23 (complete) |
