@@ -1331,94 +1331,145 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
   },
 
   // ==========================================================================
-  // CHAPTER 8: INTEGRATION & DOWNSTREAM IMPACTS (~65 min)
+  // CHAPTER 8: INTEGRATION & DOWNSTREAM IMPACTS (~80 min)
   // ==========================================================================
   {
     id: 'chapter-8',
     sectionNumber: '8',
     title: 'Integration & Downstream Impacts',
-    description: 'Cross-module integrations including onboarding, appraisals, competencies, succession, and external systems.',
+    description: 'Cross-module integrations including onboarding, appraisals, competencies, succession, workflows, notifications, and external systems.',
     contentLevel: 'reference',
-    estimatedReadTime: 65,
+    estimatedReadTime: 80,
     targetRoles: ['Admin', 'Consultant'],
     subsections: [
+      // Section A: Integration Architecture (8.1)
       {
         id: 'sec-8-1',
         sectionNumber: '8.1',
-        title: 'Onboarding Integration',
-        description: 'Auto-enrollment triggers via trigger_onboarding_training_enrollment',
-        contentLevel: 'reference',
-        estimatedReadTime: 10,
+        title: 'Integration Architecture Overview',
+        description: 'Event-driven integration model connecting L&D to HR lifecycle modules via appraisal_integration_rules and audit logging',
+        contentLevel: 'concept',
+        estimatedReadTime: 8,
         targetRoles: ['Admin', 'Consultant'],
-        legacyReference: 'Training Requests by Onboarding'
+        sectionGroup: { code: 'A', title: 'Integration Architecture', range: '8.1' }
       },
+      // Section B: HR Lifecycle Integrations (8.2-8.6)
       {
         id: 'sec-8-2',
         sectionNumber: '8.2',
-        title: 'Appraisal Integration',
-        description: 'Performance-driven training via appraisal-integration-orchestrator edge function',
-        contentLevel: 'reference',
-        estimatedReadTime: 10,
+        title: 'Onboarding Integration',
+        description: 'Auto-enrollment via trigger_onboarding_training_enrollment PostgreSQL function and onboarding_tasks.training_course_id',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
         targetRoles: ['Admin', 'Consultant'],
-        legacyReference: 'Training Request via Performance Appraisal'
+        legacyReference: 'Training Requests by Onboarding',
+        sectionGroup: { code: 'B', title: 'HR Lifecycle Integrations', range: '8.2-8.6' }
       },
       {
         id: 'sec-8-3',
         sectionNumber: '8.3',
-        title: 'Competency Framework Sync',
-        description: 'Bidirectional skill updates from course completion via competency_course_mappings',
-        contentLevel: 'reference',
-        estimatedReadTime: 8,
+        title: 'Performance & Appraisal Integration',
+        description: 'Training actions via appraisal-integration-orchestrator edge function with action types: create_request, auto_enroll, recommend, gap_based_enrollment',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
         targetRoles: ['Admin', 'Consultant'],
-        legacyReference: 'Competencies to be Gained'
+        legacyReference: 'Training Request via Performance Appraisal',
+        sectionGroup: { code: 'B', title: 'HR Lifecycle Integrations', range: '8.2-8.6' }
       },
       {
         id: 'sec-8-4',
         sectionNumber: '8.4',
-        title: 'Succession Planning Link',
-        description: 'Training recommendations for succession candidates based on readiness gaps',
-        contentLevel: 'reference',
+        title: 'Competency Framework Sync',
+        description: 'Bidirectional sync via competency_course_mappings: skill gaps → course recommendations and course completion → skill updates',
+        contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'HR Partner'],
-        legacyReference: 'Succession Planning'
+        targetRoles: ['Admin', 'Consultant'],
+        legacyReference: 'Competencies to be Gained',
+        sectionGroup: { code: 'B', title: 'HR Lifecycle Integrations', range: '8.2-8.6' }
       },
       {
         id: 'sec-8-5',
         sectionNumber: '8.5',
-        title: 'Career Development Integration',
-        description: 'Learning paths linked to career paths, IDP goals, and development themes',
-        contentLevel: 'reference',
+        title: 'Succession & Career Development',
+        description: 'Succession readiness gaps, career path requirements, and IDP goals linked to training courses and learning paths',
+        contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'Consultant']
+        targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'B', title: 'HR Lifecycle Integrations', range: '8.2-8.6' }
       },
       {
         id: 'sec-8-6',
         sectionNumber: '8.6',
-        title: 'External LMS Integration',
-        description: 'Third-party LMS sync patterns, SCORM/xAPI data exchange, and SSO',
-        contentLevel: 'reference',
+        title: 'Workflow Engine & Approvals',
+        description: '5 seeded workflow templates (TRAINING_REQUEST_APPROVAL, CERTIFICATION_REQUEST_APPROVAL, etc.) with SLA tracking and escalation',
+        contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'Consultant'],
-        legacyReference: 'HRplus-Talent LMS Integration'
+        legacyReference: 'Workflow for Approval Process',
+        sectionGroup: { code: 'B', title: 'HR Lifecycle Integrations', range: '8.2-8.6' }
       },
+      // Section C: External Systems (8.7-8.9)
       {
         id: 'sec-8-7',
         sectionNumber: '8.7',
-        title: 'Calendar & Notification Integration',
-        description: 'Email reminders, calendar invites, and notification templates',
-        contentLevel: 'reference',
+        title: 'Notification & Calendar Integration',
+        description: '20+ training reminder_event_types, email templates with placeholders, and Google/Outlook calendar sync',
+        contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin']
+        targetRoles: ['Admin'],
+        sectionGroup: { code: 'C', title: 'External Systems', range: '8.7-8.9' }
       },
       {
         id: 'sec-8-8',
         sectionNumber: '8.8',
-        title: 'Workflow Engine Integration',
-        description: 'Training approval workflows, custom triggers, and escalation rules',
-        contentLevel: 'reference',
-        estimatedReadTime: 7,
+        title: 'External LMS & Content Providers',
+        description: 'external_training_records tracking, SSO/SAML configuration, and SCORM/xAPI data exchange patterns',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
         targetRoles: ['Admin', 'Consultant'],
-        legacyReference: 'Workflow for Approval Process'
+        legacyReference: 'HRplus-Talent LMS Integration',
+        sectionGroup: { code: 'C', title: 'External Systems', range: '8.7-8.9' }
+      },
+      {
+        id: 'sec-8-9',
+        sectionNumber: '8.9',
+        title: 'Virtual Classroom Integration',
+        description: 'Microsoft Teams, Zoom, and Google Meet configuration for virtual ILT with attendance tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin'],
+        sectionGroup: { code: 'C', title: 'External Systems', range: '8.7-8.9' }
+      },
+      // Section D: Operational Support (8.10-8.12)
+      {
+        id: 'sec-8-10',
+        sectionNumber: '8.10',
+        title: 'API & Data Sync Patterns',
+        description: 'REST API endpoints, webhook configuration, data sync patterns, and LTI 1.3 roadmap',
+        contentLevel: 'reference',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'Consultant'],
+        sectionGroup: { code: 'D', title: 'Operational Support', range: '8.10-8.12' }
+      },
+      {
+        id: 'sec-8-11',
+        sectionNumber: '8.11',
+        title: 'Integration Audit & Monitoring',
+        description: 'appraisal_integration_log diagnostic queries, execution status tracking, and monitoring dashboard metrics',
+        contentLevel: 'reference',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'Consultant'],
+        sectionGroup: { code: 'D', title: 'Operational Support', range: '8.10-8.12' }
+      },
+      {
+        id: 'sec-8-12',
+        sectionNumber: '8.12',
+        title: 'Integration Troubleshooting',
+        description: 'Common integration failures, error message reference, diagnostic checklist, and support escalation paths',
+        contentLevel: 'reference',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'Consultant'],
+        sectionGroup: { code: 'D', title: 'Operational Support', range: '8.10-8.12' }
       }
     ]
   },
