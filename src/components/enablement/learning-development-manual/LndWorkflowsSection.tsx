@@ -1,119 +1,173 @@
-import { Play } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Play, Users, ClipboardCheck, Settings, History, FileText, Calendar, Medal } from 'lucide-react';
+
+// Section A: Course Delivery Lifecycle (4.1-4.6)
 import {
-  LndWorkflowCourseLifecycle,
+  LndWorkflowLearnerJourney,
   LndWorkflowEnrollment,
-  LndWorkflowRequestGapAnalysis,
-  LndWorkflowRequestAppraisal,
-  LndWorkflowRequestSelfService,
-  LndWorkflowRequestOnboarding,
-  LndWorkflowRequestHR,
-  LndWorkflowInvitations,
   LndWorkflowProgressTracking,
   LndWorkflowQuizDelivery,
   LndWorkflowCompletion,
   LndWorkflowCertification,
-  LndWorkflowTrainingHistory,
-  LndWorkflowExternalRecords,
-  LndWorkflowCalendar,
+} from './sections/workflows';
+
+// Section B: Training Request Lifecycle (4.7-4.13)
+import {
+  LndWorkflowRequestSelfService,
+  LndWorkflowRequestGapAnalysis,
+  LndWorkflowRequestAppraisal,
+  LndWorkflowRequestOnboarding,
+  LndWorkflowRequestHR,
+  LndWorkflowInvitations,
+  LndWorkflowHRHubIntegration,
+} from './sections/workflows';
+
+// Section C: Session & Delivery Operations (4.14-4.18)
+import {
+  LndWorkflowCourseLifecycle,
   LndWorkflowSessionManagement,
   LndWorkflowVirtualClassroom,
   LndWorkflowWaitlist,
-  LndWorkflowLearnerJourney,
-  LndWorkflowHRHubIntegration,
-  LndWorkflowCourseReviews
+  LndWorkflowCalendar,
+} from './sections/workflows';
+
+// Section D: Historical Records & Transcripts (4.19-4.21)
+import {
+  LndWorkflowTrainingHistory,
+  LndWorkflowExternalRecords,
+  LndWorkflowCourseReviews,
 } from './sections/workflows';
 
 export function LndWorkflowsSection() {
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* Chapter Header */}
-      <div className="border-b pb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-3">
-          <Play className="h-8 w-8 text-blue-600" />
-          Chapter 4: Operational Workflows
-        </h1>
-        <p className="text-muted-foreground mt-2 max-w-3xl">
-          Day-to-day training operations covering the complete learner journey,
-          training request lifecycle, session delivery, and historical records.
-          This chapter follows the ADDIE framework (Analysis, Design, Development,
-          Implementation, Evaluation) for industry alignment.
-        </p>
-        <div className="flex flex-wrap gap-2 mt-4">
-          <span className="text-sm bg-muted px-3 py-1 rounded-full">21 Sections</span>
-          <span className="text-sm bg-muted px-3 py-1 rounded-full">~120 min read</span>
-          <span className="text-sm bg-muted px-3 py-1 rounded-full">12 Database Tables</span>
-          <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">HR Hub Integration</span>
-        </div>
-      </div>
-
-      {/* SECTION A: LEARNER JOURNEY */}
-      <div className="space-y-8">
-        <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 p-4 rounded-lg border border-emerald-200 dark:border-emerald-800">
-          <h2 className="text-xl font-semibold text-emerald-800 dark:text-emerald-200">
-            Section A: Learner Journey (Demand-Side)
-          </h2>
-          <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
-            Sections 4.1–4.6 • End-to-end learner experience from discovery to certification
+      <Card id="lnd-ch-4" data-manual-anchor="lnd-ch-4">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+              <Play className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <CardTitle>Chapter 4: Operational Workflows</CardTitle>
+              <CardDescription>
+                Day-to-day training operations covering the complete learner journey,
+                training request lifecycle, session delivery, and historical records
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge variant="outline">L&D Administrator</Badge>
+            <Badge variant="outline">HR Partner</Badge>
+            <Badge variant="outline">Manager</Badge>
+            <Badge variant="outline">Employee</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            This chapter follows the ADDIE framework (Analysis, Design, Development,
+            Implementation, Evaluation) for industry alignment. It covers 21 operational 
+            workflows across 4 functional areas with HR Hub integration.
           </p>
-        </div>
-        <LndWorkflowLearnerJourney />
-        <LndWorkflowEnrollment />
-        <LndWorkflowProgressTracking />
-        <LndWorkflowQuizDelivery />
-        <LndWorkflowCompletion />
-        <LndWorkflowCertification />
-      </div>
+          <div className="flex flex-wrap gap-2 mt-4">
+            <span className="text-xs bg-muted px-2 py-1 rounded">21 Sections</span>
+            <span className="text-xs bg-muted px-2 py-1 rounded">~120 min read</span>
+            <span className="text-xs bg-muted px-2 py-1 rounded">12 Database Tables</span>
+            <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">HR Hub Integration</span>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* SECTION B: TRAINING REQUEST LIFECYCLE */}
-      <div className="space-y-8">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-          <h2 className="text-xl font-semibold text-blue-800 dark:text-blue-200">
-            Section B: Training Request Lifecycle (Approval Workflows)
-          </h2>
-          <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-            Sections 4.7–4.13 • Request sources, approval chains, and HR Hub integration
-          </p>
-        </div>
-        <LndWorkflowRequestSelfService />
-        <LndWorkflowRequestGapAnalysis />
-        <LndWorkflowRequestAppraisal />
-        <LndWorkflowRequestOnboarding />
-        <LndWorkflowRequestHR />
-        <LndWorkflowInvitations />
-        <LndWorkflowHRHubIntegration />
-      </div>
+      {/* Section A: Learner Journey / Course Delivery Lifecycle */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-emerald-600" />
+            <CardTitle className="text-lg">Section A: Course Delivery Lifecycle (4.1-4.6)</CardTitle>
+          </div>
+          <CardDescription>End-to-end learner experience from discovery through certification</CardDescription>
+        </CardHeader>
+      </Card>
 
-      {/* SECTION C: SESSION & DELIVERY OPERATIONS */}
-      <div className="space-y-8">
-        <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
-          <h2 className="text-xl font-semibold text-purple-800 dark:text-purple-200">
-            Section C: Session & Delivery Operations (Supply-Side)
-          </h2>
-          <p className="text-sm text-purple-600 dark:text-purple-400 mt-1">
-            Sections 4.14–4.18 • Course lifecycle, ILT sessions, virtual classrooms, and scheduling
-          </p>
-        </div>
-        <LndWorkflowCourseLifecycle />
-        <LndWorkflowSessionManagement />
-        <LndWorkflowVirtualClassroom />
-        <LndWorkflowWaitlist />
-        <LndWorkflowCalendar />
-      </div>
+      <LndWorkflowLearnerJourney />
+      <Separator />
+      <LndWorkflowEnrollment />
+      <Separator />
+      <LndWorkflowProgressTracking />
+      <Separator />
+      <LndWorkflowQuizDelivery />
+      <Separator />
+      <LndWorkflowCompletion />
+      <Separator />
+      <LndWorkflowCertification />
 
-      {/* SECTION D: HISTORICAL RECORDS & TRANSCRIPTS */}
-      <div className="space-y-8">
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
-          <h2 className="text-xl font-semibold text-amber-800 dark:text-amber-200">
-            Section D: Historical Records & Transcripts
-          </h2>
-          <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
-            Sections 4.19–4.21 • Training history, external records, and course reviews
-          </p>
-        </div>
-        <LndWorkflowTrainingHistory />
-        <LndWorkflowExternalRecords />
-        <LndWorkflowCourseReviews />
-      </div>
+      {/* Section B: Training Request Lifecycle */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <ClipboardCheck className="h-5 w-5 text-blue-600" />
+            <CardTitle className="text-lg">Section B: Training Request Lifecycle (4.7-4.13)</CardTitle>
+          </div>
+          <CardDescription>Request sources, approval chains, and HR Hub integration</CardDescription>
+        </CardHeader>
+      </Card>
+
+      <Separator />
+      <LndWorkflowRequestSelfService />
+      <Separator />
+      <LndWorkflowRequestGapAnalysis />
+      <Separator />
+      <LndWorkflowRequestAppraisal />
+      <Separator />
+      <LndWorkflowRequestOnboarding />
+      <Separator />
+      <LndWorkflowRequestHR />
+      <Separator />
+      <LndWorkflowInvitations />
+      <Separator />
+      <LndWorkflowHRHubIntegration />
+
+      {/* Section C: Session & Delivery Operations */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Settings className="h-5 w-5 text-purple-600" />
+            <CardTitle className="text-lg">Section C: Session & Delivery Operations (4.14-4.18)</CardTitle>
+          </div>
+          <CardDescription>Course lifecycle, ILT sessions, virtual classrooms, and scheduling</CardDescription>
+        </CardHeader>
+      </Card>
+
+      <Separator />
+      <LndWorkflowCourseLifecycle />
+      <Separator />
+      <LndWorkflowSessionManagement />
+      <Separator />
+      <LndWorkflowVirtualClassroom />
+      <Separator />
+      <LndWorkflowWaitlist />
+      <Separator />
+      <LndWorkflowCalendar />
+
+      {/* Section D: Historical Records & Transcripts */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <History className="h-5 w-5 text-amber-600" />
+            <CardTitle className="text-lg">Section D: Historical Records & Transcripts (4.19-4.21)</CardTitle>
+          </div>
+          <CardDescription>Training history, external records, and course reviews</CardDescription>
+        </CardHeader>
+      </Card>
+
+      <Separator />
+      <LndWorkflowTrainingHistory />
+      <Separator />
+      <LndWorkflowExternalRecords />
+      <Separator />
+      <LndWorkflowCourseReviews />
     </div>
   );
 }

@@ -1,31 +1,16 @@
-// Chapter 4: Operational Workflows - Component Exports
-// Organized by ADDIE framework sections (A-I)
+// Chapter 4 Operational Workflows - Component Exports
+// Sections A-D: 21 comprehensive workflow documentation components
+// Organized by ADDIE framework sections
 
-// Section A: Discovery & Enrollment (4.1-4.5)
+// Section A: Course Delivery Lifecycle (4.1-4.6)
 export { LndWorkflowLearnerJourney } from './LndWorkflowLearnerJourney';
 export { LndWorkflowEnrollment } from './LndWorkflowEnrollment';
 export { LndWorkflowProgressTracking } from './LndWorkflowProgressTracking';
-export { LndWorkflowPrerequisites } from './LndWorkflowPrerequisites';
-export { LndWorkflowWaitlist } from './LndWorkflowWaitlist';
-
-// Section B: Content Consumption (4.6-4.10)
-export { LndWorkflowBookmarksNotes } from './LndWorkflowBookmarksNotes';
-export { LndWorkflowDiscussionForums } from './LndWorkflowDiscussionForums';
-export { LndWorkflowSCORMxAPI } from './LndWorkflowSCORMxAPI';
-
-// Section C: Assessment & Evaluation (4.11-4.15)
-export { LndWorkflowQuizConfiguration } from './LndWorkflowQuizConfiguration';
 export { LndWorkflowQuizDelivery } from './LndWorkflowQuizDelivery';
-export { LndWorkflowPostCourseEvaluations } from './LndWorkflowPostCourseEvaluations';
-export { LndWorkflowBehavioralImpact } from './LndWorkflowBehavioralImpact';
-
-// Section D: Completion & Certification (4.16-4.19)
 export { LndWorkflowCompletion } from './LndWorkflowCompletion';
 export { LndWorkflowCertification } from './LndWorkflowCertification';
-export { LndWorkflowRecertification } from './LndWorkflowRecertification';
-export { LndWorkflowTrainingHistory } from './LndWorkflowTrainingHistory';
 
-// Section E: Training Request Lifecycle (4.20-4.26)
+// Section B: Training Request Lifecycle (4.7-4.13)
 export { LndWorkflowRequestSelfService } from './LndWorkflowRequestSelfService';
 export { LndWorkflowRequestGapAnalysis } from './LndWorkflowRequestGapAnalysis';
 export { LndWorkflowRequestAppraisal } from './LndWorkflowRequestAppraisal';
@@ -34,21 +19,29 @@ export { LndWorkflowRequestHR } from './LndWorkflowRequestHR';
 export { LndWorkflowInvitations } from './LndWorkflowInvitations';
 export { LndWorkflowHRHubIntegration } from './LndWorkflowHRHubIntegration';
 
-// Section F: Session Delivery Operations (4.27-4.31)
+// Section C: Session & Delivery Operations (4.14-4.18)
 export { LndWorkflowCourseLifecycle } from './LndWorkflowCourseLifecycle';
 export { LndWorkflowSessionManagement } from './LndWorkflowSessionManagement';
 export { LndWorkflowVirtualClassroom } from './LndWorkflowVirtualClassroom';
+export { LndWorkflowWaitlist } from './LndWorkflowWaitlist';
 export { LndWorkflowCalendar } from './LndWorkflowCalendar';
 
-// Section G: External & Vendor Training (4.32-4.34)
+// Section D: Historical Records & Transcripts (4.19-4.21)
+export { LndWorkflowTrainingHistory } from './LndWorkflowTrainingHistory';
 export { LndWorkflowExternalRecords } from './LndWorkflowExternalRecords';
-export { LndWorkflowVendorSessions } from './LndWorkflowVendorSessions';
-export { LndWorkflowAttendance } from './LndWorkflowAttendance';
+export { LndWorkflowCourseReviews } from './LndWorkflowCourseReviews';
 
-// Section H: Gamification & Engagement (4.35-4.37)
+// Additional workflow components (extended coverage)
+export { LndWorkflowPrerequisites } from './LndWorkflowPrerequisites';
+export { LndWorkflowBookmarksNotes } from './LndWorkflowBookmarksNotes';
+export { LndWorkflowDiscussionForums } from './LndWorkflowDiscussionForums';
+export { LndWorkflowSCORMxAPI } from './LndWorkflowSCORMxAPI';
+export { LndWorkflowQuizConfiguration } from './LndWorkflowQuizConfiguration';
+export { LndWorkflowPostCourseEvaluations } from './LndWorkflowPostCourseEvaluations';
+export { LndWorkflowBehavioralImpact } from './LndWorkflowBehavioralImpact';
+export { LndWorkflowRecertification } from './LndWorkflowRecertification';
+export { LndWorkflowAttendance } from './LndWorkflowAttendance';
+export { LndWorkflowVendorSessions } from './LndWorkflowVendorSessions';
 export { LndWorkflowGamificationPoints } from './LndWorkflowGamificationPoints';
 export { LndWorkflowBadges } from './LndWorkflowBadges';
 export { LndWorkflowLeaderboards } from './LndWorkflowLeaderboards';
-
-// Section I: Course Reviews & Ratings (4.38)
-export { LndWorkflowCourseReviews } from './LndWorkflowCourseReviews';
