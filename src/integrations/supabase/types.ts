@@ -12659,6 +12659,78 @@ export type Database = {
           },
         ]
       }
+      compliance_audit_log: {
+        Row: {
+          actor_id: string | null
+          actor_name: string | null
+          actor_role: string | null
+          actor_type: string | null
+          change_summary: string | null
+          checksum: string
+          company_id: string
+          entity_id: string
+          entity_type: string
+          event_category: string
+          event_timestamp: string
+          event_type: string
+          id: string
+          ip_address: unknown
+          metadata: Json | null
+          new_values: Json | null
+          old_values: Json | null
+          previous_checksum: string | null
+          sequence_number: number
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          actor_type?: string | null
+          change_summary?: string | null
+          checksum: string
+          company_id: string
+          entity_id: string
+          entity_type: string
+          event_category?: string
+          event_timestamp?: string
+          event_type: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          previous_checksum?: string | null
+          sequence_number?: never
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          actor_type?: string | null
+          change_summary?: string | null
+          checksum?: string
+          company_id?: string
+          entity_id?: string
+          entity_type?: string
+          event_category?: string
+          event_timestamp?: string
+          event_type?: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          previous_checksum?: string | null
+          sequence_number?: never
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       compliance_document_instances: {
         Row: {
           company_id: string
@@ -12878,6 +12950,176 @@ export type Database = {
           },
         ]
       }
+      compliance_escalation_rules: {
+        Row: {
+          actions: Json | null
+          auto_restrict_access: boolean | null
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          days_overdue_max: number | null
+          days_overdue_min: number
+          escalate_to_role: string | null
+          id: string
+          include_department_head: boolean | null
+          include_hr_partner: boolean | null
+          is_active: boolean | null
+          notification_roles: string[]
+          notification_template_id: string | null
+          sla_hours: number | null
+          tier_level: number
+          tier_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions?: Json | null
+          auto_restrict_access?: boolean | null
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          days_overdue_max?: number | null
+          days_overdue_min: number
+          escalate_to_role?: string | null
+          id?: string
+          include_department_head?: boolean | null
+          include_hr_partner?: boolean | null
+          is_active?: boolean | null
+          notification_roles?: string[]
+          notification_template_id?: string | null
+          sla_hours?: number | null
+          tier_level: number
+          tier_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions?: Json | null
+          auto_restrict_access?: boolean | null
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          days_overdue_max?: number | null
+          days_overdue_min?: number
+          escalate_to_role?: string | null
+          id?: string
+          include_department_head?: boolean | null
+          include_hr_partner?: boolean | null
+          is_active?: boolean | null
+          notification_roles?: string[]
+          notification_template_id?: string | null
+          sla_hours?: number | null
+          tier_level?: number
+          tier_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_escalation_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_escalation_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_escalation_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_exemption_approval_config: {
+        Row: {
+          approval_levels: string[]
+          auto_expire: boolean | null
+          company_id: string
+          config: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          exemption_type: string
+          exemption_type_name: string
+          id: string
+          is_active: boolean | null
+          max_exemption_days: number | null
+          max_renewals: number | null
+          renewable: boolean | null
+          required_document_types: string[] | null
+          requires_documentation: boolean | null
+          sla_days: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_levels?: string[]
+          auto_expire?: boolean | null
+          company_id: string
+          config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          exemption_type: string
+          exemption_type_name: string
+          id?: string
+          is_active?: boolean | null
+          max_exemption_days?: number | null
+          max_renewals?: number | null
+          renewable?: boolean | null
+          required_document_types?: string[] | null
+          requires_documentation?: boolean | null
+          sla_days?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_levels?: string[]
+          auto_expire?: boolean | null
+          company_id?: string
+          config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          exemption_type?: string
+          exemption_type_name?: string
+          id?: string
+          is_active?: boolean | null
+          max_exemption_days?: number | null
+          max_renewals?: number | null
+          renewable?: boolean | null
+          required_document_types?: string[] | null
+          requires_documentation?: boolean | null
+          sla_days?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_exemption_approval_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_exemption_approval_config_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_exemption_approval_config_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_item_documents: {
         Row: {
           compliance_item_id: string
@@ -12981,50 +13223,83 @@ export type Database = {
       }
       compliance_training: {
         Row: {
+          allow_exemptions: boolean | null
           applies_to_all: boolean | null
+          assignment_criteria: Json | null
+          auto_assign: boolean | null
           company_id: string
           course_id: string
           created_at: string
           description: string | null
+          effective_date: string | null
+          expiry_date: string | null
           frequency_months: number | null
+          frequency_type: string | null
           grace_period_days: number | null
           id: string
           is_active: boolean
           is_mandatory: boolean
           name: string
+          passing_score: number | null
+          region_code: string | null
+          regulatory_body: string | null
+          risk_level: string | null
           target_departments: string[] | null
+          target_locations: string[] | null
           target_positions: string[] | null
           updated_at: string
         }
         Insert: {
+          allow_exemptions?: boolean | null
           applies_to_all?: boolean | null
+          assignment_criteria?: Json | null
+          auto_assign?: boolean | null
           company_id: string
           course_id: string
           created_at?: string
           description?: string | null
+          effective_date?: string | null
+          expiry_date?: string | null
           frequency_months?: number | null
+          frequency_type?: string | null
           grace_period_days?: number | null
           id?: string
           is_active?: boolean
           is_mandatory?: boolean
           name: string
+          passing_score?: number | null
+          region_code?: string | null
+          regulatory_body?: string | null
+          risk_level?: string | null
           target_departments?: string[] | null
+          target_locations?: string[] | null
           target_positions?: string[] | null
           updated_at?: string
         }
         Update: {
+          allow_exemptions?: boolean | null
           applies_to_all?: boolean | null
+          assignment_criteria?: Json | null
+          auto_assign?: boolean | null
           company_id?: string
           course_id?: string
           created_at?: string
           description?: string | null
+          effective_date?: string | null
+          expiry_date?: string | null
           frequency_months?: number | null
+          frequency_type?: string | null
           grace_period_days?: number | null
           id?: string
           is_active?: boolean
           is_mandatory?: boolean
           name?: string
+          passing_score?: number | null
+          region_code?: string | null
+          regulatory_body?: string | null
+          risk_level?: string | null
           target_departments?: string[] | null
+          target_locations?: string[] | null
           target_positions?: string[] | null
           updated_at?: string
         }
@@ -13047,45 +13322,146 @@ export type Database = {
       }
       compliance_training_assignments: {
         Row: {
+          assigned_by: string | null
+          attempts: number | null
           completed_at: string | null
           compliance_training_id: string
           created_at: string
           due_date: string
           employee_id: string
           escalated_at: string | null
+          escalation_level: number | null
+          escalation_notes: string | null
+          escalation_resolved_at: string | null
+          escalation_resolved_by: string | null
+          escalation_started_at: string | null
+          exemption_approved_at: string | null
+          exemption_approved_by: string | null
+          exemption_documents: Json | null
+          exemption_end_date: string | null
+          exemption_notes: string | null
           exemption_reason: string | null
+          exemption_requested_at: string | null
+          exemption_requested_by: string | null
+          exemption_start_date: string | null
+          exemption_status: string | null
+          exemption_type: string | null
+          grace_period_approved_by: string | null
+          grace_period_end_date: string | null
+          grace_period_extended: boolean | null
           id: string
+          last_attempt_at: string | null
+          last_escalation_at: string | null
+          priority: string | null
           reminder_sent_at: string | null
+          risk_factors: Json | null
+          risk_score: number | null
+          score: number | null
+          source_reference_id: string | null
+          source_type: string | null
           status: string
+          time_spent_minutes: number | null
           updated_at: string
         }
         Insert: {
+          assigned_by?: string | null
+          attempts?: number | null
           completed_at?: string | null
           compliance_training_id: string
           created_at?: string
           due_date: string
           employee_id: string
           escalated_at?: string | null
+          escalation_level?: number | null
+          escalation_notes?: string | null
+          escalation_resolved_at?: string | null
+          escalation_resolved_by?: string | null
+          escalation_started_at?: string | null
+          exemption_approved_at?: string | null
+          exemption_approved_by?: string | null
+          exemption_documents?: Json | null
+          exemption_end_date?: string | null
+          exemption_notes?: string | null
           exemption_reason?: string | null
+          exemption_requested_at?: string | null
+          exemption_requested_by?: string | null
+          exemption_start_date?: string | null
+          exemption_status?: string | null
+          exemption_type?: string | null
+          grace_period_approved_by?: string | null
+          grace_period_end_date?: string | null
+          grace_period_extended?: boolean | null
           id?: string
+          last_attempt_at?: string | null
+          last_escalation_at?: string | null
+          priority?: string | null
           reminder_sent_at?: string | null
+          risk_factors?: Json | null
+          risk_score?: number | null
+          score?: number | null
+          source_reference_id?: string | null
+          source_type?: string | null
           status?: string
+          time_spent_minutes?: number | null
           updated_at?: string
         }
         Update: {
+          assigned_by?: string | null
+          attempts?: number | null
           completed_at?: string | null
           compliance_training_id?: string
           created_at?: string
           due_date?: string
           employee_id?: string
           escalated_at?: string | null
+          escalation_level?: number | null
+          escalation_notes?: string | null
+          escalation_resolved_at?: string | null
+          escalation_resolved_by?: string | null
+          escalation_started_at?: string | null
+          exemption_approved_at?: string | null
+          exemption_approved_by?: string | null
+          exemption_documents?: Json | null
+          exemption_end_date?: string | null
+          exemption_notes?: string | null
           exemption_reason?: string | null
+          exemption_requested_at?: string | null
+          exemption_requested_by?: string | null
+          exemption_start_date?: string | null
+          exemption_status?: string | null
+          exemption_type?: string | null
+          grace_period_approved_by?: string | null
+          grace_period_end_date?: string | null
+          grace_period_extended?: boolean | null
           id?: string
+          last_attempt_at?: string | null
+          last_escalation_at?: string | null
+          priority?: string | null
           reminder_sent_at?: string | null
+          risk_factors?: Json | null
+          risk_score?: number | null
+          score?: number | null
+          source_reference_id?: string | null
+          source_type?: string | null
           status?: string
+          time_spent_minutes?: number | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "compliance_training_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "compliance_training_assignments_compliance_training_id_fkey"
             columns: ["compliance_training_id"]
@@ -13103,6 +13479,62 @@ export type Database = {
           {
             foreignKeyName: "compliance_training_assignments_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_escalation_resolved_by_fkey"
+            columns: ["escalation_resolved_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_escalation_resolved_by_fkey"
+            columns: ["escalation_resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_exemption_approved_by_fkey"
+            columns: ["exemption_approved_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_exemption_approved_by_fkey"
+            columns: ["exemption_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_exemption_requested_by_fkey"
+            columns: ["exemption_requested_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_exemption_requested_by_fkey"
+            columns: ["exemption_requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_grace_period_approved_by_fkey"
+            columns: ["grace_period_approved_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_training_assignments_grace_period_approved_by_fkey"
+            columns: ["grace_period_approved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -78526,6 +78958,19 @@ export type Database = {
           p_entity_id?: string
           p_entity_name?: string
           p_entity_type: string
+          p_metadata?: Json
+          p_new_values?: Json
+          p_old_values?: Json
+        }
+        Returns: string
+      }
+      log_compliance_event: {
+        Args: {
+          p_change_summary?: string
+          p_company_id: string
+          p_entity_id: string
+          p_entity_type: string
+          p_event_type: string
           p_metadata?: Json
           p_new_values?: Json
           p_old_values?: Json
