@@ -7,14 +7,32 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Search, Clock, ChevronRight, ChevronDown,
   FileText, Layers, Settings, PlayCircle, Brain, BarChart3,
   Link2, AlertTriangle, BookOpen, Eye,
   CheckCircle, Circle, ArrowLeft, Shield,
-  GraduationCap, Building, Workflow, ClipboardCheck, Network, FolderOpen
+  GraduationCap, Building, Workflow, ClipboardCheck, Network, FolderOpen,
+  Users, UserCog, Briefcase, ShieldCheck, HardHat, TrendingUp, X
 } from 'lucide-react';
 import { LND_MANUAL_STRUCTURE, getLndTotalReadTime, getLndTotalSections, LndSection } from '@/types/learningDevelopmentManual';
+
+// Define available roles with their display info
+const PERSONA_ROLES = [
+  { value: 'all', label: 'All Personas', icon: Users, description: 'Show all sections' },
+  { value: 'L&D Admin', label: 'L&D Admin', icon: GraduationCap, description: 'Learning & Development administrators' },
+  { value: 'Admin', label: 'System Admin', icon: UserCog, description: 'System administrators' },
+  { value: 'HR Partner', label: 'HR Partner', icon: Briefcase, description: 'HR business partners' },
+  { value: 'Manager', label: 'Manager', icon: Users, description: 'People managers' },
+  { value: 'Compliance Officer', label: 'Compliance Officer', icon: ShieldCheck, description: 'Compliance officers' },
+  { value: 'HSE Officer', label: 'HSE Officer', icon: HardHat, description: 'Health, Safety & Environment officers' },
+  { value: 'Consultant', label: 'Consultant', icon: TrendingUp, description: 'Implementation consultants' },
+  { value: 'Employee', label: 'Employee', icon: Users, description: 'General employees' },
+  { value: 'Executive', label: 'Executive', icon: TrendingUp, description: 'Executive leadership' },
+] as const;
+
+type PersonaRole = typeof PERSONA_ROLES[number]['value'];
 import { useManualPrintSettings } from '@/hooks/useManualPrintSettings';
 import { PrintConfigDialog } from '@/components/enablement/manual/print/PrintConfigDialog';
 import { ManualPrintPreview } from '@/components/enablement/manual/print/ManualPrintPreview';
@@ -80,6 +98,7 @@ const CHAPTER_ICONS: Record<string, React.ReactNode> = {
 export default function LearningDevelopmentManualPage() {
   const { navigateToList } = useWorkspaceNavigation();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPersona, setSelectedPersona] = useState<PersonaRole>('all');
   const [selectedSectionId, setSelectedSectionId] = useState('chapter-1');
   const [expandedSections, setExpandedSections] = useState<string[]>(['chapter-1']);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
@@ -154,18 +173,63 @@ export default function LearningDevelopmentManualPage() {
     return Math.round((completedSections.length / totalSections) * 100);
   }, [completedSections, totalSections]);
 
+  // Helper to check if a section matches the selected persona
+  const sectionMatchesPersona = (section: LndSection): boolean => {
+    if (selectedPersona === 'all') return true;
+    return section.targetRoles.includes(selectedPersona as any);
+  };
+
+  // Filter subsections by persona
+  const filterSubsectionsByPersona = (subsections: LndSection[] | undefined): LndSection[] => {
+    if (!subsections) return [];
+    if (selectedPersona === 'all') return subsections;
+    return subsections.filter(sub => sub.targetRoles.includes(selectedPersona as any));
+  };
+
   const filteredSections = useMemo(() => {
-    if (!searchQuery) return LND_MANUAL_STRUCTURE;
-    const query = searchQuery.toLowerCase();
-    return LND_MANUAL_STRUCTURE.filter(section => 
-      section.title.toLowerCase().includes(query) ||
-      section.description.toLowerCase().includes(query) ||
-      section.subsections?.some(sub => 
-        sub.title.toLowerCase().includes(query) ||
-        sub.description.toLowerCase().includes(query)
-      )
-    );
-  }, [searchQuery]);
+    let sections = LND_MANUAL_STRUCTURE;
+    
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      sections = sections.filter(section => 
+        section.title.toLowerCase().includes(query) ||
+        section.description.toLowerCase().includes(query) ||
+        section.subsections?.some(sub => 
+          sub.title.toLowerCase().includes(query) ||
+          sub.description.toLowerCase().includes(query)
+        )
+      );
+    }
+    
+    // Apply persona filter - filter out chapters that have no matching subsections
+    if (selectedPersona !== 'all') {
+      sections = sections.filter(section => {
+        // Check if chapter itself matches
+        const chapterMatches = section.targetRoles.includes(selectedPersona as any);
+        // Check if any subsection matches
+        const hasMatchingSubsections = section.subsections?.some(sub => 
+          sub.targetRoles.includes(selectedPersona as any)
+        );
+        return chapterMatches || hasMatchingSubsections;
+      });
+    }
+    
+    return sections;
+  }, [searchQuery, selectedPersona]);
+
+  // Count matching sections for the current persona
+  const personaSectionCount = useMemo(() => {
+    if (selectedPersona === 'all') return totalSections;
+    let count = 0;
+    LND_MANUAL_STRUCTURE.forEach(chapter => {
+      if (chapter.targetRoles.includes(selectedPersona as any)) count++;
+      chapter.subsections?.forEach(sub => {
+        if (sub.targetRoles.includes(selectedPersona as any)) count++;
+      });
+    });
+    return count;
+  }, [selectedPersona, totalSections]);
 
   const setSectionExpanded = (sectionId: string, open: boolean) => {
     setExpandedSections((prev) => {
@@ -304,11 +368,20 @@ export default function LearningDevelopmentManualPage() {
           {/* Left Sidebar - Table of Contents */}
           <div className="w-[340px] flex-shrink-0 h-full">
             <Card className="h-full flex flex-col">
-              <CardHeader className="pb-3 flex-shrink-0">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Layers className="h-4 w-4" />
-                  Table of Contents
-                </CardTitle>
+              <CardHeader className="pb-3 flex-shrink-0 space-y-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    Table of Contents
+                  </CardTitle>
+                  {selectedPersona !== 'all' && (
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      {personaSectionCount} sections
+                    </Badge>
+                  )}
+                </div>
+                
+                {/* Search Input */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -317,6 +390,41 @@ export default function LearningDevelopmentManualPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 h-9"
                   />
+                </div>
+
+                {/* Persona Filter */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Filter by Persona</label>
+                  <div className="flex gap-2">
+                    <Select value={selectedPersona} onValueChange={(value: PersonaRole) => setSelectedPersona(value)}>
+                      <SelectTrigger className="h-9 text-xs flex-1">
+                        <SelectValue placeholder="Select persona..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PERSONA_ROLES.map((role) => {
+                          const IconComponent = role.icon;
+                          return (
+                            <SelectItem key={role.value} value={role.value} className="text-xs">
+                              <div className="flex items-center gap-2">
+                                <IconComponent className="h-3.5 w-3.5" />
+                                <span>{role.label}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    {selectedPersona !== 'all' && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-9 w-9 flex-shrink-0"
+                        onClick={() => setSelectedPersona('all')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0 flex-1 overflow-hidden">
@@ -354,11 +462,22 @@ export default function LearningDevelopmentManualPage() {
                           <CollapsibleContent>
                             <div className="ml-6 mt-1 space-y-1 border-l pl-3">
                               {(() => {
-                                const { groups, ungrouped } = groupSubsectionsByGroup(section.subsections);
+                                // Filter subsections by persona first
+                                const personaFilteredSubs = filterSubsectionsByPersona(section.subsections);
+                                
+                                if (personaFilteredSubs.length === 0) {
+                                  return (
+                                    <p className="text-xs text-muted-foreground italic py-2">
+                                      No sections for selected persona
+                                    </p>
+                                  );
+                                }
+                                
+                                const { groups, ungrouped } = groupSubsectionsByGroup(personaFilteredSubs);
                                 
                                 // If no groups, render flat list
                                 if (groups.length === 0) {
-                                  return section.subsections.map((sub) => (
+                                  return personaFilteredSubs.map((sub) => (
                                     <button
                                       key={sub.id}
                                       className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors
@@ -379,9 +498,12 @@ export default function LearningDevelopmentManualPage() {
                                 }
                                 
                                 // Render grouped subsections with collapsible headers
+                                // Filter out groups with no items after persona filtering
+                                const nonEmptyGroups = groups.filter(g => g.items.length > 0);
+                                
                                 return (
                                   <>
-                                    {groups.map((group) => {
+                                    {nonEmptyGroups.map((group) => {
                                       const groupKey = `${section.id}-group-${group.code}`;
                                       const isGroupExpanded = expandedGroups.includes(groupKey);
                                       const isAnyItemSelected = group.items.some(item => selectedSectionId === item.id);
@@ -404,7 +526,12 @@ export default function LearningDevelopmentManualPage() {
                                               <span className="flex-1 break-words">
                                                 {group.code}. {group.title}
                                               </span>
-                                              <span className="text-muted-foreground text-[10px]">({group.range})</span>
+                                              <span className="text-muted-foreground text-[10px]">
+                                                {selectedPersona !== 'all' 
+                                                  ? `${group.items.length}`
+                                                  : `(${group.range})`
+                                                }
+                                              </span>
                                               {isGroupExpanded 
                                                 ? <ChevronDown className="h-3 w-3 flex-shrink-0" />
                                                 : <ChevronRight className="h-3 w-3 flex-shrink-0" />
