@@ -36,5 +36,10 @@ export { LndComplianceIncidentTraining } from './LndComplianceIncidentTraining';
 export { LndComplianceOSHA } from './LndComplianceOSHA';
 export { LndComplianceCaribbean } from './LndComplianceCaribbean';
 
+// Section G: Extended Capabilities (5.24-5.26)
+export { LndComplianceMobileCompletion } from './LndComplianceMobileCompletion';
+export { LndComplianceCostTracking } from './LndComplianceCostTracking';
+export { LndComplianceExternalAuditor } from './LndComplianceExternalAuditor';
+
 // Legacy exports for backwards compatibility (deprecated - use new components above)
 export { LndComplianceFramework, LndComplianceTargetAudience, LndComplianceRecertification, LndComplianceDashboard, LndComplianceAuditTrail, LndComplianceRegionalVariations, LndComplianceExpiryTracking, LndComplianceGracePeriod } from './LndComplianceComponents';
