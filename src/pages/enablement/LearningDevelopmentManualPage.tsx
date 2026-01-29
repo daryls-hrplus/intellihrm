@@ -14,9 +14,10 @@ import {
   Link2, AlertTriangle, BookOpen, Eye,
   CheckCircle, Circle, ArrowLeft, Shield,
   GraduationCap, Building, Workflow, ClipboardCheck, Network, FolderOpen,
-  Users, UserCog, Briefcase, ShieldCheck, HardHat, TrendingUp, X
+  Users, UserCog, Briefcase, ShieldCheck, HardHat, TrendingUp, X, Zap, BookText
 } from 'lucide-react';
 import { LND_MANUAL_STRUCTURE, getLndTotalReadTime, getLndTotalSections, LndSection } from '@/types/learningDevelopmentManual';
+import { isEssentialSection, ESSENTIAL_SECTION_COUNT } from '@/lib/lndEssentialSections';
 
 // Define available roles with their display info
 const PERSONA_ROLES = [
@@ -99,6 +100,7 @@ export default function LearningDevelopmentManualPage() {
   const { navigateToList } = useWorkspaceNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPersona, setSelectedPersona] = useState<PersonaRole>('all');
+  const [isQuickStartMode, setIsQuickStartMode] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState('chapter-1');
   const [expandedSections, setExpandedSections] = useState<string[]>(['chapter-1']);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
@@ -179,11 +181,22 @@ export default function LearningDevelopmentManualPage() {
     return section.targetRoles.includes(selectedPersona as any);
   };
 
-  // Filter subsections by persona
+  // Filter subsections by persona and Quick Start mode
   const filterSubsectionsByPersona = (subsections: LndSection[] | undefined): LndSection[] => {
     if (!subsections) return [];
-    if (selectedPersona === 'all') return subsections;
-    return subsections.filter(sub => sub.targetRoles.includes(selectedPersona as any));
+    let filtered = subsections;
+    
+    // Apply Quick Start filter first
+    if (isQuickStartMode) {
+      filtered = filtered.filter(sub => isEssentialSection(sub.id));
+    }
+    
+    // Then apply persona filter
+    if (selectedPersona !== 'all') {
+      filtered = filtered.filter(sub => sub.targetRoles.includes(selectedPersona as any));
+    }
+    
+    return filtered;
   };
 
   const filteredSections = useMemo(() => {
@@ -202,13 +215,24 @@ export default function LearningDevelopmentManualPage() {
       );
     }
     
+    // Apply Quick Start filter - only show chapters with essential sections
+    if (isQuickStartMode) {
+      sections = sections.filter(section => {
+        const hasEssentialSubsections = section.subsections?.some(sub => isEssentialSection(sub.id));
+        return hasEssentialSubsections;
+      });
+    }
+    
     // Apply persona filter - filter out chapters that have no matching subsections
     if (selectedPersona !== 'all') {
       sections = sections.filter(section => {
         // Check if chapter itself matches
         const chapterMatches = section.targetRoles.includes(selectedPersona as any);
-        // Check if any subsection matches
-        const hasMatchingSubsections = section.subsections?.some(sub => 
+        // Check if any subsection matches (respecting Quick Start filter)
+        const relevantSubs = isQuickStartMode 
+          ? section.subsections?.filter(sub => isEssentialSection(sub.id))
+          : section.subsections;
+        const hasMatchingSubsections = relevantSubs?.some(sub => 
           sub.targetRoles.includes(selectedPersona as any)
         );
         return chapterMatches || hasMatchingSubsections;
@@ -216,20 +240,24 @@ export default function LearningDevelopmentManualPage() {
     }
     
     return sections;
-  }, [searchQuery, selectedPersona]);
+  }, [searchQuery, selectedPersona, isQuickStartMode]);
 
-  // Count matching sections for the current persona
+  // Count matching sections for the current filters
   const personaSectionCount = useMemo(() => {
-    if (selectedPersona === 'all') return totalSections;
+    if (isQuickStartMode && selectedPersona === 'all') return ESSENTIAL_SECTION_COUNT;
+    
     let count = 0;
     LND_MANUAL_STRUCTURE.forEach(chapter => {
-      if (chapter.targetRoles.includes(selectedPersona as any)) count++;
       chapter.subsections?.forEach(sub => {
-        if (sub.targetRoles.includes(selectedPersona as any)) count++;
+        // Check Quick Start filter
+        if (isQuickStartMode && !isEssentialSection(sub.id)) return;
+        // Check persona filter
+        if (selectedPersona !== 'all' && !sub.targetRoles.includes(selectedPersona as any)) return;
+        count++;
       });
     });
     return count;
-  }, [selectedPersona, totalSections]);
+  }, [selectedPersona, isQuickStartMode]);
 
   const setSectionExpanded = (sectionId: string, open: boolean) => {
     setExpandedSections((prev) => {
@@ -374,12 +402,40 @@ export default function LearningDevelopmentManualPage() {
                     <Layers className="h-4 w-4" />
                     Table of Contents
                   </CardTitle>
-                  {selectedPersona !== 'all' && (
+                  {(selectedPersona !== 'all' || isQuickStartMode) && (
                     <Badge variant="secondary" className="text-xs gap-1">
                       {personaSectionCount} sections
                     </Badge>
                   )}
                 </div>
+
+                {/* Quick Start / Full Reference Mode Toggle */}
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                  <Button
+                    variant={isQuickStartMode ? "default" : "ghost"}
+                    size="sm"
+                    className="flex-1 h-8 text-xs gap-1.5"
+                    onClick={() => setIsQuickStartMode(true)}
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                    Quick Start
+                  </Button>
+                  <Button
+                    variant={!isQuickStartMode ? "default" : "ghost"}
+                    size="sm"
+                    className="flex-1 h-8 text-xs gap-1.5"
+                    onClick={() => setIsQuickStartMode(false)}
+                  >
+                    <BookText className="h-3.5 w-3.5" />
+                    Full Reference
+                  </Button>
+                </div>
+                
+                {isQuickStartMode && (
+                  <div className="text-xs text-muted-foreground bg-primary/5 border border-primary/20 rounded-md p-2">
+                    <span className="font-medium text-primary">Quick Start Mode:</span> Showing {ESSENTIAL_SECTION_COUNT} essential procedures to get you started fast.
+                  </div>
+                )}
                 
                 {/* Search Input */}
                 <div className="relative">
