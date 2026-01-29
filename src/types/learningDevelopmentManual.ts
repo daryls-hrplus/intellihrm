@@ -9,7 +9,7 @@ export interface LndSection {
   description: string;
   contentLevel: 'overview' | 'concept' | 'procedure' | 'reference';
   estimatedReadTime: number;
-  targetRoles: ('Admin' | 'Consultant' | 'HR Partner' | 'Manager' | 'Employee' | 'L&D Admin' | 'Training Staff')[];
+  targetRoles: ('Admin' | 'Consultant' | 'HR Partner' | 'Manager' | 'Employee' | 'L&D Admin' | 'Training Staff' | 'Compliance Officer' | 'HSE Officer' | 'Executive')[];
   legacyReference?: string;
   industryContext?: {
     frequency?: string;
@@ -679,71 +679,231 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
 
 
   // ==========================================================================
-  // CHAPTER 5: COMPLIANCE & RECERTIFICATION (~70 min)
+  // CHAPTER 5: COMPLIANCE TRAINING OPERATIONS (~180 min)
+  // Sections A-F: Compliance Framework, Assignment Management, Monitoring,
+  // Escalation, Audit & Reporting, HSE & Industry Compliance
   // ==========================================================================
   {
     id: 'chapter-5',
     sectionNumber: '5',
-    title: 'Compliance & Recertification',
-    description: 'Mandatory training management, compliance tracking, recertification workflows, and audit documentation.',
+    title: 'Compliance Training Operations',
+    description: 'Regulatory compliance, assignment management, monitoring dashboards, escalation workflows, audit documentation, and HSE module integration.',
     contentLevel: 'procedure',
-    estimatedReadTime: 70,
-    targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+    estimatedReadTime: 180,
+    targetRoles: ['Admin', 'L&D Admin', 'HR Partner', 'Compliance Officer', 'HSE Officer'],
     subsections: [
+      // Section A: Compliance Program Framework (5.1-5.3)
       {
         id: 'sec-5-1',
         sectionNumber: '5.1',
-        title: 'Compliance Training Framework',
-        description: 'Mandatory training requirements, regulatory alignment, and enforcement mechanisms',
+        title: 'Regulatory Compliance Overview',
+        description: 'Compliance training framework, governance structure, regulatory drivers, and program objectives',
         contentLevel: 'concept',
-        estimatedReadTime: 12,
-        targetRoles: ['Admin', 'Consultant', 'L&D Admin']
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Compliance Officer', 'L&D Admin']
       },
       {
         id: 'sec-5-2',
         sectionNumber: '5.2',
-        title: 'Target Audience Rules',
-        description: 'Department-based, position-based, and role-based compliance assignments',
+        title: 'Compliance Training Categories',
+        description: 'Mandatory, recommended, role-based, and HSE-linked training category configuration',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-5-3',
         sectionNumber: '5.3',
-        title: 'Recertification Management',
-        description: 'Expiry tracking, reminder windows, automatic re-enrollment, and grace periods',
+        title: 'Compliance Calendar & Deadlines',
+        description: 'Annual compliance planning, deadline management, and regulatory calendar alignment',
         contentLevel: 'procedure',
-        estimatedReadTime: 12,
-        targetRoles: ['Admin', 'L&D Admin']
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'L&D Admin', 'Compliance Officer']
       },
+      // Section B: Assignment Management (5.4-5.7)
       {
         id: 'sec-5-4',
         sectionNumber: '5.4',
-        title: 'Compliance Dashboard',
-        description: 'Completion rates, overdue tracking, risk indicators, and executive reporting',
+        title: 'Bulk Assignment Operations',
+        description: 'Mass compliance assignment, CSV import/export, and rule-based auto-assignment',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HR Partner', 'L&D Admin']
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-5-5',
         sectionNumber: '5.5',
-        title: 'Audit Trail & Documentation',
-        description: 'Training records retention, compliance reports, SOC 2 alignment, and legal holds',
-        contentLevel: 'reference',
-        estimatedReadTime: 16,
-        targetRoles: ['Admin', 'Consultant'],
-        legacyReference: 'Training Audit'
+        title: 'Individual Assignment Management',
+        description: 'Single employee compliance tracking, manual assignments, and status overrides',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'L&D Admin', 'Manager']
       },
       {
         id: 'sec-5-6',
         sectionNumber: '5.6',
-        title: 'Regional Compliance Variations',
-        description: 'Multi-country training requirements, local regulations, and jurisdiction handling',
+        title: 'Exemption Request Workflow',
+        description: 'Exemption requests, approval workflows, documentation requirements, and audit trail',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
+      },
+      {
+        id: 'sec-5-7',
+        sectionNumber: '5.7',
+        title: 'Assignment Status Lifecycle',
+        description: 'Status transitions (pending → in_progress → completed → expired), field reference for compliance_training_assignments',
+        contentLevel: 'reference',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      // Section C: Monitoring & Dashboards (5.8-5.11)
+      {
+        id: 'sec-5-8',
+        sectionNumber: '5.8',
+        title: 'Compliance Dashboard Analytics',
+        description: 'Real-time compliance metrics, completion rates, risk scoring, and visualization',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
+      },
+      {
+        id: 'sec-5-9',
+        sectionNumber: '5.9',
+        title: 'Risk Indicators & Alerts',
+        description: 'Risk scoring algorithms, early warning indicators, and proactive alert configuration',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Compliance Officer']
+      },
+      {
+        id: 'sec-5-10',
+        sectionNumber: '5.10',
+        title: 'Manager Compliance View',
+        description: 'MSS team compliance portal, manager drill-down, and team-level reporting',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['Manager', 'L&D Admin']
+      },
+      {
+        id: 'sec-5-11',
+        sectionNumber: '5.11',
+        title: 'Executive Compliance Reports',
+        description: 'C-suite dashboards, board-ready reporting, and compliance trend analysis',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Executive', 'Compliance Officer']
+      },
+      // Section D: Escalation & Enforcement (5.12-5.15)
+      {
+        id: 'sec-5-12',
+        sectionNumber: '5.12',
+        title: 'Escalation Rules & Tiers',
+        description: 'Tiered escalation (1-4), SLA definitions, notification chains, and escalation_level tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
+      },
+      {
+        id: 'sec-5-13',
+        sectionNumber: '5.13',
+        title: 'Grace Period Operations',
+        description: 'Grace period configuration, extension requests, manager override workflows, and time tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin']
+      },
+      {
+        id: 'sec-5-14',
+        sectionNumber: '5.14',
+        title: 'Non-Compliance Consequences',
+        description: 'Consequence matrix, policy enforcement actions, system flags, and access restrictions',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner', 'Compliance Officer']
+      },
+      {
+        id: 'sec-5-15',
+        sectionNumber: '5.15',
+        title: 'HR Intervention Workflows',
+        description: 'HR workflow integration, disciplinary linkage, intervention tracking, and case resolution',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR Partner']
+      },
+      // Section E: Audit & Reporting (5.16-5.19)
+      {
+        id: 'sec-5-16',
+        sectionNumber: '5.16',
+        title: 'Compliance Audit Trail',
+        description: 'Audit log schema, retention policies, tamper-proof logging (SHA-256), and query patterns',
         contentLevel: 'reference',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'Consultant']
+        targetRoles: ['Admin', 'Compliance Officer', 'Consultant']
+      },
+      {
+        id: 'sec-5-17',
+        sectionNumber: '5.17',
+        title: 'Regulatory Report Generation',
+        description: 'OSHA 300A integration, standard report templates, export formats, and scheduling',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Compliance Officer', 'HSE Officer']
+      },
+      {
+        id: 'sec-5-18',
+        sectionNumber: '5.18',
+        title: 'Evidence Package Preparation',
+        description: 'Audit preparation workflows, evidence assembly, documentation packages, and regulator interface',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Compliance Officer']
+      },
+      {
+        id: 'sec-5-19',
+        sectionNumber: '5.19',
+        title: 'Historical Compliance Records',
+        description: 'Data archival, retention schedules, GDPR/data protection compliance, and historical query access',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant', 'Compliance Officer']
+      },
+      // Section F: HSE & Industry Compliance (5.20-5.23)
+      {
+        id: 'sec-5-20',
+        sectionNumber: '5.20',
+        title: 'HSE Training Integration',
+        description: 'hse_safety_training ↔ lms_courses bidirectional linkage, hse_training_records sync with lms_enrollments',
+        contentLevel: 'reference',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'HSE Officer', 'Consultant']
+      },
+      {
+        id: 'sec-5-21',
+        sectionNumber: '5.21',
+        title: 'Incident-Triggered Training',
+        description: 'hse_incidents.corrective_actions → training request workflow, remedial training automation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HSE Officer', 'L&D Admin']
+      },
+      {
+        id: 'sec-5-22',
+        sectionNumber: '5.22',
+        title: 'OSHA & Safety Certification',
+        description: 'OSHA 10/30-Hour tracking, hse_osha_logs (22 fields), is_osha_reportable flag integration, OSHA 300A generation',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'HSE Officer', 'Compliance Officer']
+      },
+      {
+        id: 'sec-5-23',
+        sectionNumber: '5.23',
+        title: 'Caribbean Regional Requirements',
+        description: 'Jamaica OSHA Act, Trinidad OSH Act 2004, Barbados Safety & Health at Work Act, regional calendar compliance',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant', 'Compliance Officer']
       }
     ]
   },
