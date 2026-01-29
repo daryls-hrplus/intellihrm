@@ -7,6 +7,7 @@ import {
   LndAIContentGeneration,
   LndAIGovernance,
   LndAIModelRegistry,
+  LndAIAgentFramework,
 } from './sections/ai';
 
 export function LndAISection() {
@@ -17,12 +18,12 @@ export function LndAISection() {
         <h1 className="text-3xl font-bold mb-2">Chapter 6: AI-Powered Learning Intelligence</h1>
         <p className="text-muted-foreground">
           This chapter documents the AI capabilities within the Learning & Development module, including 
-          skill gap detection, course recommendations, training analytics, and ISO 42001 governance compliance.
+          skill gap detection, course recommendations, training analytics, agent framework, and ISO 42001 governance compliance.
         </p>
         <div className="flex flex-wrap gap-2 mt-4">
-          <span className="text-xs bg-muted px-2 py-1 rounded">8 Sections</span>
-          <span className="text-xs bg-muted px-2 py-1 rounded">~30 min read</span>
-          <span className="text-xs bg-muted px-2 py-1 rounded">7 Database Tables</span>
+          <span className="text-xs bg-muted px-2 py-1 rounded">9 Sections</span>
+          <span className="text-xs bg-muted px-2 py-1 rounded">~45 min read</span>
+          <span className="text-xs bg-muted px-2 py-1 rounded">15+ Database Tables</span>
         </div>
       </div>
 
@@ -86,6 +87,16 @@ export function LndAISection() {
         </div>
         <LndAIGovernance />
         <LndAIModelRegistry />
+      </div>
+
+      {/* Section G: Agent Framework */}
+      <div className="space-y-8">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium uppercase tracking-wide">
+          <span className="h-px flex-1 bg-border"></span>
+          <span>Section G: Agent Framework</span>
+          <span className="h-px flex-1 bg-border"></span>
+        </div>
+        <LndAIAgentFramework />
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ export function LndAIModelRegistry() {
       <div>
         <h2 className="text-2xl font-bold mb-2">6.8 Model Configuration & Registry</h2>
         <p className="text-muted-foreground">
-          AI model administration for L&D features including registration, risk classification, and compliance audit scheduling.
+          AI model administration for L&D features including registration, risk classification, fairness auditing, and compliance tracking.
         </p>
       </div>
 
@@ -26,6 +26,7 @@ export function LndAIModelRegistry() {
             <li>Apply risk classification guidelines to AI models</li>
             <li>Configure approved use cases for L&D AI features</li>
             <li>Schedule and track compliance audits</li>
+            <li>Monitor model fairness metrics and audit findings</li>
           </ul>
         </CardContent>
       </Card>
@@ -49,6 +50,16 @@ export function LndAIModelRegistry() {
                 </tr>
               </thead>
               <tbody className="text-muted-foreground">
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">id</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3">Primary key</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">company_id</td>
+                  <td className="py-2 px-3">FK → companies</td>
+                  <td className="py-2 px-3">Company scope (null = global)</td>
+                </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">model_identifier</td>
                   <td className="py-2 px-3">string</td>
@@ -90,19 +101,59 @@ export function LndAIModelRegistry() {
                   <td className="py-2 px-3">Explicitly forbidden uses</td>
                 </tr>
                 <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">is_active</td>
+                  <td className="py-2 px-3">boolean</td>
+                  <td className="py-2 px-3">Whether model is currently enabled</td>
+                </tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">compliance_status</td>
                   <td className="py-2 px-3">enum</td>
                   <td className="py-2 px-3">compliant | pending | non_compliant</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2 px-3 font-mono text-xs">last_audit_date</td>
+                  <td className="py-2 px-3 font-mono text-xs">last_audit_date / next_audit_due</td>
                   <td className="py-2 px-3">date</td>
-                  <td className="py-2 px-3">Most recent compliance audit</td>
+                  <td className="py-2 px-3">Audit schedule tracking</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">audit_findings</td>
+                  <td className="py-2 px-3">JSONB</td>
+                  <td className="py-2 px-3">Results from compliance audits</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">fairness_score</td>
+                  <td className="py-2 px-3">number (0-100)</td>
+                  <td className="py-2 px-3">Overall fairness rating</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">fairness_metrics</td>
+                  <td className="py-2 px-3">JSONB</td>
+                  <td className="py-2 px-3">Detailed fairness breakdown by characteristic</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">last_fairness_audit</td>
+                  <td className="py-2 px-3">date</td>
+                  <td className="py-2 px-3">Most recent fairness evaluation</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">model_card</td>
+                  <td className="py-2 px-3">JSONB</td>
+                  <td className="py-2 px-3">Model documentation per AI ethics standards</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">data_retention_policy</td>
+                  <td className="py-2 px-3">string</td>
+                  <td className="py-2 px-3">Data handling and retention rules</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">created_by</td>
+                  <td className="py-2 px-3">FK → profiles</td>
+                  <td className="py-2 px-3">User who registered the model</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono text-xs">next_audit_due</td>
-                  <td className="py-2 px-3">date</td>
-                  <td className="py-2 px-3">Scheduled next audit date</td>
+                  <td className="py-2 px-3 font-mono text-xs">created_at / updated_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">Audit timestamps</td>
                 </tr>
               </tbody>
             </table>
@@ -223,6 +274,38 @@ export function LndAIModelRegistry() {
         </CardContent>
       </Card>
 
+      {/* Fairness Metrics */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Fairness Metrics Structure</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-muted/30 rounded-lg p-4 font-mono text-xs">
+            <pre>{`fairness_metrics: {
+  "demographic_parity": {
+    "gender": 0.95,
+    "age_group": 0.92,
+    "department": 0.88
+  },
+  "equalized_odds": {
+    "true_positive_rate_variance": 0.03,
+    "false_positive_rate_variance": 0.02
+  },
+  "individual_fairness": 0.91,
+  "counterfactual_fairness": 0.89
+}
+
+model_card: {
+  "intended_use": "Course recommendations based on skill gaps",
+  "limitations": ["Limited data for niche roles", "English-only content"],
+  "training_data_summary": "50K employee-course pairs, 2020-2024",
+  "ethical_considerations": ["Bias monitoring enabled", "Human review for critical"],
+  "evaluation_results": {...}
+}`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* UI Navigation */}
       <Card>
         <CardHeader className="pb-3">
@@ -233,11 +316,12 @@ export function LndAIModelRegistry() {
         </CardHeader>
         <CardContent>
           <div className="bg-muted/30 rounded-lg p-4 font-mono text-xs">
-            <pre>{`Admin → AI Governance → Model Registry
+            <pre>{`Admin → AI Governance → Model Registry (AIModelRegistryPanel)
 │
 ├── Model List:
-│   ├── Filter by: Provider, Risk Level, Compliance Status
+│   ├── Filter by: Provider, Risk Level, Compliance Status, Active
 │   ├── View compliance indicators (badges)
+│   ├── Fairness score column
 │   └── Click row to view details
 │
 ├── Model Detail:
@@ -245,13 +329,16 @@ export function LndAIModelRegistry() {
 │   ├── Risk Classification
 │   ├── Approved Use Cases (editable list)
 │   ├── Prohibited Use Cases (editable list)
-│   ├── Audit History
+│   ├── Model Card (structured documentation)
+│   ├── Fairness Metrics (visual breakdown)
+│   ├── Audit Findings History
 │   └── Schedule Next Audit
 │
 └── Actions:
     ├── Register New Model
     ├── Update Risk Classification
     ├── Schedule Audit
+    ├── Run Fairness Evaluation
     └── Deactivate Model`}</pre>
           </div>
         </CardContent>
@@ -279,6 +366,8 @@ export function LndAIModelRegistry() {
               <li>Check human override rate (threshold: &lt;10%)</li>
               <li>Confirm explainability logs are complete</li>
               <li>Test model outputs for consistency</li>
+              <li>Update fairness_metrics with latest evaluation</li>
+              <li>Document findings in audit_findings JSONB</li>
             </ul>
           </div>
         </CardContent>
@@ -301,7 +390,7 @@ export function LndAIModelRegistry() {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Model deactivation requires approval from AI Governance owner</span>
+              <span>Model deactivation (is_active=false) requires approval from AI Governance owner</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -310,6 +399,10 @@ export function LndAIModelRegistry() {
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
               <span>Provider model version changes require re-registration</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span>fairness_score &lt; 80 triggers automatic review requirement</span>
             </li>
           </ul>
         </CardContent>

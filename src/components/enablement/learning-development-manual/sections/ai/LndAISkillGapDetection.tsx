@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Target, Database, Navigation, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Target, Database, Navigation, AlertTriangle, CheckCircle, Code } from 'lucide-react';
 
 export function LndAISkillGapDetection() {
   return (
@@ -50,9 +50,24 @@ export function LndAISkillGapDetection() {
               </thead>
               <tbody className="text-muted-foreground">
                 <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">id</td>
+                  <td className="py-2 px-3">UUID</td>
+                  <td className="py-2 px-3">Primary key</td>
+                </tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">employee_id</td>
                   <td className="py-2 px-3">FK → profiles</td>
                   <td className="py-2 px-3">Employee with the identified gap</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">company_id</td>
+                  <td className="py-2 px-3">FK → companies</td>
+                  <td className="py-2 px-3">Company scope for RLS</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">capability_id</td>
+                  <td className="py-2 px-3">FK → competencies</td>
+                  <td className="py-2 px-3">Reference to competency framework (optional)</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">capability_name</td>
@@ -99,10 +114,30 @@ export function LndAISkillGapDetection() {
                   <td className="py-2 px-3">FK → idp_items</td>
                   <td className="py-2 px-3">Link to development plan item</td>
                 </tr>
-                <tr>
+                <tr className="border-b">
                   <td className="py-2 px-3 font-mono text-xs">status</td>
                   <td className="py-2 px-3">enum</td>
-                  <td className="py-2 px-3">identified | in_progress | addressed</td>
+                  <td className="py-2 px-3">open | in_progress | addressed | closed</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">detected_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">When gap was first identified</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">addressed_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">When gap was remediated</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">created_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">Record creation timestamp</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono text-xs">updated_at</td>
+                  <td className="py-2 px-3">timestamp</td>
+                  <td className="py-2 px-3">Last modification timestamp</td>
                 </tr>
               </tbody>
             </table>
@@ -204,7 +239,7 @@ export function LndAISkillGapDetection() {
         </CardContent>
       </Card>
 
-      {/* UI Navigation */}
+      {/* UI Navigation - CORRECTED */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -212,17 +247,79 @@ export function LndAISkillGapDetection() {
             UI Navigation
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Skill gaps are accessible from multiple entry points depending on user role:
+          </p>
           <div className="bg-muted/30 rounded-lg p-4 font-mono text-xs">
-            <pre>{`Training → Gap Analysis → Employee Gaps
-│
-├── Filter by: Department, Priority, Status, Source
-├── View: Individual employee gap cards
+            <pre>{`Employee Self-Service (ESS):
+ESS → My Skill Gaps (/ess/skill-gaps)
+├── View personal skill gaps
+├── Accept/decline recommendations
+└── Link to learning resources
+
+Manager View:
+Workforce → Team → [Employee] → Skill Gaps Tab
+├── Filter by: Priority, Status, Source
+├── View individual employee gap cards
 ├── Actions:
 │   ├── Link to IDP item
 │   ├── Assign recommended course
 │   └── Mark as addressed
-└── Export: Gap report (PDF/Excel)`}</pre>
+└── Export: Gap report (PDF/Excel)
+
+HR/Admin View:
+Workforce → Employees → [Employee] → Skill Gaps Tab
+├── Same as manager view with additional controls
+└── Bulk gap analysis trigger`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Hook Functions */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Code className="h-4 w-4 text-primary" />
+            API Reference: useSkillGapManagement Hook
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="text-left py-2 px-3 font-medium">Function</th>
+                  <th className="text-left py-2 px-3 font-medium">Purpose</th>
+                </tr>
+              </thead>
+              <tbody className="text-muted-foreground">
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">fetchEmployeeGaps(employeeId, filters?)</td>
+                  <td className="py-2 px-3">Fetch gaps for a specific employee with optional filters</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">fetchCompanyGaps(companyId, filters?)</td>
+                  <td className="py-2 px-3">Fetch all gaps across company (HR/Admin view)</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">createGapFromAppraisal(...)</td>
+                  <td className="py-2 px-3">Create gap from appraisal competency rating</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">linkGapToIDP(gapId, idpItemId)</td>
+                  <td className="py-2 px-3">Associate gap with development plan item</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 px-3 font-mono text-xs">updateGapStatus(gapId, status)</td>
+                  <td className="py-2 px-3">Update gap status with automatic addressed_at</td>
+                </tr>
+                <tr>
+                  <td className="py-2 px-3 font-mono text-xs">triggerGapAnalysis(action, params)</td>
+                  <td className="py-2 px-3">Invoke edge function for AI gap analysis</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
@@ -257,6 +354,10 @@ export function LndAISkillGapDetection() {
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
               <span>Gap history is retained for trend analysis (gaps are soft-deleted)</span>
             </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span>Edge function: skill-gap-processor handles bulk analysis</span>
+            </li>
           </ul>
         </CardContent>
       </Card>
@@ -275,7 +376,7 @@ export function LndAISkillGapDetection() {
 
 When IDP item status changes:
 ├── in_progress → gap.status = "in_progress"
-├── completed   → gap.status = "addressed"
+├── completed   → gap.status = "addressed", gap.addressed_at = NOW()
 └── cancelled   → gap.idp_item_id = NULL (unlink)`}</pre>
           </div>
         </CardContent>
