@@ -2,6 +2,12 @@
 // Comprehensive documentation for 62+ database tables, 28 UI pages
 // Following industry standards: Workday Learning, SAP SuccessFactors, Cornerstone
 
+export interface SectionGroup {
+  code: string;      // 'A', 'B', 'C', 'D', 'E', 'F'
+  title: string;     // 'Compliance Program Framework'
+  range: string;     // '5.1-5.3'
+}
+
 export interface LndSection {
   id: string;
   sectionNumber: string;
@@ -16,6 +22,7 @@ export interface LndSection {
     timing?: string;
     benchmark?: string;
   };
+  sectionGroup?: SectionGroup;
   subsections?: LndSection[];
 }
 
@@ -465,7 +472,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
     estimatedReadTime: 120,
     targetRoles: ['Admin', 'L&D Admin', 'HR Partner', 'Manager', 'Employee'],
     subsections: [
-      // SECTION A: LEARNER JOURNEY (4.1-4.6)
+      // SECTION A: COURSE DELIVERY LIFECYCLE (4.1-4.6)
       {
         id: 'sec-4-1',
         sectionNumber: '4.1',
@@ -474,6 +481,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'concept',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin', 'Employee'],
+        sectionGroup: { code: 'A', title: 'Course Delivery Lifecycle', range: '4.1-4.6' },
         industryContext: {
           benchmark: 'Workday Learning Discover-Learn-Apply framework'
         }
@@ -486,6 +494,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'A', title: 'Course Delivery Lifecycle', range: '4.1-4.6' },
         legacyReference: 'Training Requests workflow'
       },
       {
@@ -495,7 +504,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Lesson progress monitoring, due date tracking, and automated reminder notifications',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'A', title: 'Course Delivery Lifecycle', range: '4.1-4.6' }
       },
       {
         id: 'sec-4-4',
@@ -504,7 +514,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Quiz attempts, scoring algorithms, retake management, and feedback display',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'A', title: 'Course Delivery Lifecycle', range: '4.1-4.6' }
       },
       {
         id: 'sec-4-5',
@@ -514,6 +525,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 6,
         targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'A', title: 'Course Delivery Lifecycle', range: '4.1-4.6' },
         legacyReference: 'How to Complete a Training Course and Submit an Evaluation'
       },
       {
@@ -523,7 +535,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Certificate generation, certificate numbers, digital delivery, and verification codes',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'A', title: 'Course Delivery Lifecycle', range: '4.1-4.6' }
       },
       // SECTION B: TRAINING REQUEST LIFECYCLE (4.7-4.13)
       {
@@ -534,6 +547,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 6,
         targetRoles: ['Admin', 'Employee'],
+        sectionGroup: { code: 'B', title: 'Training Request Lifecycle', range: '4.7-4.13' },
         legacyReference: 'How to View Training Requests by Self-Service'
       },
       {
@@ -544,6 +558,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'HR Partner', 'Manager'],
+        sectionGroup: { code: 'B', title: 'Training Request Lifecycle', range: '4.7-4.13' },
         legacyReference: 'How to Create a Training Request by Job Gap Analysis'
       },
       {
@@ -554,6 +569,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 6,
         targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'B', title: 'Training Request Lifecycle', range: '4.7-4.13' },
         legacyReference: 'How to Create a Training Request via Performance Appraisal'
       },
       {
@@ -564,6 +580,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 6,
         targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'B', title: 'Training Request Lifecycle', range: '4.7-4.13' },
         legacyReference: 'How to setup Training Requests by Onboarding'
       },
       {
@@ -574,6 +591,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 5,
         targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'B', title: 'Training Request Lifecycle', range: '4.7-4.13' },
         legacyReference: 'How to Create Training Requests generated by HR'
       },
       {
@@ -584,6 +602,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 5,
         targetRoles: ['Manager'],
+        sectionGroup: { code: 'B', title: 'Training Request Lifecycle', range: '4.7-4.13' },
         legacyReference: 'How to Invite an Employee to Request Training'
       },
       {
@@ -594,6 +613,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'B', title: 'Training Request Lifecycle', range: '4.7-4.13' },
         industryContext: {
           benchmark: 'Enterprise workflow integration pattern (SAP SuccessFactors, Workday)'
         }
@@ -606,7 +626,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Draft → Published → Archived states, versioning, and content update workflows',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'C', title: 'Session & Delivery Operations', range: '4.14-4.18' }
       },
       {
         id: 'sec-4-15',
@@ -615,7 +636,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Instructor-led training session scheduling, instructor assignment, and venue booking',
         contentLevel: 'procedure',
         estimatedReadTime: 7,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'C', title: 'Session & Delivery Operations', range: '4.14-4.18' }
       },
       {
         id: 'sec-4-16',
@@ -624,7 +646,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Video platform integration (Teams/Zoom/Meet), attendance tracking, and recordings',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'C', title: 'Session & Delivery Operations', range: '4.14-4.18' }
       },
       {
         id: 'sec-4-17',
@@ -633,7 +656,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Session capacity limits, waitlist processing, and auto-promotion rules',
         contentLevel: 'procedure',
         estimatedReadTime: 5,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'C', title: 'Session & Delivery Operations', range: '4.14-4.18' }
       },
       {
         id: 'sec-4-18',
@@ -643,6 +667,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 5,
         targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'C', title: 'Session & Delivery Operations', range: '4.14-4.18' },
         legacyReference: 'Training Calendar'
       },
       // SECTION D: HISTORICAL RECORDS & TRANSCRIPTS (4.19-4.21)
@@ -654,6 +679,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'procedure',
         estimatedReadTime: 5,
         targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'D', title: 'Historical Records & Transcripts', range: '4.19-4.21' },
         legacyReference: 'How to Record an Employee\'s Training History'
       },
       {
@@ -663,7 +689,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Record training completed outside LMS, vendor tracking, evidence upload, and cost capture',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'HR Partner']
+        targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'D', title: 'Historical Records & Transcripts', range: '4.19-4.21' }
       },
       {
         id: 'sec-4-21',
@@ -672,7 +699,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Learner feedback collection, rating aggregation, moderation, and quality improvement',
         contentLevel: 'procedure',
         estimatedReadTime: 5,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'D', title: 'Historical Records & Transcripts', range: '4.19-4.21' }
       }
     ]
   },
@@ -700,7 +728,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Compliance training framework, governance structure, regulatory drivers, and program objectives',
         contentLevel: 'concept',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'Compliance Officer', 'L&D Admin']
+        targetRoles: ['Admin', 'Compliance Officer', 'L&D Admin'],
+        sectionGroup: { code: 'A', title: 'Compliance Program Framework', range: '5.1-5.3' }
       },
       {
         id: 'sec-5-2',
@@ -709,7 +738,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Mandatory, recommended, role-based, and HSE-linked training category configuration',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'A', title: 'Compliance Program Framework', range: '5.1-5.3' }
       },
       {
         id: 'sec-5-3',
@@ -718,7 +748,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Annual compliance planning, deadline management, and regulatory calendar alignment',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin', 'Compliance Officer']
+        targetRoles: ['Admin', 'L&D Admin', 'Compliance Officer'],
+        sectionGroup: { code: 'A', title: 'Compliance Program Framework', range: '5.1-5.3' }
       },
       // Section B: Assignment Management (5.4-5.7)
       {
@@ -728,7 +759,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Mass compliance assignment, CSV import/export, and rule-based auto-assignment',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'B', title: 'Assignment Management', range: '5.4-5.7' }
       },
       {
         id: 'sec-5-5',
@@ -737,7 +769,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Single employee compliance tracking, manual assignments, and status overrides',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin', 'Manager']
+        targetRoles: ['Admin', 'L&D Admin', 'Manager'],
+        sectionGroup: { code: 'B', title: 'Assignment Management', range: '5.4-5.7' }
       },
       {
         id: 'sec-5-6',
@@ -746,7 +779,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Exemption requests, approval workflows, documentation requirements, and audit trail',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'B', title: 'Assignment Management', range: '5.4-5.7' }
       },
       {
         id: 'sec-5-7',
@@ -755,7 +789,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Status transitions (pending → in_progress → completed → expired), field reference for compliance_training_assignments',
         contentLevel: 'reference',
         estimatedReadTime: 6,
-        targetRoles: ['Admin', 'Consultant']
+        targetRoles: ['Admin', 'Consultant'],
+        sectionGroup: { code: 'B', title: 'Assignment Management', range: '5.4-5.7' }
       },
       // Section C: Monitoring & Dashboards (5.8-5.11)
       {
@@ -765,7 +800,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Real-time compliance metrics, completion rates, risk scoring, and visualization',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'C', title: 'Monitoring & Dashboards', range: '5.8-5.11' }
       },
       {
         id: 'sec-5-9',
@@ -774,7 +810,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Risk scoring algorithms, early warning indicators, and proactive alert configuration',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'Compliance Officer']
+        targetRoles: ['Admin', 'Compliance Officer'],
+        sectionGroup: { code: 'C', title: 'Monitoring & Dashboards', range: '5.8-5.11' }
       },
       {
         id: 'sec-5-10',
@@ -783,7 +820,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'MSS team compliance portal, manager drill-down, and team-level reporting',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
-        targetRoles: ['Manager', 'L&D Admin']
+        targetRoles: ['Manager', 'L&D Admin'],
+        sectionGroup: { code: 'C', title: 'Monitoring & Dashboards', range: '5.8-5.11' }
       },
       {
         id: 'sec-5-11',
@@ -792,7 +830,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'C-suite dashboards, board-ready reporting, and compliance trend analysis',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'Executive', 'Compliance Officer']
+        targetRoles: ['Admin', 'Executive', 'Compliance Officer'],
+        sectionGroup: { code: 'C', title: 'Monitoring & Dashboards', range: '5.8-5.11' }
       },
       // Section D: Escalation & Enforcement (5.12-5.15)
       {
@@ -802,7 +841,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Tiered escalation (1-4), SLA definitions, notification chains, and escalation_level tracking',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'D', title: 'Escalation & Enforcement', range: '5.12-5.15' }
       },
       {
         id: 'sec-5-13',
@@ -811,7 +851,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Grace period configuration, extension requests, manager override workflows, and time tracking',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin']
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'D', title: 'Escalation & Enforcement', range: '5.12-5.15' }
       },
       {
         id: 'sec-5-14',
@@ -820,7 +861,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Consequence matrix, policy enforcement actions, system flags, and access restrictions',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'HR Partner', 'Compliance Officer']
+        targetRoles: ['Admin', 'HR Partner', 'Compliance Officer'],
+        sectionGroup: { code: 'D', title: 'Escalation & Enforcement', range: '5.12-5.15' }
       },
       {
         id: 'sec-5-15',
@@ -829,7 +871,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'HR workflow integration, disciplinary linkage, intervention tracking, and case resolution',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'HR Partner']
+        targetRoles: ['Admin', 'HR Partner'],
+        sectionGroup: { code: 'D', title: 'Escalation & Enforcement', range: '5.12-5.15' }
       },
       // Section E: Audit & Reporting (5.16-5.19)
       {
@@ -839,7 +882,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Audit log schema, retention policies, tamper-proof logging (SHA-256), and query patterns',
         contentLevel: 'reference',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'Compliance Officer', 'Consultant']
+        targetRoles: ['Admin', 'Compliance Officer', 'Consultant'],
+        sectionGroup: { code: 'E', title: 'Audit & Reporting', range: '5.16-5.19' }
       },
       {
         id: 'sec-5-17',
@@ -848,7 +892,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'OSHA 300A integration, standard report templates, export formats, and scheduling',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'Compliance Officer', 'HSE Officer']
+        targetRoles: ['Admin', 'Compliance Officer', 'HSE Officer'],
+        sectionGroup: { code: 'E', title: 'Audit & Reporting', range: '5.16-5.19' }
       },
       {
         id: 'sec-5-18',
@@ -857,7 +902,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Audit preparation workflows, evidence assembly, documentation packages, and regulator interface',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'Compliance Officer']
+        targetRoles: ['Admin', 'Compliance Officer'],
+        sectionGroup: { code: 'E', title: 'Audit & Reporting', range: '5.16-5.19' }
       },
       {
         id: 'sec-5-19',
@@ -866,7 +912,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Data archival, retention schedules, GDPR/data protection compliance, and historical query access',
         contentLevel: 'reference',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'Consultant', 'Compliance Officer']
+        targetRoles: ['Admin', 'Consultant', 'Compliance Officer'],
+        sectionGroup: { code: 'E', title: 'Audit & Reporting', range: '5.16-5.19' }
       },
       // Section F: HSE & Industry Compliance (5.20-5.23)
       {
@@ -876,7 +923,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'hse_safety_training ↔ lms_courses bidirectional linkage, hse_training_records sync with lms_enrollments',
         contentLevel: 'reference',
         estimatedReadTime: 12,
-        targetRoles: ['Admin', 'HSE Officer', 'Consultant']
+        targetRoles: ['Admin', 'HSE Officer', 'Consultant'],
+        sectionGroup: { code: 'F', title: 'HSE & Industry Compliance', range: '5.20-5.23' }
       },
       {
         id: 'sec-5-21',
@@ -885,7 +933,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'hse_incidents.corrective_actions → training request workflow, remedial training automation',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HSE Officer', 'L&D Admin']
+        targetRoles: ['Admin', 'HSE Officer', 'L&D Admin'],
+        sectionGroup: { code: 'F', title: 'HSE & Industry Compliance', range: '5.20-5.23' }
       },
       {
         id: 'sec-5-22',
@@ -894,7 +943,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'OSHA 10/30-Hour tracking, hse_osha_logs (22 fields), is_osha_reportable flag integration, OSHA 300A generation',
         contentLevel: 'reference',
         estimatedReadTime: 10,
-        targetRoles: ['Admin', 'HSE Officer', 'Compliance Officer']
+        targetRoles: ['Admin', 'HSE Officer', 'Compliance Officer'],
+        sectionGroup: { code: 'F', title: 'HSE & Industry Compliance', range: '5.20-5.23' }
       },
       {
         id: 'sec-5-23',
@@ -903,7 +953,8 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         description: 'Jamaica OSHA Act, Trinidad OSH Act 2004, Barbados Safety & Health at Work Act, regional calendar compliance',
         contentLevel: 'reference',
         estimatedReadTime: 8,
-        targetRoles: ['Admin', 'Consultant', 'Compliance Officer']
+        targetRoles: ['Admin', 'Consultant', 'Compliance Officer'],
+        sectionGroup: { code: 'F', title: 'HSE & Industry Compliance', range: '5.20-5.23' }
       }
     ]
   },
