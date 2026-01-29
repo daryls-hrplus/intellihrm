@@ -1,7 +1,7 @@
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Scale, Users, BarChart3, Bell, FileSearch, Globe } from 'lucide-react';
+import { Shield, Scale, Users, BarChart3, Bell, FileSearch, Globe, Smartphone, DollarSign, UserCheck } from 'lucide-react';
 
 // Section A: Compliance Program Framework (5.1-5.3)
 import { LndComplianceOverview } from './sections/compliance/LndComplianceOverview';
@@ -37,6 +37,11 @@ import { LndComplianceHSEIntegration } from './sections/compliance/LndCompliance
 import { LndComplianceIncidentTraining } from './sections/compliance/LndComplianceIncidentTraining';
 import { LndComplianceOSHA } from './sections/compliance/LndComplianceOSHA';
 import { LndComplianceCaribbean } from './sections/compliance/LndComplianceCaribbean';
+
+// Section G: Extended Capabilities (5.24-5.26)
+import { LndComplianceMobileCompletion } from './sections/compliance/LndComplianceMobileCompletion';
+import { LndComplianceCostTracking } from './sections/compliance/LndComplianceCostTracking';
+import { LndComplianceExternalAuditor } from './sections/compliance/LndComplianceExternalAuditor';
 
 export function LndComplianceSection() {
   return (
@@ -187,6 +192,24 @@ export function LndComplianceSection() {
       <LndComplianceOSHA />
       <Separator />
       <LndComplianceCaribbean />
+
+      {/* Section G: Extended Capabilities */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Smartphone className="h-5 w-5 text-blue-500" />
+            <CardTitle className="text-lg">Section G: Extended Capabilities (5.24-5.26)</CardTitle>
+          </div>
+          <CardDescription>Mobile completion, cost tracking, and external auditor access</CardDescription>
+        </CardHeader>
+      </Card>
+
+      <Separator />
+      <LndComplianceMobileCompletion />
+      <Separator />
+      <LndComplianceCostTracking />
+      <Separator />
+      <LndComplianceExternalAuditor />
     </div>
   );
 }
