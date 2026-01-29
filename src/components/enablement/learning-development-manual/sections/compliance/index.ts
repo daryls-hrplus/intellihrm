@@ -18,5 +18,23 @@ export { LndComplianceRiskIndicators } from './LndComplianceRiskIndicators';
 export { LndComplianceManagerView } from './LndComplianceManagerView';
 export { LndComplianceExecutiveReports } from './LndComplianceExecutiveReports';
 
+// Section D: Escalation & Enforcement (5.12-5.15)
+export { LndComplianceEscalationRules } from './LndComplianceEscalationRules';
+export { LndComplianceGracePeriodOps } from './LndComplianceGracePeriodOps';
+export { LndComplianceNonCompliance } from './LndComplianceNonCompliance';
+export { LndComplianceHRIntervention } from './LndComplianceHRIntervention';
+
+// Section E: Audit & Reporting (5.16-5.19)
+export { LndComplianceAuditTrailSection } from './LndComplianceAuditTrailSection';
+export { LndComplianceRegulatoryReports } from './LndComplianceRegulatoryReports';
+export { LndComplianceEvidencePackage } from './LndComplianceEvidencePackage';
+export { LndComplianceHistoricalRecords } from './LndComplianceHistoricalRecords';
+
+// Section F: HSE & Industry Compliance (5.20-5.23)
+export { LndComplianceHSEIntegration } from './LndComplianceHSEIntegration';
+export { LndComplianceIncidentTraining } from './LndComplianceIncidentTraining';
+export { LndComplianceOSHA } from './LndComplianceOSHA';
+export { LndComplianceCaribbean } from './LndComplianceCaribbean';
+
 // Legacy exports for backwards compatibility (deprecated - use new components above)
 export { LndComplianceFramework, LndComplianceTargetAudience, LndComplianceRecertification, LndComplianceDashboard, LndComplianceAuditTrail, LndComplianceRegionalVariations, LndComplianceExpiryTracking, LndComplianceGracePeriod } from './LndComplianceComponents';
