@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, AlertTriangle, CheckCircle, Clock, BarChart3, Settings, Upload, CalendarPlus } from "lucide-react";
+import { Plus, Pencil, AlertTriangle, CheckCircle, Clock, BarChart3, Settings, Upload, CalendarPlus, Users, Building2, CalendarDays, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { differenceInDays } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -20,6 +20,11 @@ import { ComplianceEscalationRulesAdmin } from "./compliance/ComplianceEscalatio
 import { ComplianceBulkOperations } from "./compliance/ComplianceBulkOperations";
 import { ComplianceGracePeriodExtension } from "./compliance/ComplianceGracePeriodExtension";
 import { ComplianceExemptionRequest } from "./compliance/ComplianceExemptionRequest";
+import { ComplianceManagerPortal } from "./compliance/ComplianceManagerPortal";
+import { ComplianceExecutiveDashboard } from "./compliance/ComplianceExecutiveDashboard";
+import { ComplianceCalendarView } from "./compliance/ComplianceCalendarView";
+import { ComplianceAuditTrailViewer } from "./compliance/ComplianceAuditTrailViewer";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ComplianceTrainingTabProps {
   companyId: string;
@@ -47,6 +52,7 @@ interface Assignment {
 }
 
 export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps) {
+  const { user } = useAuth();
   const [trainings, setTrainings] = useState<ComplianceTraining[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
@@ -190,13 +196,25 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="flex flex-wrap gap-1">
           <TabsTrigger value="dashboard" className="flex items-center gap-1">
             <BarChart3 className="h-4 w-4" />
             Dashboard
           </TabsTrigger>
           <TabsTrigger value="requirements">Requirements</TabsTrigger>
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center gap-1">
+            <CalendarDays className="h-4 w-4" />
+            Calendar
+          </TabsTrigger>
+          <TabsTrigger value="manager" className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            Team View
+          </TabsTrigger>
+          <TabsTrigger value="executive" className="flex items-center gap-1">
+            <Building2 className="h-4 w-4" />
+            Executive
+          </TabsTrigger>
           <TabsTrigger value="bulk" className="flex items-center gap-1">
             <Upload className="h-4 w-4" />
             Bulk Ops
@@ -208,6 +226,10 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
           <TabsTrigger value="escalation" className="flex items-center gap-1">
             <Settings className="h-4 w-4" />
             Escalation
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="flex items-center gap-1">
+            <Shield className="h-4 w-4" />
+            Audit Trail
           </TabsTrigger>
         </TabsList>
 
@@ -354,6 +376,22 @@ export function ComplianceTrainingTab({ companyId }: ComplianceTrainingTabProps)
 
         <TabsContent value="escalation" className="mt-6">
           <ComplianceEscalationRulesAdmin companyId={companyId} />
+        </TabsContent>
+
+        <TabsContent value="calendar" className="mt-6">
+          <ComplianceCalendarView companyId={companyId} />
+        </TabsContent>
+
+        <TabsContent value="manager" className="mt-6">
+          <ComplianceManagerPortal companyId={companyId} managerId={user?.id || ""} />
+        </TabsContent>
+
+        <TabsContent value="executive" className="mt-6">
+          <ComplianceExecutiveDashboard companyId={companyId} />
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-6">
+          <ComplianceAuditTrailViewer companyId={companyId} />
         </TabsContent>
       </Tabs>
     </div>
