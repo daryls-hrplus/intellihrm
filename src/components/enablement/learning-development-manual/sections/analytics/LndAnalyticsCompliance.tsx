@@ -159,7 +159,7 @@ export function LndAnalyticsAuditExports() {
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold mb-3">Audit Log Structure</h3>
+        <h3 className="text-lg font-semibold mb-3">compliance_audit_log Table (Full Schema)</h3>
         <Table>
           <TableHeader>
             <TableRow>
@@ -171,13 +171,33 @@ export function LndAnalyticsAuditExports() {
           <TableBody>
             <TableRow>
               <TableCell><code>id</code></TableCell>
-              <TableCell>uuid</TableCell>
+              <TableCell>uuid (PK)</TableCell>
               <TableCell>Unique log entry identifier</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>company_id</code></TableCell>
+              <TableCell>uuid (FK)</TableCell>
+              <TableCell>Multi-tenant company scope</TableCell>
             </TableRow>
             <TableRow>
               <TableCell><code>action_type</code></TableCell>
               <TableCell>text</TableCell>
               <TableCell>Action performed (assignment, completion, exemption, escalation)</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>event_category</code></TableCell>
+              <TableCell>text</TableCell>
+              <TableCell>Category: compliance, training, certification</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>entity_type</code></TableCell>
+              <TableCell>text</TableCell>
+              <TableCell>Entity affected: assignment, enrollment, certificate</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>entity_id</code></TableCell>
+              <TableCell>uuid</TableCell>
+              <TableCell>Reference to the affected record</TableCell>
             </TableRow>
             <TableRow>
               <TableCell><code>old_values</code></TableCell>
@@ -190,9 +210,49 @@ export function LndAnalyticsAuditExports() {
               <TableCell>State after action</TableCell>
             </TableRow>
             <TableRow>
+              <TableCell><code>change_summary</code></TableCell>
+              <TableCell>text</TableCell>
+              <TableCell>Human-readable description of the change</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>actor_type</code></TableCell>
+              <TableCell>text</TableCell>
+              <TableCell>user, system, api</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>actor_name</code></TableCell>
+              <TableCell>text</TableCell>
+              <TableCell>Display name of the actor</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>actor_role</code></TableCell>
+              <TableCell>text</TableCell>
+              <TableCell>Role at time of action (admin, manager, employee)</TableCell>
+            </TableRow>
+            <TableRow>
               <TableCell><code>performed_by</code></TableCell>
-              <TableCell>uuid</TableCell>
-              <TableCell>User who performed the action</TableCell>
+              <TableCell>uuid (FK)</TableCell>
+              <TableCell>Reference to profiles.id</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>ip_address</code></TableCell>
+              <TableCell>inet</TableCell>
+              <TableCell>Client IP address for security audit</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>user_agent</code></TableCell>
+              <TableCell>text</TableCell>
+              <TableCell>Browser/client identifier</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>session_id</code></TableCell>
+              <TableCell>text</TableCell>
+              <TableCell>Authentication session reference</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>sequence_number</code></TableCell>
+              <TableCell>bigint</TableCell>
+              <TableCell>Sequential ordering for chain verification</TableCell>
             </TableRow>
             <TableRow>
               <TableCell><code>checksum</code></TableCell>
@@ -203,6 +263,16 @@ export function LndAnalyticsAuditExports() {
               <TableCell><code>previous_checksum</code></TableCell>
               <TableCell>text</TableCell>
               <TableCell>Hash chain link to previous record</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>metadata</code></TableCell>
+              <TableCell>jsonb</TableCell>
+              <TableCell>Additional context data</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><code>created_at</code></TableCell>
+              <TableCell>timestamptz</TableCell>
+              <TableCell>Immutable creation timestamp</TableCell>
             </TableRow>
           </TableBody>
         </Table>

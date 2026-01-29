@@ -1083,16 +1083,16 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
   },
 
   // ==========================================================================
-  // CHAPTER 7: ANALYTICS & REPORTING (~120 min)
-  // Industry-aligned: Workday Learning Analytics, SAP SuccessFactors LMS Reporting, Docebo Analytics
+  // CHAPTER 7: ANALYTICS & REPORTING (~150 min)
+  // Industry-aligned: Workday Learning Analytics, SAP SuccessFactors LMS Reporting, Docebo Analytics, Cornerstone
   // ==========================================================================
   {
     id: 'chapter-7',
     sectionNumber: '7',
     title: 'Analytics & Reporting',
-    description: 'Enterprise training analytics covering dashboards, Kirkpatrick evaluation, ROI analysis, compliance reporting, and AI-powered insights.',
+    description: 'Enterprise training analytics covering dashboards, Kirkpatrick evaluation, ROI analysis, compliance reporting, SCORM/xAPI tracking, gamification metrics, learning paths, external training, and AI-powered insights.',
     contentLevel: 'procedure',
-    estimatedReadTime: 120,
+    estimatedReadTime: 150,
     targetRoles: ['Admin', 'L&D Admin', 'HR Partner', 'Manager', 'Executive'],
     subsections: [
       // Section A: Executive Dashboards (7.1-7.3)
@@ -1111,7 +1111,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-2',
         sectionNumber: '7.2',
         title: 'KPI Card Configuration',
-        description: 'Configuring dashboard metrics: total courses, enrollments, completion rate, avg quiz score, certifications, training hours, compliance rate, budget used',
+        description: 'Configuring dashboard metrics: total courses, enrollments, completion rate, avg quiz score, certifications, training hours, compliance rate, budget used (allocated_amount)',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin'],
@@ -1132,7 +1132,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-4',
         sectionNumber: '7.4',
         title: 'Learner Progress Reports',
-        description: 'Individual progress tracking via lms_enrollments (status, progress_percentage, started_at, completed_at) with learning history timeline',
+        description: 'Individual progress via lms_enrollments (user_id, course_id, enrolled_by, status, progress_percentage), lms_lesson_progress, and training_analytics tables',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'Manager', 'Employee'],
@@ -1143,7 +1143,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-5',
         sectionNumber: '7.5',
         title: 'Certification Tracking',
-        description: 'Certificate issuance and expiry monitoring via lms_certificates with verification_code validation and renewal alerts',
+        description: 'Certificate issuance and expiry via lms_certificates (enrollment_id, course_id, user_id, verification_code, issued_at, expires_at)',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin', 'Manager'],
@@ -1153,7 +1153,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-6',
         sectionNumber: '7.6',
         title: 'Quiz Performance Analytics',
-        description: 'Quiz attempt analysis via lms_quiz_attempts (score, max_score, percentage, passed, time_spent_seconds, attempt_number)',
+        description: 'Quiz attempt analysis via lms_quiz_attempts (quiz_id, enrollment_id, score, max_score, percentage, passed, time_spent_seconds, attempt_number, started_at, submitted_at)',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin'],
@@ -1164,7 +1164,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-7',
         sectionNumber: '7.7',
         title: 'Course Effectiveness Metrics',
-        description: 'Holistic course quality via completion rates, quiz scores, evaluation feedback, and NPS tracking per course',
+        description: 'Holistic course quality via completion rates, quiz scores, lms_course_reviews (rating, review_text, is_anonymous), and NPS tracking',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'L&D Admin'],
@@ -1175,7 +1175,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-8',
         sectionNumber: '7.8',
         title: 'Kirkpatrick Model Reporting',
-        description: 'Four-level evaluation framework via training_evaluations: Level 1 (Reaction), Level 2 (Learning), Level 3 (Behavior), Level 4 (Results)',
+        description: 'Four-level evaluation via training_evaluations (id, company_id, name, description, evaluation_level, questions, is_active) and training_evaluation_responses',
         contentLevel: 'procedure',
         estimatedReadTime: 12,
         targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
@@ -1185,7 +1185,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-9',
         sectionNumber: '7.9',
         title: 'Training ROI Analysis',
-        description: 'Return on investment calculation: (training_budgets.spent_amount vs skills_transfer_assessments outcomes) with cost-per-learner and business impact metrics',
+        description: 'ROI calculation via training_budgets.allocated_amount vs skills_transfer_assessments, transfer_benchmarks, with cost-per-learner metrics',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'HR Partner', 'Executive'],
@@ -1196,7 +1196,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-10',
         sectionNumber: '7.10',
         title: 'Budget Utilization Reports',
-        description: 'Financial tracking via training_budgets (allocated_amount, spent_amount, currency) with department-level breakdown and fiscal year comparison',
+        description: 'Financial tracking via training_budgets (company_id, department_id, fiscal_year, allocated_amount, spent_amount, currency, notes) with variance analysis',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'HR Partner', 'Executive'],
@@ -1217,7 +1217,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-12',
         sectionNumber: '7.12',
         title: 'Compliance Reporting',
-        description: 'Mandatory training status via compliance_training_assignments with overdue alerts, escalation tracking, and audit-ready exports',
+        description: 'Mandatory training status via compliance_training_assignments with overdue alerts, escalation tracking, and exemption management',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'L&D Admin', 'Compliance Officer'],
@@ -1227,7 +1227,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-13',
         sectionNumber: '7.13',
         title: 'Regulatory Audit Exports',
-        description: 'Generating audit-ready reports with compliance_audit_log evidence, checksum verification, and regulatory format templates',
+        description: 'Audit-ready reports via compliance_audit_log (event_category, entity_type, actor_type, actor_name, actor_role, change_summary, ip_address, user_agent, session_id, metadata, sequence_number, checksum, previous_checksum)',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'Compliance Officer'],
@@ -1259,7 +1259,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-16',
         sectionNumber: '7.16',
         title: 'AI-Powered BI Reports',
-        description: 'Natural language report generation via AIModuleReportBuilder with banded and BI report types for training module',
+        description: 'Natural language report generation via AIModuleReportBuilder with banded and BI report types, PII masking controls',
         contentLevel: 'procedure',
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin'],
@@ -1270,7 +1270,7 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-7-17',
         sectionNumber: '7.17',
         title: 'Scheduled Reports Configuration',
-        description: 'Automated report delivery setup with recipient lists, frequency (daily/weekly/monthly), and format options (PDF, Excel, CSV)',
+        description: 'Automated report delivery via ScheduledOrgReports.tsx and scheduled_org_reports table with recipient lists, frequency, format options',
         contentLevel: 'procedure',
         estimatedReadTime: 6,
         targetRoles: ['Admin', 'L&D Admin'],
@@ -1285,6 +1285,47 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         estimatedReadTime: 8,
         targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
         sectionGroup: { code: 'G', title: 'Advanced Analytics & AI', range: '7.16-7.18' }
+      },
+      // Section H: Technical Analytics (7.19-7.22) - NEW
+      {
+        id: 'sec-7-19',
+        sectionNumber: '7.19',
+        title: 'SCORM/xAPI Analytics',
+        description: 'eLearning tracking via lms_scorm_tracking (sco_id, lesson_status, completion_status, success_status, score_raw/min/max/scaled, total_time, suspend_data, cmi_data) and lms_xapi_statements (actor, verb, object, result, context)',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'L&D Admin', 'Consultant'],
+        sectionGroup: { code: 'H', title: 'Technical Analytics', range: '7.19-7.22' }
+      },
+      {
+        id: 'sec-7-20',
+        sectionNumber: '7.20',
+        title: 'Gamification Analytics',
+        description: 'Engagement tracking via lms_user_points (total_points, current_level, streak_days), lms_user_badges (earned_at, source_type), lms_leaderboards (scope, time_period), lms_point_transactions',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin'],
+        sectionGroup: { code: 'H', title: 'Technical Analytics', range: '7.19-7.22' }
+      },
+      {
+        id: 'sec-7-21',
+        sectionNumber: '7.21',
+        title: 'Learning Path Analytics',
+        description: 'Path progression via learning_path_enrollments (status, progress_percentage, current_course_index, source_type) and learning_path_course_progress with funnel analysis',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'H', title: 'Technical Analytics', range: '7.19-7.22' }
+      },
+      {
+        id: 'sec-7-22',
+        sectionNumber: '7.22',
+        title: 'External Training Analytics',
+        description: 'External training tracking via external_training_records (21 fields including training_type, provider_name, duration_hours, cost_amount, cost_currency, budget_id, certificate_url, skills_acquired, verified_by)',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin', 'HR Partner'],
+        sectionGroup: { code: 'H', title: 'Technical Analytics', range: '7.19-7.22' }
       }
     ]
   },

@@ -8,7 +8,8 @@ import {
   LndAnalyticsBudgetUtilization, LndAnalyticsCostPerLearner,
   LndAnalyticsComplianceReporting, LndAnalyticsAuditExports,
   LndAnalyticsManagerTeamView, LndAnalyticsDepartmentRollup,
-  LndAnalyticsAIPoweredBI, LndAnalyticsScheduledReports, LndAnalyticsCustomReportBuilder
+  LndAnalyticsAIPoweredBI, LndAnalyticsScheduledReports, LndAnalyticsCustomReportBuilder,
+  LndAnalyticsScormXapi, LndAnalyticsGamification, LndAnalyticsLearningPaths, LndAnalyticsExternalTraining
 } from './sections/analytics';
 
 const ANALYTICS_SECTIONS = [
@@ -37,6 +38,11 @@ const ANALYTICS_SECTIONS = [
   { id: 'sec-7-16', num: '7.16', title: 'AI-Powered BI Reports', time: 8, Component: LndAnalyticsAIPoweredBI, group: 'G' },
   { id: 'sec-7-17', num: '7.17', title: 'Scheduled Reports Configuration', time: 6, Component: LndAnalyticsScheduledReports, group: 'G' },
   { id: 'sec-7-18', num: '7.18', title: 'Custom Report Builder', time: 8, Component: LndAnalyticsCustomReportBuilder, group: 'G' },
+  // Section H: Technical Analytics (NEW)
+  { id: 'sec-7-19', num: '7.19', title: 'SCORM/xAPI Analytics', time: 12, Component: LndAnalyticsScormXapi, group: 'H' },
+  { id: 'sec-7-20', num: '7.20', title: 'Gamification Analytics', time: 10, Component: LndAnalyticsGamification, group: 'H' },
+  { id: 'sec-7-21', num: '7.21', title: 'Learning Path Analytics', time: 10, Component: LndAnalyticsLearningPaths, group: 'H' },
+  { id: 'sec-7-22', num: '7.22', title: 'External Training Analytics', time: 10, Component: LndAnalyticsExternalTraining, group: 'H' },
 ];
 
 export function LndAnalyticsSection() {
@@ -51,8 +57,8 @@ export function LndAnalyticsSection() {
             <div>
               <CardTitle className="text-xl">Chapter 7: Analytics & Reporting</CardTitle>
               <CardDescription className="flex items-center gap-4 mt-1">
-                <span className="flex items-center gap-1"><Clock className="h-4 w-4" />120 minutes</span>
-                <span>18 sections</span>
+                <span className="flex items-center gap-1"><Clock className="h-4 w-4" />150 minutes</span>
+                <span>22 sections</span>
               </CardDescription>
             </div>
           </div>
@@ -60,7 +66,8 @@ export function LndAnalyticsSection() {
         <CardContent>
           <p className="text-muted-foreground">
             Enterprise training analytics covering dashboards, Kirkpatrick evaluation, ROI analysis,
-            compliance reporting, and AI-powered insights. Industry-aligned with Workday, SAP SuccessFactors, and Docebo patterns.
+            compliance reporting, SCORM/xAPI tracking, gamification metrics, learning paths, external training, 
+            and AI-powered insights. Industry-aligned with Workday, SAP SuccessFactors, Docebo, and Cornerstone patterns.
           </p>
         </CardContent>
       </Card>

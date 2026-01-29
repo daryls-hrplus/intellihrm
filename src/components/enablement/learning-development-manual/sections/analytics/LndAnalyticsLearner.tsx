@@ -64,7 +64,7 @@ export function LndAnalyticsLearnerProgress() {
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold mb-3">Progress Tracking Fields</h3>
+        <h3 className="text-lg font-semibold mb-3">lms_enrollments Table Schema (Full)</h3>
         <Card>
           <CardContent className="pt-4">
             <Table>
@@ -76,6 +76,36 @@ export function LndAnalyticsLearnerProgress() {
                 </TableRow>
               </TableHeader>
               <TableBody>
+                <TableRow>
+                  <TableCell><code>id</code></TableCell>
+                  <TableCell>uuid (PK)</TableCell>
+                  <TableCell>Unique enrollment identifier</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>user_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Reference to profiles.id (the learner)</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>course_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Reference to lms_courses.id</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>company_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Multi-tenant company scope</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>enrolled_by</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>User who enrolled the learner (self or manager)</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>status</code></TableCell>
+                  <TableCell>text</TableCell>
+                  <TableCell>enrolled, in_progress, completed, expired, cancelled</TableCell>
+                </TableRow>
                 <TableRow>
                   <TableCell><code>progress_percentage</code></TableCell>
                   <TableCell>integer (0-100)</TableCell>
@@ -100,6 +130,115 @@ export function LndAnalyticsLearnerProgress() {
                   <TableCell><code>due_date</code></TableCell>
                   <TableCell>date</TableCell>
                   <TableCell>Target completion date (from assignment or enrollment)</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>created_at</code></TableCell>
+                  <TableCell>timestamptz</TableCell>
+                  <TableCell>Record creation timestamp</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>updated_at</code></TableCell>
+                  <TableCell>timestamptz</TableCell>
+                  <TableCell>Last modification timestamp</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <h3 className="text-lg font-semibold mb-3">lms_lesson_progress Table</h3>
+        <Card>
+          <CardContent className="pt-4">
+            <p className="text-sm text-muted-foreground mb-3">
+              Granular lesson-level tracking for detailed progress analytics:
+            </p>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Field</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell><code>enrollment_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Reference to lms_enrollments.id</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>lesson_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Reference to lms_lessons.id</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>is_completed</code></TableCell>
+                  <TableCell>boolean</TableCell>
+                  <TableCell>Lesson completion status</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>time_spent_seconds</code></TableCell>
+                  <TableCell>integer</TableCell>
+                  <TableCell>Total time spent on lesson content</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>last_accessed_at</code></TableCell>
+                  <TableCell>timestamptz</TableCell>
+                  <TableCell>Most recent access timestamp</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <h3 className="text-lg font-semibold mb-3">training_analytics Table</h3>
+        <Card>
+          <CardContent className="pt-4">
+            <p className="text-sm text-muted-foreground mb-3">
+              Event-level analytics for session and engagement tracking:
+            </p>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Field</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell><code>event_type</code></TableCell>
+                  <TableCell>text</TableCell>
+                  <TableCell>course_view, lesson_start, quiz_attempt, certificate_earned</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>user_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Reference to profiles.id</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>course_id</code></TableCell>
+                  <TableCell>uuid (FK)</TableCell>
+                  <TableCell>Reference to lms_courses.id</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>session_id</code></TableCell>
+                  <TableCell>text</TableCell>
+                  <TableCell>Browser session identifier for engagement tracking</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>metadata</code></TableCell>
+                  <TableCell>jsonb</TableCell>
+                  <TableCell>Additional event-specific data</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell><code>created_at</code></TableCell>
+                  <TableCell>timestamptz</TableCell>
+                  <TableCell>Event timestamp</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
