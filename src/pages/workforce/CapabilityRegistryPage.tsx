@@ -61,6 +61,8 @@ import {
   FileDown,
   CalendarIcon,
   Clock,
+  ListChecks,
+  Briefcase,
   AlertTriangle,
 } from "lucide-react";
 import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
@@ -125,6 +127,10 @@ export default function CapabilityRegistryPage() {
   // Date-driven filters
   const [effectiveAsOfDate, setEffectiveAsOfDate] = useState<Date | undefined>(undefined);
   const [includeExpired, setIncludeExpired] = useState(false);
+  
+  // Configuration status filter
+  type ConfigStatusFilter = 'all' | 'no-indicators' | 'not-linked-jobs';
+  const [configStatusFilter, setConfigStatusFilter] = useState<ConfigStatusFilter>('all');
   const [showDateFilter, setShowDateFilter] = useState(false);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -332,9 +338,34 @@ export default function CapabilityRegistryPage() {
     fetchCapabilities({});
   };
 
-  const skillCount = enrichedCapabilities.filter((c) => c.type === "SKILL").length;
-  const competencyCount = enrichedCapabilities.filter((c) => c.type === "COMPETENCY").length;
-  const valueCount = enrichedCapabilities.filter((c) => c.type === "VALUE").length;
+  // Filter by configuration status
+  const filteredCapabilities = useMemo(() => {
+    return enrichedCapabilities.filter(cap => {
+      if (configStatusFilter === 'no-indicators') {
+        return !cap.has_behavioral_indicators;
+      }
+      if (configStatusFilter === 'not-linked-jobs') {
+        // Values don't link to jobs, so exclude them from this filter
+        if (cap.type === 'VALUE') return false;
+        return (cap.job_count ?? 0) === 0;
+      }
+      return true;
+    });
+  }, [enrichedCapabilities, configStatusFilter]);
+
+  // Configuration filter counts (based on enrichedCapabilities, not filtered)
+  const noIndicatorsCount = useMemo(() => {
+    return enrichedCapabilities.filter(c => !c.has_behavioral_indicators).length;
+  }, [enrichedCapabilities]);
+
+  const notLinkedCount = useMemo(() => {
+    return enrichedCapabilities.filter(c => c.type !== 'VALUE' && (c.job_count ?? 0) === 0).length;
+  }, [enrichedCapabilities]);
+
+  // Type counts based on filtered capabilities
+  const skillCount = filteredCapabilities.filter((c) => c.type === "SKILL").length;
+  const competencyCount = filteredCapabilities.filter((c) => c.type === "COMPETENCY").length;
+  const valueCount = filteredCapabilities.filter((c) => c.type === "VALUE").length;
   
   // Count expiring soon items
   const expiringSoonCount = useMemo(() => {
@@ -684,6 +715,38 @@ export default function CapabilityRegistryPage() {
                 </Select>
               </div>
             </div>
+            
+            {/* Configuration Status Filters */}
+            <div className="flex items-center gap-2 flex-wrap mt-4 pt-4 border-t">
+              <span className="text-sm text-muted-foreground">Configuration:</span>
+              <Button
+                variant={configStatusFilter === 'all' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setConfigStatusFilter('all')}
+              >
+                All
+              </Button>
+              <Button
+                variant={configStatusFilter === 'no-indicators' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setConfigStatusFilter('no-indicators')}
+                className="gap-1"
+              >
+                <ListChecks className="h-3.5 w-3.5" />
+                No Indicators
+                <Badge variant="outline" className="ml-1">{noIndicatorsCount}</Badge>
+              </Button>
+              <Button
+                variant={configStatusFilter === 'not-linked-jobs' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setConfigStatusFilter('not-linked-jobs')}
+                className="gap-1"
+              >
+                <Briefcase className="h-3.5 w-3.5" />
+                Not Linked to Jobs
+                <Badge variant="outline" className="ml-1">{notLinkedCount}</Badge>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "all" | "skills" | "competencies" | "values")}>
@@ -691,7 +754,7 @@ export default function CapabilityRegistryPage() {
                 <TabsTrigger value="all" className="gap-2">
                   <Layers className="h-4 w-4" />
                   All
-                  <Badge variant="secondary">{enrichedCapabilities.length}</Badge>
+                  <Badge variant="secondary">{filteredCapabilities.length}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="skills" className="gap-2">
                   <Zap className="h-4 w-4" />
@@ -715,7 +778,7 @@ export default function CapabilityRegistryPage() {
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : enrichedCapabilities.length === 0 ? (
+                ) : filteredCapabilities.length === 0 ? (
                   <EmptyStateOnboarding
                     onOpenWizard={() => setIsQuickStartOpen(true)}
                     onOpenBulkImport={() => setIsBulkImportOpen(true)}
@@ -725,7 +788,7 @@ export default function CapabilityRegistryPage() {
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {enrichedCapabilities.map((capability) => (
+                    {filteredCapabilities.map((capability) => (
                       <CapabilityCard
                         key={capability.id}
                         capability={capability}
@@ -764,7 +827,7 @@ export default function CapabilityRegistryPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {enrichedCapabilities.filter(c => c.type === "SKILL").map((capability) => (
+                    {filteredCapabilities.filter(c => c.type === "SKILL").map((capability) => (
                       <CapabilityCard
                         key={capability.id}
                         capability={capability}
@@ -803,7 +866,7 @@ export default function CapabilityRegistryPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {enrichedCapabilities.filter(c => c.type === "COMPETENCY").map((capability) => (
+                    {filteredCapabilities.filter(c => c.type === "COMPETENCY").map((capability) => (
                       <CapabilityCard
                         key={capability.id}
                         capability={capability}
@@ -824,7 +887,7 @@ export default function CapabilityRegistryPage() {
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : enrichedCapabilities.filter(c => c.type === "VALUE").length === 0 ? (
+                ) : filteredCapabilities.filter(c => c.type === "VALUE").length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <Heart className="h-12 w-12 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium">No Values Defined</h3>
@@ -838,7 +901,7 @@ export default function CapabilityRegistryPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {enrichedCapabilities.filter(c => c.type === "VALUE").map((capability) => (
+                    {filteredCapabilities.filter(c => c.type === "VALUE").map((capability) => (
                       <CapabilityCard
                         key={capability.id}
                         capability={capability}
