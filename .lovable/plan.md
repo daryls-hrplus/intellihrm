@@ -1,276 +1,265 @@
 
-# Seed Missing Industry-Standard Workflows for Performance & Succession
+# Enhance Manager Self-Service Dashboard Analytics
 
-## Summary
-Add 10 additional must-have workflow templates to align with enterprise HRMS benchmarks (Workday, SAP SuccessFactors, Oracle HCM). These workflows address gaps in continuous feedback, PIP lifecycle management, and succession governance.
-
----
-
-## Current vs. Target State
-
-### Performance Module
-
-| Category | Current Count | New Templates | Total |
-|----------|---------------|---------------|-------|
-| Appraisals | 4 | +2 (Continuous Feedback, Mid-Cycle Review) | 6 |
-| Performance Improvement | 1 | +3 (PIP Extension, PIP Closure, Appraisal Re-Open) | 4 |
-| Goals | 5 | 0 | 5 |
-| 360 Feedback | 5 | 0 | 5 |
-| **Total** | **15** | **+5** | **20** |
-
-### Succession Module
-
-| Category | Current Count | New Templates | Total |
-|----------|---------------|---------------|-------|
-| Candidate Management | 2 | 0 | 2 |
-| Plan Governance | 2 | +2 (Key Position Designation, Bench Strength Review) | 4 |
-| Emergency Succession | 1 | 0 | 1 |
-| Risk Management | 0 | +3 (Flight Risk Acknowledgment, Retention Action, Nine-Box Override) | 3 |
-| **Total** | **5** | **+5** | **10** |
+## Executive Summary
+The Manager Self-Service (MSS) dashboard currently provides a category-based navigation hub with basic AI coaching and leave intelligence. Based on industry standards (Workday, SAP SuccessFactors, Oracle HCM) and the module categories visible in the uploaded screenshot, this plan proposes adding **consolidated team KPI widgets** directly to the MSS landing page to give managers immediate visibility into their team's status across all areas.
 
 ---
 
-## New Workflows to Seed
+## Current State Analysis
 
-### Performance Module Additions
+### What the MSS Dashboard Currently Shows
+1. **Team Leave Intelligence** - AI-powered absence patterns and no-show predictions
+2. **Resumption of Duty Widget** - Pending ROD verifications
+3. **Coaching Inbox** - AI-generated intervention prompts for team support
+4. **Grouped Module Cards** - Navigation links organized into 5 sections
 
-#### 1. Continuous Feedback Approval
-- **Code**: `PERF_CONTINUOUS_FEEDBACK`
-- **Category**: `continuous_feedback`
-- **Purpose**: Approve ad-hoc feedback shared outside formal cycles
-- **Workflow Steps**: Manager → HR (optional)
-- **Industry Pattern**: Workday Continuous Performance Management
-
-#### 2. Mid-Cycle Review Approval
-- **Code**: `PERF_MIDCYCLE_REVIEW`
-- **Category**: `midcycle_review`
-- **Purpose**: Formal checkpoint during long appraisal cycles (annual → semi-annual check-in)
-- **Workflow Steps**: Skip-Level Manager → HR Partner
-- **Industry Pattern**: SAP SuccessFactors Career Development Planning
-
-#### 3. PIP Extension Request
-- **Code**: `PERF_PIP_EXTENSION`
-- **Category**: `pip_extension`
-- **Purpose**: Approve extension of PIP duration when more time is needed
-- **Workflow Steps**: HR Partner → HR Director
-- **Industry Pattern**: Oracle HCM Talent Management
-
-#### 4. PIP Closure Approval
-- **Code**: `PERF_PIP_CLOSURE`
-- **Category**: `pip_closure`
-- **Purpose**: Formal sign-off on PIP completion (successful or unsuccessful)
-- **Workflow Steps**: HR Partner → Legal/Employee Relations
-- **Industry Pattern**: Enterprise standard for audit trail
-
-#### 5. Appraisal Re-Open Request
-- **Code**: `PERF_APPRAISAL_REOPEN`
-- **Category**: `appraisal_reopen`
-- **Purpose**: Allow corrections to finalized appraisals with approval
-- **Workflow Steps**: HR Manager → HR Director → System Admin
-- **Industry Pattern**: SAP SuccessFactors Performance Management
+### What's Missing (Industry Benchmark Gap)
+Based on Workday, SAP SuccessFactors, and Oracle HCM patterns, manager dashboards typically display:
+- **At-a-glance team health KPIs** before navigation
+- **Action-required counters** across all modules
+- **Performance distribution visualization**
+- **Goal progress summaries**
+- **Pending approvals consolidation**
+- **Risk indicators** (attrition, compliance, overdue items)
+- **Team workforce composition metrics**
 
 ---
 
-### Succession Module Additions
+## Proposed Enhancements
 
-#### 6. Key Position Designation Approval
-- **Code**: `SUCC_KEY_POSITION`
-- **Category**: `key_position_designation`
-- **Purpose**: Approve marking a position as succession-critical
-- **Workflow Steps**: Department Head → CHRO
-- **Industry Pattern**: Workday Succession Planning
+### 1. Team Health Summary Row (New Widget)
+**Purpose:** Single-glance team status across all categories
 
-#### 7. Bench Strength Review Approval
-- **Code**: `SUCC_BENCH_REVIEW`
-- **Category**: `bench_strength_review`
-- **Purpose**: Sign-off on annual succession coverage assessments
-- **Workflow Steps**: HR Partner → CHRO
-- **Industry Pattern**: SAP SuccessFactors Succession & Development
+| Metric | Source | Description |
+|--------|--------|-------------|
+| Team Size | profiles | Direct reports count |
+| Actions Pending | workflow_approvals | All pending approvals |
+| Overdue Items | Multiple tables | Leave, training, appraisals overdue |
+| High Performers | appraisals | % rated 4-5 in last cycle |
+| At Risk | Multiple signals | Attrition/compliance risk count |
 
-#### 8. Flight Risk Acknowledgment
-- **Code**: `SUCC_FLIGHT_RISK_ACK`
-- **Category**: `flight_risk_acknowledgment`
-- **Purpose**: Manager acknowledges high-value employee flight risk alert
-- **Workflow Steps**: Manager Acknowledgment (single step)
-- **Industry Pattern**: Workday Prism Analytics triggers
+**Industry Pattern:** Workday Team Summary Widget
 
-#### 9. Retention Action Approval
-- **Code**: `SUCC_RETENTION_ACTION`
-- **Category**: `retention_action_approval`
-- **Purpose**: Approve retention interventions (counter-offer, promotion, etc.)
-- **Workflow Steps**: HR Partner → Finance → CHRO
-- **Industry Pattern**: Oracle HCM Workforce Compensation
+---
 
-#### 10. Nine-Box Placement Override
-- **Code**: `SUCC_NINEBOX_OVERRIDE`
-- **Category**: `ninebox_override`
-- **Purpose**: Approve manual override of algorithm-calculated 9-box placement
-- **Workflow Steps**: Calibration Committee → HR Director
-- **Industry Pattern**: SAP SuccessFactors Calibration Sessions
+### 2. Performance Snapshot Card (New Widget)
+**Purpose:** Quick view of team performance metrics
+
+| Metric | Description |
+|--------|-------------|
+| Appraisal Completion Rate | % of team with completed appraisals this cycle |
+| Team Average Rating | Numeric average from last appraisal |
+| Rating Distribution | Mini bar chart showing 1-5 distribution |
+| Goals On-Track | % of team goals at or ahead of schedule |
+| PIPs Active | Count of active performance improvement plans |
+
+**Industry Pattern:** SAP SuccessFactors Performance Dashboard
+
+---
+
+### 3. Pending Approvals Consolidated Widget (New Widget)
+**Purpose:** Single counter for all pending manager actions
+
+| Category | Source |
+|----------|--------|
+| Leave Requests | leave_requests where approver = manager |
+| Time Approvals | time_entries pending |
+| Training Requests | training_requests pending |
+| Expense Claims | expense_requests pending |
+| Workflow Approvals | workflow_approvals pending |
+
+**Industry Pattern:** Oracle HCM Approvals Inbox
+
+---
+
+### 4. Team Composition Mini-Dashboard (New Widget)
+**Purpose:** Workforce snapshot for the manager's span of control
+
+| Metric | Description |
+|--------|-------------|
+| New Hires (90 days) | Recently onboarded team members |
+| Probationary | Team members still in probation |
+| Upcoming Anniversaries | Work anniversaries next 30 days |
+| Expiring Documents | Visas, certifications, licenses expiring |
+| Pending Exits | Team members in offboarding |
+
+**Industry Pattern:** Workday Workforce Planning
+
+---
+
+### 5. Training & Development Status Card (New Widget)
+**Purpose:** L&D compliance visibility for managers
+
+| Metric | Description |
+|--------|-------------|
+| Active Enrollments | Team members in training |
+| Completion Rate | % of assigned training completed |
+| Overdue Training | Count of past-due assignments |
+| Expiring Certifications | Certifications expiring in 90 days |
+| Development Plans | Active IDPs for team |
+
+**Industry Pattern:** SAP SuccessFactors Learning Dashboard
+
+---
+
+### 6. Succession & Talent Card (New Widget)
+**Purpose:** Talent pipeline health for manager's team
+
+| Metric | Description |
+|--------|-------------|
+| Succession Coverage | % of key positions with successors |
+| Ready Now Candidates | Team members flagged as "ready now" |
+| High Potentials | Team members in HiPo talent pools |
+| Flight Risk | Employees flagged for attrition risk |
+| Skill Gaps | Critical skill gaps identified |
+
+**Industry Pattern:** Workday Succession Planning
+
+---
+
+### 7. Compensation Equity Alert (New Widget)
+**Purpose:** Pay equity visibility for managers
+
+| Metric | Description |
+|--------|-------------|
+| Avg Compa-Ratio | Team average pay vs. midpoint |
+| Below Midpoint | Count of team members < 95% compa |
+| Above Maximum | Count exceeding range maximum |
+| Pay Equity Alerts | Gender/role equity flags |
+
+**Industry Pattern:** Oracle HCM Compensation
 
 ---
 
 ## Technical Implementation
 
-### 1. Database Migration
+### New Components to Create
 
-**File**: `supabase/migrations/[timestamp]_seed_performance_succession_workflows.sql`
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `TeamHealthSummary.tsx` | `src/components/mss/` | Consolidated KPI row |
+| `PerformanceSnapshotCard.tsx` | `src/components/mss/` | Performance metrics |
+| `PendingApprovalsWidget.tsx` | `src/components/mss/` | Approval consolidation |
+| `TeamCompositionCard.tsx` | `src/components/mss/` | Workforce composition |
+| `TeamTrainingStatusCard.tsx` | `src/components/mss/` | L&D metrics |
+| `TeamSuccessionCard.tsx` | `src/components/mss/` | Talent pipeline |
+| `CompensationAlertCard.tsx` | `src/components/mss/` | Pay equity indicators |
 
-```sql
--- Add new transaction types to lookup_values
-INSERT INTO lookup_values (category, code, name, description, display_order, is_active)
-VALUES
-  -- Performance additions
-  ('transaction_type', 'PERF_CONTINUOUS_FEEDBACK', 'Continuous Feedback Approval', 'Approval for ad-hoc feedback outside formal cycles', 200, true),
-  ('transaction_type', 'PERF_MIDCYCLE_REVIEW', 'Mid-Cycle Review Approval', 'Checkpoint review during long appraisal cycles', 201, true),
-  ('transaction_type', 'PERF_PIP_EXTENSION', 'PIP Extension Approval', 'Extend performance improvement plan duration', 202, true),
-  ('transaction_type', 'PERF_PIP_CLOSURE', 'PIP Closure Approval', 'Sign-off on PIP completion', 203, true),
-  ('transaction_type', 'PERF_APPRAISAL_REOPEN', 'Appraisal Re-Open Request', 'Request to reopen finalized appraisal', 204, true),
-  -- Succession additions
-  ('transaction_type', 'SUCC_KEY_POSITION', 'Key Position Designation', 'Approve position as succession-critical', 300, true),
-  ('transaction_type', 'SUCC_BENCH_REVIEW', 'Bench Strength Review', 'Annual succession coverage sign-off', 301, true),
-  ('transaction_type', 'SUCC_FLIGHT_RISK_ACK', 'Flight Risk Acknowledgment', 'Manager acknowledges flight risk alert', 302, true),
-  ('transaction_type', 'SUCC_RETENTION_ACTION', 'Retention Action Approval', 'Approve retention intervention', 303, true),
-  ('transaction_type', 'SUCC_NINEBOX_OVERRIDE', 'Nine-Box Override Approval', 'Override algorithm 9-box placement', 304, true)
-ON CONFLICT (category, code) DO NOTHING;
+### Data Hooks to Create
 
--- Insert new workflow templates
-INSERT INTO workflow_templates (name, code, category, description, is_global, is_active)
-VALUES
-  -- Performance templates
-  ('Continuous Feedback Approval', 'PERF_CONTINUOUS_FEEDBACK', 'continuous_feedback', 'Approval workflow for ad-hoc feedback submissions', true, true),
-  ('Mid-Cycle Review Approval', 'PERF_MIDCYCLE_REVIEW', 'midcycle_review', 'Approval for checkpoint reviews during long cycles', true, true),
-  ('PIP Extension Request', 'PERF_PIP_EXTENSION', 'pip_extension', 'Approval to extend PIP duration', true, true),
-  ('PIP Closure Approval', 'PERF_PIP_CLOSURE', 'pip_closure', 'Sign-off on PIP completion or termination', true, true),
-  ('Appraisal Re-Open Request', 'PERF_APPRAISAL_REOPEN', 'appraisal_reopen', 'Request to reopen a finalized appraisal for corrections', true, true),
-  -- Succession templates
-  ('Key Position Designation Approval', 'SUCC_KEY_POSITION', 'key_position_designation', 'Approve marking a position as succession-critical', true, true),
-  ('Bench Strength Review Approval', 'SUCC_BENCH_REVIEW', 'bench_strength_review', 'Annual succession coverage assessment sign-off', true, true),
-  ('Flight Risk Acknowledgment', 'SUCC_FLIGHT_RISK_ACK', 'flight_risk_acknowledgment', 'Manager acknowledges high-value employee at risk', true, true),
-  ('Retention Action Approval', 'SUCC_RETENTION_ACTION', 'retention_action_approval', 'Approve retention interventions for at-risk talent', true, true),
-  ('Nine-Box Placement Override', 'SUCC_NINEBOX_OVERRIDE', 'ninebox_override', 'Override algorithm-calculated 9-box placement', true, true)
-ON CONFLICT (code) WHERE is_global = true DO NOTHING;
+| Hook | Purpose |
+|------|---------|
+| `useMssTeamMetrics()` | Consolidated team KPIs from multiple tables |
+| `useMssPendingApprovals()` | All pending approval counts |
+| `useMssRiskIndicators()` | Attrition, compliance, overdue counts |
 
--- Insert workflow steps for each template
--- (Separate INSERT statements for each template's steps)
-```
+### Page Modifications
 
-### 2. Update Module Structure
+**File:** `src/pages/mss/ManagerSelfServicePage.tsx`
 
-**File**: `src/constants/workflowModuleStructure.ts`
-
-Add new workflows to the appropriate categories:
-
-**Performance Module Updates:**
-- Add `continuous_feedback` category under Appraisals
-- Add 3 new workflows to PIP category
-- Add `midcycle_review` under Appraisals
-
-**Succession Module Updates:**
-- Add new `risk_management` category with 3 workflows
-- Add 2 workflows to Plan Governance category
+**Changes:**
+1. Add `TeamHealthSummary` widget at top (after breadcrumbs)
+2. Add new grid section with 3 columns of metric cards
+3. Keep existing widgets (Leave Intelligence, ROD, Coaching Inbox)
+4. Move navigation cards to bottom (collapsible)
 
 ---
 
-## Updated Module Structure
+## Proposed Layout
 
-### Performance Module (Final Structure)
-
-```typescript
-{
-  id: "performance",
-  name: "Performance",
-  categories: [
-    {
-      id: "appraisals",
-      name: "Appraisals",
-      workflows: [
-        { code: "rating_approval", name: "Rating Approval" },
-        { code: "rating_release_approval", name: "Rating Release" },
-        { code: "performance", name: "Appraisal Acknowledgment" },
-        { code: "calibration_approval", name: "Calibration Approval" },
-        { code: "continuous_feedback", name: "Continuous Feedback Approval" }, // NEW
-        { code: "midcycle_review", name: "Mid-Cycle Review Approval" }  // NEW
-      ]
-    },
-    {
-      id: "pip",
-      name: "Performance Improvement",
-      workflows: [
-        { code: "pip_acknowledgment", name: "PIP Acknowledgment" },
-        { code: "pip_extension", name: "PIP Extension Request" },       // NEW
-        { code: "pip_closure", name: "PIP Closure Approval" },          // NEW
-        { code: "appraisal_reopen", name: "Appraisal Re-Open Request" } // NEW
-      ]
-    },
-    // Goals and 360 Feedback remain unchanged
-  ]
-}
-```
-
-### Succession Module (Final Structure)
-
-```typescript
-{
-  id: "succession",
-  name: "Succession Planning",
-  categories: [
-    {
-      id: "succession_candidates",
-      name: "Candidate Management",
-      workflows: [
-        { code: "succession_nomination", name: "Candidate Nomination" },
-        { code: "talent_pool_nomination", name: "Talent Pool Nomination" }
-      ]
-    },
-    {
-      id: "succession_plans",
-      name: "Plan Governance",
-      workflows: [
-        { code: "succession_approval", name: "Readiness Assessment Approval" },
-        { code: "succession_plan_approval", name: "Succession Plan Approval" },
-        { code: "key_position_designation", name: "Key Position Designation" }, // NEW
-        { code: "bench_strength_review", name: "Bench Strength Review" }        // NEW
-      ]
-    },
-    {
-      id: "succession_emergency",
-      name: "Emergency Succession",
-      workflows: [
-        { code: "succession_emergency", name: "Emergency Activation" }
-      ]
-    },
-    {
-      id: "succession_risk",  // NEW CATEGORY
-      name: "Risk Management",
-      workflows: [
-        { code: "flight_risk_ack", name: "Flight Risk Acknowledgment" },    // NEW
-        { code: "retention_action", name: "Retention Action Approval" },    // NEW
-        { code: "ninebox_override", name: "Nine-Box Placement Override" }   // NEW
-      ]
-    }
-  ]
-}
+```text
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ Manager Self-Service                                                             │
+│ Manage your team and direct reports                                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│ │ TEAM HEALTH SUMMARY (5 stat cards)                                          │ │
+│ │ [Team: 12] [Actions: 8] [Overdue: 3⚠] [High Performers: 67%] [At Risk: 2]   │ │
+│ └─────────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ ┌────────────────────────────┐ ┌────────────────────────────┐ ┌──────────────┐ │
+│ │ PERFORMANCE SNAPSHOT       │ │ PENDING APPROVALS          │ │ TEAM         │ │
+│ │ - Appraisal: 85% complete  │ │ - Leave: 3                 │ │ COMPOSITION  │ │
+│ │ - Avg Rating: 3.8          │ │ - Time: 5                  │ │ - New: 2     │ │
+│ │ - On-Track: 72%            │ │ - Training: 2              │ │ - Probation:1│ │
+│ │ - [Rating Distribution]    │ │ - Workflow: 1              │ │ - Exits: 0   │ │
+│ │ - PIPs: 1                  │ │ [View All] [Quick Approve] │ │ - Expiring:3 │ │
+│ └────────────────────────────┘ └────────────────────────────┘ └──────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ ┌────────────────────────────┐ ┌────────────────────────────┐ ┌──────────────┐ │
+│ │ TRAINING & DEVELOPMENT     │ │ SUCCESSION & TALENT        │ │ COMPENSATION │ │
+│ │ - Active: 8 enrolled       │ │ - Coverage: 75%            │ │ - Avg Compa: │ │
+│ │ - Complete: 92%            │ │ - Ready Now: 3             │ │   0.98       │ │
+│ │ - Overdue: 1 ⚠             │ │ - HiPos: 2                 │ │ - Below: 2   │ │
+│ │ - Expiring Certs: 2        │ │ - Flight Risk: 1 ⚠         │ │ - Alerts: 0  │ │
+│ │ - Active IDPs: 5           │ │ - Skill Gaps: 4            │ │              │ │
+│ └────────────────────────────┘ └────────────────────────────┘ └──────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ [Existing: Team Leave Intelligence Card]                                         │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ [Existing: ROD Widget]                                                           │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ [Existing: Coaching Inbox]                                                       │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ [Navigation Cards - Collapsible Sections]                                        │
+│ ▸ Team Management   ▸ Approvals & Attendance   ▸ Performance & Development       │
+│ ▸ Team Resources    ▸ Analytics & Support                                        │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
+
+## Files to Create
+
+| File | Description |
+|------|-------------|
+| `src/components/mss/TeamHealthSummary.tsx` | Summary stat row with 5 KPI cards |
+| `src/components/mss/PerformanceSnapshotCard.tsx` | Performance metrics with mini chart |
+| `src/components/mss/PendingApprovalsWidget.tsx` | Consolidated approval counts |
+| `src/components/mss/TeamCompositionCard.tsx` | Workforce composition metrics |
+| `src/components/mss/TeamTrainingStatusCard.tsx` | L&D progress metrics |
+| `src/components/mss/TeamSuccessionCard.tsx` | Succession and talent metrics |
+| `src/components/mss/CompensationAlertCard.tsx` | Pay equity indicators |
+| `src/hooks/useMssTeamMetrics.ts` | Consolidated data hook |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `supabase/migrations/[new].sql` | Seed 10 new transaction types and workflow templates with steps |
-| `src/constants/workflowModuleStructure.ts` | Add new workflows and Risk Management category |
+| `src/pages/mss/ManagerSelfServicePage.tsx` | Add new widget grid, reorganize layout |
+| `src/components/mss/index.ts` | Export new components |
+
+---
+
+## Implementation Phases
+
+### Phase 1: Core Metrics (This Implementation)
+1. Create `TeamHealthSummary` with consolidated stats
+2. Create `PerformanceSnapshotCard` with appraisal data
+3. Create `PendingApprovalsWidget` with approval counts
+4. Update MSS page layout
+
+### Phase 2: Extended Metrics
+1. Create `TeamCompositionCard`
+2. Create `TeamTrainingStatusCard`
+3. Create `TeamSuccessionCard`
+4. Create `CompensationAlertCard`
+
+### Phase 3: Enhancements
+1. Add drill-down from each card to detailed views
+2. Add AI insights to each metric category
+3. Add export/print capabilities
+4. Add date range filtering
 
 ---
 
 ## Industry Alignment Summary
 
-| Benchmark | Workflows Covered |
-|-----------|-------------------|
-| **Workday** | Continuous Feedback, Flight Risk, Key Position Designation |
-| **SAP SuccessFactors** | Mid-Cycle Review, Nine-Box Override, Appraisal Re-Open |
-| **Oracle HCM** | PIP Extension, Retention Action, Bench Strength Review |
-| **General Enterprise** | PIP Closure (audit compliance) |
+| Benchmark | Features Covered |
+|-----------|------------------|
+| **Workday** | Team Summary, Workforce Composition, Succession Coverage |
+| **SAP SuccessFactors** | Performance Distribution, Training Status, Talent Pools |
+| **Oracle HCM** | Consolidated Approvals, Compensation Equity, Risk Indicators |
 
-This brings the Performance module to **20 total workflows** and Succession module to **10 total workflows**, achieving full industry parity.
+This enhancement transforms the MSS dashboard from a navigation hub into a true **manager command center** with at-a-glance visibility across all team metrics.
