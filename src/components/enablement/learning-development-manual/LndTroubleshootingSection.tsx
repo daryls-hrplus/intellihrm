@@ -12,6 +12,8 @@ import {
   LndAIAutomationIssues,
   LndPerformanceDataIssues,
   LndEscalationProcedures,
+  LndAccessibilityMobileIssues,
+  LndDataManagementIssues,
 } from './sections/troubleshooting';
 
 export function LndTroubleshootingSection() {
@@ -33,10 +35,10 @@ export function LndTroubleshootingSection() {
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            ~120 min read
+            ~150 min read
           </span>
           <span>Target: Admin, L&D Admin, Consultant</span>
-          <span>100+ documented issues</span>
+          <span>144 documented issues</span>
         </div>
       </section>
 
@@ -75,6 +77,12 @@ export function LndTroubleshootingSection() {
 
       {/* 9.12 Escalation Procedures & FAQs */}
       <LndEscalationProcedures />
+
+      {/* 9.13 Accessibility, Mobile & Localization Issues */}
+      <LndAccessibilityMobileIssues />
+
+      {/* 9.14 Data Management, Privacy & Retention Issues */}
+      <LndDataManagementIssues />
     </div>
   );
 }

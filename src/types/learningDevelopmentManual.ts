@@ -1475,15 +1475,15 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
   },
 
   // ==========================================================================
-  // CHAPTER 9: TROUBLESHOOTING & BEST PRACTICES (~120 min)
+  // CHAPTER 9: TROUBLESHOOTING & BEST PRACTICES (~150 min)
   // ==========================================================================
   {
     id: 'chapter-9',
     sectionNumber: '9',
     title: 'Troubleshooting & Best Practices',
-    description: 'Comprehensive diagnostic procedures, 100+ documented issues, escalation paths, and implementation best practices.',
+    description: 'Comprehensive diagnostic procedures, 144 documented issues, escalation paths, and implementation best practices.',
     contentLevel: 'reference',
-    estimatedReadTime: 120,
+    estimatedReadTime: 150,
     targetRoles: ['Admin', 'L&D Admin', 'Consultant'],
     subsections: [
       {
@@ -1499,9 +1499,9 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-9-2',
         sectionNumber: '9.2',
         title: 'Setup & Configuration Issues',
-        description: '15 issues: Categories, courses, modules, SCORM/xAPI, certificates, company settings (LMS-001 to LMS-015)',
+        description: '21 issues: Categories, courses, modules, SCORM/xAPI, certificates, TNA, notifications (LMS-001 to LMS-021)',
         contentLevel: 'reference',
-        estimatedReadTime: 15,
+        estimatedReadTime: 18,
         targetRoles: ['Admin', 'L&D Admin', 'Consultant']
       },
       {
@@ -1526,18 +1526,18 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-9-5',
         sectionNumber: '9.5',
         title: 'Quiz & Assessment Issues',
-        description: '12 issues: Scoring, timing, retakes, randomization, AI quiz generation (QIZ-001 to QIZ-012)',
+        description: '15 issues: Scoring, timing, retakes, randomization, AI quiz generation, proctoring (QIZ-001 to QIZ-015)',
         contentLevel: 'reference',
-        estimatedReadTime: 12,
+        estimatedReadTime: 14,
         targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-9-6',
         sectionNumber: '9.6',
         title: 'Certificate & Credential Issues',
-        description: '10 issues: Generation, numbering, PDF rendering, expiry, verification (CRT-001 to CRT-010)',
+        description: '13 issues: Generation, numbering, PDF rendering, expiry, verification, digital badges (CRT-001 to CRT-013)',
         contentLevel: 'reference',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['Admin']
       },
       {
@@ -1571,18 +1571,18 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         id: 'sec-9-10',
         sectionNumber: '9.10',
         title: 'AI & Automation Issues',
-        description: '8 issues: Recommendations, adaptive paths, risk prediction, chatbot, governance (AIA-001 to AIA-008)',
+        description: '14 issues: Recommendations, adaptive paths, risk prediction, TNA, chatbot, governance (AIA-001 to AIA-014)',
         contentLevel: 'reference',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['Admin', 'Consultant']
       },
       {
         id: 'sec-9-11',
         sectionNumber: '9.11',
         title: 'Performance & Data Issues',
-        description: '8 issues: Page loading, analytics, duplicates, exports, realtime sync (PER-001 to PER-008)',
+        description: '11 issues: Page loading, analytics, duplicates, exports, realtime sync, ROI calculation (PER-001 to PER-011)',
         contentLevel: 'reference',
-        estimatedReadTime: 8,
+        estimatedReadTime: 10,
         targetRoles: ['Admin', 'Consultant']
       },
       {

@@ -213,6 +213,91 @@ const SETUP_ISSUES = [
     ],
     prevention: 'Configure company hierarchy before L&D setup. Document inheritance rules in implementation guide.'
   },
+  // NEW: Phase 1 additions (LMS-016 to LMS-021)
+  {
+    id: 'LMS-016',
+    symptom: 'Discussion forum not appearing on course page',
+    severity: 'Medium',
+    cause: 'Forum not created for the course, is_active is false, or discussion feature is disabled at company level.',
+    resolution: [
+      'Navigate to Admin > LMS Management > Discussion Forums',
+      'Verify forum exists for the course with is_active = true',
+      'Check company L&D settings for discussion_enabled flag',
+      'Ensure user has discussion participation permission',
+      'Clear course cache and reload page'
+    ],
+    prevention: 'Enable discussion forums during course creation. Assign moderator roles for active management.'
+  },
+  {
+    id: 'LMS-017',
+    symptom: 'Instructor session scheduling conflict',
+    severity: 'Medium',
+    cause: 'Instructor has overlapping sessions in training_instructor_sessions, or calendar integration not syncing.',
+    resolution: [
+      'Query training_instructor_sessions for overlapping dates/times',
+      'Use the instructor availability calendar view',
+      'Reschedule conflicting sessions or assign alternative instructor',
+      'Verify calendar sync is enabled for the instructor profile',
+      'Check for timezone mismatches between systems'
+    ],
+    prevention: 'Check instructor availability before scheduling. Enable calendar integration for automatic conflict detection.'
+  },
+  {
+    id: 'LMS-018',
+    symptom: 'ILT session attendance not tracking correctly',
+    severity: 'High',
+    cause: 'Attendance sync is disabled, virtual meeting integration failing, or manual entry not completed.',
+    resolution: [
+      'Navigate to session details and check attendance_tracking_enabled',
+      'For virtual sessions, verify meeting provider API credentials',
+      'Use manual attendance entry as fallback',
+      'Check training_vendor_session_enrollments for attendance_status updates',
+      'Verify session end time has passed (attendance calculated after session)'
+    ],
+    prevention: 'Configure attendance tracking during session creation. Test virtual classroom integration before go-live.'
+  },
+  {
+    id: 'LMS-019',
+    symptom: 'Content localization not displaying in user\'s preferred language',
+    severity: 'Medium',
+    cause: 'User locale not matched, content not translated, or fallback language not configured.',
+    resolution: [
+      'Verify user profile language preference is set correctly',
+      'Check if course has translations for the target language',
+      'Configure fallback language in L&D settings (default: English)',
+      'Verify browser locale matches user preference',
+      'Clear content cache and reload'
+    ],
+    prevention: 'Create translations during content authoring. Test with users from different locales.'
+  },
+  {
+    id: 'LMS-020',
+    symptom: 'Training needs analysis not generating recommendations',
+    severity: 'High',
+    cause: 'TNA rule criteria not matched, skill profile incomplete, or recommendation engine disabled.',
+    resolution: [
+      'Navigate to Training > Training Needs Analysis',
+      'Verify TNA rules are configured and active',
+      'Check employee skill profiles have assessment data',
+      'Review training_needs and employee_skill_gaps tables for data',
+      'Force TNA recalculation from admin tools'
+    ],
+    prevention: 'Require skill assessments during onboarding. Review TNA rules quarterly for accuracy.'
+  },
+  {
+    id: 'LMS-021',
+    symptom: 'Notification template placeholders not rendering in emails',
+    severity: 'Medium',
+    cause: 'Invalid placeholder syntax, field name mismatch, or data not available when notification triggered.',
+    resolution: [
+      'Verify placeholder syntax: {{employee_name}}, {{course_title}}',
+      'Check notification_templates for correct template_type',
+      'Review notification trigger timing (data must exist before trigger)',
+      'Test with preview function using sample data',
+      'Check email logs for template rendering errors'
+    ],
+    prevention: 'Use template preview before activating. Document all available placeholders per notification type.'
+  },
 ];
 
 const QUICK_REFERENCE = [
@@ -223,6 +308,8 @@ const QUICK_REFERENCE = [
   { id: 'LMS-008', symptom: 'SCORM upload failing', severity: 'High' },
   { id: 'LMS-009', symptom: 'xAPI not recording', severity: 'High' },
   { id: 'LMS-015', symptom: 'Settings not inheriting', severity: 'High' },
+  { id: 'LMS-018', symptom: 'ILT attendance not tracking', severity: 'High' },
+  { id: 'LMS-020', symptom: 'TNA not generating recommendations', severity: 'High' },
 ];
 
 export function LndSetupConfigurationIssues() {
@@ -296,7 +383,7 @@ export function LndSetupConfigurationIssues() {
       {/* Detailed Issues */}
       <Card>
         <CardHeader>
-          <CardTitle>Detailed Issue Resolution (15 Issues)</CardTitle>
+          <CardTitle>Detailed Issue Resolution (21 Issues)</CardTitle>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="space-y-2">

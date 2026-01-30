@@ -122,12 +122,100 @@ const AI_ISSUES = [
     ],
     prevention: 'Enable explainability logging for all AI features. Monitor logging health.'
   },
+  // NEW: Phase 1 additions (AIA-009 to AIA-014)
+  {
+    id: 'AIA-009',
+    symptom: 'Skills gap analysis not identifying development needs',
+    severity: 'High',
+    cause: 'Competency framework incomplete, skill assessment data missing, or gap detection rules not configured.',
+    resolution: [
+      'Verify employee_skill_gaps table has recent data',
+      'Check competency framework has target proficiency levels',
+      'Ensure skill assessments are completed for employees',
+      'Review gap detection algorithm configuration',
+      'Run gap analysis job manually to refresh data'
+    ],
+    prevention: 'Complete competency framework before enabling gap analysis. Require periodic skill assessments.'
+  },
+  {
+    id: 'AIA-010',
+    symptom: 'Training needs analysis AI recommendations inaccurate',
+    severity: 'High',
+    cause: 'Model training data insufficient, feature weights incorrect, or TNA rules outdated.',
+    resolution: [
+      'Review training_needs_analysis table for data quality',
+      'Check AI model weights in configuration',
+      'Validate TNA rules against current business objectives',
+      'Retrain model with recent completion and performance data',
+      'Compare AI recommendations with manual TNA for accuracy'
+    ],
+    prevention: 'Review TNA model quarterly. Update feature weights based on feedback.'
+  },
+  {
+    id: 'AIA-011',
+    symptom: 'At-risk learner intervention not triggering',
+    severity: 'High',
+    cause: 'Intervention rules not configured, risk threshold not met, or notification workflow inactive.',
+    resolution: [
+      'Verify risk_intervention_rules are active and configured',
+      'Check completion_risk_predictions for high-risk learners',
+      'Review risk_interventions table for triggered interventions',
+      'Verify notification workflow is enabled for interventions',
+      'Lower risk threshold temporarily to test trigger'
+    ],
+    prevention: 'Configure intervention rules during implementation. Test with pilot group.'
+  },
+  {
+    id: 'AIA-012',
+    symptom: 'Chatbot knowledge index outdated or missing content',
+    severity: 'Medium',
+    cause: 'Knowledge index sync job failed, new content not indexed, or index corrupted.',
+    resolution: [
+      'Check chatbot_knowledge_index last_updated timestamp',
+      'Trigger manual reindex from admin tools',
+      'Verify new courses/content are flagged for indexing',
+      'Review sync job logs for errors',
+      'Rebuild index if corruption suspected'
+    ],
+    prevention: 'Schedule regular index refreshes. Monitor sync job health.'
+  },
+  {
+    id: 'AIA-013',
+    symptom: 'AI content suggestions showing irrelevant courses',
+    severity: 'Medium',
+    cause: 'User profile incomplete, recommendation algorithm drift, or content metadata incorrect.',
+    resolution: [
+      'Review employee skill profile completeness',
+      'Check course metadata (tags, competencies, target audience)',
+      'Review recommendation algorithm logs for anomalies',
+      'Clear recommendation cache and regenerate',
+      'Provide feedback to improve algorithm'
+    ],
+    prevention: 'Require complete skill profiles. Audit course metadata regularly.'
+  },
+  {
+    id: 'AIA-014',
+    symptom: 'Personalized learning path not adapting to quiz performance',
+    severity: 'Medium',
+    cause: 'Adaptive rules not triggered, mastery threshold misconfigured, or quiz scores not syncing.',
+    resolution: [
+      'Verify adaptive_path_rules exist for quiz performance triggers',
+      'Check min_mastery_threshold in adaptive_learning_paths',
+      'Review adaptive_learner_progress for mastery_scores data',
+      'Verify quiz scores are updating learner progress',
+      'Test adaptation with forced low/high score scenario'
+    ],
+    prevention: 'Configure adaptive rules for each quiz checkpoint. Test adaptation scenarios.'
+  },
 ];
 
 const QUICK_REFERENCE = [
   { id: 'AIA-001', symptom: 'Recommendations not appearing', severity: 'Medium' },
   { id: 'AIA-003', symptom: 'Risk prediction showing extremes', severity: 'High' },
   { id: 'AIA-008', symptom: 'Governance logging missing', severity: 'High' },
+  { id: 'AIA-009', symptom: 'Skills gap not detecting needs', severity: 'High' },
+  { id: 'AIA-010', symptom: 'TNA recommendations inaccurate', severity: 'High' },
+  { id: 'AIA-011', symptom: 'At-risk intervention not triggering', severity: 'High' },
 ];
 
 export function LndAIAutomationIssues() {
@@ -206,7 +294,7 @@ export function LndAIAutomationIssues() {
       {/* Detailed Issues */}
       <Card>
         <CardHeader>
-          <CardTitle>Detailed Issue Resolution (8 Issues)</CardTitle>
+          <CardTitle>Detailed Issue Resolution (14 Issues)</CardTitle>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="space-y-2">
