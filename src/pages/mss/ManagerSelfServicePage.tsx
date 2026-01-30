@@ -6,8 +6,12 @@ import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/componen
 import { TeamLeaveIntelligence } from "@/components/mss/TeamLeaveIntelligence";
 import { ManagerRODWidget } from "@/components/mss/ManagerRODWidget";
 import { ManagerInterventionInbox } from "@/components/performance/ai/ManagerInterventionInbox";
+import { TeamHealthSummary } from "@/components/mss/TeamHealthSummary";
+import { PerformanceSnapshotCard } from "@/components/mss/PerformanceSnapshotCard";
+import { PendingApprovalsWidget } from "@/components/mss/PendingApprovalsWidget";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMssTeamMetrics } from "@/hooks/useMssTeamMetrics";
 import {
   Users,
   Calendar,
