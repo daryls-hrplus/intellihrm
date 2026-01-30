@@ -80754,6 +80754,10 @@ export type Database = {
         | "external_training"
         | "recertification_request"
         | "training_budget"
+        | "succession_nomination"
+        | "succession_plan_approval"
+        | "talent_pool_nomination"
+        | "succession_emergency"
       workflow_status:
         | "draft"
         | "pending"
@@ -81171,6 +81175,10 @@ export const Constants = {
         "external_training",
         "recertification_request",
         "training_budget",
+        "succession_nomination",
+        "succession_plan_approval",
+        "talent_pool_nomination",
+        "succession_emergency",
       ],
       workflow_status: [
         "draft",

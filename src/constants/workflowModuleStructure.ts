@@ -234,12 +234,32 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
     icon: TrendingUp,
     categories: [
       {
-        id: "readiness_assessment",
-        name: "Readiness Assessment",
+        id: "succession_candidates",
+        name: "Candidate Management",
         color: "violet",
+        icon: Users,
+        workflows: [
+          { code: "succession_nomination", name: "Candidate Nomination", transactionTypeCode: "SUCC_CANDIDATE_NOMINATION" },
+          { code: "talent_pool_nomination", name: "Talent Pool Nomination", transactionTypeCode: "SUCC_TALENT_POOL_NOMINATION" }
+        ]
+      },
+      {
+        id: "succession_plans",
+        name: "Plan Governance",
+        color: "indigo",
         icon: ClipboardCheck,
         workflows: [
-          { code: "succession_readiness", name: "Readiness Assessment Approval", transactionTypeCode: "SUCC_READINESS_APPROVAL" }
+          { code: "succession_approval", name: "Readiness Assessment Approval", transactionTypeCode: "SUCC_READINESS_APPROVAL" },
+          { code: "succession_plan_approval", name: "Succession Plan Approval", transactionTypeCode: "SUCC_PLAN_APPROVAL" }
+        ]
+      },
+      {
+        id: "succession_emergency",
+        name: "Emergency Succession",
+        color: "red",
+        icon: TrendingUp,
+        workflows: [
+          { code: "succession_emergency", name: "Emergency Activation", transactionTypeCode: "SUCC_EMERGENCY_SUCCESSION" }
         ]
       }
     ]
