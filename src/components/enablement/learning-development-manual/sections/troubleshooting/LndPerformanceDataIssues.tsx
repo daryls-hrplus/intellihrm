@@ -122,12 +122,57 @@ const PERFORMANCE_ISSUES = [
     ],
     prevention: 'Validate migration scripts in test environment. Include rollback procedures.'
   },
+  // NEW: Phase 1 additions (PER-009 to PER-011)
+  {
+    id: 'PER-009',
+    symptom: 'Kirkpatrick evaluation data not aggregating in reports',
+    severity: 'High',
+    cause: 'Evaluation responses not linked to enrollments, aggregation job failed, or data model mismatch.',
+    resolution: [
+      'Verify training_evaluation_responses have enrollment_id',
+      'Check aggregation job logs for errors',
+      'Review training_evaluations table for response counts',
+      'Manually recalculate aggregates for affected courses',
+      'Verify Kirkpatrick level mapping is correct'
+    ],
+    prevention: 'Link evaluations to enrollments during setup. Test aggregation before go-live.'
+  },
+  {
+    id: 'PER-010',
+    symptom: 'ROI calculation showing zero or incorrect value',
+    severity: 'High',
+    cause: 'Skills transfer assessment incomplete, ROI formula error, or cost data missing.',
+    resolution: [
+      'Verify skills_transfer_assessments has pre and post scores',
+      'Check ROI formula configuration in settings',
+      'Ensure training cost data is captured correctly',
+      'Review barrier_analysis and enabler_analysis data',
+      'Recalculate ROI with corrected inputs'
+    ],
+    prevention: 'Require complete pre/post assessments. Validate cost data capture.'
+  },
+  {
+    id: 'PER-011',
+    symptom: 'Batch enrollment import timing out for large files',
+    severity: 'Medium',
+    cause: 'File too large, validation timeout, or queue backlog.',
+    resolution: [
+      'Split file into smaller batches (500 rows max)',
+      'Use async import queue for large files',
+      'Increase import job timeout if needed',
+      'Pre-validate data before import',
+      'Monitor import job progress for stuck records'
+    ],
+    prevention: 'Set batch size limits. Provide import progress indicators.'
+  },
 ];
 
 const QUICK_REFERENCE = [
   { id: 'PER-001', symptom: 'Catalog loading slowly', severity: 'Medium' },
   { id: 'PER-002', symptom: 'Analytics timing out', severity: 'High' },
   { id: 'PER-008', symptom: 'Orphaned records from migration', severity: 'High' },
+  { id: 'PER-009', symptom: 'Kirkpatrick data not aggregating', severity: 'High' },
+  { id: 'PER-010', symptom: 'ROI calculation incorrect', severity: 'High' },
 ];
 
 export function LndPerformanceDataIssues() {
@@ -201,7 +246,7 @@ export function LndPerformanceDataIssues() {
       {/* Detailed Issues */}
       <Card>
         <CardHeader>
-          <CardTitle>Detailed Issue Resolution (8 Issues)</CardTitle>
+          <CardTitle>Detailed Issue Resolution (11 Issues)</CardTitle>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="space-y-2">

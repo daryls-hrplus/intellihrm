@@ -172,6 +172,49 @@ const QUIZ_ISSUES = [
     ],
     prevention: 'Always store complete answer data with attempts. Test review mode before go-live.'
   },
+  // NEW: Phase 1 additions (QIZ-013 to QIZ-015)
+  {
+    id: 'QIZ-013',
+    symptom: 'AI-generated quiz questions not appearing in quiz',
+    severity: 'Medium',
+    cause: 'Questions pending approval in ai_generated_questions table, or approval workflow not completed.',
+    resolution: [
+      'Navigate to Admin > LMS Management > AI Quizzes',
+      'Check ai_generated_questions for is_approved = false entries',
+      'Review and approve pending questions',
+      'Verify approved questions are linked to target quiz',
+      'Force quiz refresh after approval'
+    ],
+    prevention: 'Include approval step in quiz creation workflow. Set up approval notifications for L&D Admin.'
+  },
+  {
+    id: 'QIZ-014',
+    symptom: 'Bloom\'s taxonomy distribution incorrect in AI-generated quiz',
+    severity: 'Low',
+    cause: 'Generation parameters not set, question pool too small, or source content limited to single concept.',
+    resolution: [
+      'Review bloom_taxonomy_distribution in ai_generated_quizzes table',
+      'Provide more diverse source content covering multiple concepts',
+      'Manually tag question difficulty after generation',
+      'Request regeneration with explicit Bloom level targets',
+      'Consider mixing AI-generated with manually created questions'
+    ],
+    prevention: 'Specify target Bloom levels before generation. Provide comprehensive source content.'
+  },
+  {
+    id: 'QIZ-015',
+    symptom: 'Proctoring integration not capturing session recordings',
+    severity: 'High',
+    cause: 'Proctoring API credentials expired, browser permissions denied, or recording storage quota exceeded.',
+    resolution: [
+      'Verify proctoring provider API credentials in integration settings',
+      'Check browser permissions for camera/microphone access',
+      'Test proctoring in incognito mode to rule out extensions',
+      'Review proctoring vendor dashboard for session status',
+      'Check storage quota and archive old recordings if needed'
+    ],
+    prevention: 'Test proctoring with pilot group before high-stakes assessments. Monitor API health regularly.'
+  },
 ];
 
 const QUICK_REFERENCE = [
@@ -180,6 +223,7 @@ const QUICK_REFERENCE = [
   { id: 'QIZ-005', symptom: 'Answers exposed before submission', severity: 'High' },
   { id: 'QIZ-007', symptom: 'Attempt lost on network issue', severity: 'High' },
   { id: 'QIZ-008', symptom: 'Pass not updating completion', severity: 'High' },
+  { id: 'QIZ-015', symptom: 'Proctoring not capturing', severity: 'High' },
 ];
 
 export function LndQuizAssessmentIssues() {
@@ -256,7 +300,7 @@ export function LndQuizAssessmentIssues() {
       {/* Detailed Issues */}
       <Card>
         <CardHeader>
-          <CardTitle>Detailed Issue Resolution (12 Issues)</CardTitle>
+          <CardTitle>Detailed Issue Resolution (15 Issues)</CardTitle>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="space-y-2">

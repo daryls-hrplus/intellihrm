@@ -150,6 +150,49 @@ const CERTIFICATE_ISSUES = [
     ],
     prevention: 'Use async batch processing for large volumes. Set appropriate batch size limits.'
   },
+  // NEW: Phase 1 additions (CRT-011 to CRT-013)
+  {
+    id: 'CRT-011',
+    symptom: 'Certificate QR code verification returning invalid response',
+    severity: 'Medium',
+    cause: 'QR verification endpoint misconfigured, SSL certificate issue, or verification service down.',
+    resolution: [
+      'Verify QR verification endpoint URL in certificate settings',
+      'Test endpoint directly with certificate ID',
+      'Check SSL certificate validity on verification domain',
+      'Review verification service logs for errors',
+      'Regenerate QR code with updated endpoint if needed'
+    ],
+    prevention: 'Test QR verification during template preview. Monitor endpoint availability.'
+  },
+  {
+    id: 'CRT-012',
+    symptom: 'External credential import validation errors',
+    severity: 'Medium',
+    cause: 'Data format mismatch, required fields missing, or duplicate credential already exists.',
+    resolution: [
+      'Review import error log for specific field errors',
+      'Verify date formats match expected pattern (YYYY-MM-DD)',
+      'Check for existing credentials with same credential_number',
+      'Validate accrediting_body exists in reference data',
+      'Use import template with data validation rules'
+    ],
+    prevention: 'Use provided CSV template. Pre-validate data with import preview function.'
+  },
+  {
+    id: 'CRT-013',
+    symptom: 'Digital badge not publishing to Credly/Badgr',
+    severity: 'Medium',
+    cause: 'OAuth credentials expired, badge template not mapped, or external API rate limit exceeded.',
+    resolution: [
+      'Verify badge provider OAuth credentials are current',
+      'Check badge template mapping in integration settings',
+      'Review API rate limits and request counts',
+      'Test with manual badge push to isolate issue',
+      'Reauthorize integration if OAuth token expired'
+    ],
+    prevention: 'Monitor integration health dashboard. Set up OAuth token refresh reminders.'
+  },
 ];
 
 const QUICK_REFERENCE = [
@@ -157,6 +200,7 @@ const QUICK_REFERENCE = [
   { id: 'CRT-002', symptom: 'Duplicate certificate numbers', severity: 'High' },
   { id: 'CRT-003', symptom: 'PDF download failing', severity: 'High' },
   { id: 'CRT-005', symptom: 'Expiry date incorrect', severity: 'High' },
+  { id: 'CRT-011', symptom: 'QR verification failing', severity: 'Medium' },
 ];
 
 export function LndCertificateCredentialIssues() {
@@ -228,7 +272,7 @@ export function LndCertificateCredentialIssues() {
       {/* Detailed Issues */}
       <Card>
         <CardHeader>
-          <CardTitle>Detailed Issue Resolution (10 Issues)</CardTitle>
+          <CardTitle>Detailed Issue Resolution (13 Issues)</CardTitle>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="space-y-2">
