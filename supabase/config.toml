@@ -455,3 +455,6 @@ verify_jwt = false
 
 [functions.documentation-agent]
 verify_jwt = false
+
+[functions.external-api]
+verify_jwt = false
