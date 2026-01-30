@@ -1,4 +1,5 @@
 // MSS Components
+export { CollapsibleDashboardSection } from './CollapsibleDashboardSection';
 export { ManagerCoachingPrompts } from './ManagerCoachingPrompts';
 export { ManagerRODWidget } from './ManagerRODWidget';
 export { SendReminderDialog } from './SendReminderDialog';
