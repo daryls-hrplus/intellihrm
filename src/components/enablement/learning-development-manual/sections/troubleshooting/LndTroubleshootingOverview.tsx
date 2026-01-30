@@ -23,6 +23,11 @@ const SYMPTOM_TO_SECTION = [
   { symptom: 'Onboarding enrollment not triggering', section: '9.9', category: 'Integration' },
   { symptom: 'AI recommendations not appearing', section: '9.10', category: 'AI' },
   { symptom: 'Analytics dashboard timing out', section: '9.11', category: 'Performance' },
+  { symptom: 'Screen reader not announcing content', section: '9.13', category: 'Accessibility' },
+  { symptom: 'Mobile app progress not syncing', section: '9.13', category: 'Mobile' },
+  { symptom: 'Content not in user preferred language', section: '9.13', category: 'Localization' },
+  { symptom: 'GDPR data export incomplete', section: '9.14', category: 'Data Management' },
+  { symptom: 'Audit log entries missing', section: '9.14', category: 'Data Management' },
 ];
 
 const CROSS_REFERENCES = [
@@ -73,7 +78,7 @@ export function LndTroubleshootingOverview() {
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
             Chapter 9 serves as the <strong>consolidated troubleshooting hub</strong> for the Learning & Development module. 
-            It covers 100+ documented issues across 10 functional domains with standardized resolution procedures.
+            It covers <strong>144 documented issues</strong> across 14 functional domains with standardized resolution procedures.
           </p>
           
           <div className="grid md:grid-cols-2 gap-4">
@@ -197,7 +202,7 @@ export function LndTroubleshootingOverview() {
 
       {/* Issue ID Convention */}
       <InfoCallout title="Issue ID Convention">
-        <p className="text-sm mb-2">All documented issues use standardized IDs for efficient support communication:</p>
+        <p className="text-sm mb-2">All 144 documented issues use standardized IDs for efficient support communication:</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
           <div><code className="bg-muted px-1 rounded">LMS-XXX</code> Setup/Config</div>
           <div><code className="bg-muted px-1 rounded">ENR-XXX</code> Enrollment</div>
@@ -209,6 +214,8 @@ export function LndTroubleshootingOverview() {
           <div><code className="bg-muted px-1 rounded">INT-XXX</code> Integration</div>
           <div><code className="bg-muted px-1 rounded">AIA-XXX</code> AI/Automation</div>
           <div><code className="bg-muted px-1 rounded">PER-XXX</code> Performance</div>
+          <div><code className="bg-muted px-1 rounded">ACC-XXX</code> Accessibility/Mobile</div>
+          <div><code className="bg-muted px-1 rounded">DMC-XXX</code> Data Management</div>
         </div>
       </InfoCallout>
 
