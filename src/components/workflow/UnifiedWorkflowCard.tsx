@@ -102,11 +102,6 @@ export function UnifiedWorkflowCard({
         <div>
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm">{workflow.name}</span>
-            {workflow.transactionTypeCode && (
-              <span className="text-xs text-muted-foreground">
-                {workflow.transactionTypeCode}
-              </span>
-            )}
           </div>
           {isEnabled && selectedTemplate && (
             <div className="flex items-center gap-1.5 mt-0.5">

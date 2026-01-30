@@ -473,9 +473,6 @@ export function WorkflowTemplateLibrary({
                     {getTemplateBadge(selectedTemplate)}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded mr-2">
-                      {selectedTemplate.code}
-                    </span>
                     {CATEGORY_LABELS[selectedTemplate.category] || selectedTemplate.category}
                   </p>
                   {selectedTemplate.description && (
