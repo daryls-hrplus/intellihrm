@@ -4,7 +4,8 @@ import {
   FileSearch, 
   Database,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Code
 } from 'lucide-react';
 import { 
   LearningObjectives, 
@@ -15,6 +16,7 @@ import {
 } from '@/components/enablement/manual/components';
 import { ScreenshotPlaceholder } from '@/components/enablement/shared/ScreenshotPlaceholder';
 
+// Corrected schema with all 21 actual fields
 const integrationLogFields: FieldDefinition[] = [
   { name: 'id', required: true, type: 'UUID', description: 'Unique log identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
   { name: 'rule_id', required: false, type: 'UUID', description: 'Source integration rule', defaultValue: 'null', validation: 'References appraisal_integration_rules.id' },
@@ -25,13 +27,17 @@ const integrationLogFields: FieldDefinition[] = [
   { name: 'trigger_data', required: false, type: 'jsonb', description: 'Event payload data', defaultValue: '{}', validation: 'JSON object' },
   { name: 'target_module', required: true, type: 'text', description: 'Target integration module', defaultValue: '—', validation: 'training, succession, nine_box, etc.' },
   { name: 'action_type', required: true, type: 'text', description: 'Action executed', defaultValue: '—', validation: 'create_request, auto_enroll, recommend, etc.' },
+  { name: 'action_config', required: false, type: 'jsonb', description: 'Action configuration parameters', defaultValue: '{}', validation: 'JSON object' },
   { name: 'action_result', required: true, type: 'text', description: 'Execution status', defaultValue: 'pending', validation: 'pending, success, failed, pending_approval, cancelled' },
   { name: 'target_record_id', required: false, type: 'UUID', description: 'Created record ID', defaultValue: 'null', validation: 'ID of created enrollment/request' },
   { name: 'target_record_type', required: false, type: 'text', description: 'Created record type', defaultValue: 'null', validation: 'training_request, lms_enrollment, etc.' },
   { name: 'error_message', required: false, type: 'text', description: 'Error details if failed', defaultValue: 'null', validation: 'Error description' },
   { name: 'executed_at', required: false, type: 'timestamptz', description: 'When action was executed', defaultValue: 'null', validation: 'Timestamp' },
+  { name: 'executed_by', required: false, type: 'UUID', description: 'User who triggered execution', defaultValue: 'null', validation: 'References profiles.id' },
   { name: 'requires_approval', required: false, type: 'boolean', description: 'Pending HR approval', defaultValue: 'false', validation: 'true/false' },
   { name: 'approved_at', required: false, type: 'timestamptz', description: 'When approved', defaultValue: 'null', validation: 'Timestamp' },
+  { name: 'approved_by', required: false, type: 'UUID', description: 'User who approved', defaultValue: 'null', validation: 'References profiles.id' },
+  { name: 'rejection_reason', required: false, type: 'text', description: 'Reason if rejected/cancelled', defaultValue: 'null', validation: 'Free text' },
   { name: 'created_at', required: true, type: 'timestamptz', description: 'Log creation time', defaultValue: 'now()', validation: 'Auto-set' }
 ];
 
@@ -57,9 +63,39 @@ export function LndIntegrationAudit() {
         'Generate compliance reports for automated training assignments'
       ]} />
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Code className="h-5 w-5" />
+            UI Component Reference
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            The following UI components provide real-time monitoring of integration status:
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2 font-mono text-sm">AppraisalIntegrationStatus.tsx</h4>
+              <p className="text-sm text-muted-foreground">
+                Displays real-time integration execution status for individual appraisals.
+              </p>
+              <Badge variant="outline" className="mt-2">src/components/performance/</Badge>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2 font-mono text-sm">IntegrationRulesConfigPanel.tsx</h4>
+              <p className="text-sm text-muted-foreground">
+                Configuration interface for integration rules with execution preview.
+              </p>
+              <Badge variant="outline" className="mt-2">src/components/performance/</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <FieldReferenceTable 
         fields={integrationLogFields} 
-        title="appraisal_integration_log Table" 
+        title="appraisal_integration_log Table (21 fields)" 
       />
 
       <Card>
@@ -80,6 +116,7 @@ export function LndIntegrationAudit() {
   ail.action_result,
   ail.error_message,
   ail.executed_at,
+  ail.executed_by,
   p.full_name as employee_name
 FROM appraisal_integration_log ail
 JOIN profiles p ON ail.employee_id = p.id
@@ -91,33 +128,36 @@ LIMIT 50;`}</pre>
           </div>
 
           <div className="p-4 border rounded-lg">
-            <h4 className="font-medium mb-2">Failed Integrations</h4>
+            <h4 className="font-medium mb-2">Failed Integrations with Config Details</h4>
             <div className="text-xs font-mono bg-muted/50 p-3 rounded overflow-x-auto">
               <pre>{`SELECT 
   ail.trigger_event,
   ail.action_type,
+  ail.action_config,
   ail.error_message,
   COUNT(*) as failure_count
 FROM appraisal_integration_log ail
 WHERE ail.target_module = 'training'
   AND ail.action_result = 'failed'
   AND ail.created_at > NOW() - INTERVAL '30 days'
-GROUP BY ail.trigger_event, ail.action_type, ail.error_message
+GROUP BY ail.trigger_event, ail.action_type, ail.action_config, ail.error_message
 ORDER BY failure_count DESC;`}</pre>
             </div>
           </div>
 
           <div className="p-4 border rounded-lg">
-            <h4 className="font-medium mb-2">Pending Approval Queue</h4>
+            <h4 className="font-medium mb-2">Pending Approval Queue with Approver</h4>
             <div className="text-xs font-mono bg-muted/50 p-3 rounded overflow-x-auto">
               <pre>{`SELECT 
   ail.id,
   p.full_name as employee_name,
   ail.action_type,
   ail.created_at,
-  EXTRACT(hours FROM NOW() - ail.created_at) as hours_pending
+  EXTRACT(hours FROM NOW() - ail.created_at) as hours_pending,
+  approver.full_name as pending_with
 FROM appraisal_integration_log ail
 JOIN profiles p ON ail.employee_id = p.id
+LEFT JOIN profiles approver ON ail.approved_by = approver.id
 WHERE ail.target_module = 'training'
   AND ail.action_result = 'pending_approval'
 ORDER BY ail.created_at ASC;`}</pre>
@@ -181,7 +221,7 @@ ORDER BY ail.created_at ASC;`}</pre>
                 <Badge variant="outline">cancelled</Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Action cancelled by user or rejected in approval.
+                Action cancelled. See rejection_reason for explanation.
               </p>
             </div>
 

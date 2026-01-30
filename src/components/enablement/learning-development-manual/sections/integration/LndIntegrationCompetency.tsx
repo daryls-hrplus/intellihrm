@@ -18,15 +18,16 @@ import {
 } from '@/components/enablement/manual/components';
 import { ScreenshotPlaceholder } from '@/components/enablement/shared/ScreenshotPlaceholder';
 
+// Corrected schema based on actual database
 const competencyMappingFields: FieldDefinition[] = [
   { name: 'id', required: true, type: 'UUID', description: 'Unique mapping identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
   { name: 'competency_id', required: true, type: 'UUID', description: 'Linked competency', defaultValue: '—', validation: 'References competencies.id' },
-  { name: 'course_id', required: true, type: 'UUID', description: 'Linked training course', defaultValue: '—', validation: 'References lms_courses.id' },
-  { name: 'proficiency_level', required: false, type: 'integer', description: 'Target proficiency (1-5)', defaultValue: '3', validation: '1-5 scale' },
-  { name: 'min_gap_level', required: false, type: 'integer', description: 'Minimum gap to trigger recommendation', defaultValue: '2', validation: '1-5 scale' },
-  { name: 'is_primary', required: false, type: 'boolean', description: 'Primary course for this competency', defaultValue: 'false', validation: 'true/false' },
+  { name: 'course_id', required: false, type: 'UUID', description: 'Linked internal course', defaultValue: 'null', validation: 'References lms_courses.id' },
+  { name: 'vendor_course_id', required: false, type: 'UUID', description: 'Linked vendor course', defaultValue: 'null', validation: 'References vendor_courses.id' },
+  { name: 'is_mandatory', required: false, type: 'boolean', description: 'Required for competency development', defaultValue: 'false', validation: 'true/false' },
+  { name: 'notes', required: false, type: 'text', description: 'Additional context for mapping', defaultValue: 'null', validation: 'Free text' },
   { name: 'company_id', required: true, type: 'UUID', description: 'Company scope', defaultValue: '—', validation: 'References companies.id' },
-  { name: 'is_active', required: false, type: 'boolean', description: 'Mapping active status', defaultValue: 'true', validation: 'true/false' }
+  { name: 'created_at', required: true, type: 'timestamptz', description: 'Record creation timestamp', defaultValue: 'now()', validation: 'Auto-set' }
 ];
 
 const configSteps: Step[] = [
@@ -48,25 +49,26 @@ const configSteps: Step[] = [
     title: 'Link Training Courses',
     description: 'Add one or more courses that develop this competency.',
     notes: [
-      'Set proficiency_level to indicate target skill level',
-      'Mark one course as is_primary for gap recommendations'
+      'Link internal courses via course_id',
+      'Link vendor courses via vendor_course_id',
+      'Mark critical courses as is_mandatory'
     ],
     expectedResult: 'Courses linked to competency'
   },
   {
-    title: 'Configure Gap Threshold',
-    description: 'Set min_gap_level to control when courses are recommended for gaps.',
+    title: 'Add Context Notes',
+    description: 'Use the notes field to document mapping rationale.',
     notes: [
-      'Gap level 1 = minor gap, 5 = critical gap',
-      'Typical threshold: 2 (moderate gap)'
+      'Explain why this course develops the competency',
+      'Note any prerequisites or sequencing'
     ]
   },
   {
-    title: 'Enable Bidirectional Sync',
-    description: 'Verify that course completions will update employee_skill_assessments.',
+    title: 'Verify Bidirectional Sync',
+    description: 'Confirm that course completions will update employee skill assessments.',
     notes: [
-      'Sync happens via lms_enrollments completion trigger',
-      'Only updates if proficiency_level is higher than current'
+      'Sync happens via enrollment completion trigger',
+      'Check employee_skill_assessments after course completion'
     ],
     expectedResult: 'Completing course updates skill proficiency'
   }
@@ -90,7 +92,7 @@ export function LndIntegrationCompetency() {
       <LearningObjectives objectives={[
         'Configure competency_course_mappings for gap-based recommendations',
         'Understand bidirectional sync: courses ↔ skills',
-        'Set proficiency levels and gap thresholds for automated suggestions',
+        'Link both internal and vendor courses to competencies',
         'Track skill development from training completions'
       ]} />
 
@@ -112,8 +114,8 @@ export function LndIntegrationCompetency() {
                 <li>1. Skill gap identified in employee_skill_gaps</li>
                 <li>2. System queries competency_course_mappings</li>
                 <li>3. Courses with matching competency_id returned</li>
-                <li>4. Filtered by min_gap_level threshold</li>
-                <li>5. Primary course prioritized in recommendations</li>
+                <li>4. Mandatory courses prioritized (is_mandatory = true)</li>
+                <li>5. Both internal and vendor courses included</li>
               </ol>
             </div>
 
@@ -127,7 +129,7 @@ export function LndIntegrationCompetency() {
                 <li>2. System queries competency_course_mappings</li>
                 <li>3. Linked competencies identified</li>
                 <li>4. employee_skill_assessments updated</li>
-                <li>5. Proficiency set to mapping's proficiency_level</li>
+                <li>5. Gap status recalculated</li>
               </ol>
             </div>
           </div>
@@ -162,7 +164,8 @@ export function LndIntegrationCompetency() {
                 <li>• <code>competencies</code> - Competency definitions</li>
                 <li>• <code>employee_skill_gaps</code> - Identified gaps</li>
                 <li>• <code>employee_skill_assessments</code> - Current levels</li>
-                <li>• <code>lms_courses</code> - Available courses</li>
+                <li>• <code>lms_courses</code> - Internal courses</li>
+                <li>• <code>vendor_courses</code> - External vendor courses</li>
               </ul>
             </div>
             <div className="p-3 border rounded-lg">
@@ -185,39 +188,36 @@ export function LndIntegrationCompetency() {
 
       <ScreenshotPlaceholder 
         title="Competency-Course Mapping"
-        description="Shows the mapping interface with competency dropdown, course selection, and proficiency settings"
+        description="Shows the mapping interface with competency dropdown, course selection, and mandatory flag"
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Gap Level Reference</CardTitle>
+          <CardTitle>Course Type Support</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-5 gap-2 text-center text-sm">
-            <div className="p-3 border rounded-lg">
-              <Badge variant="outline" className="mb-2">1</Badge>
-              <p className="font-medium">Minor</p>
-              <p className="text-xs text-muted-foreground">Self-study sufficient</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2">Internal Courses (course_id)</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                Courses hosted in your LMS with full progress tracking.
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Real-time completion detection</li>
+                <li>• Quiz scores tracked</li>
+                <li>• Certificates auto-issued</li>
+              </ul>
             </div>
-            <div className="p-3 border rounded-lg">
-              <Badge variant="secondary" className="mb-2">2</Badge>
-              <p className="font-medium">Moderate</p>
-              <p className="text-xs text-muted-foreground">Course recommended</p>
-            </div>
-            <div className="p-3 border rounded-lg">
-              <Badge className="bg-amber-500 mb-2">3</Badge>
-              <p className="font-medium">Significant</p>
-              <p className="text-xs text-muted-foreground">Course required</p>
-            </div>
-            <div className="p-3 border rounded-lg">
-              <Badge className="bg-orange-500 mb-2">4</Badge>
-              <p className="font-medium">Major</p>
-              <p className="text-xs text-muted-foreground">Learning path needed</p>
-            </div>
-            <div className="p-3 border rounded-lg">
-              <Badge variant="destructive" className="mb-2">5</Badge>
-              <p className="font-medium">Critical</p>
-              <p className="text-xs text-muted-foreground">Immediate intervention</p>
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2">Vendor Courses (vendor_course_id)</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                External courses from training providers.
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Manual or SSO completion sync</li>
+                <li>• Budget tracking enabled</li>
+                <li>• External certificate upload</li>
+              </ul>
             </div>
           </div>
         </CardContent>
@@ -225,8 +225,8 @@ export function LndIntegrationCompetency() {
 
       <TipCallout>
         <strong>Best Practice:</strong> Map each competency to 2-3 courses at different levels. 
-        Use <code>proficiency_level</code> to indicate which course develops which level (e.g., 
-        "Excel Basics" → level 2, "Excel Advanced" → level 4).
+        Mark the foundational course as <code>is_mandatory = true</code> to prioritize it in 
+        gap-based recommendations.
       </TipCallout>
 
       <InfoCallout>

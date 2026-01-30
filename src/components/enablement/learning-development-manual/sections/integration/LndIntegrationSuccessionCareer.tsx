@@ -16,15 +16,16 @@ import {
 } from '@/components/enablement/manual/components';
 import { ScreenshotPlaceholder } from '@/components/enablement/shared/ScreenshotPlaceholder';
 
+// Corrected schema based on actual idp_goals table
 const idpGoalFields: FieldDefinition[] = [
   { name: 'id', required: true, type: 'UUID', description: 'Unique goal identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
   { name: 'idp_id', required: true, type: 'UUID', description: 'Parent development plan', defaultValue: '—', validation: 'References individual_development_plans.id' },
-  { name: 'goal_title', required: true, type: 'text', description: 'Development goal name', defaultValue: '—', validation: 'Required' },
-  { name: 'development_type', required: true, type: 'text', description: 'Type of development activity', defaultValue: 'training', validation: 'training, project, mentoring, assignment, reading' },
-  { name: 'linked_course_id', required: false, type: 'UUID', description: 'Linked training course', defaultValue: 'null', validation: 'References lms_courses.id' },
-  { name: 'linked_learning_path_id', required: false, type: 'UUID', description: 'Linked learning path', defaultValue: 'null', validation: 'References learning_paths.id' },
-  { name: 'target_completion_date', required: false, type: 'date', description: 'Goal deadline', defaultValue: 'null', validation: 'Future date' },
-  { name: 'status', required: true, type: 'text', description: 'Goal status', defaultValue: 'not_started', validation: 'not_started, in_progress, completed, cancelled' }
+  { name: 'title', required: true, type: 'text', description: 'Development goal name', defaultValue: '—', validation: 'Required' },
+  { name: 'description', required: false, type: 'text', description: 'Goal details and success criteria', defaultValue: 'null', validation: 'Free text' },
+  { name: 'category', required: false, type: 'text', description: 'Category of development activity', defaultValue: 'null', validation: 'training, project, mentoring, assignment, reading' },
+  { name: 'target_date', required: false, type: 'date', description: 'Goal target completion date', defaultValue: 'null', validation: 'Future date' },
+  { name: 'status', required: true, type: 'text', description: 'Goal status', defaultValue: 'not_started', validation: 'not_started, in_progress, completed, cancelled' },
+  { name: 'priority', required: false, type: 'text', description: 'Goal priority level', defaultValue: 'medium', validation: 'low, medium, high, critical' }
 ];
 
 export function LndIntegrationSuccessionCareer() {
@@ -45,7 +46,7 @@ export function LndIntegrationSuccessionCareer() {
       <LearningObjectives objectives={[
         'Understand how succession readiness gaps trigger training recommendations',
         'Link career path steps to learning paths for progression requirements',
-        'Configure IDP goals with linked training courses',
+        'Configure IDP goals with training-related categories',
         'Track development activity completion for succession candidates'
       ]} />
 
@@ -186,12 +187,13 @@ export function LndIntegrationSuccessionCareer() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            IDPs connect employee development goals to specific training activities.
+            IDPs connect employee development goals to specific training activities via the 
+            <code>category</code> field.
           </p>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">Development Types</h4>
+              <h4 className="font-medium mb-2">Goal Categories</h4>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <Badge variant="outline">training</Badge>
@@ -217,11 +219,11 @@ export function LndIntegrationSuccessionCareer() {
             </div>
 
             <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">Training Link Fields</h4>
+              <h4 className="font-medium mb-2">Training Category Goals</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• <code>linked_course_id</code> → single course</li>
-                <li>• <code>linked_learning_path_id</code> → learning path</li>
-                <li>• Status syncs from lms_enrollments</li>
+                <li>• Use category = 'training' for L&D activities</li>
+                <li>• Reference courses in goal description</li>
+                <li>• Status syncs with training completion</li>
                 <li>• Completion triggers IDP goal update</li>
               </ul>
             </div>
@@ -231,12 +233,12 @@ export function LndIntegrationSuccessionCareer() {
 
       <FieldReferenceTable 
         fields={idpGoalFields} 
-        title="idp_goals Table (Training-Related Fields)" 
+        title="idp_goals Table (Key Fields)" 
       />
 
       <ScreenshotPlaceholder 
-        title="IDP Goal with Training Link"
-        description="Shows an IDP goal form with course/learning path selection dropdown"
+        title="IDP Goal with Training Category"
+        description="Shows an IDP goal form with category dropdown and training description"
       />
 
       <Card>
@@ -248,7 +250,7 @@ export function LndIntegrationSuccessionCareer() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2 px-3">Development Type</th>
+                  <th className="text-left py-2 px-3">Category</th>
                   <th className="text-left py-2 px-3">Progress Source</th>
                   <th className="text-left py-2 px-3">Completion Trigger</th>
                 </tr>
@@ -257,7 +259,7 @@ export function LndIntegrationSuccessionCareer() {
                 <tr className="border-b">
                   <td className="py-2 px-3"><Badge variant="outline">training</Badge></td>
                   <td className="py-2 px-3">lms_enrollments.progress_percentage</td>
-                  <td className="py-2 px-3">status = 'completed'</td>
+                  <td className="py-2 px-3">enrollment status = 'completed'</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 px-3"><Badge variant="outline">project</Badge></td>

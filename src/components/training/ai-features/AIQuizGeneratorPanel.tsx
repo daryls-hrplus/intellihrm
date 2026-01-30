@@ -84,14 +84,15 @@ export function AIQuizGeneratorPanel() {
 
   const { data: courses = [] } = useQuery({
     queryKey: ['lms-courses-for-quiz'],
-    queryFn: async () => {
-      const { data, error } = await supabase
+    queryFn: async (): Promise<Array<{ id: string; title: string }>> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from('lms_courses')
         .select('id, title')
         .eq('is_active', true)
         .order('title');
       if (error) throw error;
-      return data;
+      return (data ?? []) as Array<{ id: string; title: string }>;
     },
   });
 

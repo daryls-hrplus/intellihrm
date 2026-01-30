@@ -5,7 +5,8 @@ import {
   ArrowRight, 
   Zap,
   Code,
-  Settings
+  Settings,
+  Eye
 } from 'lucide-react';
 import { 
   LearningObjectives, 
@@ -124,6 +125,53 @@ export function LndIntegrationAppraisal() {
             function, which evaluates all active rules when an appraisal is finalized and executes 
             matching training actions.
           </InfoCallout>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Code className="h-5 w-5" />
+            UI Component Reference
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            The following UI components support appraisal-to-training integration:
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2 font-mono text-sm">IntegrationRulesConfigPanel.tsx</h4>
+              <p className="text-sm text-muted-foreground">
+                Full configuration UI for creating and editing integration rules with condition builders.
+              </p>
+              <Badge variant="outline" className="mt-2">src/components/performance/</Badge>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2 font-mono text-sm">DownstreamImpactPreview.tsx</h4>
+              <p className="text-sm text-muted-foreground">
+                Shows what integration actions will trigger before finalizing an appraisal.
+              </p>
+              <Badge variant="outline" className="mt-2">src/components/performance/</Badge>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2 font-mono text-sm">useAppraisalIntegration.ts</h4>
+              <p className="text-sm text-muted-foreground">
+                React hook for managing integration rules and logs.
+              </p>
+              <Badge variant="outline" className="mt-2">src/hooks/</Badge>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                <span className="font-mono text-sm">AppraisalIntegrationStatus.tsx</span>
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Real-time status display for integration execution results.
+              </p>
+              <Badge variant="outline" className="mt-2">src/components/performance/</Badge>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -266,7 +314,7 @@ export function LndIntegrationAppraisal() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            The <code>appraisal-integration-orchestrator</code> edge function (959 lines) handles:
+            The <code>appraisal-integration-orchestrator</code> edge function handles:
           </p>
           <ul className="space-y-2 text-sm">
             <li className="flex items-start gap-2">
