@@ -269,6 +269,42 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
     ]
   },
   {
+    id: "career_development",
+    name: "Career Development",
+    icon: TrendingUp,
+    categories: [
+      {
+        id: "idp",
+        name: "Development Plans",
+        color: "teal",
+        icon: Target,
+        workflows: [
+          { code: "idp_approval", name: "IDP Approval", transactionTypeCode: "CAREER_IDP_APPROVAL" },
+          { code: "development_assignment", name: "Development Assignment", transactionTypeCode: "CAREER_DEV_ASSIGNMENT" }
+        ]
+      },
+      {
+        id: "career_paths",
+        name: "Career Paths",
+        color: "cyan",
+        icon: TrendingUp,
+        workflows: [
+          { code: "career_path_approval", name: "Career Path Approval", transactionTypeCode: "CAREER_PATH_APPROVAL" },
+          { code: "career_move_request", name: "Career Move Request", transactionTypeCode: "CAREER_MOVE_REQUEST" }
+        ]
+      },
+      {
+        id: "mentorship",
+        name: "Mentorship",
+        color: "violet",
+        icon: Users,
+        workflows: [
+          { code: "mentorship_approval", name: "Mentorship Approval", transactionTypeCode: "CAREER_MENTORSHIP_APPROVAL" }
+        ]
+      }
+    ]
+  },
+  {
     id: "expenses",
     name: "Expenses",
     icon: Receipt,

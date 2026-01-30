@@ -109,6 +109,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   succession_plan_approval: "Succession Plan Approval",
   talent_pool_nomination: "Talent Pool Nomination",
   succession_emergency: "Emergency Succession",
+  // Career Development workflow types
+  idp_approval: "IDP Approval",
+  career_path_approval: "Career Path Approval",
+  mentorship_approval: "Mentorship Approval",
+  development_assignment: "Development Assignment",
+  career_move_request: "Career Move Request",
   // 360 Feedback workflow types
   feedback_360_approval: "360 Feedback",
   feedback_360_release: "360 Results Release",
