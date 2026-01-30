@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
 import { usePageAudit } from "@/hooks/usePageAudit";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
@@ -12,6 +14,7 @@ import { TeamCompositionCard } from "@/components/mss/TeamCompositionCard";
 import { TeamTrainingStatusCard } from "@/components/mss/TeamTrainingStatusCard";
 import { TeamSuccessionCard } from "@/components/mss/TeamSuccessionCard";
 import { CompensationAlertCard } from "@/components/mss/CompensationAlertCard";
+import { CollapsibleDashboardSection } from "@/components/mss/CollapsibleDashboardSection";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMssTeamMetrics } from "@/hooks/useMssTeamMetrics";
@@ -39,13 +42,45 @@ import {
   AlertTriangle,
   DollarSign,
   Scale,
+  ChevronsUpDown,
+  Activity,
+  GraduationCap,
+  Brain,
 } from "lucide-react";
+
+// Section keys for collapse state management
+type SectionKey = "health" | "performance" | "training" | "intelligence";
 
 export default function ManagerSelfServicePage() {
   usePageAudit('mss_dashboard', 'MSS');
   const { t } = useLanguage();
   const { hasTabAccess } = useGranularPermissions();
   const { user, company } = useAuth();
+
+  // Collapse state - all expanded by default
+  const [sectionStates, setSectionStates] = useState<Record<SectionKey, boolean>>({
+    health: true,
+    performance: true,
+    training: true,
+    intelligence: true,
+  });
+
+  const allExpanded = Object.values(sectionStates).every(Boolean);
+  const allCollapsed = Object.values(sectionStates).every(v => !v);
+
+  const toggleSection = (key: SectionKey) => {
+    setSectionStates(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const toggleAll = () => {
+    const newState = allExpanded ? false : true;
+    setSectionStates({
+      health: newState,
+      performance: newState,
+      training: newState,
+      intelligence: newState,
+    });
+  };
 
   // Tab codes aligned with database module_permissions for granular security control
   const allModules = {
@@ -127,35 +162,74 @@ export default function ManagerSelfServicePage() {
           ]}
         />
         
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("mss.title")}</h1>
-          <p className="text-muted-foreground">
-            {t("mss.subtitle")}
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{t("mss.title")}</h1>
+            <p className="text-muted-foreground">
+              {t("mss.subtitle")}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleAll}
+            className="shrink-0"
+          >
+            <ChevronsUpDown className="h-4 w-4 mr-2" />
+            {allExpanded ? "Collapse All" : "Expand All"}
+          </Button>
         </div>
 
-        {/* Team Health Summary - Top KPI Row */}
-        <TeamHealthSummary metrics={healthMetrics} loading={isLoading} />
+        {/* Team Health Summary */}
+        <CollapsibleDashboardSection
+          title="Team Health Summary"
+          icon={Activity}
+          isOpen={sectionStates.health}
+          onToggle={() => toggleSection("health")}
+        >
+          <TeamHealthSummary metrics={healthMetrics} loading={isLoading} />
+        </CollapsibleDashboardSection>
 
-        {/* Analytics Cards Grid - Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <PerformanceSnapshotCard metrics={performanceMetrics} loading={isLoading} />
-          <PendingApprovalsWidget approvals={pendingApprovals} loading={isLoading} />
-          <TeamCompositionCard metrics={compositionMetrics} loading={isLoading} />
-        </div>
+        {/* Performance & Approvals */}
+        <CollapsibleDashboardSection
+          title="Performance & Approvals"
+          icon={ClipboardCheck}
+          isOpen={sectionStates.performance}
+          onToggle={() => toggleSection("performance")}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <PerformanceSnapshotCard metrics={performanceMetrics} loading={isLoading} />
+            <PendingApprovalsWidget approvals={pendingApprovals} loading={isLoading} />
+            <TeamCompositionCard metrics={compositionMetrics} loading={isLoading} />
+          </div>
+        </CollapsibleDashboardSection>
 
-        {/* Analytics Cards Grid - Row 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <TeamTrainingStatusCard metrics={trainingMetrics} loading={isLoading} />
-          <TeamSuccessionCard metrics={successionMetrics} loading={isLoading} />
-          <CompensationAlertCard metrics={compensationMetrics} loading={isLoading} />
-        </div>
+        {/* Training & Talent Pipeline */}
+        <CollapsibleDashboardSection
+          title="Training & Talent Pipeline"
+          icon={GraduationCap}
+          isOpen={sectionStates.training}
+          onToggle={() => toggleSection("training")}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <TeamTrainingStatusCard metrics={trainingMetrics} loading={isLoading} />
+            <TeamSuccessionCard metrics={successionMetrics} loading={isLoading} />
+            <CompensationAlertCard metrics={compensationMetrics} loading={isLoading} />
+          </div>
+        </CollapsibleDashboardSection>
 
-        {/* Team Leave Intelligence */}
-        <TeamLeaveIntelligence />
-
-        {/* Resumption of Duty Widget */}
-        <ManagerRODWidget />
+        {/* Team Intelligence */}
+        <CollapsibleDashboardSection
+          title="Team Intelligence"
+          icon={Brain}
+          isOpen={sectionStates.intelligence}
+          onToggle={() => toggleSection("intelligence")}
+        >
+          <div className="space-y-4">
+            <TeamLeaveIntelligence />
+            <ManagerRODWidget />
+          </div>
+        </CollapsibleDashboardSection>
 
         <GroupedModuleCards sections={sections} defaultOpen={false} showToggleButton />
       </div>
