@@ -9,6 +9,10 @@ import { ManagerInterventionInbox } from "@/components/performance/ai/ManagerInt
 import { TeamHealthSummary } from "@/components/mss/TeamHealthSummary";
 import { PerformanceSnapshotCard } from "@/components/mss/PerformanceSnapshotCard";
 import { PendingApprovalsWidget } from "@/components/mss/PendingApprovalsWidget";
+import { TeamCompositionCard } from "@/components/mss/TeamCompositionCard";
+import { TeamTrainingStatusCard } from "@/components/mss/TeamTrainingStatusCard";
+import { TeamSuccessionCard } from "@/components/mss/TeamSuccessionCard";
+import { CompensationAlertCard } from "@/components/mss/CompensationAlertCard";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMssTeamMetrics } from "@/hooks/useMssTeamMetrics";
@@ -104,7 +108,16 @@ export default function ManagerSelfServicePage() {
     },
   ];
 
-  const { healthMetrics, performanceMetrics, pendingApprovals, isLoading } = useMssTeamMetrics();
+  const { 
+    healthMetrics, 
+    performanceMetrics, 
+    pendingApprovals, 
+    compositionMetrics,
+    trainingMetrics,
+    successionMetrics,
+    compensationMetrics,
+    isLoading 
+  } = useMssTeamMetrics();
 
   return (
     <AppLayout>
@@ -125,10 +138,18 @@ export default function ManagerSelfServicePage() {
         {/* Team Health Summary - Top KPI Row */}
         <TeamHealthSummary metrics={healthMetrics} loading={isLoading} />
 
-        {/* Analytics Cards Grid */}
+        {/* Analytics Cards Grid - Row 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <PerformanceSnapshotCard metrics={performanceMetrics} loading={isLoading} />
           <PendingApprovalsWidget approvals={pendingApprovals} loading={isLoading} />
+          <TeamCompositionCard metrics={compositionMetrics} loading={isLoading} />
+        </div>
+
+        {/* Analytics Cards Grid - Row 2 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <TeamTrainingStatusCard metrics={trainingMetrics} loading={isLoading} />
+          <TeamSuccessionCard metrics={successionMetrics} loading={isLoading} />
+          <CompensationAlertCard metrics={compensationMetrics} loading={isLoading} />
         </div>
 
         {/* Team Leave Intelligence */}

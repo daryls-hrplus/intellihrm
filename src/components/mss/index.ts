@@ -19,3 +19,7 @@ export { TeamPerformanceDistribution } from './TeamPerformanceDistribution';
 export { TeamHealthSummary } from './TeamHealthSummary';
 export { PerformanceSnapshotCard } from './PerformanceSnapshotCard';
 export { PendingApprovalsWidget } from './PendingApprovalsWidget';
+export { TeamCompositionCard } from './TeamCompositionCard';
+export { TeamTrainingStatusCard } from './TeamTrainingStatusCard';
+export { TeamSuccessionCard } from './TeamSuccessionCard';
+export { CompensationAlertCard } from './CompensationAlertCard';
