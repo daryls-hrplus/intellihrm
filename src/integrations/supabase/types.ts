@@ -63877,6 +63877,7 @@ export type Database = {
       }
       reminder_rules: {
         Row: {
+          appraisal_cycle_id: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -63894,6 +63895,7 @@ export type Database = {
           notification_method: string
           priority: string | null
           reminder_intervals: number[] | null
+          review_cycle_id: string | null
           send_to_employee: boolean | null
           send_to_hr: boolean | null
           send_to_manager: boolean | null
@@ -63902,6 +63904,7 @@ export type Database = {
           version: number | null
         }
         Insert: {
+          appraisal_cycle_id?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -63919,6 +63922,7 @@ export type Database = {
           notification_method?: string
           priority?: string | null
           reminder_intervals?: number[] | null
+          review_cycle_id?: string | null
           send_to_employee?: boolean | null
           send_to_hr?: boolean | null
           send_to_manager?: boolean | null
@@ -63927,6 +63931,7 @@ export type Database = {
           version?: number | null
         }
         Update: {
+          appraisal_cycle_id?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -63944,6 +63949,7 @@ export type Database = {
           notification_method?: string
           priority?: string | null
           reminder_intervals?: number[] | null
+          review_cycle_id?: string | null
           send_to_employee?: boolean | null
           send_to_hr?: boolean | null
           send_to_manager?: boolean | null
@@ -63952,6 +63958,13 @@ export type Database = {
           version?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reminder_rules_appraisal_cycle_id_fkey"
+            columns: ["appraisal_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reminder_rules_company_id_fkey"
             columns: ["company_id"]
@@ -63985,6 +63998,13 @@ export type Database = {
             columns: ["event_type_id"]
             isOneToOne: false
             referencedRelation: "reminder_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_rules_review_cycle_id_fkey"
+            columns: ["review_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "review_cycles"
             referencedColumns: ["id"]
           },
           {

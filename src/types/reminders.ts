@@ -39,6 +39,23 @@ export interface ReminderRule {
   created_at: string;
   updated_at: string;
   event_type?: ReminderEventType;
+  // Cycle references for performance-related events
+  appraisal_cycle_id: string | null;
+  review_cycle_id: string | null;
+  appraisal_cycle?: {
+    id: string;
+    name: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+  };
+  review_cycle?: {
+    id: string;
+    name: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+  };
 }
 
 export interface EmployeeReminder {

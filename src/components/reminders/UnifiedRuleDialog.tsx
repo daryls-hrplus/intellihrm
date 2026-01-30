@@ -36,6 +36,7 @@ import { RuleSourcePreview } from './RuleSourcePreview';
 import { TemplateMessagePreview } from './TemplateMessagePreview';
 import { TemplateSelector } from './TemplateSelector';
 import { useReminderSourcePreview, type SourcePreviewData } from '@/hooks/useReminderSourcePreview';
+import { CycleSelector } from './CycleSelector';
 
 export type DialogMode = 'ai-assist' | 'manual' | 'quick-setup';
 
@@ -104,6 +105,8 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
       cycle_type_filter: string[];
       effective_from: string | null;
       effective_to: string | null;
+      appraisal_cycle_id: string | null;
+      review_cycle_id: string | null;
     }>({
       name: '',
       description: '',
@@ -122,6 +125,8 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
       cycle_type_filter: [],
       effective_from: null,
       effective_to: null,
+      appraisal_cycle_id: null,
+      review_cycle_id: null,
     });
 
     useImperativeHandle(ref, () => ({
@@ -153,6 +158,8 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
             cycle_type_filter: (editingRule as any).cycle_type_filter || [],
             effective_from: editingRule.effective_from || null,
             effective_to: editingRule.effective_to || null,
+            appraisal_cycle_id: editingRule.appraisal_cycle_id || null,
+            review_cycle_id: editingRule.review_cycle_id || null,
           });
         } else if (linkedTemplate) {
           setMode('manual');
@@ -203,6 +210,8 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
         cycle_type_filter: [],
         effective_from: null,
         effective_to: null,
+        appraisal_cycle_id: null,
+        review_cycle_id: null,
       });
       setNewInterval('');
     };
@@ -459,39 +468,36 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
             daysBeforeArray={formData.reminder_intervals}
           />
 
-          {/* Cycle Type Filter */}
-          {eventTypes.find(t => t.id === formData.event_type_id)?.category === 'performance' && (
-            <div className="space-y-2 p-3 bg-muted/30 rounded-lg border border-dashed">
-              <Label className="flex items-center gap-2">
-                <Settings className="h-4 w-4 text-primary" />
-                Filter by Appraisal Cycle Type
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {CYCLE_TYPE_OPTIONS.map((option) => {
-                  const isSelected = formData.cycle_type_filter.includes(option.value);
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        const newFilter = isSelected
-                          ? formData.cycle_type_filter.filter(v => v !== option.value)
-                          : [...formData.cycle_type_filter, option.value];
-                        setFormData({ ...formData, cycle_type_filter: newFilter });
-                      }}
-                      className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                        isSelected
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background hover:bg-muted border-border'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* Cycle Selector for Performance Events */}
+          {(() => {
+            const selectedEventType = eventTypes.find(t => t.id === formData.event_type_id);
+            const showAppraisalCycleSelector = selectedEventType?.category === 'performance_appraisals';
+            const showReviewCycleSelector = selectedEventType?.category === 'performance_360';
+            
+            if (showAppraisalCycleSelector) {
+              return (
+                <CycleSelector
+                  companyId={companyId}
+                  cycleType="appraisal"
+                  selectedCycleId={formData.appraisal_cycle_id}
+                  onSelect={(cycleId) => setFormData({ ...formData, appraisal_cycle_id: cycleId, review_cycle_id: null })}
+                />
+              );
+            }
+            
+            if (showReviewCycleSelector) {
+              return (
+                <CycleSelector
+                  companyId={companyId}
+                  cycleType="360"
+                  selectedCycleId={formData.review_cycle_id}
+                  onSelect={(cycleId) => setFormData({ ...formData, review_cycle_id: cycleId, appraisal_cycle_id: null })}
+                />
+              );
+            }
+            
+            return null;
+          })()}
 
           <div className="space-y-2">
             <Label>Description</Label>
