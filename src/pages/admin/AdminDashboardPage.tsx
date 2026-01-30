@@ -116,7 +116,7 @@ const getAdminModuleSections = (
     ],
     // Section 7: Integrations & API - External connections
     integrations: [
-      { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
+      { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
     ],
     // Section 8: Documentation & Enablement - Help and training
     documentation: [
