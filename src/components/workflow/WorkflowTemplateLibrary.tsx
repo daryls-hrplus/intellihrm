@@ -94,6 +94,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   retirement: "Retirement",
   disciplinary_acknowledgement: "Disciplinary Acknowledgement",
   grievance_submission: "Grievance Submission",
+  // 360 Feedback workflow types
+  feedback_360_approval: "360 Feedback",
+  feedback_360_release: "360 Results Release",
+  feedback_360_investigation: "360 Investigation",
+  feedback_360_external: "360 External Rater",
+  feedback_360_cycle: "360 Cycle Launch",
 };
 
 export function WorkflowTemplateLibrary({
