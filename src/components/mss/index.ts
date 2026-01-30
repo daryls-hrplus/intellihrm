@@ -14,3 +14,8 @@ export { TeamMember360Summary } from './TeamMember360Summary';
 export { TeamAppraisalSummaryCard } from './TeamAppraisalSummaryCard';
 export { DirectReportsAppraisalStatus } from './DirectReportsAppraisalStatus';
 export { TeamPerformanceDistribution } from './TeamPerformanceDistribution';
+
+// Dashboard Analytics Widgets
+export { TeamHealthSummary } from './TeamHealthSummary';
+export { PerformanceSnapshotCard } from './PerformanceSnapshotCard';
+export { PendingApprovalsWidget } from './PendingApprovalsWidget';
