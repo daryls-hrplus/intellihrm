@@ -1475,81 +1475,124 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
   },
 
   // ==========================================================================
-  // CHAPTER 9: TROUBLESHOOTING & BEST PRACTICES (~45 min)
+  // CHAPTER 9: TROUBLESHOOTING & BEST PRACTICES (~120 min)
   // ==========================================================================
   {
     id: 'chapter-9',
     sectionNumber: '9',
     title: 'Troubleshooting & Best Practices',
-    description: 'Common issues, diagnostic procedures, and implementation best practices.',
+    description: 'Comprehensive diagnostic procedures, 100+ documented issues, escalation paths, and implementation best practices.',
     contentLevel: 'reference',
-    estimatedReadTime: 45,
+    estimatedReadTime: 120,
     targetRoles: ['Admin', 'L&D Admin', 'Consultant'],
     subsections: [
       {
         id: 'sec-9-1',
         sectionNumber: '9.1',
-        title: 'Common Setup Issues',
-        description: 'Category configuration, course publishing, and enrollment errors',
+        title: 'Troubleshooting Overview',
+        description: 'Diagnostic methodology, symptom-to-section matrix, issue ID conventions, and escalation decision tree',
         contentLevel: 'reference',
-        estimatedReadTime: 8,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Training FAQs'
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin', 'Consultant']
       },
       {
         id: 'sec-9-2',
         sectionNumber: '9.2',
-        title: 'Course Visibility Issues',
-        description: 'Why courses don\'t appear in catalog, permission issues, and date filters',
+        title: 'Setup & Configuration Issues',
+        description: '15 issues: Categories, courses, modules, SCORM/xAPI, certificates, company settings (LMS-001 to LMS-015)',
         contentLevel: 'reference',
-        estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin'],
-        legacyReference: 'Why can\'t I see the course?'
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'L&D Admin', 'Consultant']
       },
       {
         id: 'sec-9-3',
         sectionNumber: '9.3',
-        title: 'Progress Tracking Issues',
-        description: 'Lesson progress not saving, SCORM tracking problems, and data sync',
+        title: 'Enrollment & Access Issues',
+        description: '12 issues: Catalog visibility, self-enrollment, manager assignment, waitlists, prerequisites (ENR-001 to ENR-012)',
         contentLevel: 'reference',
-        estimatedReadTime: 7,
-        targetRoles: ['Admin', 'Consultant']
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'L&D Admin', 'Manager']
       },
       {
         id: 'sec-9-4',
         sectionNumber: '9.4',
-        title: 'Quiz & Assessment Issues',
-        description: 'Scoring discrepancies, retake limits, time-out problems, and browser issues',
+        title: 'Progress Tracking Issues',
+        description: '10 issues: Lesson completion, SCORM sync, progress calculation, module unlock (PRG-001 to PRG-010)',
         contentLevel: 'reference',
-        estimatedReadTime: 6,
-        targetRoles: ['Admin', 'L&D Admin']
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant']
       },
       {
         id: 'sec-9-5',
         sectionNumber: '9.5',
-        title: 'Certificate Generation Issues',
-        description: 'Template rendering, certificate number conflicts, and PDF generation',
+        title: 'Quiz & Assessment Issues',
+        description: '12 issues: Scoring, timing, retakes, randomization, AI quiz generation (QIZ-001 to QIZ-012)',
         contentLevel: 'reference',
-        estimatedReadTime: 5,
-        targetRoles: ['Admin']
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'L&D Admin']
       },
       {
         id: 'sec-9-6',
         sectionNumber: '9.6',
-        title: 'Integration Troubleshooting',
-        description: 'Onboarding sync failures, appraisal trigger issues, and data flow diagnosis',
+        title: 'Certificate & Credential Issues',
+        description: '10 issues: Generation, numbering, PDF rendering, expiry, verification (CRT-001 to CRT-010)',
         contentLevel: 'reference',
-        estimatedReadTime: 7,
-        targetRoles: ['Admin', 'Consultant']
+        estimatedReadTime: 10,
+        targetRoles: ['Admin']
       },
       {
         id: 'sec-9-7',
         sectionNumber: '9.7',
-        title: 'Best Practices',
-        description: 'Content design, learner engagement, compliance management, and adoption strategies',
-        contentLevel: 'concept',
-        estimatedReadTime: 6,
+        title: 'Compliance Training Issues',
+        description: '12 issues: Assignment rules, exemptions, escalations, recertification, HSE sync (CMP-001 to CMP-012)',
+        contentLevel: 'reference',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'L&D Admin', 'Compliance Officer']
+      },
+      {
+        id: 'sec-9-8',
+        sectionNumber: '9.8',
+        title: 'External Training & Vendor Issues',
+        description: '10 issues: Vendor courses, sessions, costs, approvals, budget integration (VND-001 to VND-010)',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
         targetRoles: ['Admin', 'L&D Admin', 'HR Partner']
+      },
+      {
+        id: 'sec-9-9',
+        sectionNumber: '9.9',
+        title: 'Integration & Sync Issues',
+        description: '12 issues: Onboarding, appraisals, competencies, SSO, virtual classrooms, webhooks (INT-001 to INT-012)',
+        contentLevel: 'reference',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      {
+        id: 'sec-9-10',
+        sectionNumber: '9.10',
+        title: 'AI & Automation Issues',
+        description: '8 issues: Recommendations, adaptive paths, risk prediction, chatbot, governance (AIA-001 to AIA-008)',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      {
+        id: 'sec-9-11',
+        sectionNumber: '9.11',
+        title: 'Performance & Data Issues',
+        description: '8 issues: Page loading, analytics, duplicates, exports, realtime sync (PER-001 to PER-008)',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      {
+        id: 'sec-9-12',
+        sectionNumber: '9.12',
+        title: 'Escalation Procedures & FAQs',
+        description: 'Tiered support model (L1-L4), SLA targets, escalation checklist, 20+ FAQs',
+        contentLevel: 'reference',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'L&D Admin', 'Consultant', 'Manager', 'Employee']
       }
     ]
   }
