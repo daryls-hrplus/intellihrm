@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, Eye, Edit, Trash2, PlayCircle, Loader2, DollarSign, ChevronRight, ChevronDown, X, Filter } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, PlayCircle, Loader2, DollarSign, ChevronRight, ChevronDown, X, LayoutGrid, LayoutList } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,8 @@ import {
 import { TransactionTypePicker } from "./TransactionTypePicker";
 import { TransactionModuleFilter } from "./TransactionModuleFilter";
 import { TransactionModuleBadge } from "./TransactionModuleBadge";
+import { TransactionStatusProgress } from "./TransactionStatusProgress";
+import { TransactionCardView } from "./TransactionCardView";
 import { getTypesForModule } from "@/constants/transactionModuleCategories";
 import {
   Table,
@@ -39,6 +42,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui/toggle-group";
 import {
   useEmployeeTransactions,
   EmployeeTransaction,
@@ -86,6 +93,8 @@ const statusColors: Record<TransactionStatus, string> = {
   cancelled: "bg-muted text-muted-foreground",
 };
 
+type ViewMode = "table" | "card";
+
 export function EmployeeTransactionsList({
   companyId,
   departmentId,
@@ -119,6 +128,7 @@ export function EmployeeTransactionsList({
   const [deleteCompensationDialogOpen, setDeleteCompensationDialogOpen] = useState(false);
   const [compensationToDelete, setCompensationToDelete] = useState<{id: string; transactionId: string} | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [viewMode, setViewMode] = useLocalStorage<ViewMode>("transactionsViewMode", "table");
   const [recentTransactions, setRecentTransactions] = useState<TransactionType[]>(() => {
     try {
       const stored = localStorage.getItem("recentTransactionTypes");
@@ -417,13 +427,29 @@ export function EmployeeTransactionsList({
               </Button>
             )}
           </div>
-          <Button
-            onClick={() => setPickerOpen(true)}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
-          >
-            <Plus className="h-4 w-4" />
-            {t("workforce.modules.transactions.newTransaction")}
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* View Toggle */}
+            <ToggleGroup
+              type="single"
+              value={viewMode}
+              onValueChange={(value) => value && setViewMode(value as ViewMode)}
+              className="border rounded-md"
+            >
+              <ToggleGroupItem value="table" aria-label="Table view" className="px-3">
+                <LayoutList className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="card" aria-label="Card view" className="px-3">
+                <LayoutGrid className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <Button
+              onClick={() => setPickerOpen(true)}
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
+            >
+              <Plus className="h-4 w-4" />
+              {t("workforce.modules.transactions.newTransaction")}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -435,316 +461,333 @@ export function EmployeeTransactionsList({
         recentTransactions={recentTransactions}
       />
 
-      {/* Transactions Table */}
-      <div className="rounded-lg border border-border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-8"></TableHead>
-              <TableHead>{t("workforce.modules.transactions.transactionNumber")}</TableHead>
-              <TableHead>{t("workforce.modules.transactions.transactionType")}</TableHead>
-              <TableHead>{t("common.employee")}</TableHead>
-              <TableHead>{t("common.position")}</TableHead>
-              <TableHead>{t("workforce.modules.transactions.effectiveDate")}</TableHead>
-              <TableHead>{t("common.status")}</TableHead>
-              <TableHead>{t("workforce.modules.transactions.created")}</TableHead>
-              <TableHead className="text-right">{t("common.actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : viewMode === "card" ? (
+        /* Card View */
+        <TransactionCardView
+          transactions={filteredTransactions}
+          onView={onView}
+          onEdit={onEdit}
+          onDelete={(transaction) => {
+            setTransactionToDelete(transaction);
+            setDeleteDialogOpen(true);
+          }}
+          onStartWorkflow={onStartWorkflow}
+          onSetCompensation={(transaction) => {
+            setSelectedForCompensation(transaction);
+            setCompensationDialogOpen(true);
+          }}
+          hasCompensation={hasCompensation}
+          getRelevantPositionId={getRelevantPositionId}
+        />
+      ) : (
+        /* Table View */
+        <div className="rounded-lg border border-border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                </TableCell>
+                <TableHead className="w-8"></TableHead>
+                <TableHead>{t("workforce.modules.transactions.transactionNumber")}</TableHead>
+                <TableHead>{t("workforce.modules.transactions.transactionType")}</TableHead>
+                <TableHead>{t("common.employee")}</TableHead>
+                <TableHead>{t("common.position")}</TableHead>
+                <TableHead>{t("workforce.modules.transactions.effectiveDate")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
+                <TableHead className="text-right">{t("common.actions")}</TableHead>
               </TableRow>
-            ) : filteredTransactions.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={9}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  {t("workforce.modules.transactions.noTransactionsFound")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredTransactions.map((transaction) => (
-                <>
-                  <TableRow key={transaction.id} className={hasCompensation(transaction.id) ? "cursor-pointer hover:bg-muted/50" : ""}>
-                    <TableCell className="w-8 p-2">
-                      {hasCompensation(transaction.id) && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => toggleRowExpanded(transaction.id)}
-                        >
-                          {expandedRows.has(transaction.id) ? (
-                            <ChevronDown className="h-4 w-4 text-primary" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 text-primary" />
-                          )}
-                        </Button>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {transaction.transaction_number}
+            </TableHeader>
+            <TableBody>
+              {filteredTransactions.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    {t("workforce.modules.transactions.noTransactionsFound")}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredTransactions.map((transaction) => (
+                  <>
+                    <TableRow key={transaction.id} className={hasCompensation(transaction.id) ? "cursor-pointer hover:bg-muted/50" : ""}>
+                      <TableCell className="w-8 p-2">
                         {hasCompensation(transaction.id) && (
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <DollarSign className="h-3.5 w-3.5 text-success" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {t("compensation.history.hasCompensation")}
-                            </TooltipContent>
-                          </Tooltip>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => toggleRowExpanded(transaction.id)}
+                          >
+                            {expandedRows.has(transaction.id) ? (
+                              <ChevronDown className="h-4 w-4 text-primary" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-primary" />
+                            )}
+                          </Button>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <TransactionModuleBadge 
-                        typeCode={transaction.transaction_type?.code || ""}
-                        typeName={transaction.transaction_type?.name}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {transaction.employee?.full_name ||
-                        transaction.employee?.email ||
-                        "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      {(() => {
-                        const typeCode = transaction.transaction_type?.code;
-                        // For movement transactions, show destination position with arrow
-                        if (["TRANSFER", "BULK_TRANSFER", "PROMOTION"].includes(typeCode || "")) {
-                          const toPos = (transaction as any).to_position?.title;
-                          if (toPos) {
-                            return (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-muted-foreground text-xs">→</span>
-                                <span>{toPos}</span>
-                              </div>
-                            );
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {transaction.transaction_number}
+                          {hasCompensation(transaction.id) && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <DollarSign className="h-3.5 w-3.5 text-success" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {t("compensation.history.hasCompensation")}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <TransactionModuleBadge 
+                          typeCode={transaction.transaction_type?.code || ""}
+                          typeName={transaction.transaction_type?.name}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {transaction.employee?.full_name ||
+                          transaction.employee?.email ||
+                          "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const typeCode = transaction.transaction_type?.code;
+                          // For movement transactions, show destination position with arrow
+                          if (["TRANSFER", "BULK_TRANSFER", "PROMOTION"].includes(typeCode || "")) {
+                            const toPos = (transaction as any).to_position?.title;
+                            if (toPos) {
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-muted-foreground text-xs">→</span>
+                                  <span>{toPos}</span>
+                                </div>
+                              );
+                            }
                           }
-                        }
-                        // For ACTING transactions
-                        if (typeCode === "ACTING") {
-                          const actingPos = (transaction as any).acting_position?.title;
-                          if (actingPos) {
-                            return (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-muted-foreground text-xs">→</span>
-                                <span>{actingPos}</span>
-                              </div>
-                            );
+                          // For ACTING transactions
+                          if (typeCode === "ACTING") {
+                            const actingPos = (transaction as any).acting_position?.title;
+                            if (actingPos) {
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-muted-foreground text-xs">→</span>
+                                  <span>{actingPos}</span>
+                                </div>
+                              );
+                            }
                           }
-                        }
-                        // For SECONDMENT transactions
-                        if (typeCode === "SECONDMENT") {
-                          const secondmentPos = (transaction as any).secondment_position?.title;
-                          if (secondmentPos) {
-                            return (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-muted-foreground text-xs">→</span>
-                                <span>{secondmentPos}</span>
-                              </div>
-                            );
+                          // For SECONDMENT transactions
+                          if (typeCode === "SECONDMENT") {
+                            const secondmentPos = (transaction as any).secondment_position?.title;
+                            if (secondmentPos) {
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-muted-foreground text-xs">→</span>
+                                  <span>{secondmentPos}</span>
+                                </div>
+                              );
+                            }
                           }
-                        }
-                        // Default to position
-                        return transaction.position?.title || "—";
-                      })()}
-                    </TableCell>
-                    <TableCell>
-                      {formatDateForDisplay(transaction.effective_date, "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={statusColors[transaction.status]}>
-                        {t(`workforce.modules.transactions.statuses.${transaction.status}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {formatDateForDisplay(transaction.created_at, "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onView(transaction)}
-                              className="h-8 px-2"
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              <span className="hidden lg:inline">View</span>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="lg:hidden">View</TooltipContent>
-                        </Tooltip>
-                        {/* Compensation button - show for transactions with relevant position (employee_id optional for HIRE) */}
-                        {getRelevantPositionId(transaction) && 
-                         transaction.transaction_type?.code !== "TERMINATION" &&
-                         (transaction.status === "approved" || transaction.status === "completed" || transaction.status === "draft") && (
+                          // Default to position
+                          return transaction.position?.title || "—";
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        {formatDateForDisplay(transaction.effective_date, "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        <TransactionStatusProgress
+                          status={transaction.status}
+                          requiresWorkflow={transaction.requires_workflow}
+                          size="sm"
+                        />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => {
-                                  setSelectedForCompensation(transaction);
-                                  setCompensationDialogOpen(true);
-                                }}
+                                onClick={() => onView(transaction)}
                                 className="h-8 px-2"
                               >
-                                <DollarSign className="h-4 w-4 mr-1" />
-                                <span className="hidden lg:inline">Pay</span>
+                                <Eye className="h-4 w-4 mr-1" />
+                                <span className="hidden lg:inline">View</span>
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>
-                              {t("workforce.modules.transactions.form.setCompensation")}
-                            </TooltipContent>
+                            <TooltipContent className="lg:hidden">View</TooltipContent>
                           </Tooltip>
-                        )}
-                        {transaction.status === "draft" && (
-                          <>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => onEdit(transaction)}
-                                  className="h-8 px-2"
-                                >
-                                  <Edit className="h-4 w-4 mr-1" />
-                                  <span className="hidden lg:inline">Edit</span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="lg:hidden">Edit</TooltipContent>
-                            </Tooltip>
-                            {transaction.requires_workflow && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => onStartWorkflow(transaction)}
-                                    className="h-8 px-2 text-primary border-primary/30 hover:bg-primary/10"
-                                  >
-                                    <PlayCircle className="h-4 w-4 mr-1" />
-                                    <span className="hidden lg:inline">Submit</span>
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>Start Approval Workflow</TooltipContent>
-                              </Tooltip>
-                            )}
+                          {/* Compensation button - show for transactions with relevant position (employee_id optional for HIRE) */}
+                          {getRelevantPositionId(transaction) && 
+                           transaction.transaction_type?.code !== "TERMINATION" &&
+                           (transaction.status === "approved" || transaction.status === "completed" || transaction.status === "draft") && (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => {
-                                    setTransactionToDelete(transaction);
-                                    setDeleteDialogOpen(true);
+                                    setSelectedForCompensation(transaction);
+                                    setCompensationDialogOpen(true);
                                   }}
-                                  className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  className="h-8 px-2"
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <DollarSign className="h-4 w-4 mr-1" />
+                                  <span className="hidden lg:inline">Pay</span>
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>Delete</TooltipContent>
+                              <TooltipContent>
+                                {t("workforce.modules.transactions.form.setCompensation")}
+                              </TooltipContent>
                             </Tooltip>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                  {/* Expanded compensation details row */}
-                  {expandedRows.has(transaction.id) && hasCompensation(transaction.id) && (
-                    <TableRow className="bg-muted/30">
-                      <TableCell colSpan={9} className="py-3 px-4">
-                        <div className="ml-8">
-                          <p className="text-sm font-medium mb-2 text-muted-foreground">
-                            {t("compensation.employeeCompensation.title", "Employee Compensation")}
-                          </p>
-                          <div className="space-y-2">
-                            {transactionCompensation[transaction.id].map((comp) => (
-                              <div key={comp.id} className="flex items-center justify-between text-sm bg-background rounded-md px-3 py-2 border">
-                                <div className="flex items-center gap-6">
-                                  <div>
-                                    <span className="text-muted-foreground">{t("compensation.employeeCompensation.payElement", "Pay Element")}:</span>{" "}
-                                    <Badge variant="outline" className="ml-1">{comp.pay_element?.name || comp.pay_element_id}</Badge>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">{t("compensation.employeeCompensation.amount", "Amount")}:</span>{" "}
-                                    <span className="font-medium">{comp.currency} {comp.amount.toLocaleString()}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">{t("compensation.employeeCompensation.frequencyLabel", "Frequency")}:</span>{" "}
-                                    <span className="font-medium capitalize">{comp.frequency}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">{t("common.startDate")}:</span>{" "}
-                                    <span className="font-medium">{formatDateForDisplay(comp.start_date, "MMM d, yyyy")}</span>
-                                  </div>
-                                  {comp.end_date && (
-                                    <div>
-                                      <span className="text-muted-foreground">{t("common.endDate")}:</span>{" "}
-                                      <span className="font-medium">{formatDateForDisplay(comp.end_date, "MMM d, yyyy")}</span>
-                                    </div>
-                                  )}
-                                  {comp.is_override && (
-                                    <Badge variant="secondary" className="text-xs">Override</Badge>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant={comp.is_active ? "default" : "outline"} className="text-xs">
-                                    {comp.is_active ? t("common.active") : t("common.inactive")}
-                                  </Badge>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7"
-                                        onClick={() => handleEditCompensation(comp, transaction)}
-                                      >
-                                        <Edit className="h-3.5 w-3.5" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>{t("common.edit")}</TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-7 w-7 text-destructive hover:text-destructive"
-                                        onClick={() => {
-                                          setCompensationToDelete({ id: comp.id, transactionId: transaction.id });
-                                          setDeleteCompensationDialogOpen(true);
-                                        }}
-                                      >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>{t("common.delete")}</TooltipContent>
-                                  </Tooltip>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                          )}
+                          {transaction.status === "draft" && (
+                            <>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => onEdit(transaction)}
+                                    className="h-8 px-2"
+                                  >
+                                    <Edit className="h-4 w-4 mr-1" />
+                                    <span className="hidden lg:inline">Edit</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent className="lg:hidden">Edit</TooltipContent>
+                              </Tooltip>
+                              {transaction.requires_workflow && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => onStartWorkflow(transaction)}
+                                      className="h-8 px-2 text-primary border-primary/30 hover:bg-primary/10"
+                                    >
+                                      <PlayCircle className="h-4 w-4 mr-1" />
+                                      <span className="hidden lg:inline">Submit</span>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Start Approval Workflow</TooltipContent>
+                                </Tooltip>
+                              )}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setTransactionToDelete(transaction);
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                    className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete</TooltipContent>
+                              </Tooltip>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
-                  )}
-                </>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                    {/* Expanded compensation details row */}
+                    {expandedRows.has(transaction.id) && hasCompensation(transaction.id) && (
+                      <TableRow className="bg-muted/30">
+                        <TableCell colSpan={8} className="py-3 px-4">
+                          <div className="ml-8">
+                            <p className="text-sm font-medium mb-2 text-muted-foreground">
+                              {t("compensation.employeeCompensation.title", "Employee Compensation")}
+                            </p>
+                            <div className="space-y-2">
+                              {transactionCompensation[transaction.id].map((comp) => (
+                                <div key={comp.id} className="flex items-center justify-between text-sm bg-background rounded-md px-3 py-2 border">
+                                  <div className="flex items-center gap-6">
+                                    <div>
+                                      <span className="text-muted-foreground">{t("compensation.employeeCompensation.payElement", "Pay Element")}:</span>{" "}
+                                      <Badge variant="outline" className="ml-1">{comp.pay_element?.name || comp.pay_element_id}</Badge>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">{t("compensation.employeeCompensation.amount", "Amount")}:</span>{" "}
+                                      <span className="font-medium">{comp.currency} {comp.amount.toLocaleString()}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">{t("compensation.employeeCompensation.frequencyLabel", "Frequency")}:</span>{" "}
+                                      <span className="font-medium capitalize">{comp.frequency}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">{t("common.startDate")}:</span>{" "}
+                                      <span className="font-medium">{formatDateForDisplay(comp.start_date, "MMM d, yyyy")}</span>
+                                    </div>
+                                    {comp.end_date && (
+                                      <div>
+                                        <span className="text-muted-foreground">{t("common.endDate")}:</span>{" "}
+                                        <span className="font-medium">{formatDateForDisplay(comp.end_date, "MMM d, yyyy")}</span>
+                                      </div>
+                                    )}
+                                    {comp.is_override && (
+                                      <Badge variant="secondary" className="text-xs">Override</Badge>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant={comp.is_active ? "default" : "outline"} className="text-xs">
+                                      {comp.is_active ? t("common.active") : t("common.inactive")}
+                                    </Badge>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-7 w-7"
+                                          onClick={() => handleEditCompensation(comp, transaction)}
+                                        >
+                                          <Edit className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{t("common.edit")}</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-7 w-7 text-destructive hover:text-destructive"
+                                          onClick={() => {
+                                            setCompensationToDelete({ id: comp.id, transactionId: transaction.id });
+                                            setDeleteCompensationDialogOpen(true);
+                                          }}
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{t("common.delete")}</TooltipContent>
+                                    </Tooltip>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
