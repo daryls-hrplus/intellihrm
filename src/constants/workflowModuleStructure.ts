@@ -210,7 +210,11 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         color: "lime",
         icon: Target,
         workflows: [
-          { code: "goal_approval", name: "Goal Approval", transactionTypeCode: null }
+          { code: "goal_approval_individual", name: "Individual Goal Approval", transactionTypeCode: "PERF_GOAL_APPROVAL_INDIVIDUAL" },
+          { code: "goal_approval_team", name: "Team Goal Approval", transactionTypeCode: "PERF_GOAL_APPROVAL_TEAM" },
+          { code: "goal_approval_department", name: "Department Goal Approval", transactionTypeCode: "PERF_GOAL_APPROVAL_DEPARTMENT" },
+          { code: "goal_cascade", name: "Goal Cascade Approval", transactionTypeCode: "PERF_GOAL_CASCADE" },
+          { code: "goal_modification", name: "Goal Modification Approval", transactionTypeCode: "PERF_GOAL_MODIFICATION" }
         ]
       },
       {
