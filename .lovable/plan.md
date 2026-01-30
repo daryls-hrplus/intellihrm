@@ -1,89 +1,151 @@
 
-# Remove Template Codes from Workflow Management UI
+
+# Prevent Duplicate Template Usage in Automation Rules
 
 ## Overview
-Remove the internal template codes (e.g., `PERF_RATING_APPROVAL`, `PERF_APPRAISAL_ACKNOWLEDGMENT`) displayed next to workflow template names throughout the Workflow Management interface. These technical identifiers are not useful for end-users and clutter the UI.
+Add logic to prevent users from creating duplicate automation rules for templates that are already in use. When a template is already linked to an automation rule for the selected company, show a visual indicator and change the "Use in Rule" button to "Edit Rule" that navigates to the existing rule.
 
 ---
 
-## Current State
-The template/transaction type codes are currently displayed in three locations:
+## Current Behavior
+- The "Use in Rule" button always appears for all templates
+- Clicking it always opens the **create** dialog for a new rule
+- Users can accidentally create multiple rules using the same template
+- No visual feedback showing which templates are already associated with rules
 
-| Location | Component | Code Displayed |
-|----------|-----------|---------------|
-| Workflow list rows | `UnifiedWorkflowCard.tsx` | Transaction type code (e.g., `PERF_RATING_APPROVAL`) |
-| Template Library details panel | `WorkflowTemplateLibrary.tsx` | Template code in monospace badge |
-| Step Configuration details panel | `WorkflowStepConfiguration.tsx` | Template code in monospace badge |
+## Desired Behavior
+- Templates already linked to a rule for the current company show an "In Use" indicator
+- The "Use in Rule" button is replaced with "Edit Rule" for templates already in use
+- Clicking "Edit Rule" switches to the Automation Rules tab and opens the edit dialog for the existing rule
+- Users can still view/duplicate templates regardless of usage status
+
+---
+
+## Technical Approach
+
+### 1. Fetch Template Usage Status
+
+In `ReminderEmailTemplates.tsx`, query `reminder_rules` to find which templates are already linked to rules for the current company:
+
+```sql
+SELECT email_template_id, id as rule_id, name as rule_name 
+FROM reminder_rules 
+WHERE company_id = :companyId 
+  AND email_template_id IS NOT NULL
+```
+
+This returns a mapping of `template_id` → `{ rule_id, rule_name }` to identify which templates are in use.
+
+### 2. Add Template Usage State
+
+Add new state and fetch logic in `ReminderEmailTemplates`:
+
+```typescript
+const [templateUsage, setTemplateUsage] = useState<Map<string, { ruleId: string; ruleName: string }>>(new Map());
+
+// Fetch in useEffect alongside templates
+const fetchTemplateUsage = async () => {
+  const { data } = await supabase
+    .from('reminder_rules')
+    .select('email_template_id, id, name')
+    .eq('company_id', companyId)
+    .not('email_template_id', 'is', null);
+  
+  const usageMap = new Map();
+  data?.forEach(rule => {
+    usageMap.set(rule.email_template_id, { ruleId: rule.id, ruleName: rule.name });
+  });
+  setTemplateUsage(usageMap);
+};
+```
+
+### 3. Add onEditRule Callback
+
+Add a new prop to allow editing existing rules:
+
+```typescript
+interface ReminderEmailTemplatesProps {
+  companyId: string;
+  companyName?: string;
+  onUseTemplate?: (template: EmailTemplate) => void;
+  onEditRule?: (ruleId: string, ruleName: string) => void; // NEW
+}
+```
+
+### 4. Update Template Card UI
+
+Modify `renderTemplateCard` to show usage status and conditional button:
+
+```tsx
+const usage = templateUsage.get(template.id);
+const isInUse = !!usage;
+
+// Show "In Use" badge next to template name
+{isInUse && (
+  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+    <Zap className="h-3 w-3 mr-1" />
+    In Use
+  </Badge>
+)}
+
+// Change button based on usage status
+{onUseTemplate && !isInUse && (
+  <Button variant="default" size="sm" onClick={() => onUseTemplate(template)}>
+    <Zap className="h-3.5 w-3.5 mr-1" />
+    Use in Rule
+  </Button>
+)}
+{onEditRule && isInUse && (
+  <Button variant="secondary" size="sm" onClick={() => onEditRule(usage.ruleId, usage.ruleName)}>
+    <Edit className="h-3.5 w-3.5 mr-1" />
+    Edit Rule
+  </Button>
+)}
+```
+
+### 5. Handle Edit Rule in Parent Page
+
+Update `HRRemindersPage.tsx` to add the edit handler:
+
+```typescript
+const handleEditRule = (ruleId: string, ruleName: string) => {
+  setTabState({ activeTab: 'rules' });
+  setTimeout(() => {
+    rulesManagerRef.current?.openEditDialog(ruleId);
+  }, 100);
+};
+```
+
+Pass it to the component:
+```tsx
+<ReminderEmailTemplates 
+  companyId={selectedCompanyId}
+  companyName={companies.find(c => c.id === selectedCompanyId)?.name}
+  onUseTemplate={handleUseTemplate}
+  onEditRule={handleEditRule}
+/>
+```
 
 ---
 
 ## Files to Modify
 
-### 1. `src/components/workflow/UnifiedWorkflowCard.tsx`
-**Remove lines 105-109** - the span showing `workflow.transactionTypeCode`:
-
-```text
-Before:
-<div className="flex items-center gap-2">
-  <span className="font-medium text-sm">{workflow.name}</span>
-  {workflow.transactionTypeCode && (
-    <span className="text-xs text-muted-foreground">
-      {workflow.transactionTypeCode}
-    </span>
-  )}
-</div>
-
-After:
-<div className="flex items-center gap-2">
-  <span className="font-medium text-sm">{workflow.name}</span>
-</div>
-```
-
-### 2. `src/components/workflow/WorkflowTemplateLibrary.tsx`
-**Remove lines 475-479** - the monospace code badge showing `selectedTemplate.code`:
-
-```text
-Before:
-<p className="text-sm text-muted-foreground mt-1">
-  <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded mr-2">
-    {selectedTemplate.code}
-  </span>
-  {CATEGORY_LABELS[selectedTemplate.category] || selectedTemplate.category}
-</p>
-
-After:
-<p className="text-sm text-muted-foreground mt-1">
-  {CATEGORY_LABELS[selectedTemplate.category] || selectedTemplate.category}
-</p>
-```
-
-### 3. `src/components/workflow/WorkflowStepConfiguration.tsx`
-**Remove lines 234-238** - the monospace code badge showing `selectedTemplate.code`:
-
-```text
-Before:
-<p className="text-sm text-muted-foreground mt-1">
-  <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded mr-2">
-    {selectedTemplate.code}
-  </span>
-  {CATEGORY_LABELS[selectedTemplate.category] || selectedTemplate.category}
-</p>
-
-After:
-<p className="text-sm text-muted-foreground mt-1">
-  {CATEGORY_LABELS[selectedTemplate.category] || selectedTemplate.category}
-</p>
-```
+| File | Changes |
+|------|---------|
+| `src/components/reminders/ReminderEmailTemplates.tsx` | Add `templateUsage` state, `fetchTemplateUsage()` query, `onEditRule` prop, update `renderTemplateCard()` with conditional button and "In Use" badge |
+| `src/pages/hr-hub/HRRemindersPage.tsx` | Add `handleEditRule` callback and pass to `ReminderEmailTemplates` |
 
 ---
 
-## Result
-After these changes:
-- Workflow list rows will show only the human-readable name (e.g., "Rating Approval")
-- Template details panels will show only the category label (e.g., "Performance Rating")
-- Internal codes remain in the database for system use but are hidden from the UI
+## UI Changes Summary
+
+| State | Badge | Button |
+|-------|-------|--------|
+| Template **not** in use | None | "Use in Rule" (primary, blue) |
+| Template **in use** | "In Use" (green badge with Zap icon) | "Edit Rule" (secondary variant) |
 
 ---
 
 ## No Database Changes Required
-This is a UI-only change. The codes remain stored in the database and continue to function for system operations.
+This uses existing `reminder_rules.email_template_id` relationship. No schema modifications needed.
+
