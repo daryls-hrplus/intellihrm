@@ -201,6 +201,19 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         workflows: [
           { code: "goal_approval", name: "Goal Approval", transactionTypeCode: null }
         ]
+      },
+      {
+        id: "feedback_360",
+        name: "360 Feedback",
+        color: "violet",
+        icon: Users,
+        workflows: [
+          { code: "feedback_360_approval", name: "Peer Nomination Approval", transactionTypeCode: "FEEDBACK_360_NOMINATION" },
+          { code: "feedback_360_release", name: "Results Release", transactionTypeCode: "PERF_360_RELEASE" },
+          { code: "feedback_360_investigation", name: "Investigation Access", transactionTypeCode: "FEEDBACK_360_INVESTIGATION" },
+          { code: "feedback_360_external", name: "External Rater Approval", transactionTypeCode: "FEEDBACK_360_EXTERNAL_RATER" },
+          { code: "feedback_360_cycle", name: "Cycle Launch Approval", transactionTypeCode: "FEEDBACK_360_CYCLE_LAUNCH" }
+        ]
       }
     ]
   },
