@@ -104,6 +104,8 @@ export default function ManagerSelfServicePage() {
     },
   ];
 
+  const { healthMetrics, performanceMetrics, pendingApprovals, isLoading } = useMssTeamMetrics();
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -118,6 +120,15 @@ export default function ManagerSelfServicePage() {
           <p className="text-muted-foreground">
             {t("mss.subtitle")}
           </p>
+        </div>
+
+        {/* Team Health Summary - Top KPI Row */}
+        <TeamHealthSummary metrics={healthMetrics} loading={isLoading} />
+
+        {/* Analytics Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <PerformanceSnapshotCard metrics={performanceMetrics} loading={isLoading} />
+          <PendingApprovalsWidget approvals={pendingApprovals} loading={isLoading} />
         </div>
 
         {/* Team Leave Intelligence */}
