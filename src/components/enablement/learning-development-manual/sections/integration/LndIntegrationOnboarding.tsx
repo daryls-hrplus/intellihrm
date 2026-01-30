@@ -5,12 +5,14 @@ import {
   ArrowRight, 
   Database,
   Code,
-  CheckCircle2
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import { 
   LearningObjectives, 
   InfoCallout, 
   TipCallout,
+  WarningCallout,
   StepByStep,
   FieldReferenceTable,
   type Step,
@@ -20,11 +22,13 @@ import { ScreenshotPlaceholder } from '@/components/enablement/shared/Screenshot
 
 const onboardingTaskFields: FieldDefinition[] = [
   { name: 'id', required: true, type: 'UUID', description: 'Unique task identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
-  { name: 'employee_id', required: true, type: 'UUID', description: 'Employee assigned the task', defaultValue: '—', validation: 'References profiles.id' },
+  { name: 'instance_id', required: true, type: 'UUID', description: 'Parent onboarding instance', defaultValue: '—', validation: 'References onboarding_instances.id' },
   { name: 'training_course_id', required: false, type: 'UUID', description: 'Linked training course for auto-enrollment', defaultValue: 'null', validation: 'References lms_courses.id' },
   { name: 'task_type', required: true, type: 'text', description: 'Type of onboarding task', defaultValue: '—', validation: 'training, document, form, meeting' },
   { name: 'status', required: true, type: 'text', description: 'Task completion status', defaultValue: 'pending', validation: 'pending, in_progress, completed' },
-  { name: 'due_date', required: false, type: 'date', description: 'Task deadline', defaultValue: 'null', validation: 'Future date' }
+  { name: 'due_date', required: false, type: 'date', description: 'Task deadline', defaultValue: 'null', validation: 'Future date' },
+  { name: 'assigned_to_id', required: false, type: 'UUID', description: 'Assignee (employee or role)', defaultValue: 'null', validation: 'Polymorphic reference' },
+  { name: 'assigned_to_type', required: false, type: 'text', description: 'Type of assignee', defaultValue: 'null', validation: 'employee, role, group' }
 ];
 
 const configSteps: Step[] = [
@@ -80,8 +84,8 @@ export function LndIntegrationOnboarding() {
 
       <LearningObjectives objectives={[
         'Configure onboarding tasks with linked training courses',
-        'Understand the trigger_onboarding_training_enrollment PostgreSQL function',
-        'Track training enrollments with source_type = "onboarding"',
+        'Understand the onboarding → training enrollment trigger mechanism',
+        'Track training enrollments originating from onboarding',
         'Troubleshoot common onboarding integration issues'
       ]} />
 
@@ -102,23 +106,23 @@ export function LndIntegrationOnboarding() {
               </div>
               <ArrowRight className="h-5 w-5 text-muted-foreground" />
               <div className="text-center p-3 bg-background rounded-lg border">
-                <p className="text-xs text-muted-foreground">Function</p>
-                <p className="font-medium">trigger_onboarding_training_enrollment</p>
-                <Badge variant="outline" className="mt-1">PostgreSQL trigger</Badge>
+                <p className="text-xs text-muted-foreground">Join</p>
+                <p className="font-medium">onboarding_instances</p>
+                <Badge variant="outline" className="mt-1">instance_id → employee_id</Badge>
               </div>
               <ArrowRight className="h-5 w-5 text-muted-foreground" />
               <div className="text-center p-3 bg-background rounded-lg border">
                 <p className="text-xs text-muted-foreground">Result</p>
-                <p className="font-medium">LMS Enrollment</p>
-                <Badge variant="outline" className="mt-1">lms_enrollments</Badge>
+                <p className="font-medium">Training Request</p>
+                <Badge variant="outline" className="mt-1">training_requests</Badge>
               </div>
             </div>
           </div>
 
           <InfoCallout>
-            The integration is implemented as a PostgreSQL trigger that fires when an onboarding 
-            task with a <code>training_course_id</code> is inserted. This ensures zero-latency 
-            enrollment without edge function overhead.
+            The onboarding tasks table uses <code>instance_id</code> to link to 
+            <code>onboarding_instances</code>, which contains the <code>employee_id</code>. 
+            This join is required to identify the employee for training enrollment.
           </InfoCallout>
         </CardContent>
       </Card>
@@ -127,42 +131,35 @@ export function LndIntegrationOnboarding() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Code className="h-5 w-5" />
-            PostgreSQL Trigger Function
+            Integration Logic
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            The <code>trigger_onboarding_training_enrollment</code> function handles automatic enrollment:
+            When an onboarding task with a <code>training_course_id</code> is created or assigned, 
+            the system creates a training request for the employee:
           </p>
 
           <div className="p-4 border rounded-lg bg-muted/30 font-mono text-xs overflow-x-auto">
-            <pre>{`CREATE OR REPLACE FUNCTION trigger_onboarding_training_enrollment()
-RETURNS TRIGGER AS $$
-BEGIN
-  -- Only process if training_course_id is set
-  IF NEW.training_course_id IS NOT NULL THEN
-    INSERT INTO lms_enrollments (
-      user_id,
-      course_id,
-      company_id,
-      status,
-      enrolled_by,
-      source_type,
-      source_reference_id
-    ) VALUES (
-      NEW.employee_id,
-      NEW.training_course_id,
-      (SELECT company_id FROM profiles WHERE id = NEW.employee_id),
-      'enrolled',
-      NEW.assigned_by,
-      'onboarding',
-      NEW.id
-    )
-    ON CONFLICT (user_id, course_id) DO NOTHING;
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;`}</pre>
+            <pre>{`-- Conceptual flow for onboarding → training integration
+-- 1. Task created with training_course_id
+INSERT INTO onboarding_tasks (instance_id, training_course_id, ...)
+
+-- 2. System resolves employee via instance
+SELECT oi.employee_id, oi.company_id 
+FROM onboarding_instances oi 
+WHERE oi.id = NEW.instance_id
+
+-- 3. Training request created
+INSERT INTO training_requests (
+  employee_id,
+  course_id,
+  company_id,
+  source_type,          -- 'onboarding'
+  source_reference_id,  -- onboarding_tasks.id
+  request_type,
+  status
+) VALUES (...)`}</pre>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -172,9 +169,9 @@ $$ LANGUAGE plpgsql;`}</pre>
                 Key Behaviors
               </h4>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• Fires on INSERT to onboarding_tasks</li>
+                <li>• Triggers on INSERT to onboarding_tasks</li>
                 <li>• Only triggers when training_course_id is set</li>
-                <li>• Uses ON CONFLICT to prevent duplicates</li>
+                <li>• Creates training_request for tracking</li>
                 <li>• Sets source_type = 'onboarding' for traceability</li>
               </ul>
             </div>
@@ -186,8 +183,8 @@ $$ LANGUAGE plpgsql;`}</pre>
               <ul className="space-y-1 text-muted-foreground">
                 <li>• source_type: 'onboarding'</li>
                 <li>• source_reference_id: onboarding_tasks.id</li>
-                <li>• enrolled_by: assigned_by from task</li>
-                <li>• Enables full audit trail</li>
+                <li>• Links back for audit trail</li>
+                <li>• Enables onboarding training reports</li>
               </ul>
             </div>
           </div>
@@ -198,6 +195,11 @@ $$ LANGUAGE plpgsql;`}</pre>
         fields={onboardingTaskFields} 
         title="onboarding_tasks Table (Key Training Fields)" 
       />
+
+      <WarningCallout>
+        The <code>onboarding_tasks</code> table uses <code>instance_id</code> (not direct employee_id). 
+        Always join through <code>onboarding_instances</code> to get the employee reference.
+      </WarningCallout>
 
       <StepByStep steps={configSteps} title="Configuration Procedure" />
 

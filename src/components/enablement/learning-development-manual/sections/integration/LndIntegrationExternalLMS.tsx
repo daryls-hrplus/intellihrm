@@ -17,10 +17,11 @@ import {
 } from '@/components/enablement/manual/components';
 import { ScreenshotPlaceholder } from '@/components/enablement/shared/ScreenshotPlaceholder';
 
+// Corrected schema based on actual external_training_records table
 const externalTrainingFields: FieldDefinition[] = [
   { name: 'id', required: true, type: 'UUID', description: 'Unique record identifier', defaultValue: 'gen_random_uuid()', validation: 'Auto-generated' },
   { name: 'employee_id', required: true, type: 'UUID', description: 'Employee who completed training', defaultValue: '—', validation: 'References profiles.id' },
-  { name: 'training_title', required: true, type: 'text', description: 'Name of external training', defaultValue: '—', validation: 'Required' },
+  { name: 'training_name', required: true, type: 'text', description: 'Name of external training', defaultValue: '—', validation: 'Required' },
   { name: 'provider_name', required: true, type: 'text', description: 'Training provider/vendor', defaultValue: '—', validation: 'Required' },
   { name: 'training_type', required: true, type: 'text', description: 'Type of training', defaultValue: 'course', validation: 'course, certification, conference, workshop' },
   { name: 'completion_date', required: true, type: 'date', description: 'When training was completed', defaultValue: '—', validation: 'Past or today' },
@@ -28,9 +29,10 @@ const externalTrainingFields: FieldDefinition[] = [
   { name: 'cost_amount', required: false, type: 'decimal', description: 'Training cost', defaultValue: 'null', validation: 'Positive number' },
   { name: 'cost_currency', required: false, type: 'text', description: 'Currency code', defaultValue: 'USD', validation: 'ISO currency code' },
   { name: 'certificate_url', required: false, type: 'text', description: 'Link to certificate/credential', defaultValue: 'null', validation: 'Valid URL' },
+  { name: 'certificate_received', required: false, type: 'boolean', description: 'Certificate documentation received', defaultValue: 'false', validation: 'true/false' },
   { name: 'skills_acquired', required: false, type: 'text[]', description: 'Skills gained from training', defaultValue: '[]', validation: 'Array of skill names' },
-  { name: 'verification_status', required: false, type: 'text', description: 'HR verification status', defaultValue: 'pending', validation: 'pending, verified, rejected' },
-  { name: 'verified_by', required: false, type: 'UUID', description: 'HR user who verified', defaultValue: 'null', validation: 'References profiles.id' }
+  { name: 'training_request_id', required: false, type: 'UUID', description: 'Linked training request', defaultValue: 'null', validation: 'References training_requests.id' },
+  { name: 'company_id', required: true, type: 'UUID', description: 'Company context', defaultValue: '—', validation: 'References companies.id' }
 ];
 
 export function LndIntegrationExternalLMS() {
@@ -49,7 +51,7 @@ export function LndIntegrationExternalLMS() {
       </div>
 
       <LearningObjectives objectives={[
-        'Record and verify external training completed outside the LMS',
+        'Record external training completed outside the LMS',
         'Configure SSO/SAML for federated LMS access',
         'Understand SCORM/xAPI data exchange patterns',
         'Track external training costs against budgets'
@@ -65,7 +67,7 @@ export function LndIntegrationExternalLMS() {
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             Employees can submit training completed outside the LMS for inclusion in their 
-            learning record. HR verifies submissions before they count toward metrics.
+            learning record. Records can be linked to training requests for cost tracking.
           </p>
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -92,12 +94,12 @@ export function LndIntegrationExternalLMS() {
             </div>
 
             <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">Verification Workflow</h4>
+              <h4 className="font-medium mb-2">Record Submission Workflow</h4>
               <ol className="space-y-2 text-sm text-muted-foreground">
                 <li>1. Employee submits external training record</li>
-                <li>2. Status set to <code>pending</code></li>
-                <li>3. HR reviews documentation/certificate</li>
-                <li>4. HR approves → <code>verified</code></li>
+                <li>2. Uploads certificate via <code>certificate_url</code></li>
+                <li>3. HR reviews documentation</li>
+                <li>4. Sets <code>certificate_received = true</code></li>
                 <li>5. Training appears in employee learning history</li>
               </ol>
             </div>
@@ -107,7 +109,7 @@ export function LndIntegrationExternalLMS() {
 
       <FieldReferenceTable 
         fields={externalTrainingFields} 
-        title="external_training_records Table (Key Fields)" 
+        title="external_training_records Table" 
       />
 
       <Card>
@@ -244,15 +246,15 @@ export function LndIntegrationExternalLMS() {
               </li>
               <li className="flex items-start gap-2">
                 <Badge variant="outline" className="mt-0.5">2</Badge>
-                <span>System links to training_budgets via budget_id (optional)</span>
+                <span>Link to original training_request via training_request_id</span>
               </li>
               <li className="flex items-start gap-2">
                 <Badge variant="outline" className="mt-0.5">3</Badge>
-                <span>Upon HR verification, cost added to spent_amount in budget</span>
+                <span>Cost reconciled against training_requests.estimated_cost</span>
               </li>
               <li className="flex items-start gap-2">
                 <Badge variant="outline" className="mt-0.5">4</Badge>
-                <span>Budget utilization reports reflect external training spend</span>
+                <span>Budget utilization reports reflect actual external training spend</span>
               </li>
             </ul>
           </div>
@@ -265,13 +267,13 @@ export function LndIntegrationExternalLMS() {
       />
 
       <WarningCallout>
-        External training records require HR verification before counting toward compliance or 
-        skill metrics. Ensure the verification workflow is staffed to prevent backlogs.
+        External training records should include certificate documentation for compliance tracking. 
+        Use the <code>certificate_received</code> flag to track verification status.
       </WarningCallout>
 
       <TipCallout>
         <strong>Best Practice:</strong> Create approved vendor lists for common external providers 
-        (LinkedIn Learning, Coursera, etc.) to streamline verification and standardize reporting.
+        (LinkedIn Learning, Coursera, etc.) to streamline reporting and standardize provider names.
       </TipCallout>
 
       <InfoCallout>

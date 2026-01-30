@@ -72,7 +72,7 @@ export function LndIntegrationNotifications() {
       </div>
 
       <LearningObjectives objectives={[
-        'Understand the 20+ training-related notification event types',
+        'Understand the 34 training-related notification event types',
         'Configure reminder timing and email templates',
         'Set up calendar sync for training sessions (Google/Outlook)',
         'Customize notification preferences by user role'
@@ -82,7 +82,7 @@ export function LndIntegrationNotifications() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
-            Training Notification Event Types
+            Training Notification Event Types (34 Total)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -151,13 +151,39 @@ export function LndIntegrationNotifications() {
 
               <div className="p-4 border rounded-lg">
                 <h4 className="font-medium mb-3 flex items-center gap-2">
-                  <Badge variant="outline">Sessions</Badge>
+                  <Badge variant="outline">Sessions & Vendor</Badge>
                 </h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• <code>VENDOR_SESSION_REMINDER</code></li>
                   <li>• <code>VENDOR_SESSION_CANCELLED</code></li>
                   <li>• <code>VENDOR_SESSION_RESCHEDULED</code></li>
+                  <li>• <code>VENDOR_SESSION_CONFIRMED</code></li>
+                  <li>• <code>VENDOR_SESSION_REG_DEADLINE</code></li>
                   <li>• <code>ILT_SESSION_REMINDER</code></li>
+                </ul>
+              </div>
+
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-medium mb-3 flex items-center gap-2">
+                  <Badge variant="outline">Cross-Module</Badge>
+                </h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>• <code>EXTERNAL_CERT_EXPIRING</code></li>
+                  <li>• <code>safety_training_expiry</code></li>
+                  <li>• <code>skill_expiry</code></li>
+                  <li>• <code>BACKGROUND_CHECK_EXPIRY</code></li>
+                </ul>
+              </div>
+
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-medium mb-3 flex items-center gap-2">
+                  <Badge variant="outline">Quiz & Assessment</Badge>
+                </h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>• <code>LMS_QUIZ_FAILED</code></li>
+                  <li>• <code>LMS_QUIZ_PASSED</code></li>
+                  <li>• <code>LMS_ASSESSMENT_DUE</code></li>
+                  <li>• <code>LMS_EVALUATION_REQUEST</code></li>
                 </ul>
               </div>
             </div>
