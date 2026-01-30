@@ -171,7 +171,7 @@ export function F360ApprovalWorkflows() {
       {/* Section Header */}
       <h3 className="text-xl font-semibold flex items-center gap-2">
         <Workflow className="h-5 w-5 text-primary" />
-        2.0a Approval Workflows for 360 Feedback
+        2.8 Approval Workflows for 360 Feedback
       </h3>
 
       {/* Learning Objectives */}

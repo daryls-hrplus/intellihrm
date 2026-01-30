@@ -222,7 +222,7 @@ export function F360Notifications() {
       {/* Section Header */}
       <h3 className="text-xl font-semibold flex items-center gap-2">
         <Bell className="h-5 w-5 text-primary" />
-        2.0b Notifications & Reminders for 360 Feedback
+        2.9 Notifications & Reminders for 360 Feedback
       </h3>
 
       {/* Learning Objectives */}

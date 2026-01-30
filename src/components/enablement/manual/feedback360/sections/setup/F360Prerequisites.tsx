@@ -50,28 +50,28 @@ export function F360Prerequisites() {
               path: 'Core Framework → Workflows',
               details: 'At least one 360-applicable workflow configured (e.g., Results Release, Nomination Approval)',
               validation: 'Workflow template with category "360 Feedback" exists and is active',
-              section: 'See Section 2.0a'
+              section: 'See Section 2.8'
             },
             {
               item: 'Notification Rules Defined',
               path: 'Core Framework → Notifications',
               details: 'Reminder rules for 360 event types (invitations, deadlines, results release)',
               validation: 'Event types with category "performance_360" have associated rules',
-              section: 'See Section 2.0b'
+              section: 'See Section 2.9'
             },
             {
               item: 'Competency Framework Active',
               path: 'Core Framework → Competencies',
               details: 'Competency library with behavioral indicators for question linking and structured feedback',
               validation: 'At least one competency framework is active with defined competencies',
-              section: 'See Section 2.0c'
+              section: 'See Section 2.4'
             },
             {
               item: 'Performance Index Configured',
               path: 'Core Framework → Performance Trends',
               details: 'Decision on whether 360 scores contribute to Performance Index and at what weight',
               validation: 'Performance Index settings include 360 weight configuration',
-              section: 'See Section 2.0d'
+              section: 'See Section 2.13'
             }
           ].map((prereq, i) => (
             <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-background">
