@@ -1593,6 +1593,24 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         contentLevel: 'reference',
         estimatedReadTime: 15,
         targetRoles: ['Admin', 'L&D Admin', 'Consultant', 'Manager', 'Employee']
+      },
+      {
+        id: 'sec-9-13',
+        sectionNumber: '9.13',
+        title: 'Accessibility, Mobile & Localization Issues',
+        description: '8 issues: WCAG compliance, keyboard navigation, mobile sync, offline content, push notifications, localization (ACC-001 to ACC-008)',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      {
+        id: 'sec-9-14',
+        sectionNumber: '9.14',
+        title: 'Data Management, Privacy & Retention Issues',
+        description: '6 issues: GDPR exports, data anonymization, consent records, audit logs, cross-border transfers, SQL diagnostic queries (DMC-001 to DMC-006)',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant', 'Compliance Officer']
       }
     ]
   }
