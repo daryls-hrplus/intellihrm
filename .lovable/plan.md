@@ -1,111 +1,191 @@
 
+# Add Configuration Status Filters to Capability Framework Dashboard
 
-# Fix Missing Section References in 360 Feedback Manual
+## Overview
+Add two new quick filter buttons to the Capability Framework page that allow users to quickly identify capabilities that are missing configuration:
+1. **No Behavioral Indicators** - Competencies/Skills/Values without proficiency/behavioral indicators defined
+2. **Not Linked to Jobs** - Competencies and Skills that are not assigned to any job positions
 
-## Problem Summary
-The **Prerequisites Checklist** (Section 2.1) in the 360 Feedback Manual references sections that don't exist:
-- "See Section 2.0a" (Approval Workflows) → No `sec-2-0a` anchor exists
-- "See Section 2.0b" (Notifications) → No `sec-2-0b` anchor exists  
-- "See Section 2.0c" (Competency Integration) → No `sec-2-0c` anchor exists
-- "See Section 2.0d" (Performance Trends) → No `sec-2-0d` anchor exists
+These filters will help administrators identify gaps in their capability configuration and take action.
 
-**Root Cause:** The components exist and have correct section headers (2.0a, 2.0b, etc.) inside their content, but the `F360SetupSection.tsx` renders them with different section IDs (2.4, 2.8, 2.9, 2.13).
+---
 
-## Solution Options
+## Current State
+- The page has type filters (All, Skills, Competencies, Values)
+- Category and Status dropdown filters exist
+- Date filter popover exists
+- Each capability card already shows configuration status (indicators, jobs) via `CompletionIndicator` icons
+- The `enrichedCapabilities` array already computes `has_behavioral_indicators` and `job_count` for each capability
 
-### Option A: Update References to Match Actual IDs (Recommended)
-Update `F360Prerequisites.tsx` to reference the correct existing section IDs:
+## Desired Behavior
+- Add a new "Configuration" filter dropdown or toggle group above or near the existing filters
+- Filter options:
+  - "All" (default) - no configuration filter applied
+  - "No Indicators" - show only capabilities where `has_behavioral_indicators === false`
+  - "Not Linked to Jobs" - show only capabilities where `job_count === 0`
+- Filters can combine with existing type/category/status filters
+- Show count badges on each filter option
 
-| Current Reference | Correct Section | Actual ID |
-|-------------------|-----------------|-----------|
-| See Section 2.0a | Approval Workflows | sec-2-8 |
-| See Section 2.0b | Notifications | sec-2-9 |
-| See Section 2.0c | Competency Integration | sec-2-4 |
-| See Section 2.0d | Performance Trends | sec-2-13 |
+---
 
-### Option B: Add 2.0a-2.0d as Proper Sub-Sections
-Create a new "Core Framework Prerequisites" group before section 2.1 with actual `sec-2-0a` through `sec-2-0d` anchors.
+## Technical Approach
 
-**Recommendation:** Option A is simpler and maintains the current structure. The section numbers inside the components (2.0a, 2.0b, etc.) would need to be updated to match their actual positions (2.8, 2.9, etc.).
+### 1. Add State for Configuration Filter
+
+In `CapabilityRegistryPage.tsx`, add new state:
+
+```typescript
+type ConfigStatusFilter = 'all' | 'no-indicators' | 'not-linked-jobs';
+const [configStatusFilter, setConfigStatusFilter] = useState<ConfigStatusFilter>('all');
+```
+
+### 2. Filter enrichedCapabilities in useMemo
+
+Add a second useMemo or extend existing filtering to apply config status filter:
+
+```typescript
+const filteredCapabilities = useMemo(() => {
+  return enrichedCapabilities.filter(cap => {
+    // Apply configuration status filter
+    if (configStatusFilter === 'no-indicators') {
+      return !cap.has_behavioral_indicators;
+    }
+    if (configStatusFilter === 'not-linked-jobs') {
+      // Only applies to SKILL and COMPETENCY types (Values don't link to jobs)
+      if (cap.type === 'VALUE') return false;
+      return (cap.job_count ?? 0) === 0;
+    }
+    return true;
+  });
+}, [enrichedCapabilities, configStatusFilter]);
+```
+
+### 3. Add Filter UI Component
+
+Add a new filter control in the filter bar. Option: A dropdown menu or a set of filter chips/badges.
+
+**Recommended UI:** Add filter chips/buttons that work as toggles:
+
+```tsx
+{/* Configuration Status Filters - Add below the main filter bar */}
+<div className="flex items-center gap-2 flex-wrap">
+  <span className="text-sm text-muted-foreground">Configuration:</span>
+  <Button
+    variant={configStatusFilter === 'all' ? 'secondary' : 'ghost'}
+    size="sm"
+    onClick={() => setConfigStatusFilter('all')}
+  >
+    All
+  </Button>
+  <Button
+    variant={configStatusFilter === 'no-indicators' ? 'secondary' : 'ghost'}
+    size="sm"
+    onClick={() => setConfigStatusFilter('no-indicators')}
+    className="gap-1"
+  >
+    <ListChecks className="h-3.5 w-3.5" />
+    No Indicators
+    <Badge variant="outline" className="ml-1">{noIndicatorsCount}</Badge>
+  </Button>
+  <Button
+    variant={configStatusFilter === 'not-linked-jobs' ? 'secondary' : 'ghost'}
+    size="sm"
+    onClick={() => setConfigStatusFilter('not-linked-jobs')}
+    className="gap-1"
+  >
+    <Briefcase className="h-3.5 w-3.5" />
+    Not Linked to Jobs
+    <Badge variant="outline" className="ml-1">{notLinkedCount}</Badge>
+  </Button>
+</div>
+```
+
+### 4. Compute Filter Counts
+
+Add counts to show how many items match each filter:
+
+```typescript
+const noIndicatorsCount = useMemo(() => {
+  return enrichedCapabilities.filter(c => !c.has_behavioral_indicators).length;
+}, [enrichedCapabilities]);
+
+const notLinkedCount = useMemo(() => {
+  return enrichedCapabilities.filter(c => c.type !== 'VALUE' && (c.job_count ?? 0) === 0).length;
+}, [enrichedCapabilities]);
+```
+
+### 5. Update Tab Content Rendering
+
+Replace `enrichedCapabilities` with `filteredCapabilities` in all TabsContent grid renders:
+
+```tsx
+// Before
+{enrichedCapabilities.map((capability) => (
+
+// After  
+{filteredCapabilities.map((capability) => (
+```
+
+Also update the type-filtered views:
+
+```tsx
+// Before
+{enrichedCapabilities.filter(c => c.type === "SKILL").map((capability) => (
+
+// After
+{filteredCapabilities.filter(c => c.type === "SKILL").map((capability) => (
+```
+
+### 6. Update Summary Counts
+
+The tab badges should show filtered counts:
+
+```typescript
+const filteredSkillCount = filteredCapabilities.filter(c => c.type === "SKILL").length;
+const filteredCompetencyCount = filteredCapabilities.filter(c => c.type === "COMPETENCY").length;
+const filteredValueCount = filteredCapabilities.filter(c => c.type === "VALUE").length;
+```
+
+---
+
+## UI Placement
+
+The configuration filter will be placed in a secondary row below the main filter bar, inside the Card header area:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Capability Framework     [Search] [Category▼] [Status▼] [Date] [Company▼] │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Configuration: [All] [🔘 No Indicators (12)] [💼 Not Linked to Jobs (8)]  │
+├─────────────────────────────────────────────────────────────────────────┤
+│ [All 78] [Skills 48] [Competencies 29] [Values 1]                        │
+│                                                                         │
+│ ┌─────────┐  ┌─────────┐  ┌─────────┐                                   │
+│ │ Card 1  │  │ Card 2  │  │ Card 3  │                                   │
+│ └─────────┘  └─────────┘  └─────────┘                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Files to Modify
 
-### 1. `src/components/enablement/manual/feedback360/sections/setup/F360Prerequisites.tsx`
-Update the section references in the prerequisites checklist:
-
-```typescript
-// Line 53 - Change from:
-section: 'See Section 2.0a'
-// To:
-section: 'See Section 2.8'
-
-// Line 60 - Change from:  
-section: 'See Section 2.0b'
-// To:
-section: 'See Section 2.9'
-
-// Line 67 - Change from:
-section: 'See Section 2.0c'
-// To:
-section: 'See Section 2.4'
-
-// Line 74 - Change from:
-section: 'See Section 2.0d'
-// To:
-section: 'See Section 2.13'
-```
-
-### 2. Update Component Headers to Match Section Numbers
-
-**`F360ApprovalWorkflows.tsx` (Line 174):**
-```text
-Before: "2.0a Approval Workflows for 360 Feedback"
-After:  "2.8 Approval Workflows for 360 Feedback"
-```
-
-**`F360Notifications.tsx` (Line 225):**
-```text
-Before: "2.0b Notifications & Reminders for 360 Feedback"
-After:  "2.9 Notifications & Reminders for 360 Feedback"
-```
-
-**`F360CompetencyIntegration.tsx` (Line 58):**
-```text
-Before: "2.0c Competency Framework Integration"
-After:  "2.4 Competency Framework Integration"
-```
-
-**`F360PerformanceTrends.tsx` (Line 75):**
-```text
-Before: "2.0d Performance Trends & Index Configuration"
-After:  "2.13 Performance Trends & Index Configuration"
-```
-
-### 3. Update Index Comment
-**`src/components/enablement/manual/feedback360/sections/setup/index.ts`:**
-```typescript
-// Line 1 - Remove misleading comment:
-// OLD: // Core Framework Integration (Sections 2.0a - 2.0d)
-// NEW: // Core Framework Integration Components
-```
+| File | Changes |
+|------|---------|
+| `src/pages/workforce/CapabilityRegistryPage.tsx` | Add `configStatusFilter` state, compute filter counts, add filter UI row, update grid renders to use filtered list |
 
 ---
 
 ## Summary of Changes
 
-| File | Change |
-|------|--------|
-| `F360Prerequisites.tsx` | Update 4 section references (2.0a→2.8, 2.0b→2.9, 2.0c→2.4, 2.0d→2.13) |
-| `F360ApprovalWorkflows.tsx` | Update header from "2.0a" to "2.8" |
-| `F360Notifications.tsx` | Update header from "2.0b" to "2.9" |
-| `F360CompetencyIntegration.tsx` | Update header from "2.0c" to "2.4" |
-| `F360PerformanceTrends.tsx` | Update header from "2.0d" to "2.13" |
-| `index.ts` | Update comment to remove incorrect section references |
+1. **State**: Add `configStatusFilter` state with type `'all' | 'no-indicators' | 'not-linked-jobs'`
+2. **Filter Logic**: Add `filteredCapabilities` useMemo that applies config filter to `enrichedCapabilities`
+3. **Counts**: Compute `noIndicatorsCount` and `notLinkedCount` for badge display
+4. **UI**: Add configuration filter row with toggle buttons and count badges
+5. **Rendering**: Update all grid maps to use `filteredCapabilities` instead of `enrichedCapabilities`
+6. **Tab Counts**: Update tab badges to show filtered counts
 
 ---
 
 ## No Database Changes Required
-This is a documentation/UI-only fix to correct cross-reference mismatches.
-
+This feature uses data already computed on the frontend (`has_behavioral_indicators`, `job_count`). No new queries or schema changes needed.
