@@ -16,7 +16,10 @@ import {
   Briefcase,
   Award,
   TrendingUp,
-  ClipboardCheck
+  ClipboardCheck,
+  MessageSquare,
+  AlertTriangle,
+  Shield
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -192,7 +195,9 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
           { code: "rating_approval", name: "Rating Approval", transactionTypeCode: "PERF_RATING_APPROVAL" },
           { code: "rating_release_approval", name: "Rating Release", transactionTypeCode: "PERF_RATING_RELEASE" },
           { code: "performance", name: "Appraisal Acknowledgment", transactionTypeCode: "PERF_APPRAISAL_ACKNOWLEDGMENT" },
-          { code: "calibration_approval", name: "Calibration Approval", transactionTypeCode: "PERF_CALIBRATION_APPROVAL" }
+          { code: "calibration_approval", name: "Calibration Approval", transactionTypeCode: "PERF_CALIBRATION_APPROVAL" },
+          { code: "continuous_feedback", name: "Continuous Feedback Approval", transactionTypeCode: "PERF_CONTINUOUS_FEEDBACK" },
+          { code: "midcycle_review", name: "Mid-Cycle Review Approval", transactionTypeCode: "PERF_MIDCYCLE_REVIEW" }
         ]
       },
       {
@@ -201,7 +206,10 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         color: "red",
         icon: ClipboardCheck,
         workflows: [
-          { code: "pip_acknowledgment", name: "PIP Acknowledgment", transactionTypeCode: "PERF_PIP_ACKNOWLEDGMENT" }
+          { code: "pip_acknowledgment", name: "PIP Acknowledgment", transactionTypeCode: "PERF_PIP_ACKNOWLEDGMENT" },
+          { code: "pip_extension", name: "PIP Extension Request", transactionTypeCode: "PERF_PIP_EXTENSION" },
+          { code: "pip_closure", name: "PIP Closure Approval", transactionTypeCode: "PERF_PIP_CLOSURE" },
+          { code: "appraisal_reopen", name: "Appraisal Re-Open Request", transactionTypeCode: "PERF_APPRAISAL_REOPEN" }
         ]
       },
       {
@@ -254,7 +262,9 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         icon: ClipboardCheck,
         workflows: [
           { code: "succession_approval", name: "Readiness Assessment Approval", transactionTypeCode: "SUCC_READINESS_APPROVAL" },
-          { code: "succession_plan_approval", name: "Succession Plan Approval", transactionTypeCode: "SUCC_PLAN_APPROVAL" }
+          { code: "succession_plan_approval", name: "Succession Plan Approval", transactionTypeCode: "SUCC_PLAN_APPROVAL" },
+          { code: "key_position_designation", name: "Key Position Designation", transactionTypeCode: "SUCC_KEY_POSITION" },
+          { code: "bench_strength_review", name: "Bench Strength Review", transactionTypeCode: "SUCC_BENCH_REVIEW" }
         ]
       },
       {
@@ -264,6 +274,17 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         icon: TrendingUp,
         workflows: [
           { code: "succession_emergency", name: "Emergency Activation", transactionTypeCode: "SUCC_EMERGENCY_SUCCESSION" }
+        ]
+      },
+      {
+        id: "succession_risk",
+        name: "Risk Management",
+        color: "amber",
+        icon: AlertTriangle,
+        workflows: [
+          { code: "flight_risk_ack", name: "Flight Risk Acknowledgment", transactionTypeCode: "SUCC_FLIGHT_RISK_ACK" },
+          { code: "retention_action", name: "Retention Action Approval", transactionTypeCode: "SUCC_RETENTION_ACTION" },
+          { code: "ninebox_override", name: "Nine-Box Placement Override", transactionTypeCode: "SUCC_NINEBOX_OVERRIDE" }
         ]
       }
     ]
