@@ -454,7 +454,24 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         </TableCell>
         
         {/* Rule Name */}
-        <TableCell className="font-medium">{rule.name}</TableCell>
+        <TableCell>
+          <div className="flex flex-col gap-1">
+            <span className="font-medium">{rule.name}</span>
+            {/* Show linked cycle badge */}
+            {rule.appraisal_cycle && (
+              <Badge variant="outline" className="text-[10px] w-fit bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800">
+                <CalendarIcon className="h-3 w-3 mr-1" />
+                {rule.appraisal_cycle.name}
+              </Badge>
+            )}
+            {rule.review_cycle && (
+              <Badge variant="outline" className="text-[10px] w-fit bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-800">
+                <Users className="h-3 w-3 mr-1" />
+                {rule.review_cycle.name}
+              </Badge>
+            )}
+          </div>
+        </TableCell>
         
         {/* Affected Items */}
         <TableCell>

@@ -34,7 +34,9 @@ export function useReminders() {
       .from('reminder_rules')
       .select(`
         *,
-        event_type:reminder_event_types(*)
+        event_type:reminder_event_types(*),
+        appraisal_cycle:appraisal_cycles(id, name, start_date, end_date, status),
+        review_cycle:review_cycles(id, name, start_date, end_date, status)
       `)
       .order('created_at', { ascending: false });
 
