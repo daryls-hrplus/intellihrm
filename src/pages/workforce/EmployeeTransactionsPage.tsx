@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeTransactionsList } from "@/components/workforce/EmployeeTransactionsList";
 import { TransactionFormDialog } from "@/components/workforce/TransactionFormDialog";
+import { TransactionSummaryStats } from "@/components/workforce/TransactionSummaryStats";
 import { EmployeeTransaction, TransactionType } from "@/hooks/useEmployeeTransactions";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { toast } from "sonner";
@@ -60,6 +61,8 @@ export default function EmployeeTransactionsPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
+  const [moduleFilter, setModuleFilter] = useState<string>("all");
+  const [allTransactions, setAllTransactions] = useState<EmployeeTransaction[]>([]);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -120,6 +123,10 @@ export default function EmployeeTransactionsPage() {
     setRefreshKey((k) => k + 1);
   };
 
+  const handleModuleClick = (code: string | null) => {
+    setModuleFilter(code || "all");
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -144,12 +151,12 @@ export default function EmployeeTransactionsPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Select value={selectedCompanyId} onValueChange={(id) => { setSelectedCompanyId(id); setSelectedDepartmentId("all"); }}>
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={t("common.allCompanies")} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover z-50">
                   <SelectItem value="all">{t("common.allCompanies")}</SelectItem>
                 {companies.map((company) => (
                   <SelectItem key={company.id} value={company.id}>
@@ -166,14 +173,14 @@ export default function EmployeeTransactionsPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-foreground">{t("common.dateRange")}:</span>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-[160px] justify-start text-left font-normal",
+                    "w-[140px] justify-start text-left font-normal",
                     !fromDate && "text-muted-foreground"
                   )}
                 >
@@ -181,7 +188,7 @@ export default function EmployeeTransactionsPage() {
                   {fromDate ? format(fromDate, "MMM d, yyyy") : t("common.from")}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
                 <Calendar
                   mode="single"
                   selected={fromDate}
@@ -196,7 +203,7 @@ export default function EmployeeTransactionsPage() {
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-[160px] justify-start text-left font-normal",
+                    "w-[140px] justify-start text-left font-normal",
                     !toDate && "text-muted-foreground"
                   )}
                 >
@@ -204,7 +211,7 @@ export default function EmployeeTransactionsPage() {
                   {toDate ? format(toDate, "MMM d, yyyy") : t("common.to")}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
                 <Calendar
                   mode="single"
                   selected={toDate}
@@ -226,6 +233,14 @@ export default function EmployeeTransactionsPage() {
           </div>
         </div>
 
+        {/* Summary Stats */}
+        <TransactionSummaryStats
+          transactions={allTransactions}
+          loading={false}
+          onModuleClick={handleModuleClick}
+          activeModule={moduleFilter !== "all" ? moduleFilter : null}
+        />
+
         <Card>
           <CardHeader>
             <CardTitle>{t("workforce.modules.transactions.allTransactions")}</CardTitle>
@@ -240,10 +255,13 @@ export default function EmployeeTransactionsPage() {
               departmentId={selectedDepartmentId !== "all" ? selectedDepartmentId : undefined}
               fromDate={fromDate ? format(fromDate, "yyyy-MM-dd") : undefined}
               toDate={toDate ? format(toDate, "yyyy-MM-dd") : undefined}
+              moduleFilter={moduleFilter}
+              onModuleFilterChange={setModuleFilter}
               onCreateNew={handleCreateNew}
               onView={handleView}
               onEdit={handleEdit}
               onStartWorkflow={handleStartWorkflow}
+              onTransactionsLoaded={setAllTransactions}
             />
           </CardContent>
         </Card>

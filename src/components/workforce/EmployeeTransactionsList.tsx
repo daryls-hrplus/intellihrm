@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, Eye, Edit, Trash2, PlayCircle, Loader2, DollarSign, ChevronRight, ChevronDown } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, PlayCircle, Loader2, DollarSign, ChevronRight, ChevronDown, X, Filter } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TransactionTypePicker } from "./TransactionTypePicker";
+import { TransactionModuleFilter } from "./TransactionModuleFilter";
+import { TransactionModuleBadge } from "./TransactionModuleBadge";
+import { getTypesForModule } from "@/constants/transactionModuleCategories";
 import {
   Table,
   TableBody,
@@ -65,10 +68,13 @@ interface EmployeeTransactionsListProps {
   departmentId?: string;
   fromDate?: string;
   toDate?: string;
+  moduleFilter?: string;
+  onModuleFilterChange?: (module: string) => void;
   onCreateNew: (type: string) => void;
   onView: (transaction: EmployeeTransaction) => void;
   onEdit: (transaction: EmployeeTransaction) => void;
   onStartWorkflow: (transaction: EmployeeTransaction) => void;
+  onTransactionsLoaded?: (transactions: EmployeeTransaction[]) => void;
 }
 
 const statusColors: Record<TransactionStatus, string> = {
@@ -85,10 +91,13 @@ export function EmployeeTransactionsList({
   departmentId,
   fromDate,
   toDate,
+  moduleFilter: externalModuleFilter,
+  onModuleFilterChange,
   onCreateNew,
   onView,
   onEdit,
   onStartWorkflow,
+  onTransactionsLoaded,
 }: EmployeeTransactionsListProps) {
   const { t } = useLanguage();
   const { fetchTransactions, deleteTransaction, fetchLookupValues, isLoading } =
@@ -97,6 +106,7 @@ export function EmployeeTransactionsList({
   const [transactionTypes, setTransactionTypes] = useState<LookupValue[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [internalModuleFilter, setInternalModuleFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] =
@@ -118,6 +128,10 @@ export function EmployeeTransactionsList({
     }
   });
 
+  // Use external module filter if provided, otherwise use internal
+  const moduleFilter = externalModuleFilter !== undefined ? externalModuleFilter : internalModuleFilter;
+  const setModuleFilter = onModuleFilterChange || setInternalModuleFilter;
+
   const handleSelectTransactionType = (type: TransactionType) => {
     // Update recent transactions
     const updated = [type, ...recentTransactions.filter((t) => t !== type)].slice(0, 5);
@@ -128,10 +142,25 @@ export function EmployeeTransactionsList({
     onCreateNew(type);
   };
 
+  // Get filtered type options based on module selection
+  const filteredTypeOptions = moduleFilter !== "all" 
+    ? transactionTypes.filter(t => getTypesForModule(moduleFilter).includes(t.code as TransactionType))
+    : transactionTypes;
+
+  // Reset type filter when module changes
+  useEffect(() => {
+    if (moduleFilter !== "all") {
+      const moduleTypes = getTypesForModule(moduleFilter);
+      if (typeFilter !== "all" && !moduleTypes.includes(typeFilter as TransactionType)) {
+        setTypeFilter("all");
+      }
+    }
+  }, [moduleFilter]);
+
   useEffect(() => {
     loadData();
     loadLookupValues();
-  }, [statusFilter, typeFilter, companyId, departmentId, fromDate, toDate]);
+  }, [statusFilter, typeFilter, moduleFilter, companyId, departmentId, fromDate, toDate]);
 
   const loadData = async () => {
     const filters: any = {};
@@ -155,6 +184,7 @@ export function EmployeeTransactionsList({
     }
     const data = await fetchTransactions(filters);
     setTransactions(data);
+    onTransactionsLoaded?.(data);
     
     // Load compensation data for all transactions
     if (data.length > 0) {
@@ -282,7 +312,15 @@ export function EmployeeTransactionsList({
     setCompensationToDelete(null);
   };
 
-  const filteredTransactions = transactions.filter((t) => {
+  // Filter by module first, then by search
+  const moduleFilteredTransactions = moduleFilter !== "all"
+    ? transactions.filter(t => {
+        const typeCode = t.transaction_type?.code;
+        return typeCode && getTypesForModule(moduleFilter).includes(typeCode as TransactionType);
+      })
+    : transactions;
+
+  const filteredTransactions = moduleFilteredTransactions.filter((t) => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
     return (
@@ -314,52 +352,79 @@ export function EmployeeTransactionsList({
     }
   };
 
+  const hasActiveFilters = statusFilter !== "all" || typeFilter !== "all" || moduleFilter !== "all" || searchTerm;
+
+  const clearAllFilters = () => {
+    setStatusFilter("all");
+    setTypeFilter("all");
+    setModuleFilter("all");
+    setSearchTerm("");
+  };
+
   return (
     <div className="space-y-4">
       {/* Filters and Actions */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 gap-2">
-          <Input
-            placeholder={t("workforce.modules.transactions.searchPlaceholder")}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-xs"
-          />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder={t("common.status")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("workforce.modules.transactions.allStatuses")}</SelectItem>
-              <SelectItem value="draft">{t("workforce.modules.transactions.statuses.draft")}</SelectItem>
-              <SelectItem value="pending_approval">{t("workforce.modules.transactions.statuses.pending_approval")}</SelectItem>
-              <SelectItem value="approved">{t("workforce.modules.transactions.statuses.approved")}</SelectItem>
-              <SelectItem value="rejected">{t("workforce.modules.transactions.statuses.rejected")}</SelectItem>
-              <SelectItem value="completed">{t("workforce.modules.transactions.statuses.completed")}</SelectItem>
-              <SelectItem value="cancelled">{t("workforce.modules.transactions.statuses.cancelled")}</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder={t("workforce.modules.transactions.transactionType")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("workforce.modules.transactions.allTypes")}</SelectItem>
-              {transactionTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-2 items-center">
+            <Input
+              placeholder={t("workforce.modules.transactions.searchPlaceholder")}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-[200px]"
+            />
+            <TransactionModuleFilter
+              value={moduleFilter}
+              onChange={setModuleFilter}
+              className="w-full sm:w-auto"
+            />
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder={t("workforce.modules.transactions.transactionType")} />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="all">{t("workforce.modules.transactions.allTypes")}</SelectItem>
+                {filteredTypeOptions.map((type) => (
+                  <SelectItem key={type.id} value={type.id}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder={t("common.status")} />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="all">{t("workforce.modules.transactions.allStatuses")}</SelectItem>
+                <SelectItem value="draft">{t("workforce.modules.transactions.statuses.draft")}</SelectItem>
+                <SelectItem value="pending_approval">{t("workforce.modules.transactions.statuses.pending_approval")}</SelectItem>
+                <SelectItem value="approved">{t("workforce.modules.transactions.statuses.approved")}</SelectItem>
+                <SelectItem value="rejected">{t("workforce.modules.transactions.statuses.rejected")}</SelectItem>
+                <SelectItem value="completed">{t("workforce.modules.transactions.statuses.completed")}</SelectItem>
+                <SelectItem value="cancelled">{t("workforce.modules.transactions.statuses.cancelled")}</SelectItem>
+              </SelectContent>
+            </Select>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear filters
+              </Button>
+            )}
+          </div>
+          <Button
+            onClick={() => setPickerOpen(true)}
+            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            {t("workforce.modules.transactions.newTransaction")}
+          </Button>
         </div>
-        <Button
-          onClick={() => setPickerOpen(true)}
-          className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-        >
-          <Plus className="h-4 w-4" />
-          {t("workforce.modules.transactions.newTransaction")}
-        </Button>
       </div>
 
       {/* Transaction Type Picker Dialog */}
@@ -438,9 +503,10 @@ export function EmployeeTransactionsList({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">
-                        {transaction.transaction_type?.name || "Unknown"}
-                      </Badge>
+                      <TransactionModuleBadge 
+                        typeCode={transaction.transaction_type?.code || ""}
+                        typeName={transaction.transaction_type?.name}
+                      />
                     </TableCell>
                     <TableCell>
                       {transaction.employee?.full_name ||
@@ -503,13 +569,20 @@ export function EmployeeTransactionsList({
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onView(transaction)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onView(transaction)}
+                              className="h-8 px-2"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              <span className="hidden lg:inline">View</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="lg:hidden">View</TooltipContent>
+                        </Tooltip>
                         {/* Compensation button - show for transactions with relevant position (employee_id optional for HIRE) */}
                         {getRelevantPositionId(transaction) && 
                          transaction.transaction_type?.code !== "TERMINATION" &&
@@ -518,13 +591,15 @@ export function EmployeeTransactionsList({
                             <TooltipTrigger asChild>
                               <Button
                                 variant="ghost"
-                                size="icon"
+                                size="sm"
                                 onClick={() => {
                                   setSelectedForCompensation(transaction);
                                   setCompensationDialogOpen(true);
                                 }}
+                                className="h-8 px-2"
                               >
-                                <DollarSign className="h-4 w-4" />
+                                <DollarSign className="h-4 w-4 mr-1" />
+                                <span className="hidden lg:inline">Pay</span>
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -534,32 +609,52 @@ export function EmployeeTransactionsList({
                         )}
                         {transaction.status === "draft" && (
                           <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => onEdit(transaction)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => onEdit(transaction)}
+                                  className="h-8 px-2"
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  <span className="hidden lg:inline">Edit</span>
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent className="lg:hidden">Edit</TooltipContent>
+                            </Tooltip>
                             {transaction.requires_workflow && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => onStartWorkflow(transaction)}
-                              >
-                                <PlayCircle className="h-4 w-4" />
-                              </Button>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onStartWorkflow(transaction)}
+                                    className="h-8 px-2 text-primary border-primary/30 hover:bg-primary/10"
+                                  >
+                                    <PlayCircle className="h-4 w-4 mr-1" />
+                                    <span className="hidden lg:inline">Submit</span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Start Approval Workflow</TooltipContent>
+                              </Tooltip>
                             )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setTransactionToDelete(transaction);
-                                setDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setTransactionToDelete(transaction);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                  className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete</TooltipContent>
+                            </Tooltip>
                           </>
                         )}
                       </div>
