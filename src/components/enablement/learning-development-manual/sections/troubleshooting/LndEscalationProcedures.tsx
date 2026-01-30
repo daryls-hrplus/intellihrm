@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Headphones, Clock, HelpCircle, CheckCircle, AlertTriangle, Mail, Phone } from 'lucide-react';
+import { Headphones, Clock, HelpCircle, CheckCircle, AlertTriangle, Mail, Phone, Database, Code } from 'lucide-react';
 import { LearningObjectives, TipCallout, InfoCallout } from '../../../manual/components';
 import {
   Accordion,
@@ -345,6 +345,108 @@ export function LndEscalationProcedures() {
         80% of L&D questions can be answered from this manual. Use the symptom-to-section matrix in 
         Section 9.1 to quickly find relevant troubleshooting guidance before escalating.
       </TipCallout>
+
+      {/* Diagnostic Query Reference Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-primary" />
+            SQL Diagnostic Query Reference
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            These queries help diagnose common L&D data issues. Run in Cloud View → Run SQL (read-only recommended).
+          </p>
+          
+          <div className="space-y-4">
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Code className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-sm">Find Orphan Courses (No Modules)</span>
+                <Badge variant="outline" className="ml-auto">Section 9.2</Badge>
+              </div>
+              <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">
+{`SELECT id, title, status FROM lms_courses 
+WHERE id NOT IN (SELECT DISTINCT course_id FROM lms_modules WHERE course_id IS NOT NULL);`}
+              </pre>
+            </div>
+
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Code className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-sm">Find Progress Mismatches</span>
+                <Badge variant="outline" className="ml-auto">Section 9.4</Badge>
+              </div>
+              <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">
+{`SELECT e.id, e.user_id, e.course_id, e.progress_percentage,
+  (SELECT COUNT(*) FILTER (WHERE completed_at IS NOT NULL) * 100.0 / NULLIF(COUNT(*), 0)
+   FROM lms_lesson_progress lp 
+   JOIN lms_lessons l ON lp.lesson_id = l.id 
+   JOIN lms_modules m ON l.module_id = m.id 
+   WHERE m.course_id = e.course_id AND lp.user_id = e.user_id) as calculated
+FROM lms_enrollments e
+WHERE e.status = 'in_progress';`}
+              </pre>
+            </div>
+
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Code className="h-4 w-4 text-amber-600" />
+                <span className="font-medium text-sm">Find Overdue Compliance Assignments</span>
+                <Badge variant="outline" className="ml-auto">Section 9.7</Badge>
+              </div>
+              <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">
+{`SELECT cta.id, cta.employee_id, ct.name, cta.due_date, cta.status
+FROM compliance_training_assignments cta
+JOIN compliance_training ct ON cta.compliance_training_id = ct.id
+WHERE cta.due_date < NOW() AND cta.status NOT IN ('completed', 'exempted')
+ORDER BY cta.due_date LIMIT 50;`}
+              </pre>
+            </div>
+
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Code className="h-4 w-4 text-red-600" />
+                <span className="font-medium text-sm">Find At-Risk Learners Without Intervention</span>
+                <Badge variant="outline" className="ml-auto">Section 9.10</Badge>
+              </div>
+              <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">
+{`SELECT crp.id, crp.employee_id, crp.enrollment_id, crp.risk_level, crp.risk_score
+FROM completion_risk_predictions crp
+WHERE crp.risk_level = 'high' 
+  AND crp.id NOT IN (SELECT prediction_id FROM risk_interventions WHERE prediction_id IS NOT NULL)
+ORDER BY crp.predicted_at DESC LIMIT 50;`}
+              </pre>
+            </div>
+
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Code className="h-4 w-4 text-purple-600" />
+                <span className="font-medium text-sm">Find Orphan Enrollments (No Progress Records)</span>
+                <Badge variant="outline" className="ml-auto">Section 9.14</Badge>
+              </div>
+              <pre className="text-xs bg-muted p-3 rounded overflow-x-auto">
+{`SELECT e.id, e.user_id, e.course_id, e.enrolled_at, e.status
+FROM lms_enrollments e
+WHERE e.status = 'in_progress' 
+  AND NOT EXISTS (
+    SELECT 1 FROM lms_lesson_progress lp 
+    JOIN lms_lessons l ON lp.lesson_id = l.id
+    JOIN lms_modules m ON l.module_id = m.id
+    WHERE m.course_id = e.course_id AND lp.user_id = e.user_id
+  )
+ORDER BY e.enrolled_at DESC LIMIT 50;`}
+              </pre>
+            </div>
+          </div>
+
+          <InfoCallout title="Query Safety">
+            Always use <code className="bg-muted px-1 rounded">LIMIT</code> clauses and run queries in read-only mode. 
+            For production databases, coordinate with IT before running diagnostic queries during peak hours.
+          </InfoCallout>
+        </CardContent>
+      </Card>
     </div>
   );
 }
