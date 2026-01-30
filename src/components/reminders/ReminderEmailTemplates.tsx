@@ -79,6 +79,7 @@ interface ReminderEmailTemplatesProps {
   companyId: string;
   companyName?: string;
   onUseTemplate?: (template: EmailTemplate) => void;
+  onEditRule?: (ruleId: string, ruleName: string) => void;
 }
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -99,7 +100,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   workforce: <Users className="h-4 w-4" />,
 };
 
-export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }: ReminderEmailTemplatesProps) {
+export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, onEditRule }: ReminderEmailTemplatesProps) {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
@@ -111,6 +112,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [templateUsage, setTemplateUsage] = useState<Map<string, { ruleId: string; ruleName: string }>>(new Map());
 
   const { 
     isGenerating, 
@@ -157,8 +159,31 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
     }
   };
 
+  const fetchTemplateUsage = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reminder_rules')
+        .select('email_template_id, id, name')
+        .eq('company_id', companyId)
+        .not('email_template_id', 'is', null);
+
+      if (error) throw error;
+
+      const usageMap = new Map<string, { ruleId: string; ruleName: string }>();
+      data?.forEach(rule => {
+        if (rule.email_template_id) {
+          usageMap.set(rule.email_template_id, { ruleId: rule.id, ruleName: rule.name });
+        }
+      });
+      setTemplateUsage(usageMap);
+    } catch (error) {
+      console.error('Error fetching template usage:', error);
+    }
+  };
+
   useEffect(() => {
     fetchTemplates();
+    fetchTemplateUsage();
   }, [companyId]);
 
   // Filter templates based on search and category
@@ -447,56 +472,76 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
   }, [isCreating, clearSuggestions]);
 
   // Render template card
-  const renderTemplateCard = (template: EmailTemplate) => (
-    <div 
-      key={template.id}
-      className="p-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors"
-    >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div>
-          <p className="font-medium text-sm">{template.name}</p>
-          {template.is_default && (
-            <Badge variant="secondary" className="text-xs mt-1">
-              Default
-            </Badge>
-          )}
+  const renderTemplateCard = (template: EmailTemplate) => {
+    const usage = templateUsage.get(template.id);
+    const isInUse = !!usage;
+
+    return (
+      <div 
+        key={template.id}
+        className="p-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors"
+      >
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-medium text-sm">{template.name}</p>
+            {template.is_default && (
+              <Badge variant="secondary" className="text-xs">
+                Default
+              </Badge>
+            )}
+            {isInUse && (
+              <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">
+                <Zap className="h-3 w-3 mr-1" />
+                In Use
+              </Badge>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="mb-3">
-        <p className="text-xs text-muted-foreground">Subject</p>
-        <p className="text-sm truncate">{template.subject}</p>
-      </div>
-      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-        {template.body.substring(0, 100)}...
-      </p>
-      <div className="flex gap-2 flex-wrap">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => setPreviewTemplate(template)}
-        >
-          <Eye className="h-3.5 w-3.5 mr-1" />
-          Preview
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => handleEditTemplate(template)}
-        >
-          <Edit className="h-3.5 w-3.5 mr-1" />
-          {template.is_default ? 'Customize' : 'Edit'}
-        </Button>
-        {onUseTemplate && (
+        <div className="mb-3">
+          <p className="text-xs text-muted-foreground">Subject</p>
+          <p className="text-sm truncate">{template.subject}</p>
+        </div>
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+          {template.body.substring(0, 100)}...
+        </p>
+        <div className="flex gap-2 flex-wrap">
           <Button 
-            variant="default" 
+            variant="outline" 
             size="sm"
-            onClick={() => onUseTemplate(template)}
-            className="bg-primary hover:bg-primary/90"
+            onClick={() => setPreviewTemplate(template)}
           >
-            <Zap className="h-3.5 w-3.5 mr-1" />
-            Use in Rule
+            <Eye className="h-3.5 w-3.5 mr-1" />
+            Preview
           </Button>
-        )}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleEditTemplate(template)}
+          >
+            <Edit className="h-3.5 w-3.5 mr-1" />
+            {template.is_default ? 'Customize' : 'Edit'}
+          </Button>
+          {onUseTemplate && !isInUse && (
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => onUseTemplate(template)}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Zap className="h-3.5 w-3.5 mr-1" />
+              Use in Rule
+            </Button>
+          )}
+          {onEditRule && isInUse && (
+            <Button 
+              variant="secondary" 
+              size="sm"
+              onClick={() => onEditRule(usage.ruleId, usage.ruleName)}
+            >
+              <Edit className="h-3.5 w-3.5 mr-1" />
+              Edit Rule
+            </Button>
+          )}
         <Button 
           variant="outline" 
           size="sm"
@@ -518,9 +563,10 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
             <RotateCcw className="h-3.5 w-3.5" />
           </Button>
         )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (

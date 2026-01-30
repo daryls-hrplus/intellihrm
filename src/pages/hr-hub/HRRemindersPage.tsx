@@ -118,6 +118,14 @@ export default function HRRemindersPage() {
     }, 100);
   };
 
+  const handleEditRule = useCallback((ruleId: string, ruleName: string) => {
+    setTabState({ activeTab: 'rules' });
+    // Give the tab time to render, then open the edit dialog
+    setTimeout(() => {
+      rulesManagerRef.current?.openEditDialog(ruleId);
+    }, 100);
+  }, [setTabState]);
+
   const breadcrumbItems = [
     { label: t('hrHub.title'), href: '/hr-hub' },
     { label: t('hrHub.reminders') },
@@ -261,6 +269,7 @@ export default function HRRemindersPage() {
                     companyId={selectedCompanyId}
                     companyName={companies.find(c => c.id === selectedCompanyId)?.name}
                     onUseTemplate={handleUseTemplate}
+                    onEditRule={handleEditRule}
                   />
                 )}
               </CardContent>
