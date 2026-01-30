@@ -185,12 +185,23 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
     categories: [
       {
         id: "appraisals",
-        name: "Appraisals & PIPs",
+        name: "Appraisals",
         color: "orange",
         icon: Target,
         workflows: [
-          { code: "performance", name: "Appraisal Acknowledgment", transactionTypeCode: null },
-          { code: "pip_acknowledgment", name: "PIP Acknowledgment", transactionTypeCode: null }
+          { code: "rating_approval", name: "Rating Approval", transactionTypeCode: "PERF_RATING_APPROVAL" },
+          { code: "rating_release_approval", name: "Rating Release", transactionTypeCode: "PERF_RATING_RELEASE" },
+          { code: "performance", name: "Appraisal Acknowledgment", transactionTypeCode: "PERF_APPRAISAL_ACKNOWLEDGMENT" },
+          { code: "calibration_approval", name: "Calibration Approval", transactionTypeCode: "PERF_CALIBRATION_APPROVAL" }
+        ]
+      },
+      {
+        id: "pip",
+        name: "Performance Improvement",
+        color: "red",
+        icon: ClipboardCheck,
+        workflows: [
+          { code: "pip_acknowledgment", name: "PIP Acknowledgment", transactionTypeCode: "PERF_PIP_ACKNOWLEDGMENT" }
         ]
       },
       {

@@ -79,7 +79,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   letter_request: "Letter Request",
   qualification: "Qualification",
   general: "General",
-  performance: "Performance",
+  performance: "Appraisal Acknowledgment",
   leave_cancellation: "Leave Cancellation",
   certification_request: "Certification Request",
   requisition_approval: "Requisition Approval",
@@ -94,6 +94,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   retirement: "Retirement",
   disciplinary_acknowledgement: "Disciplinary Acknowledgement",
   grievance_submission: "Grievance Submission",
+  // Performance Appraisal workflow types
+  rating_approval: "Rating Approval",
+  rating_release_approval: "Rating Release",
+  calibration_approval: "Calibration Approval",
   // 360 Feedback workflow types
   feedback_360_approval: "360 Feedback",
   feedback_360_release: "360 Results Release",
