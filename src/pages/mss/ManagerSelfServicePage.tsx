@@ -5,7 +5,6 @@ import { usePageAudit } from "@/hooks/usePageAudit";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { TeamLeaveIntelligence } from "@/components/mss/TeamLeaveIntelligence";
 import { ManagerRODWidget } from "@/components/mss/ManagerRODWidget";
-import { ManagerInterventionInbox } from "@/components/performance/ai/ManagerInterventionInbox";
 import { TeamHealthSummary } from "@/components/mss/TeamHealthSummary";
 import { PerformanceSnapshotCard } from "@/components/mss/PerformanceSnapshotCard";
 import { PendingApprovalsWidget } from "@/components/mss/PendingApprovalsWidget";
@@ -157,15 +156,6 @@ export default function ManagerSelfServicePage() {
 
         {/* Resumption of Duty Widget */}
         <ManagerRODWidget />
-
-        {/* AI Coaching Inbox - Manager Intervention Prompts */}
-        {user?.id && company?.id && (
-          <ManagerInterventionInbox
-            managerId={user.id}
-            companyId={company.id}
-            maxItems={5}
-          />
-        )}
 
         <GroupedModuleCards sections={sections} defaultOpen={false} showToggleButton />
       </div>
