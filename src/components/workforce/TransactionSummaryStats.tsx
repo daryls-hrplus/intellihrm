@@ -28,19 +28,19 @@ function StatCard({ label, value, icon: Icon, color, bgColor, highlight, onClick
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-3 rounded-lg bg-card border transition-all",
+        "flex items-center gap-2.5 p-2.5 rounded-lg bg-card border transition-all min-w-0",
         highlight && "border-warning/50 bg-warning/5",
         active && "ring-2 ring-primary border-primary",
         onClick && "cursor-pointer hover:bg-muted/50"
       )}
       onClick={onClick}
     >
-      <div className={cn("p-2 rounded-lg", bgColor)}>
+      <div className={cn("p-1.5 rounded-md shrink-0", bgColor)}>
         <Icon className={cn("h-4 w-4", color)} />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xl font-bold">{value}</p>
-        <p className="text-xs text-muted-foreground truncate">{label}</p>
+      <div className="min-w-0">
+        <p className="text-lg font-bold leading-tight">{value}</p>
+        <p className="text-[11px] text-muted-foreground leading-tight">{label}</p>
       </div>
     </div>
   );
@@ -82,16 +82,16 @@ export function TransactionSummaryStats({
   }).filter((m) => m.count > 0);
 
   return (
-    <Card className="bg-gradient-to-br from-muted/30 via-background to-muted/30 border-border">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Badge variant="outline" className="text-xs font-medium">
+    <Card className="border-border">
+      <CardContent className="p-3">
+        <div className="flex items-center gap-2 mb-2.5">
+          <Badge variant="outline" className="text-[11px] font-medium px-2 py-0.5">
             Transaction Summary
           </Badge>
           {activeModule && (
             <Badge
               variant="secondary"
-              className="text-xs cursor-pointer hover:bg-destructive/20"
+              className="text-[11px] cursor-pointer hover:bg-destructive/20 px-2 py-0.5"
               onClick={() => onModuleClick?.(null)}
             >
               {TRANSACTION_MODULES.find((m) => m.code === activeModule)?.name} ✕
@@ -99,7 +99,7 @@ export function TransactionSummaryStats({
           )}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
           {/* Overall Stats */}
           <StatCard
             label="Total"
