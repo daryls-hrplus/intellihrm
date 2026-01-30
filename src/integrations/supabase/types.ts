@@ -80785,6 +80785,20 @@ export type Database = {
         | "mentorship_approval"
         | "development_assignment"
         | "career_move_request"
+        | "continuous_feedback"
+        | "midcycle_review"
+        | "pip_extension"
+        | "pip_closure"
+        | "appraisal_reopen"
+        | "key_position_designation"
+        | "bench_strength_review"
+        | "flight_risk_acknowledgment"
+        | "retention_action_approval"
+        | "ninebox_override"
+        | "feedback_360_release"
+        | "feedback_360_investigation"
+        | "feedback_360_external"
+        | "feedback_360_cycle"
       workflow_status:
         | "draft"
         | "pending"
@@ -81213,6 +81227,20 @@ export const Constants = {
         "mentorship_approval",
         "development_assignment",
         "career_move_request",
+        "continuous_feedback",
+        "midcycle_review",
+        "pip_extension",
+        "pip_closure",
+        "appraisal_reopen",
+        "key_position_designation",
+        "bench_strength_review",
+        "flight_risk_acknowledgment",
+        "retention_action_approval",
+        "ninebox_override",
+        "feedback_360_release",
+        "feedback_360_investigation",
+        "feedback_360_external",
+        "feedback_360_cycle",
       ],
       workflow_status: [
         "draft",
