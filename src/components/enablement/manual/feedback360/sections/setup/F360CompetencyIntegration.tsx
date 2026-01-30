@@ -55,7 +55,7 @@ export function F360CompetencyIntegration() {
       {/* Section Header */}
       <h3 className="text-xl font-semibold flex items-center gap-2">
         <Puzzle className="h-5 w-5 text-primary" />
-        2.0c Competency Framework Integration
+        2.4 Competency Framework Integration
       </h3>
 
       {/* Learning Objectives */}

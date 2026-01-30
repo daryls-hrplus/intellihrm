@@ -72,7 +72,7 @@ export function F360PerformanceTrends() {
       {/* Section Header */}
       <h3 className="text-xl font-semibold flex items-center gap-2">
         <TrendingUp className="h-5 w-5 text-primary" />
-        2.0d Performance Trends & Index Configuration
+        2.13 Performance Trends & Index Configuration
       </h3>
 
       {/* Learning Objectives */}

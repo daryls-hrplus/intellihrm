@@ -1,4 +1,4 @@
-// Core Framework Integration (Sections 2.0a - 2.0d)
+// Core Framework Integration Components
 export { F360ApprovalWorkflows } from './F360ApprovalWorkflows';
 export { F360Notifications } from './F360Notifications';
 export { F360CompetencyIntegration } from './F360CompetencyIntegration';
