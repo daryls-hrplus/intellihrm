@@ -7,11 +7,12 @@ import { usePageAudit } from "@/hooks/usePageAudit";
 import { APIKeyList } from "@/components/system/api-management/APIKeyList";
 import { APIUsageChart } from "@/components/system/api-management/APIUsageChart";
 import { APIDocumentation } from "@/components/system/api-management/APIDocumentation";
-import { useCompanySelector } from "@/hooks/useCompanySelector";
+import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 
 export default function APIManagementPage() {
   usePageAudit('api', 'System');
-  const { selectedCompanyId } = useCompanySelector();
+  const { companies } = useUserAccessibleCompanies();
+  const selectedCompanyId = companies.find(c => c.isCurrentCompany)?.id;
   const [activeTab, setActiveTab] = useState("keys");
 
   // Default company ID for demo purposes
