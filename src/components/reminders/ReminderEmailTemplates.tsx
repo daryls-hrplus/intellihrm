@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -58,7 +59,8 @@ import {
   MessageCircle,
   GitBranch,
   Files,
-  Search
+  Search,
+  AlertTriangle
 } from 'lucide-react';
 
 interface EmailTemplate {
@@ -73,6 +75,11 @@ interface EmailTemplate {
   is_default: boolean;
   is_active: boolean;
   created_at: string;
+}
+
+interface TemplateUsageInfo {
+  ruleId: string;
+  ruleName: string;
 }
 
 interface ReminderEmailTemplatesProps {
@@ -112,7 +119,8 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [templateUsage, setTemplateUsage] = useState<Map<string, { ruleId: string; ruleName: string }>>(new Map());
+  const [templateUsage, setTemplateUsage] = useState<Map<string, TemplateUsageInfo[]>>(new Map());
+  const [cascadeToRules, setCascadeToRules] = useState(true);
 
   const { 
     isGenerating, 
@@ -169,10 +177,13 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
 
       if (error) throw error;
 
-      const usageMap = new Map<string, { ruleId: string; ruleName: string }>();
+      // Group by template_id to support multiple rules per template
+      const usageMap = new Map<string, TemplateUsageInfo[]>();
       data?.forEach(rule => {
         if (rule.email_template_id) {
-          usageMap.set(rule.email_template_id, { ruleId: rule.id, ruleName: rule.name });
+          const existing = usageMap.get(rule.email_template_id) || [];
+          existing.push({ ruleId: rule.id, ruleName: rule.name });
+          usageMap.set(rule.email_template_id, existing);
         }
       });
       setTemplateUsage(usageMap);
@@ -242,6 +253,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
 
   const handleEditTemplate = (template: EmailTemplate) => {
     setEditingTemplate({ ...template });
+    setCascadeToRules(true); // Default to cascade
     setIsEditing(true);
   };
 
@@ -252,7 +264,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
     try {
       if (editingTemplate.is_default) {
         // Create a company-specific copy of the default template
-        const { error } = await supabase
+        const { data: newTemplate, error } = await supabase
           .from('reminder_email_templates')
           .insert({
             company_id: companyId,
@@ -264,12 +276,31 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
             body: editingTemplate.body,
             is_default: false,
             is_active: true,
-          });
+          })
+          .select('id')
+          .single();
 
         if (error) throw error;
-        toast.success('Custom template created');
+
+        // If cascade is enabled and there are rules using the default template, update them
+        const rulesUsingDefault = templateUsage.get(editingTemplate.id) || [];
+        if (cascadeToRules && rulesUsingDefault.length > 0 && newTemplate) {
+          const { error: updateError } = await supabase
+            .from('reminder_rules')
+            .update({ email_template_id: newTemplate.id })
+            .in('id', rulesUsingDefault.map(r => r.ruleId));
+
+          if (updateError) {
+            console.error('Error updating rules:', updateError);
+            toast.warning('Template created, but some rules could not be updated');
+          } else {
+            toast.success(`Custom template created and ${rulesUsingDefault.length} rule(s) updated`);
+          }
+        } else {
+          toast.success('Custom template created');
+        }
       } else {
-        // Update existing company template
+        // Update existing company template - changes cascade automatically via FK
         const { error } = await supabase
           .from('reminder_email_templates')
           .update({
@@ -280,12 +311,20 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
           .eq('id', editingTemplate.id);
 
         if (error) throw error;
-        toast.success('Template updated');
+
+        // Notify user about affected rules
+        const rulesUsingTemplate = templateUsage.get(editingTemplate.id) || [];
+        if (rulesUsingTemplate.length > 0) {
+          toast.success(`Template updated — ${rulesUsingTemplate.length} active rule(s) will use the new content`);
+        } else {
+          toast.success('Template updated');
+        }
       }
 
       setIsEditing(false);
       setEditingTemplate(null);
       fetchTemplates();
+      fetchTemplateUsage();
     } catch (error) {
       console.error('Error saving template:', error);
       toast.error('Failed to save template');
@@ -473,8 +512,8 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
 
   // Render template card
   const renderTemplateCard = (template: EmailTemplate) => {
-    const usage = templateUsage.get(template.id);
-    const isInUse = !!usage;
+    const usageList = templateUsage.get(template.id) || [];
+    const isInUse = usageList.length > 0;
 
     return (
       <div 
@@ -492,7 +531,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
             {isInUse && (
               <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">
                 <Zap className="h-3 w-3 mr-1" />
-                In Use
+                In Use{usageList.length > 1 ? ` (${usageList.length})` : ''}
               </Badge>
             )}
           </div>
@@ -532,11 +571,11 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
               Use in Rule
             </Button>
           )}
-          {onEditRule && isInUse && (
+          {onEditRule && isInUse && usageList.length === 1 && (
             <Button 
               variant="secondary" 
               size="sm"
-              onClick={() => onEditRule(usage.ruleId, usage.ruleName)}
+              onClick={() => onEditRule(usageList[0].ruleId, usageList[0].ruleName)}
             >
               <Edit className="h-3.5 w-3.5 mr-1" />
               Edit Rule
@@ -766,6 +805,61 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate, 
           </DialogHeader>
           {editingTemplate && (
             <div className="space-y-4">
+              {/* Warning for templates in use */}
+              {(() => {
+                const rulesUsingTemplate = templateUsage.get(editingTemplate.id) || [];
+                if (rulesUsingTemplate.length > 0) {
+                  return (
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm">
+                          <p className="font-medium text-amber-800 dark:text-amber-200">
+                            {editingTemplate.is_default 
+                              ? 'This template is used by active automations'
+                              : 'Changes will affect active automations'
+                            }
+                          </p>
+                          <p className="text-amber-700 dark:text-amber-300 mt-1">
+                            {editingTemplate.is_default
+                              ? `${rulesUsingTemplate.length} rule(s) currently use this default template.`
+                              : `${rulesUsingTemplate.length} rule(s) will automatically use the updated content.`
+                            }
+                          </p>
+                          {rulesUsingTemplate.length <= 3 && (
+                            <ul className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                              {rulesUsingTemplate.map(r => (
+                                <li key={r.ruleId}>• {r.ruleName}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Cascade option for default templates */}
+              {editingTemplate.is_default && (templateUsage.get(editingTemplate.id) || []).length > 0 && (
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="cascade-toggle" className="text-sm font-medium">
+                      Update existing rules to use custom template
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Switch rules from the default template to your new custom version
+                    </p>
+                  </div>
+                  <Switch
+                    id="cascade-toggle"
+                    checked={cascadeToRules}
+                    onCheckedChange={setCascadeToRules}
+                  />
+                </div>
+              )}
+
               <div>
                 <Label>Template Name</Label>
                 <Input
