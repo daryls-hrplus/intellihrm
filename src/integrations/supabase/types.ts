@@ -80758,6 +80758,8 @@ export type Database = {
         | "succession_plan_approval"
         | "talent_pool_nomination"
         | "succession_emergency"
+        | "goal_cascade"
+        | "goal_modification"
       workflow_status:
         | "draft"
         | "pending"
@@ -81179,6 +81181,8 @@ export const Constants = {
         "succession_plan_approval",
         "talent_pool_nomination",
         "succession_emergency",
+        "goal_cascade",
+        "goal_modification",
       ],
       workflow_status: [
         "draft",
