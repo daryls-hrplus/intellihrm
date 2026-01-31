@@ -1613,6 +1613,93 @@ export const LND_MANUAL_STRUCTURE: LndSection[] = [
         targetRoles: ['Admin', 'Consultant', 'Compliance Officer']
       }
     ]
+  },
+
+  // ==========================================================================
+  // CHAPTER 10: APPENDIX (~60 min)
+  // ==========================================================================
+  {
+    id: 'chapter-10',
+    sectionNumber: '10',
+    title: 'Appendix',
+    description: 'Quick reference cards, architecture diagrams, glossary, acronyms, data model reference, integration points, role-based permissions, and error codes.',
+    contentLevel: 'reference',
+    estimatedReadTime: 60,
+    targetRoles: ['Admin', 'L&D Admin', 'Consultant'],
+    subsections: [
+      {
+        id: 'app-a',
+        sectionNumber: '10.A',
+        title: 'Quick Reference Cards',
+        description: 'Role-based task checklists for Employee, Manager, L&D Admin, and HR Partner personas',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'L&D Admin', 'Manager', 'Employee', 'HR Partner']
+      },
+      {
+        id: 'app-b',
+        sectionNumber: '10.B',
+        title: 'Architecture Diagrams',
+        description: 'Visual representations of course content hierarchy, database table inventory (69 tables), and cross-module integration flows',
+        contentLevel: 'reference',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      {
+        id: 'app-c',
+        sectionNumber: '10.C',
+        title: 'Acronyms',
+        description: '50+ L&D, LMS, and HR acronyms with definitions used throughout the manual',
+        contentLevel: 'reference',
+        estimatedReadTime: 5,
+        targetRoles: ['Admin', 'L&D Admin', 'Consultant']
+      },
+      {
+        id: 'app-d',
+        sectionNumber: '10.D',
+        title: 'Glossary',
+        description: '80+ L&D/LMS terms organized by category: Core, LMS, Compliance, Agency, Workflow, Analytics, Integration, AI',
+        contentLevel: 'reference',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'L&D Admin', 'Consultant']
+      },
+      {
+        id: 'app-e',
+        sectionNumber: '10.E',
+        title: 'Integration Points Reference',
+        description: 'Complete mapping of L&D integration touchpoints with Onboarding, Performance, Competency, Succession, and external systems',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      {
+        id: 'app-f',
+        sectionNumber: '10.F',
+        title: 'Role-Based Permissions Matrix',
+        description: 'Granular permission breakdown for all L&D features by role: Employee, Manager, L&D Admin, HR Partner, Consultant, Executive',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      {
+        id: 'app-g',
+        sectionNumber: '10.G',
+        title: 'Error Codes & Diagnostic Messages',
+        description: 'Complete reference of 100+ error codes (LMS, ENR, PRG, QIZ, CRT, CMP, VND, INT, AIA, PER, ACC, DMC) with causes and resolutions',
+        contentLevel: 'reference',
+        estimatedReadTime: 6,
+        targetRoles: ['Admin', 'Consultant']
+      },
+      {
+        id: 'app-h',
+        sectionNumber: '10.H',
+        title: 'Version History',
+        description: 'Document revision history, release notes, and change log',
+        contentLevel: 'reference',
+        estimatedReadTime: 3,
+        targetRoles: ['Admin', 'L&D Admin', 'Consultant']
+      }
+    ]
   }
 ];
 

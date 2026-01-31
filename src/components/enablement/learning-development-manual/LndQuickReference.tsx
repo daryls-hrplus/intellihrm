@@ -1,9 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileText } from 'lucide-react';
 
 export function LndQuickReference() {
   return (
-    <div className="space-y-6" id="quick-ref" data-manual-anchor="quick-ref">
-      <h2 className="text-2xl font-bold">Appendix A: Quick Reference Cards</h2>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-emerald-500/10 rounded-lg">
+          <FileText className="h-6 w-6 text-emerald-600" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold">Appendix A: Quick Reference Cards</h2>
+          <p className="text-muted-foreground">Role-based task checklists for common L&D operations</p>
+        </div>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         {[
           { role: 'Employee', tasks: ['Browse course catalog', 'Enroll in courses', 'Track my progress', 'Complete quizzes', 'Download certificates'] },
