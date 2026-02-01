@@ -1,311 +1,326 @@
 
-# Time & Attendance Chapter 2 (Foundation Setup) - Comprehensive Upgrade Plan
 
-## Executive Summary
+# Updated Plan: Complete Coverage of Shift Rounding Rules & Payment Rules
 
-This plan upgrades Chapter 2 of the T&A Administrator Manual to align with the 360 Feedback manual's enterprise-grade structure while ensuring complete coverage of all 25+ foundation-related database tables and 8+ UI configuration pages.
+## Critical Gap Discovery
 
----
+Your screenshots reveal **two major undocumented features** that were NOT adequately addressed in my previous Chapter 2 plan:
 
-## Gap Analysis Results
-
-### Current State (6 sections, 54 min read)
-| Section | Content | Coverage |
-|---------|---------|----------|
-| 2.1 Prerequisites | Module dependencies | Adequate |
-| 2.2 Time Policies | attendance_policies | Partial (missing assignment) |
-| 2.3 Timeclock Devices | timeclock_devices, punch_queue | Good |
-| 2.4 Geofencing | geofence_locations/validations | Partial (missing assignments) |
-| 2.5 Face Verification | face_enrollments, verification_logs | Good |
-| 2.6 Punch Import | punch_import_batches | Good |
-
-### Industry Standard Comparison (Kronos/Workday/SAP/Oracle)
-| Feature | Kronos/UKG | Workday | SAP | Oracle | IntelliHRM (Current) | IntelliHRM (After) |
-|---------|-----------|---------|-----|--------|---------------------|-------------------|
-| Grouped Configuration Categories | Yes | Yes | Yes | Yes | No | **Yes** |
-| Policy Assignment Section | Yes | Yes | Yes | Yes | No | **Yes** |
-| Biometric Templates (beyond face) | Yes | Yes | Yes | Yes | No | **Yes** |
-| Overtime Rate Tiers | Yes | Yes | Yes | Yes | No | **Yes** |
-| Comp Time Configuration | Yes | Yes | Yes | Yes | No | **Yes** |
-| Timekeeper Delegation | Yes | Yes | Yes | Yes | No | **Yes** |
-| Audit Trail Configuration | Yes | Yes | Yes | Yes | Partial | **Yes** |
-| Union/CBA Rules | Yes | Yes | Yes | Yes | No | **Yes** |
-
-### Missing Database Tables Not Covered
-1. `employee_attendance_policies` - Policy-to-employee assignments
-2. `employee_biometric_templates` - Fingerprint and other biometric data
-3. `employee_geofence_assignments` - Employee-to-geofence mappings
-4. `comp_time_policies` - Compensatory time rules
-5. `flex_time_balances` - Flex time configuration
-6. `overtime_rate_tiers` - Tiered overtime pay rates
-7. `time_attendance_audit_log` - Audit configuration
-8. `timekeeper_assignments` - Timekeeper delegation
-9. `cba_time_rules` - Collective bargaining time rules
+| Feature | DB Table | DB Columns | UI Page | Current Doc Status |
+|---------|----------|------------|---------|-------------------|
+| **Shift Rounding Rules** | `shift_rounding_rules` | 16 columns | `/time-attendance/shifts/rounding-rules` | Was in Ch 2 plan as Section 2.16 |
+| **Shift Payment Rules** | `shift_payment_rules` | 20 columns | `/time-attendance/shifts/payment-rules` | **MISSING FROM PLAN** |
+| **Shifts (Base Definition)** | `shifts` | 18 columns | `/time-attendance/shifts` | Chapter 3 placeholder only |
 
 ---
 
-## Proposed New Chapter 2 Structure
+## Architecture Clarification
 
-### Reorganized to 15 Sections (Matching 360 Feedback Pattern)
+Based on database analysis, IntelliHRM has a **three-layer shift configuration architecture**:
 
 ```text
-Chapter 2: Foundation Setup (~99 min read)
+Layer 1: SHIFTS (Base Definition)
+Table: shifts
+Purpose: Define the shift itself (name, times, breaks)
 
-A. Prerequisites (1 section)
-   2.1  Prerequisites Checklist [existing, enhanced]
+Layer 2: SHIFT ROUNDING RULES
+Table: shift_rounding_rules  
+Purpose: How punches are rounded for this shift
 
-B. Core Policies (3 sections)
-   2.2  Attendance Policies Configuration [existing, enhanced]
-   2.3  Policy Assignments [NEW]
-   2.4  Overtime Rate Tiers [NEW]
-
-C. Time Collection (4 sections)
-   2.5  Timeclock Devices Setup [existing, renumbered]
-   2.6  Biometric Templates [NEW - fingerprint/card]
-   2.7  Face Verification Setup [existing, renumbered]
-   2.8  Punch Import Configuration [existing, renumbered]
-
-D. Location Validation (2 sections)
-   2.9  Geofencing Configuration [existing, renumbered]
-   2.10 Employee Geofence Assignments [NEW]
-
-E. Time Banking (2 sections)
-   2.11 Comp Time Policies [NEW]
-   2.12 Flex Time Configuration [NEW]
-
-F. Governance (2 sections)
-   2.13 Timekeeper Delegation [NEW]
-   2.14 Audit Trail Configuration [NEW]
-
-G. Advanced (1 section)
-   2.15 CBA/Union Time Rules [NEW]
+Layer 3: SHIFT PAYMENT RULES
+Table: shift_payment_rules
+Purpose: Premium pay for this shift (differentials, OT multipliers)
 ```
 
----
-
-## Implementation Details
-
-### Structural Changes
-
-**1. Update TimeAttendanceManualFoundationSection.tsx**
-- Transform from flat section list to grouped accordion structure
-- Add chapter-level learning objectives card
-- Add chapter contents overview grid (matching F360SetupSection.tsx pattern)
-- Add phase-based dependency chain visualization
-
-**2. Update timeAttendanceManual.ts Types**
-- Add 9 new section definitions (2.3, 2.4, 2.6, 2.10-2.15)
-- Renumber existing sections for logical flow
-- Update read time estimates
-
-### New Section Components to Create
-
-| File | Section | Database Tables | UI Page Reference |
-|------|---------|-----------------|-------------------|
-| `TAFoundationPolicyAssignments.tsx` | 2.3 | employee_attendance_policies | AttendancePoliciesPage.tsx |
-| `TAFoundationOvertimeRates.tsx` | 2.4 | overtime_rate_tiers | OvertimeManagementPage.tsx |
-| `TAFoundationBiometricTemplates.tsx` | 2.6 | employee_biometric_templates | TimeclockDevicesPage.tsx |
-| `TAFoundationGeofenceAssignments.tsx` | 2.10 | employee_geofence_assignments | GeofenceManagementPage.tsx |
-| `TAFoundationCompTime.tsx` | 2.11 | comp_time_policies, comp_time_balances | FlexTimePage.tsx |
-| `TAFoundationFlexTime.tsx` | 2.12 | flex_time_balances, flex_time_transactions | FlexTimePage.tsx |
-| `TAFoundationTimekeeperDelegation.tsx` | 2.13 | timekeeper_assignments | New section |
-| `TAFoundationAuditConfig.tsx` | 2.14 | time_attendance_audit_log | TimeAuditTrailPage.tsx |
-| `TAFoundationCBARules.tsx` | 2.15 | cba_time_rules | CBATimeRulesPage.tsx |
-
-### Existing Section Enhancements
-
-**TAFoundationPrerequisites.tsx (2.1)**
-- Add cross-reference links to new sections
-- Add phase-based dependency diagram
-- Add readiness assessment checklist (matching F360 pattern)
-
-**TAFoundationTimePolicies.tsx (2.2)**
-- Add reference to Policy Assignments section (2.3)
-- Add overtime threshold linkage to Overtime Rate Tiers (2.4)
-
-**TAFoundationDevices.tsx (2.5)**
-- Add reference to Biometric Templates section (2.6)
-- Clarify that this covers device setup, not template enrollment
-
-**TAFoundationGeofencing.tsx (2.9)**
-- Add reference to Employee Geofence Assignments (2.10)
-- Clarify that this covers geofence definition, not employee assignment
+All three tables have `shift_id` as a foreign key, allowing rules to apply to:
+- **All Shifts** (when `shift_id` is null)
+- **Specific Shifts** (when `shift_id` references a shift)
 
 ---
 
-## Section Content Templates
+## Complete Database Schema Analysis
 
-Each new section will follow the 360 Feedback component pattern:
+### shifts Table (18 columns)
+| Column | Type | Required | Default | UI Field |
+|--------|------|----------|---------|----------|
+| `id` | uuid | Yes | auto | — |
+| `company_id` | uuid | Yes | — | Company selector |
+| `name` | varchar | Yes | — | Name* |
+| `code` | varchar | Yes | — | Code* |
+| `description` | text | No | null | Description |
+| `start_time` | time | Yes | — | Start Time |
+| `end_time` | time | Yes | — | End Time |
+| `crosses_midnight` | boolean | No | false | Crosses Midnight toggle |
+| `break_duration_minutes` | integer | No | 60 | Break Duration (minutes) |
+| `minimum_hours` | numeric | No | 8 | Minimum Hours |
+| `is_overnight` | boolean | No | false | (internal) |
+| `color` | varchar | No | '#3b82f6' | Color picker |
+| `is_active` | boolean | No | true | (Active toggle) |
+| `start_date` | date | Yes | CURRENT_DATE | Start Date |
+| `end_date` | date | No | null | End Date |
+| `location_id` | uuid | No | null | (location filter) |
+| `created_at` | timestamptz | Yes | now() | — |
+| `updated_at` | timestamptz | Yes | now() | — |
+
+### shift_rounding_rules Table (16 columns)
+| Column | Type | Required | Default | UI Field |
+|--------|------|----------|---------|----------|
+| `id` | uuid | Yes | auto | — |
+| `company_id` | uuid | Yes | — | Company selector |
+| `shift_id` | uuid | No | null | Apply to Shift dropdown |
+| `name` | varchar | Yes | — | Name* |
+| `description` | text | No | null | Description |
+| `rule_type` | varchar | Yes | — | Rule Type (clock_in/clock_out/both) |
+| `rounding_interval` | integer | Yes | 15 | Rounding Interval dropdown |
+| `rounding_direction` | varchar | Yes | — | Rounding Direction (up/down/nearest) |
+| `grace_period_minutes` | integer | No | 0 | Grace Period input |
+| `grace_period_direction` | varchar | No | null | (direction for grace) |
+| `apply_to_overtime` | boolean | No | true | Apply to Overtime toggle |
+| `is_active` | boolean | No | true | Active toggle |
+| `start_date` | date | Yes | CURRENT_DATE | — |
+| `end_date` | date | No | null | — |
+| `created_at` | timestamptz | Yes | now() | — |
+| `updated_at` | timestamptz | Yes | now() | — |
+
+### shift_payment_rules Table (20 columns)
+| Column | Type | Required | Default | UI Field |
+|--------|------|----------|---------|----------|
+| `id` | uuid | Yes | auto | — |
+| `company_id` | uuid | Yes | — | Company selector |
+| `shift_id` | uuid | No | null | Apply to Shift dropdown |
+| `name` | varchar | Yes | — | Name* |
+| `code` | varchar | Yes | — | Code* |
+| `description` | text | No | null | Description |
+| `payment_type` | varchar | Yes | — | Payment Type (percentage/flat_rate/multiplier) |
+| `amount` | numeric | Yes | — | Amount |
+| `applies_to` | varchar | Yes | — | Applies To (all_hours/overtime/night_shift/weekend/holiday) |
+| `day_of_week` | integer[] | No | null | (Day filter) |
+| `start_time` | time | No | null | (Time range) |
+| `end_time` | time | No | null | (Time range) |
+| `minimum_hours_threshold` | numeric | No | null | (Hours threshold) |
+| `is_taxable` | boolean | No | true | Taxable toggle |
+| `is_active` | boolean | No | true | Active toggle |
+| `priority` | integer | No | 0 | Priority |
+| `start_date` | date | Yes | CURRENT_DATE | — |
+| `end_date` | date | No | null | — |
+| `created_at` | timestamptz | Yes | now() | — |
+| `updated_at` | timestamptz | Yes | now() | — |
+
+---
+
+## Revised Implementation Plan
+
+### Decision: Keep Rounding Rules in Chapter 2 or Move to Chapter 3?
+
+**Recommendation: Keep Section 2.16 (Shift Rounding Rules) in Chapter 2**
+
+Rationale:
+- Rounding rules affect how time is *captured* (foundation-level)
+- They work alongside attendance policies
+- Industry standard: Kronos/UKG groups rounding with policy setup
+
+**Add Payment Rules to Chapter 3 (Shift Management)**
+
+Rationale:
+- Payment rules affect *compensation* (shift-level concern)
+- They're about differentials and premiums
+- Industry standard: These belong with shift configuration
+
+---
+
+## Updated File Changes
+
+### Chapter 2 Changes (From Previous Plan + Fix)
+
+| Section | File | Status |
+|---------|------|--------|
+| 2.16 Shift Rounding Rules | `TAFoundationShiftRoundingRules.tsx` | **Correct fields now confirmed** |
+
+### NEW: Chapter 3 Comprehensive Upgrade
+
+#### Proposed Chapter 3 Structure (New Sections)
 
 ```text
-1. Section Header (title, section number, read time)
-2. Learning Objectives Card
-3. Conceptual Overview Block
-4. Screenshot Placeholder
-5. Field Reference Table (all database columns)
-6. Business Rules Table
-7. Step-by-Step Configuration Guide
-8. Common Configurations Examples
-9. Compliance/Security Callout (where applicable)
-10. Tip/Best Practice Callout
-11. Troubleshooting Quick Reference (optional)
+Chapter 3: Shift Management (~80 min read)
+
+A. Shift Definitions (2 sections)
+   3.1  Shifts Overview [NEW]
+   3.2  Shift Configuration [NEW - covers shifts table]
+
+B. Shift Assignments (2 sections)
+   3.3  Employee Shift Assignments [NEW]
+   3.4  Shift Calendar [NEW]
+
+C. Rotation & Patterns (2 sections)
+   3.5  Rotation Patterns [NEW]
+   3.6  Shift Templates [NEW - covers shift_templates]
+
+D. Shift Compensation (2 sections)
+   3.7  Shift Differentials [NEW]
+   3.8  Payment Rules [NEW - covers shift_payment_rules]
+
+E. Advanced (2 sections)
+   3.9  Shift Swaps [NEW]
+   3.10 Shift Coverage Requirements [NEW]
 ```
 
----
+### Files to Create
 
-## File Changes Summary
-
-### Files to Create (9 new section components)
-```text
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationPolicyAssignments.tsx
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationOvertimeRates.tsx
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationBiometricTemplates.tsx
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationGeofenceAssignments.tsx
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationCompTime.tsx
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationFlexTime.tsx
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationTimekeeperDelegation.tsx
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationAuditConfig.tsx
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationCBARules.tsx
-```
+| File | Section | Tables Covered |
+|------|---------|----------------|
+| `TAShiftOverview.tsx` | 3.1 | — (concepts) |
+| `TAShiftConfiguration.tsx` | 3.2 | `shifts` (18 cols) |
+| `TAShiftAssignments.tsx` | 3.3 | `employee_shift_assignments` |
+| `TAShiftCalendar.tsx` | 3.4 | — (UI reference) |
+| `TARotationPatterns.tsx` | 3.5 | `shift_rotation_patterns`, `rotation_entries` |
+| `TAShiftTemplates.tsx` | 3.6 | `shift_templates`, `shift_template_entries` |
+| `TAShiftDifferentials.tsx` | 3.7 | `shift_differentials` |
+| `TAShiftPaymentRules.tsx` | 3.8 | `shift_payment_rules` (20 cols) |
+| `TAShiftSwaps.tsx` | 3.9 | `shift_swap_requests` |
+| `TAShiftCoverage.tsx` | 3.10 | `shift_coverage_requirements` |
 
 ### Files to Update
+
+| File | Changes |
+|------|---------|
+| `TimeAttendanceManualShiftSection.tsx` | Transform to grouped accordion structure (like Ch 2) |
+| `sections/shift/index.ts` | Create and export new components |
+| `timeAttendanceManual.ts` | Add 10 new section definitions for Ch 3 |
+
+---
+
+## Immediate Priority: Complete Section 2.16 + Add Payment Rules Doc
+
+### Step 1: Fix Section 2.16 (Shift Rounding Rules)
+
+The plan already included this, but now with confirmed fields:
+
+```typescript
+// Verified field list for shift_rounding_rules
+const shiftRoundingRulesFields = [
+  { name: 'name', required: true, type: 'varchar', description: 'Rule display name' },
+  { name: 'description', required: false, type: 'text', description: 'Rule description' },
+  { name: 'shift_id', required: false, type: 'uuid', description: 'Apply to specific shift or All Shifts (null)' },
+  { name: 'rule_type', required: true, type: 'enum', description: 'clock_in, clock_out, or both' },
+  { name: 'rounding_interval', required: true, type: 'integer', description: '5, 6, 10, 15, or 30 minutes' },
+  { name: 'rounding_direction', required: true, type: 'enum', description: 'up, down, or nearest' },
+  { name: 'grace_period_minutes', required: false, type: 'integer', description: 'Minutes before rounding applies' },
+  { name: 'apply_to_overtime', required: false, type: 'boolean', description: 'Also apply to overtime punches' },
+  { name: 'is_active', required: false, type: 'boolean', description: 'Rule is active' },
+];
+```
+
+### Step 2: Create Section 3.8 (Shift Payment Rules) - NEW
+
+```typescript
+// Verified field list for shift_payment_rules
+const shiftPaymentRulesFields = [
+  { name: 'name', required: true, type: 'varchar', description: 'Rule display name' },
+  { name: 'code', required: true, type: 'varchar', description: 'Unique rule code' },
+  { name: 'description', required: false, type: 'text', description: 'Rule description' },
+  { name: 'shift_id', required: false, type: 'uuid', description: 'Apply to specific shift or All Shifts (null)' },
+  { name: 'payment_type', required: true, type: 'enum', description: 'percentage, flat_rate, or multiplier' },
+  { name: 'amount', required: true, type: 'numeric', description: 'Percentage %, flat $, or multiplier X' },
+  { name: 'applies_to', required: true, type: 'enum', description: 'all_hours, overtime, night_shift, weekend, holiday' },
+  { name: 'day_of_week', required: false, type: 'integer[]', description: 'Restrict to specific days (0=Sun, 6=Sat)' },
+  { name: 'start_time', required: false, type: 'time', description: 'Time range start' },
+  { name: 'end_time', required: false, type: 'time', description: 'Time range end' },
+  { name: 'minimum_hours_threshold', required: false, type: 'numeric', description: 'Min hours to trigger' },
+  { name: 'is_taxable', required: false, type: 'boolean', description: 'Payment is taxable' },
+  { name: 'priority', required: false, type: 'integer', description: 'Processing order (higher = first)' },
+  { name: 'is_active', required: false, type: 'boolean', description: 'Rule is active' },
+];
+```
+
+---
+
+## Industry Comparison After Full Implementation
+
+| Feature | Kronos/UKG | Workday | SAP | Oracle | IntelliHRM (After) |
+|---------|-----------|---------|-----|--------|-------------------|
+| Shift definitions with time/breaks | Yes | Yes | Yes | Yes | **Yes (3.2)** |
+| Separate rounding per punch type | Yes | Yes | Yes | Yes | **Yes (2.16)** |
+| Shift-specific rounding overrides | Yes | Yes | Yes | Yes | **Yes (2.16)** |
+| Grace period on rounding | Yes | Yes | Yes | Yes | **Yes (2.16)** |
+| Apply rounding to OT | Yes | Yes | Yes | Yes | **Yes (2.16)** |
+| Payment type options | Yes | Yes | Yes | Yes | **Yes (3.8)** |
+| Shift differentials | Yes | Yes | Yes | Yes | **Yes (3.7-3.8)** |
+| Day-of-week restrictions | Yes | Yes | Yes | Yes | **Yes (3.8)** |
+| Priority-based rule processing | Yes | Yes | Yes | Yes | **Yes (3.8)** |
+
+---
+
+## Implementation Summary
+
+### Immediate (With This Request)
+
+1. **Create `TAFoundationShiftRoundingRules.tsx`** (Section 2.16)
+   - Full field reference table with verified schema
+   - Business rules documentation
+   - Step-by-step configuration guide
+   - UI page reference: `/time-attendance/shifts/rounding-rules`
+
+2. **Create `TAShiftPaymentRules.tsx`** (Section 3.8)
+   - Full field reference table for `shift_payment_rules`
+   - Payment type explanations (percentage vs flat vs multiplier)
+   - Applies-to category documentation
+   - UI page reference: `/time-attendance/shifts/payment-rules`
+
+3. **Update `TimeAttendanceManualShiftSection.tsx`**
+   - Transform from placeholder to grouped accordion
+   - Include new sections
+
+### Follow-Up (Chapter 3 Full Upgrade)
+
+4. Create remaining 8 section components for Chapter 3
+5. Update types and exports
+6. Add cross-references to Payroll (payment rules → earnings)
+
+---
+
+## Technical Details
+
+### Dual-Layer Documentation Approach
+
+The manual will explain IntelliHRM's two-layer rounding system:
+
 ```text
-src/components/enablement/time-attendance-manual/TimeAttendanceManualFoundationSection.tsx
-  - Transform to grouped accordion structure
-  - Add chapter header, learning objectives, contents grid
+Layer 1: Attendance Policy (Base)
+- Applies company-wide
+- Simpler options: none, nearest_5/15/30, up, down
+- Per-punch-type (round_clock_in, round_clock_out)
 
-src/components/enablement/time-attendance-manual/sections/foundation/index.ts
-  - Export 9 new components
+Layer 2: Shift Rounding Rules (Override)
+- Applies to specific shifts (or all)
+- More granular: rule_type, interval, direction, grace
+- Can override base policy per shift
+```
 
-src/types/timeAttendanceManual.ts
-  - Add 9 new section definitions
-  - Update section numbering
-  - Update read time estimates
+This dual-layer architecture is similar to Workday's approach and should be clearly documented.
 
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationPrerequisites.tsx
-  - Enhance with phase diagram and cross-references
+### Payment Rules → Payroll Integration Note
 
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationTimePolicies.tsx
-  - Add references to new sections
+The documentation will include a cross-reference note:
 
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationDevices.tsx
-  - Add biometric templates reference
+```text
+Shift payment rules integrate with Payroll via:
+- earning_types table (payment_type maps to earning category)
+- payroll_entries (calculated amounts flow as line items)
 
-src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationGeofencing.tsx
-  - Add employee assignments reference
+When creating payment rules, ensure corresponding earning types
+exist in Payroll → Earnings Configuration.
 ```
 
 ---
 
-## Technical Implementation Notes
+## Files Changed Summary
 
-### Accordion Structure Pattern (from F360SetupSection.tsx)
-```tsx
-<Accordion type="multiple" defaultValue={['prerequisites']} className="space-y-4">
-  {/* A. Prerequisites */}
-  <AccordionItem value="prerequisites" className="border rounded-lg border-amber-500/30 bg-amber-500/5">
-    <AccordionTrigger>
-      <Badge>Section 2.1</Badge>
-      <span>A. Prerequisites</span>
-    </AccordionTrigger>
-    <AccordionContent>
-      <TAFoundationPrerequisites />
-    </AccordionContent>
-  </AccordionItem>
-  
-  {/* B. Core Policies */}
-  <AccordionItem value="policies">
-    ...
-  </AccordionItem>
-</Accordion>
-```
+| File | Action |
+|------|--------|
+| `src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationShiftRoundingRules.tsx` | **CREATE** |
+| `src/components/enablement/time-attendance-manual/sections/shift/TAShiftPaymentRules.tsx` | **CREATE** |
+| `src/components/enablement/time-attendance-manual/sections/shift/index.ts` | **CREATE** |
+| `src/components/enablement/time-attendance-manual/TimeAttendanceManualShiftSection.tsx` | **UPDATE** |
+| `src/components/enablement/time-attendance-manual/sections/foundation/index.ts` | **UPDATE** |
+| `src/types/timeAttendanceManual.ts` | **UPDATE** |
 
-### Chapter Contents Grid Pattern
-```tsx
-<Card>
-  <CardHeader>
-    <CardTitle>Chapter Contents (15 Sections)</CardTitle>
-  </CardHeader>
-  <CardContent className="space-y-4">
-    {/* A. Prerequisites */}
-    <div>
-      <h4 className="text-sm font-medium text-muted-foreground mb-2">A. Prerequisites</h4>
-      <div className="grid md:grid-cols-3 gap-2">
-        <div className="flex items-center gap-2 p-2 rounded-lg border">
-          <CheckCircle2 className="h-4 w-4" />
-          <span className="font-medium">2.1</span>
-          <span>Prerequisites</span>
-        </div>
-      </div>
-    </div>
-    {/* B. Core Policies, C. Time Collection, etc. */}
-  </CardContent>
-</Card>
-```
-
----
-
-## Alignment Verification
-
-### Database Coverage After Implementation
-| Table | Section | Status |
-|-------|---------|--------|
-| attendance_policies | 2.2 | Existing |
-| employee_attendance_policies | 2.3 | **New** |
-| overtime_rate_tiers | 2.4 | **New** |
-| timeclock_devices | 2.5 | Existing |
-| timeclock_punch_queue | 2.5 | Existing |
-| employee_biometric_templates | 2.6 | **New** |
-| employee_face_enrollments | 2.7 | Existing |
-| face_verification_logs | 2.7 | Existing |
-| punch_import_batches | 2.8 | Existing |
-| geofence_locations | 2.9 | Existing |
-| geofence_validations | 2.9 | Existing |
-| employee_geofence_assignments | 2.10 | **New** |
-| comp_time_policies | 2.11 | **New** |
-| comp_time_balances | 2.11 | **New** |
-| flex_time_balances | 2.12 | **New** |
-| flex_time_transactions | 2.12 | **New** |
-| timekeeper_assignments | 2.13 | **New** |
-| time_attendance_audit_log | 2.14 | **New** |
-| cba_time_rules | 2.15 | **New** |
-
-### UI Page Coverage After Implementation
-| UI Page | Section | Status |
-|---------|---------|--------|
-| AttendancePoliciesPage.tsx | 2.2, 2.3 | Complete |
-| OvertimeManagementPage.tsx | 2.4 | **New** |
-| TimeclockDevicesPage.tsx | 2.5, 2.6 | Complete |
-| GeofenceManagementPage.tsx | 2.9, 2.10 | Complete |
-| FlexTimePage.tsx | 2.11, 2.12 | **New** |
-| TimeAuditTrailPage.tsx | 2.14 | **New** |
-| CBATimeRulesPage.tsx | 2.15 | **New** |
-| PunchImportPage.tsx | 2.8 | Existing |
-
----
-
-## Estimated Implementation Effort
-
-| Task | Files | Time |
-|------|-------|------|
-| Create 9 new section components | 9 | 3-4 hours |
-| Update TimeAttendanceManualFoundationSection.tsx | 1 | 1 hour |
-| Update section index exports | 1 | 10 min |
-| Update timeAttendanceManual.ts types | 1 | 30 min |
-| Enhance existing section cross-references | 4 | 45 min |
-| Testing and validation | - | 30 min |
-| **Total** | **16 files** | **~6 hours** |
-
----
-
-## Success Criteria
-
-After implementation, Chapter 2 will:
-1. Follow the same grouped accordion structure as 360 Feedback manual
-2. Cover all 19+ T&A foundation database tables
-3. Reference all 7+ relevant UI configuration pages
-4. Include chapter-level learning objectives
-5. Feature phase-based dependency chain visualization
-6. Match industry documentation standards (Kronos, Workday, SAP, Oracle)
-7. Increase from 6 sections to 15 sections for comprehensive coverage
-8. Update read time from ~55 min to ~99 min reflecting additional content
