@@ -1,360 +1,336 @@
 
-
-# L&D Manual Chapter 9 - Comprehensive Gap Analysis & Enhancement Plan
+# Time & Attendance Administrator Manual - Complete Build Plan
 
 ## Executive Summary
 
-Following a detailed audit comparing Chapter 9 documentation against the actual database schema, UI components, and industry standards (Workday, SAP SuccessFactors, Cornerstone OnDemand), this plan identifies **32 gaps** requiring remediation across three dimensions:
-1. **Documentation-to-Database Gaps**: Database tables/features not covered in troubleshooting
-2. **Documentation-to-UI Gaps**: UI components/features without troubleshooting coverage
-3. **Industry Standard Gaps**: Missing content compared to enterprise LMS benchmarks
+This plan creates a comprehensive, enterprise-grade Time & Attendance Administrator Manual following the same depth and structure as the 360 Feedback Manual. The current T&A manual has skeletal placeholder components that need to be expanded into fully detailed documentation covering 63+ database tables, 26+ UI pages, and all operational workflows.
 
----
+## Current State Analysis
 
-## Part 1: Current State Assessment
+### What Exists
+- **Type definitions**: Complete structure in `src/types/timeAttendanceManual.ts` with 10 parts, 60+ subsections
+- **Chapter 1 (Overview)**: 5 detailed sections already built with proper depth
+- **Chapters 2-10**: Placeholder cards only (no detailed content)
+- **Supplementary**: Basic Quick Reference, Glossary, Architecture Diagrams, Version History
 
-### Chapter 9 Coverage Summary (Current)
+### What's Missing
+- **Detailed subsection components** for Parts 2-10 (approximately 55 sections)
+- **Database field reference tables** for all 63+ T&A tables
+- **Step-by-step procedures** with screenshots
+- **Troubleshooting matrices** with documented issues
+- **Integration documentation** for Payroll, Workforce, Leave modules
 
-| Section | Issues Documented | Database Tables Referenced | Industry Alignment |
-|---------|------------------|---------------------------|-------------------|
-| 9.1 Overview | Methodology only | N/A | Good |
-| 9.2 Setup (15 issues) | 15 | lms_categories, lms_courses, lms_modules, lms_lessons, lms_quizzes, lms_scorm_packages | Good |
-| 9.3 Enrollment (12 issues) | 12 | lms_enrollments, lms_course_prerequisites | Good |
-| 9.4 Progress (10 issues) | 10 | lms_lesson_progress, lms_scorm_tracking | Good |
-| 9.5 Quiz (12 issues) | 12 | lms_quiz_attempts, lms_quiz_questions | Good |
-| 9.6 Certificate (10 issues) | 10 | lms_certificates | Partial |
-| 9.7 Compliance (12 issues) | 12 | compliance_training, compliance_training_assignments | Good |
-| 9.8 Vendor (10 issues) | 10 | training_vendors, training_vendor_courses | Partial |
-| 9.9 Integration (12 issues) | 12 | appraisal_integration_log, competency_course_mappings | Good |
-| 9.10 AI (8 issues) | 8 | adaptive_learning_paths, completion_risk_predictions | Partial |
-| 9.11 Performance (8 issues) | 8 | N/A (general) | Minimal |
-| 9.12 Escalation | FAQs (20) | N/A | Good |
-
-**Total Current: 109 documented issues + 20 FAQs**
-
----
-
-## Part 2: Gap Analysis
-
-### Category A: Database Tables NOT Referenced in Troubleshooting
-
-These L&D-related tables exist in the schema but have no troubleshooting coverage:
-
-| Table | Domain | Gap Type | Priority |
-|-------|--------|----------|----------|
-| `lms_discussion_forums` | Social Learning | Missing | Medium |
-| `lms_discussion_threads` | Social Learning | Missing | Medium |
-| `lms_discussion_replies` | Social Learning | Missing | Medium |
-| `lms_bookmarks` | Learner Experience | Missing | Low |
-| `lms_notes` | Learner Experience | Missing | Low |
-| `lms_review_helpful` | Course Reviews | Missing | Low |
-| `lms_course_reviews` | Course Reviews | Missing | Medium |
-| `lms_leaderboards` | Gamification | Missing | Medium |
-| `lms_point_transactions` | Gamification | Missing | Low |
-| `lms_user_points` | Gamification | Missing | Low |
-| `lms_xapi_statements` | xAPI Tracking | Partial (mentioned but no issues) | High |
-| `learning_chatbot_config` | AI Chatbot | Partial (1 issue) | Medium |
-| `chatbot_conversations` | AI Chatbot | Missing | Medium |
-| `chatbot_knowledge_index` | AI Chatbot | Missing | Medium |
-| `training_needs` | Training Needs Analysis | Missing | High |
-| `training_needs_analysis` | Training Needs Analysis | Missing | High |
-| `employee_skill_gaps` | Skill Gap Analysis | Missing | High |
-| `training_analytics` | Analytics | Missing | Medium |
-| `training_evaluations` | Kirkpatrick Evaluations | Missing | High |
-| `training_evaluation_responses` | Evaluations | Missing | High |
-| `training_certificate_templates` | Certificates | Partial (1 issue) | Medium |
-| `training_budget_allocations` | Budgets | Missing | Medium |
-| `training_instructor_sessions` | ILT Sessions | Missing | Medium |
-| `training_vendor_session_enrollments` | Vendor Sessions | Missing | Medium |
-| `recertification_triggers` | Recertification | Missing | Medium |
-| `adaptive_path_rules` | Adaptive Learning | Partial | Medium |
-| `adaptive_learner_progress` | Adaptive Learning | Partial | Medium |
-| `ai_generated_quiz_questions` | AI Quiz | Missing | Medium |
-| `skills_transfer_assessments` | ROI Measurement | Partial (1 issue) | High |
-| `risk_intervention_rules` | At-Risk Learners | Missing | High |
-| `risk_interventions` | At-Risk Learners | Missing | High |
-
-**Total: 31 tables with missing or partial coverage**
-
-### Category B: UI Components NOT Covered in Troubleshooting
-
-| UI Component/Tab | Related Issues Missing | Priority |
-|-----------------|----------------------|----------|
-| `TrainingNeedsTab.tsx` | TNA workflow issues | High |
-| `TrainingEvaluationsTab.tsx` | Kirkpatrick evaluation issues | High |
-| `RecertificationTab.tsx` | Recertification workflow issues | Medium |
-| `CourseCompetenciesTab.tsx` | Competency mapping issues | Medium |
-| `training/ai-features/` | Additional AI feature issues | High |
-| `training/compliance/` | Risk dashboard issues | Medium |
-| `training/interactive/` | Social learning issues | Medium |
-
-### Category C: Industry Standard Gaps
-
-Compared to Workday Learning, SAP SuccessFactors, and Cornerstone OnDemand documentation:
-
-| Missing Content | Industry Benchmark | Impact |
-|-----------------|-------------------|--------|
-| **Accessibility (WCAG) Issues** | All enterprise LMS vendors | High |
-| **Mobile App Troubleshooting** | Workday, Cornerstone | High |
-| **Multi-language Content Issues** | SAP SuccessFactors | Medium |
-| **ILT Session Management Issues** | All vendors | High |
-| **Virtual Classroom Attendance** | Workday, SAP | Medium |
-| **Social Learning/Collaboration** | Cornerstone, Degreed | Medium |
-| **Training Needs Analysis (TNA)** | SAP SuccessFactors | High |
-| **Kirkpatrick Level 1-4 Issues** | All vendors | High |
-| **Skills Gap Remediation** | Workday Skills Cloud | High |
-| **Content Authoring Issues** | Cornerstone | Medium |
-| **LTI Integration Issues** | All vendors | Medium |
-| **Batch Import/Export Issues** | All vendors | High |
-| **Notification Template Issues** | All vendors | Medium |
-| **Reporting/Dashboard Caching** | All vendors | Medium |
-| **Timezone/Locale Issues** | All vendors | Medium |
-| **Data Retention/GDPR Issues** | SAP, Workday | High |
-
----
-
-## Part 3: Enhancement Plan
-
-### Phase 1: Add Missing High-Priority Issues (21 New Issues)
-
-**Section 9.2 - Setup & Configuration: Add 6 Issues**
-
-| ID | Symptom | Root Cause | Severity |
-|----|---------|------------|----------|
-| LMS-016 | Discussion forum not appearing on course | Forum not created or is_active=false | Medium |
-| LMS-017 | Instructor session scheduling conflict | Overlapping sessions, calendar not integrated | Medium |
-| LMS-018 | ILT session attendance not tracking | Attendance sync disabled, manual entry required | High |
-| LMS-019 | Content localization not displaying correct language | Locale not matched, fallback not configured | Medium |
-| LMS-020 | Training needs analysis not generating recommendations | TNA rule criteria not matched, skill data missing | High |
-| LMS-021 | Notification template placeholders not rendering | Invalid placeholder syntax, missing data fields | Medium |
-
-**Section 9.5 - Quiz & Assessment: Add 3 Issues**
-
-| ID | Symptom | Root Cause | Severity |
-|----|---------|------------|----------|
-| QIZ-013 | AI-generated quiz questions missing from quiz | Questions not approved, approval workflow pending | Medium |
-| QIZ-014 | Bloom's taxonomy distribution incorrect | Generation parameters not set, question pool too small | Low |
-| QIZ-015 | Proctoring integration not capturing session | Proctoring API failed, browser permissions denied | High |
-
-**Section 9.6 - Certificate & Credential: Add 3 Issues**
-
-| ID | Symptom | Root Cause | Severity |
-|----|---------|------------|----------|
-| CRT-011 | Certificate QR code verification failing | Verification endpoint misconfigured, SSL issue | Medium |
-| CRT-012 | External credential import validation errors | Data format mismatch, required fields missing | Medium |
-| CRT-013 | Digital badge not publishing to Credly/Badgr | OAuth expired, badge template not mapped | Medium |
-
-**Section 9.10 - AI & Automation: Add 6 Issues**
-
-| ID | Symptom | Root Cause | Severity |
-|----|---------|------------|----------|
-| AIA-009 | Skills gap analysis not identifying development needs | Competency framework incomplete, assessment data missing | High |
-| AIA-010 | Training needs analysis AI recommendations inaccurate | Model training data insufficient, feature weights incorrect | High |
-| AIA-011 | At-risk intervention not triggering for learners | Intervention rules not configured, risk threshold not met | High |
-| AIA-012 | Chatbot knowledge index outdated | Sync job failed, content not indexed | Medium |
-| AIA-013 | AI content suggestions showing irrelevant courses | User profile incomplete, recommendation algorithm drift | Medium |
-| AIA-014 | Personalized learning path not adapting to quiz performance | Adaptive rules not triggered, mastery threshold misconfigured | Medium |
-
-**Section 9.11 - Performance & Data: Add 3 Issues**
-
-| ID | Symptom | Root Cause | Severity |
-|----|---------|------------|----------|
-| PER-009 | Kirkpatrick evaluation data not aggregating | Evaluation responses not linked, aggregation job failed | High |
-| PER-010 | ROI calculation showing zero or incorrect value | Skills transfer assessment incomplete, formula error | High |
-| PER-011 | Batch enrollment import timing out | File too large, validation timeout, queue backlog | Medium |
-
-### Phase 2: Create New Section 9.13 - Accessibility & Mobile (Industry Gap)
-
-**New Section: 9.13 Accessibility, Mobile & Localization Issues (8 Issues)**
-
-| ID | Symptom | Severity |
-|----|---------|----------|
-| ACC-001 | Screen reader not announcing course content correctly | High |
-| ACC-002 | Keyboard navigation failing in quiz player | High |
-| ACC-003 | Color contrast insufficient for visually impaired users | Medium |
-| ACC-004 | Mobile app lesson progress not syncing to web | High |
-| ACC-005 | Offline downloaded content corrupted or inaccessible | Medium |
-| ACC-006 | Push notifications not delivering on mobile | Medium |
-| ACC-007 | Content not displaying in user's preferred language | Medium |
-| ACC-008 | Timezone causing incorrect due date display | Medium |
-
-### Phase 3: Create New Section 9.14 - Data Management & Compliance (Industry Gap)
-
-**New Section: 9.14 Data Management, Privacy & Retention Issues (6 Issues)**
-
-| ID | Symptom | Severity |
-|----|---------|----------|
-| DMC-001 | GDPR data export request incomplete | High |
-| DMC-002 | User data not being anonymized after retention period | High |
-| DMC-003 | Training history not appearing in employee data export | Medium |
-| DMC-004 | Consent records not logged for mandatory training | High |
-| DMC-005 | Audit log data truncated or missing entries | High |
-| DMC-006 | Cross-border data transfer validation failing | Medium |
-
-### Phase 4: Enhance Section 9.12 - Add Database Diagnostic Queries
-
-Add SQL diagnostic queries for each section:
-
-```sql
--- Section 9.2: Find orphan courses without modules
-SELECT id, title FROM lms_courses 
-WHERE id NOT IN (SELECT DISTINCT course_id FROM lms_modules);
-
--- Section 9.4: Find progress mismatches
-SELECT e.id, e.progress_percentage as enrollment_progress,
-  (SELECT COUNT(*) FILTER (WHERE completed_at IS NOT NULL) * 100.0 / COUNT(*) 
-   FROM lms_lesson_progress lp 
-   JOIN lms_lessons l ON lp.lesson_id = l.id 
-   JOIN lms_modules m ON l.module_id = m.id 
-   WHERE m.course_id = e.course_id AND lp.user_id = e.user_id) as calculated_progress
-FROM lms_enrollments e
-WHERE ABS(e.progress_percentage - calculated_progress) > 5;
-
--- Section 9.7: Find overdue compliance assignments
-SELECT cta.*, ct.name as training_name, p.full_name
-FROM compliance_training_assignments cta
-JOIN compliance_training ct ON cta.compliance_training_id = ct.id
-JOIN profiles p ON cta.employee_id = p.id
-WHERE cta.due_date < NOW() AND cta.status NOT IN ('completed', 'exempted')
-ORDER BY cta.due_date;
-
--- Section 9.10: Find learners at risk with no intervention
-SELECT crp.*, p.full_name
-FROM completion_risk_predictions crp
-JOIN profiles p ON crp.employee_id = p.id
-WHERE crp.risk_level = 'high' 
-  AND crp.id NOT IN (SELECT prediction_id FROM risk_interventions)
-ORDER BY crp.predicted_at DESC;
+### Database Tables to Document (63+ tables)
+```text
+time_clock_entries (68 fields)   | attendance_policies          | attendance_exceptions
+attendance_summary               | attendance_regularization_requests
+shifts (18 fields)               | shift_templates              | shift_template_entries
+shift_differentials              | shift_rounding_rules         | shift_payment_rules
+shift_rotation_patterns          | shift_approval_levels        | shift_notifications
+employee_shift_assignments       | employee_schedules           | work_schedules
+shift_swap_requests              | shift_bidding_periods        | shift_bids
+open_shifts                      | open_shift_claims            | shift_coverage_snapshots
+shift_cost_projections           | shift_demand_forecasts
+ai_schedule_runs                 | ai_schedule_recommendations  | ai_scheduling_constraints
+overtime_requests                | overtime_rate_tiers          | overtime_risk_alerts
+timeclock_devices                | timeclock_punch_queue        | time_clock_breaks
+timekeeper_assignments           | timekeeper_period_finalizations
+timesheet_submissions            | timesheet_submission_entries | timesheet_entries
+timesheet_approval_history       | time_attendance_audit_log
+cba_time_rules                   | cba_time_extensions
+flex_time_balances               | flex_time_transactions
+comp_time_policies               | comp_time_balances           | comp_time_earned/used
+project_time_entries             | payroll_time_sync_logs
+employee_attendance_policies     | employee_bradford_scores     | employee_wellness_indicators
+geofence_locations               | geofence_validations
+employee_face_enrollments        | face_verification_logs
 ```
 
-### Phase 5: Update Section 9.1 Overview
+---
 
-1. **Expand Symptom-to-Section Matrix** to include new sections 9.13 and 9.14
-2. **Add Table Coverage Map** showing which database tables are covered in each section
-3. **Add Industry Alignment Badge** indicating Workday/SAP/Cornerstone parity
-4. **Update Issue Count** from 109 to 144 issues
+## Chapter Implementation Plan
 
-### Phase 6: Update Type Definitions
+### Part 2: Foundation Setup (6 sections)
+Create detailed subsection components in `sections/foundation/`:
 
-Update `src/types/learningDevelopmentManual.ts` to include:
-- Section 9.13 and 9.14 definitions
-- Updated issue counts for sections 9.2, 9.5, 9.6, 9.10, 9.11
-- Updated total estimated read time (120 → 150 min)
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 2.1 | TAFoundationPrerequisites | Dependencies checklist, Workforce integration validation |
+| 2.2 | TAFoundationTimePolicies | `attendance_policies` table, rounding/grace rules, OT thresholds |
+| 2.3 | TAFoundationDevices | `timeclock_devices` table, device types, punch queue |
+| 2.4 | TAFoundationGeofencing | Geofence locations, radius config, validation rules |
+| 2.5 | TAFoundationFaceVerification | Face enrollment, matching thresholds, anti-spoofing |
+| 2.6 | TAFoundationPunchImport | External imports, legacy migration, batch processing |
+
+### Part 3: Shift Management (8 sections)
+Create detailed subsection components in `sections/shifts/`:
+
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 3.1 | TAShiftArchitecture | Shift hierarchy overview, data model relationships |
+| 3.2 | TAShiftTemplates | `shift_templates` table, template entries, break config |
+| 3.3 | TAShiftSchedules | Schedule creation, period management |
+| 3.4 | TAShiftRotations | `shift_rotation_patterns`, pattern types (4x4, Panama, etc.) |
+| 3.5 | TAShiftAssignments | `employee_shift_assignments`, eligibility rules |
+| 3.6 | TAShiftDifferentials | `shift_differentials` table, night/weekend/holiday premiums |
+| 3.7 | TAShiftRounding | `shift_rounding_rules`, grace periods, nearest increment |
+| 3.8 | TAShiftPaymentRules | `shift_payment_rules`, OT tiers, calculation methods |
+
+### Part 4: Daily Operations (7 sections)
+Create detailed subsection components in `sections/operations/`:
+
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 4.1 | TAOpsOverview | Time tracking conceptual overview |
+| 4.2 | TAOpsClockInOut | Clock methods, validation flow, multi-factor verification |
+| 4.3 | TAOpsRecords | `time_clock_entries` full field reference, editing |
+| 4.4 | TAOpsLiveDashboard | Real-time attendance, late arrivals, coverage status |
+| 4.5 | TAOpsExceptions | `attendance_exceptions` handling, auto-detection rules |
+| 4.6 | TAOpsRegularization | `attendance_regularization_requests`, approval workflow |
+| 4.7 | TAOpsFlexTime | `flex_time_balances`, core hours, balance tracking |
+
+### Part 5: Advanced Scheduling (7 sections)
+Create detailed subsection components in `sections/scheduling/`:
+
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 5.1 | TASchedulingAI | `ai_schedule_runs`, constraint config, optimization goals |
+| 5.2 | TASchedulingOpenShifts | `open_shifts`, `open_shift_claims`, visibility rules |
+| 5.3 | TASchedulingBidding | `shift_bidding_periods`, `shift_bids`, preference ranking |
+| 5.4 | TASchedulingCoverage | `shift_coverage_snapshots`, minimum staffing, gap alerts |
+| 5.5 | TASchedulingMultiLocation | Cross-location scheduling, travel time |
+| 5.6 | TASchedulingFatigue | Rest period enforcement, consecutive day limits |
+| 5.7 | TASchedulingCalendar | Calendar views, team/department/individual |
+
+### Part 6: Project Time Tracking (7 sections)
+Create detailed subsection components in `sections/projecttime/`:
+
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 6.1 | TAProjectOverview | Project time concepts, billing integration |
+| 6.2 | TAProjectSetup | Project/phase/task structure |
+| 6.3 | TAProjectTimeEntry | `project_time_entries`, logging procedures |
+| 6.4 | TAProjectCostConfig | Rate cards, effective dates |
+| 6.5 | TAProjectCostAllocation | Split entries, GL integration |
+| 6.6 | TAProjectApprovals | Timesheet approval workflows |
+| 6.7 | TAProjectAnalytics | Budget vs actual, utilization |
+
+### Part 7: Overtime & Compliance (6 sections)
+Create detailed subsection components in `sections/compliance/`:
+
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 7.1 | TAComplianceOverview | Overtime policy fundamentals |
+| 7.2 | TAComplianceOTRules | `overtime_rate_tiers`, calculation methods |
+| 7.3 | TAComplianceOTAlerts | `overtime_risk_alerts`, threshold notifications |
+| 7.4 | TAComplianceLaborLaw | Multi-country rules (Caribbean, Africa) |
+| 7.5 | TAComplianceCBA | `cba_time_rules`, union agreement support |
+| 7.6 | TAComplianceCBAExtensions | Special provisions, premium calculations |
+
+### Part 8: Analytics & Insights (6 sections)
+Create detailed subsection components in `sections/analytics/`:
+
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 8.1 | TAAnalyticsDashboard | Attendance KPIs, trend visualization |
+| 8.2 | TAAnalyticsAbsenteeism | Bradford Factor, `employee_bradford_scores`, cost modeling |
+| 8.3 | TAAnalyticsWellness | `employee_wellness_indicators`, burnout prediction |
+| 8.4 | TAAnalyticsOTTrends | Overtime patterns, department comparisons |
+| 8.5 | TAAnalyticsProductivity | Utilization rates, efficiency metrics |
+| 8.6 | TAAnalyticsReporting | Custom reports, scheduling, exports |
+
+### Part 9: ESS/MSS Self-Service (8 sections)
+Create detailed subsection components in `sections/selfservice/`:
+
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 9.1 | TAESSOverview | Employee self-service features summary |
+| 9.2 | TAESSMobileClock | Mobile clock-in with face/GPS |
+| 9.3 | TAESSTimesheet | My timesheet view, submission |
+| 9.4 | TAESSShiftSwaps | `shift_swap_requests`, colleague requests |
+| 9.5 | TAMSSOverview | Manager self-service features summary |
+| 9.6 | TAMSSTeamDashboard | Team attendance, who's in/out |
+| 9.7 | TAMSSTimesheetApprovals | Bulk approvals, exception handling |
+| 9.8 | TAMSSOTApprovals | Pre/post overtime approval |
+
+### Part 10: Troubleshooting (7 sections)
+Create detailed subsection components in `sections/troubleshooting/`:
+
+| Section | Component | Content Scope |
+|---------|-----------|---------------|
+| 10.1 | TATroubleshootingConfig | Policy/shift/device issues (20+ documented) |
+| 10.2 | TATroubleshootingDataQuality | Missing punches, duplicates, validation |
+| 10.3 | TATroubleshootingIntegration | Payroll sync, Workforce conflicts |
+| 10.4 | TATroubleshootingSecurity | Device security, permissions |
+| 10.5 | TATroubleshootingPerformance | System tuning, large datasets |
+| 10.6 | TATroubleshootingAudit | Audit trail review, compliance |
+| 10.7 | TATroubleshootingEscalation | Support tiers, escalation paths |
 
 ---
 
-## Part 4: Implementation Summary
+## Component Standards (Matching 360 Feedback Manual)
 
-### Files to Modify (8)
+Each section component will include:
 
-| File | Changes |
-|------|---------|
-| `LndSetupConfigurationIssues.tsx` | Add 6 issues (LMS-016 to LMS-021) |
-| `LndQuizAssessmentIssues.tsx` | Add 3 issues (QIZ-013 to QIZ-015) |
-| `LndCertificateCredentialIssues.tsx` | Add 3 issues (CRT-011 to CRT-013) |
-| `LndAIAutomationIssues.tsx` | Add 6 issues (AIA-009 to AIA-014) |
-| `LndPerformanceDataIssues.tsx` | Add 3 issues (PER-009 to PER-011) |
-| `LndTroubleshootingOverview.tsx` | Expand matrix, add table coverage, update counts |
-| `LndEscalationProcedures.tsx` | Add diagnostic query reference card |
-| `learningDevelopmentManual.ts` | Add sections 9.13, 9.14; update counts |
-
-### Files to Create (2)
-
-| File | Purpose |
-|------|---------|
-| `LndAccessibilityMobileIssues.tsx` | Section 9.13 - 8 issues |
-| `LndDataManagementIssues.tsx` | Section 9.14 - 6 issues |
-
-### Updated Statistics
-
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Total Issues | 109 | 144 | +35 |
-| FAQs | 20 | 20 | - |
-| Sections | 12 | 14 | +2 |
-| Database Tables Referenced | ~25 | ~50 | +25 |
-| Diagnostic Queries | 0 | 12+ | +12 |
-| Industry Alignment | 70% | 95% | +25% |
-| Estimated Read Time | 120 min | 150 min | +30 min |
+1. **Learning Objectives Card** - 4-6 bullet points
+2. **Conceptual Overview** - Business context and purpose
+3. **Database Field Reference Tables** - Complete field definitions with:
+   - Field name, data type, required/optional
+   - Description and validation rules
+   - Example values
+4. **Step-by-Step Procedures** - Numbered workflows with:
+   - Screenshot placeholders
+   - Path navigation (breadcrumbs)
+   - Expected outcomes
+5. **Business Rules Section** - Configurable rules with conditions
+6. **Integration Callouts** - Links to related modules
+7. **Troubleshooting Tips** - Common issues inline
+8. **Best Practices Card** - Recommendations
 
 ---
 
-## Part 5: Technical Details
+## File Structure
 
-### New Section 9.13 Structure
+```text
+src/components/enablement/time-attendance-manual/
+├── sections/
+│   ├── overview/           (existing - 5 components)
+│   ├── foundation/         (new - 6 components)
+│   │   ├── TAFoundationPrerequisites.tsx
+│   │   ├── TAFoundationTimePolicies.tsx
+│   │   ├── TAFoundationDevices.tsx
+│   │   ├── TAFoundationGeofencing.tsx
+│   │   ├── TAFoundationFaceVerification.tsx
+│   │   ├── TAFoundationPunchImport.tsx
+│   │   └── index.ts
+│   ├── shifts/             (new - 8 components)
+│   ├── operations/         (new - 7 components)
+│   ├── scheduling/         (new - 7 components)
+│   ├── projecttime/        (new - 7 components)
+│   ├── compliance/         (new - 6 components)
+│   ├── analytics/          (new - 6 components)
+│   ├── selfservice/        (new - 8 components)
+│   ├── troubleshooting/    (new - 7 components)
+│   └── supplementary/      (existing - 4 components, to be enhanced)
+├── TimeAttendanceManualFoundationSection.tsx  (update)
+├── TimeAttendanceManualShiftSection.tsx       (update)
+├── TimeAttendanceManualDailyOpsSection.tsx    (update)
+├── TimeAttendanceManualSchedulingSection.tsx  (update)
+├── TimeAttendanceManualProjectTimeSection.tsx (update)
+├── TimeAttendanceManualComplianceSection.tsx  (update)
+├── TimeAttendanceManualAnalyticsSection.tsx   (update)
+├── TimeAttendanceManualESSMSSSection.tsx      (update)
+├── TimeAttendanceManualTroubleshootingSection.tsx (update)
+└── index.ts                                   (update exports)
+```
 
+---
+
+## Implementation Phases
+
+### Phase 1: Foundation & Shifts (Parts 2-3)
+- 14 new section components
+- Focus: Core configuration that must be set up first
+- Database tables: ~15 tables documented
+
+### Phase 2: Operations & Scheduling (Parts 4-5)
+- 14 new section components
+- Focus: Daily workflows and AI-powered features
+- Database tables: ~20 tables documented
+
+### Phase 3: Project Time & Compliance (Parts 6-7)
+- 13 new section components
+- Focus: Billing integration and regulatory compliance
+- Database tables: ~15 tables documented
+
+### Phase 4: Analytics, Self-Service & Troubleshooting (Parts 8-10)
+- 21 new section components
+- Focus: Reporting, ESS/MSS, and support documentation
+- Database tables: ~13 tables documented
+- Troubleshooting matrix: 70+ documented issues
+
+### Phase 5: Appendix Enhancement
+- Update Quick Reference with expanded cards
+- Architecture Diagrams with 63+ table visualization
+- Glossary expansion to 50+ terms
+- Version History update to v1.0.0
+
+---
+
+## Technical Details
+
+### Database Field Reference Pattern
 ```tsx
-// LndAccessibilityMobileIssues.tsx
-const ACCESSIBILITY_ISSUES = [
+const attendancePoliciesFields: FieldDefinition[] = [
   {
-    id: 'ACC-001',
-    symptom: 'Screen reader not announcing course content correctly',
-    severity: 'High',
-    cause: 'Missing ARIA labels, improper heading hierarchy, dynamic content not announced.',
-    resolution: [
-      'Run accessibility audit with WAVE or axe-core',
-      'Add aria-label and aria-describedby to interactive elements',
-      'Ensure heading levels are sequential (h1 → h2 → h3)',
-      'Use aria-live regions for dynamic content updates',
-      'Test with NVDA, JAWS, and VoiceOver'
-    ],
-    prevention: 'Include accessibility testing in QA. Use semantic HTML.'
+    field: 'id',
+    type: 'uuid',
+    required: true,
+    description: 'Unique policy identifier',
+    example: 'uuid-v4'
   },
-  // ... 7 more issues
+  {
+    field: 'company_id',
+    type: 'uuid',
+    required: true,
+    description: 'Company this policy belongs to',
+    validation: 'Must reference valid company'
+  },
+  // ... 20+ fields
 ];
 ```
 
-### New Section 9.14 Structure
-
+### Component Import Pattern (Parent Chapters)
 ```tsx
-// LndDataManagementIssues.tsx
-const DATA_MANAGEMENT_ISSUES = [
-  {
-    id: 'DMC-001',
-    symptom: 'GDPR data export request incomplete',
-    severity: 'High',
-    cause: 'Export job not including all L&D tables, relationship traversal incomplete.',
-    resolution: [
-      'Verify data export includes all L&D tables (enrollments, progress, certificates)',
-      'Check join relationships are being followed correctly',
-      'Validate export against data mapping documentation',
-      'Re-run export with expanded scope if needed',
-      'Document any intentionally excluded data with legal justification'
-    ],
-    prevention: 'Maintain data inventory for GDPR. Test exports quarterly.'
-  },
-  // ... 5 more issues
-];
-```
+import {
+  TAFoundationPrerequisites,
+  TAFoundationTimePolicies,
+  TAFoundationDevices,
+  TAFoundationGeofencing,
+  TAFoundationFaceVerification,
+  TAFoundationPunchImport,
+} from './sections/foundation';
 
-### Index Export Update
-
-```tsx
-// sections/troubleshooting/index.ts - Add exports
-export { LndAccessibilityMobileIssues } from './LndAccessibilityMobileIssues';
-export { LndDataManagementIssues } from './LndDataManagementIssues';
+export function TimeAttendanceManualFoundationSection() {
+  return (
+    <div className="space-y-8">
+      <section id="ta-sec-2-1" data-manual-anchor="ta-sec-2-1">
+        <TAFoundationPrerequisites />
+      </section>
+      {/* ... remaining sections */}
+    </div>
+  );
+}
 ```
 
 ---
 
-## Part 6: Quality Assurance
+## Deliverables Summary
 
-### Validation Criteria
+| Item | Count |
+|------|-------|
+| New section components | 62 |
+| Database tables documented | 63+ |
+| Troubleshooting issues | 70+ |
+| Glossary terms | 50+ |
+| Quick reference cards | 12+ |
+| Total estimated read time | 550+ minutes |
 
-1. **Every L&D database table** must be referenced in at least one troubleshooting issue
-2. **Every UI tab/component** must have at least one related FAQ or issue
-3. **All issue IDs** must follow naming convention (PREFIX-XXX)
-4. **All sections** must include Learning Objectives, Quick Reference, and Prevention callouts
-5. **Diagnostic queries** must be tested against actual database schema
-6. **Industry alignment** verified against Workday Learning Admin Guide 2024
+---
 
-### Post-Implementation Checklist
+## TOC Ordering (Industry Standard Implementation Sequence)
 
-- [ ] All 144 issues have unique IDs
-- [ ] All 50+ database tables are cross-referenced
-- [ ] Symptom-to-section matrix is complete
-- [ ] Type definitions updated with correct counts
-- [ ] Index exports include new components
-- [ ] LndTroubleshootingSection.tsx imports new sections
-- [ ] Manual structure metadata reflects new sections
+The manual follows the logical implementation sequence used by enterprise T&A systems (Kronos, ADP, Workday):
 
+1. **Overview** - Understand before configuring
+2. **Foundation** - Policies and devices first (dependencies for all else)
+3. **Shifts** - Templates before schedules, schedules before assignments
+4. **Daily Operations** - Core transactional workflows
+5. **Advanced Scheduling** - AI and optimization (requires foundation)
+6. **Project Time** - Optional module, built on attendance data
+7. **Compliance** - Rules that govern all prior configurations
+8. **Analytics** - Reporting on operational data
+9. **Self-Service** - End-user features (ESS before MSS)
+10. **Troubleshooting** - Support documentation last
+
+This sequence ensures administrators configure prerequisite elements before dependent features, matching the dependency chain in the database schema.
