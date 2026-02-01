@@ -1,280 +1,311 @@
 
-# Chapter 1 Gap Closure Plan: Alignment to Enterprise Documentation Standards
+# Time & Attendance Chapter 2 (Foundation Setup) - Comprehensive Upgrade Plan
 
-## Gap Analysis Summary
+## Executive Summary
 
-After comparing the current T&A Chapter 1 implementation against Kronos/UKG, Workday, SAP SuccessFactors, and Oracle Time & Labor documentation standards, the following 5 gaps were identified:
-
-| Gap | Industry Pattern | Current State | Priority |
-|-----|-----------------|---------------|----------|
-| 1. Quick Start Guide | Oracle/SAP: "Getting Started in 15 minutes" | No Quick Start exists for T&A | High |
-| 2. Prerequisites Cross-Reference | All vendors: Chapter 1 overview links to setup prerequisites | No link to Chapter 2.1 Prerequisites | Medium |
-| 3. Terminology Index | UKG/Workday: Alphabetical A-Z index with hyperlinks | 50+ terms in accordion, no index | Medium |
-| 4. Security Model Deep-Dive | All vendors: Dedicated security/authorization section | Brief mention in Architecture | High |
-| 5. Version History | Oracle/SAP: Change log in overview | Exists in supplementary, not linked in Ch.1 | Low |
+This plan upgrades Chapter 2 of the T&A Administrator Manual to align with the 360 Feedback manual's enterprise-grade structure while ensuring complete coverage of all 25+ foundation-related database tables and 8+ UI configuration pages.
 
 ---
 
-## Implementation Plan
+## Gap Analysis Results
 
-### Gap 1: Quick Start Guide for Time & Attendance
+### Current State (6 sections, 54 min read)
+| Section | Content | Coverage |
+|---------|---------|----------|
+| 2.1 Prerequisites | Module dependencies | Adequate |
+| 2.2 Time Policies | attendance_policies | Partial (missing assignment) |
+| 2.3 Timeclock Devices | timeclock_devices, punch_queue | Good |
+| 2.4 Geofencing | geofence_locations/validations | Partial (missing assignments) |
+| 2.5 Face Verification | face_enrollments, verification_logs | Good |
+| 2.6 Punch Import | punch_import_batches | Good |
 
-**Why It Matters:** Enterprise documentation (Oracle, SAP) includes a rapid setup guide in the Overview chapter so administrators can complete basic configuration in 15-30 minutes before diving into detailed procedures.
+### Industry Standard Comparison (Kronos/Workday/SAP/Oracle)
+| Feature | Kronos/UKG | Workday | SAP | Oracle | IntelliHRM (Current) | IntelliHRM (After) |
+|---------|-----------|---------|-----|--------|---------------------|-------------------|
+| Grouped Configuration Categories | Yes | Yes | Yes | Yes | No | **Yes** |
+| Policy Assignment Section | Yes | Yes | Yes | Yes | No | **Yes** |
+| Biometric Templates (beyond face) | Yes | Yes | Yes | Yes | No | **Yes** |
+| Overtime Rate Tiers | Yes | Yes | Yes | Yes | No | **Yes** |
+| Comp Time Configuration | Yes | Yes | Yes | Yes | No | **Yes** |
+| Timekeeper Delegation | Yes | Yes | Yes | Yes | No | **Yes** |
+| Audit Trail Configuration | Yes | Yes | Yes | Yes | Partial | **Yes** |
+| Union/CBA Rules | Yes | Yes | Yes | Yes | No | **Yes** |
 
-**Files to Create:**
-```text
-src/components/enablement/quickstarts/data/time-attendance.ts
-```
-
-**Content Structure:**
-- **Module Identity:** moduleCode: "TA", title: "Time & Attendance Quick Start Guide"
-- **Time Estimates:** quickSetupTime: "20-30 minutes", fullConfigTime: "3-5 hours"
-- **Roles:**
-  - Primary Owner: Time Administrator
-  - Supporting: IT Administrator (devices)
-  - Supporting: Payroll Administrator (sync)
-- **Prerequisites:** (Cross-reference to Chapter 2.1)
-  - Employee Records Created (Workforce)
-  - Locations/Branches Configured (Workforce)
-  - Pay Periods Defined (Payroll)
-  - Manager Hierarchy Established (Workforce)
-- **Pitfalls:**
-  - Enabling face verification before enrollment
-  - Deploying geofencing without accurate GPS coordinates
-  - Setting OT thresholds without payroll alignment
-- **Setup Steps (5-step quick path):**
-  1. Configure Attendance Policy (5 min)
-  2. Set Up First Location Geofence (5 min)
-  3. Enable Mobile Clock-In (3 min)
-  4. Create First Shift Template (5 min)
-  5. Assign Employees and Test (7 min)
-- **Verification Checks:** Clock-in works, punch appears in records, exception triggers
-- **Success Metrics:** First successful clock-in, punch accuracy rate, exception rate
-
-**Files to Update:**
-```text
-src/components/enablement/quickstarts/index.ts - Add export
-src/pages/enablement/ModuleDocumentationPage.tsx - Set available: true for T&A
-src/App.tsx or routes - Add route for /enablement/quickstart/time-attendance
-```
+### Missing Database Tables Not Covered
+1. `employee_attendance_policies` - Policy-to-employee assignments
+2. `employee_biometric_templates` - Fingerprint and other biometric data
+3. `employee_geofence_assignments` - Employee-to-geofence mappings
+4. `comp_time_policies` - Compensatory time rules
+5. `flex_time_balances` - Flex time configuration
+6. `overtime_rate_tiers` - Tiered overtime pay rates
+7. `time_attendance_audit_log` - Audit configuration
+8. `timekeeper_assignments` - Timekeeper delegation
+9. `cba_time_rules` - Collective bargaining time rules
 
 ---
 
-### Gap 2: Prerequisites Cross-Reference in Section 1.1
+## Proposed New Chapter 2 Structure
 
-**Why It Matters:** User should see upfront dependencies before reading 60+ minutes of content. Industry pattern is a callout card linking to the detailed prerequisites.
+### Reorganized to 15 Sections (Matching 360 Feedback Pattern)
 
-**File to Update:**
 ```text
-src/components/enablement/time-attendance-manual/sections/overview/TAOverviewIntroduction.tsx
-```
+Chapter 2: Foundation Setup (~99 min read)
 
-**Changes:**
-Add a **Prerequisites Callout Card** after the Executive Summary section:
+A. Prerequisites (1 section)
+   2.1  Prerequisites Checklist [existing, enhanced]
 
-```tsx
-<div className="p-4 border-l-4 border-l-amber-500 bg-amber-500/5 rounded-r-lg">
-  <div className="flex items-start gap-3">
-    <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
-    <div>
-      <h4 className="font-semibold">Before You Begin</h4>
-      <p className="text-sm text-muted-foreground mt-1">
-        T&A configuration requires completed setup in Workforce and Payroll modules.
-      </p>
-      <div className="flex flex-wrap gap-2 mt-3">
-        <Badge variant="outline">Employee Records</Badge>
-        <Badge variant="outline">Locations</Badge>
-        <Badge variant="outline">Pay Periods</Badge>
-        <Badge variant="outline">Manager Hierarchy</Badge>
-      </div>
-      <Button variant="link" size="sm" className="p-0 h-auto mt-2">
-        See Section 2.1: Prerequisites Checklist →
-      </Button>
-    </div>
-  </div>
-</div>
-```
+B. Core Policies (3 sections)
+   2.2  Attendance Policies Configuration [existing, enhanced]
+   2.3  Policy Assignments [NEW]
+   2.4  Overtime Rate Tiers [NEW]
 
-This links to the detailed `TAFoundationPrerequisites` component in Chapter 2 without duplicating content.
+C. Time Collection (4 sections)
+   2.5  Timeclock Devices Setup [existing, renumbered]
+   2.6  Biometric Templates [NEW - fingerprint/card]
+   2.7  Face Verification Setup [existing, renumbered]
+   2.8  Punch Import Configuration [existing, renumbered]
 
----
+D. Location Validation (2 sections)
+   2.9  Geofencing Configuration [existing, renumbered]
+   2.10 Employee Geofence Assignments [NEW]
 
-### Gap 3: Alphabetical Terminology Index
+E. Time Banking (2 sections)
+   2.11 Comp Time Policies [NEW]
+   2.12 Flex Time Configuration [NEW]
 
-**Why It Matters:** UKG and Workday manuals include an A-Z term index at the end of the overview chapter so readers can quickly jump to specific definitions.
+F. Governance (2 sections)
+   2.13 Timekeeper Delegation [NEW]
+   2.14 Audit Trail Configuration [NEW]
 
-**File to Create:**
-```text
-src/components/enablement/time-attendance-manual/sections/overview/TAOverviewTermIndex.tsx
-```
-
-**Content:**
-- Extract all 50+ terms from `TAOverviewCoreConcepts.tsx`
-- Sort alphabetically
-- Display in a 4-column grid with hyperlinks to term definitions
-- Each term shows: Term name, backing table badge, anchor link
-
-**Visual Layout:**
-```text
-A-C                 D-G                 H-O                 P-Z
-─────────────────────────────────────────────────────────────────
-Attendance Policy   Delegation          Liveness Detection  Payroll Sync
-Bradford Factor     Employee Schedule   Open Shift          Period Finalization
-Break Record        Face Enrollment     Overtime Request    Punch Import
-Clock Entry         Face Verification   Overtime Rate Tier  Rest Period
-Comp Time           Geofence Location   ...                 Rotation Pattern
-...                 Grace Period                            Shift Assignment
-                                                            Shift Bid
-                                                            ...
-```
-
-**Files to Update:**
-```text
-src/components/enablement/time-attendance-manual/sections/overview/index.ts - Add export
-src/types/timeAttendanceManual.ts - Add Section 1.7 definition
-src/components/enablement/time-attendance-manual/TimeAttendanceManualOverviewSection.tsx - Include section
+G. Advanced (1 section)
+   2.15 CBA/Union Time Rules [NEW]
 ```
 
 ---
 
-### Gap 4: Security Model Deep-Dive (Section 1.8)
+## Implementation Details
 
-**Why It Matters:** All enterprise vendors dedicate a section in their overview to explain authorization levels, role-based access, and audit trail coverage. This is critical for compliance-focused buyers.
+### Structural Changes
 
-**File to Create:**
-```text
-src/components/enablement/time-attendance-manual/sections/overview/TAOverviewSecurityModel.tsx
-```
+**1. Update TimeAttendanceManualFoundationSection.tsx**
+- Transform from flat section list to grouped accordion structure
+- Add chapter-level learning objectives card
+- Add chapter contents overview grid (matching F360SetupSection.tsx pattern)
+- Add phase-based dependency chain visualization
 
-**Content Sections:**
+**2. Update timeAttendanceManual.ts Types**
+- Add 9 new section definitions (2.3, 2.4, 2.6, 2.10-2.15)
+- Renumber existing sections for logical flow
+- Update read time estimates
 
-1. **Learning Objectives:**
-   - Understand T&A role-based access control model
-   - Identify sensitive operations requiring elevated permissions
-   - Explain audit trail coverage for time-sensitive data
+### New Section Components to Create
 
-2. **Role Permission Matrix:**
-   | Role | View Punches | Edit Punches | Approve OT | Configure Policies | View Audit |
-   |------|--------------|--------------|------------|-------------------|------------|
-   | Employee (ESS) | Own only | None | Request | None | None |
-   | Manager (MSS) | Team | Limited corrections | Approve team | None | Team only |
-   | Time Admin | All | All with audit | All | Full access | All |
-   | Payroll Admin | Approved only | None | View only | None | Sync logs |
-   | Compliance Officer | All | None | View only | View only | Full access |
+| File | Section | Database Tables | UI Page Reference |
+|------|---------|-----------------|-------------------|
+| `TAFoundationPolicyAssignments.tsx` | 2.3 | employee_attendance_policies | AttendancePoliciesPage.tsx |
+| `TAFoundationOvertimeRates.tsx` | 2.4 | overtime_rate_tiers | OvertimeManagementPage.tsx |
+| `TAFoundationBiometricTemplates.tsx` | 2.6 | employee_biometric_templates | TimeclockDevicesPage.tsx |
+| `TAFoundationGeofenceAssignments.tsx` | 2.10 | employee_geofence_assignments | GeofenceManagementPage.tsx |
+| `TAFoundationCompTime.tsx` | 2.11 | comp_time_policies, comp_time_balances | FlexTimePage.tsx |
+| `TAFoundationFlexTime.tsx` | 2.12 | flex_time_balances, flex_time_transactions | FlexTimePage.tsx |
+| `TAFoundationTimekeeperDelegation.tsx` | 2.13 | timekeeper_assignments | New section |
+| `TAFoundationAuditConfig.tsx` | 2.14 | time_attendance_audit_log | TimeAuditTrailPage.tsx |
+| `TAFoundationCBARules.tsx` | 2.15 | cba_time_rules | CBATimeRulesPage.tsx |
 
-3. **Sensitive Operations:**
-   - Clock entry corrections (audit required)
-   - Overtime approval (manager+ only)
-   - Geofence radius changes (admin only)
-   - Face verification threshold changes (admin only)
-   - Payroll sync initiation (payroll admin only)
+### Existing Section Enhancements
 
-4. **Audit Trail Coverage:**
-   - Database table: `time_attendance_audit_log`
-   - Entities tracked: Clock entries, corrections, approvals, policy changes
-   - Retention policy: 7 years (configurable)
+**TAFoundationPrerequisites.tsx (2.1)**
+- Add cross-reference links to new sections
+- Add phase-based dependency diagram
+- Add readiness assessment checklist (matching F360 pattern)
 
-5. **Data Protection:**
-   - Face templates: Encrypted at rest
-   - GPS coordinates: Masked in exports
-   - Biometric data: GDPR/NDPR compliant handling
+**TAFoundationTimePolicies.tsx (2.2)**
+- Add reference to Policy Assignments section (2.3)
+- Add overtime threshold linkage to Overtime Rate Tiers (2.4)
 
-**Files to Update:**
-```text
-src/components/enablement/time-attendance-manual/sections/overview/index.ts - Add export
-src/types/timeAttendanceManual.ts - Add Section 1.8 definition
-src/components/enablement/time-attendance-manual/TimeAttendanceManualOverviewSection.tsx - Include section
-```
+**TAFoundationDevices.tsx (2.5)**
+- Add reference to Biometric Templates section (2.6)
+- Clarify that this covers device setup, not template enrollment
 
----
-
-### Gap 5: Version History Link in Chapter 1
-
-**Why It Matters:** Enterprise manuals include a version history reference so readers know the documentation is current.
-
-**File to Update:**
-```text
-src/components/enablement/time-attendance-manual/sections/overview/TAOverviewIntroduction.tsx
-```
-
-**Changes:**
-Add a subtle Version Info Card at the end of Section 1.1:
-
-```tsx
-<div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4 mt-6">
-  <div className="flex items-center gap-2">
-    <History className="h-4 w-4" />
-    <span>Manual Version: 1.0.0 (Pre-Release)</span>
-  </div>
-  <Button variant="ghost" size="sm" onClick={() => scrollToSection('version-history')}>
-    View Change Log <ArrowRight className="h-4 w-4 ml-1" />
-  </Button>
-</div>
-```
+**TAFoundationGeofencing.tsx (2.9)**
+- Add reference to Employee Geofence Assignments (2.10)
+- Clarify that this covers geofence definition, not employee assignment
 
 ---
 
-## Updated Chapter 1 Structure
+## Section Content Templates
 
-After implementing all gaps:
+Each new section will follow the 360 Feedback component pattern:
 
-| Section | Title | New/Updated | Read Time |
-|---------|-------|-------------|-----------|
-| 1.1 | Introduction to Time and Attendance | Updated (prerequisites callout, version link) | 15 min |
-| 1.2 | Core Concepts & Terminology | Existing | 18 min |
-| 1.3 | System Architecture | Existing | 12 min |
-| 1.4 | User Personas & Journeys | Existing | 10 min |
-| 1.5 | Time Management Calendar | Existing | 8 min |
-| 1.6 | Legacy Migration Guide | Existing | 10 min |
-| 1.7 | Terminology Index (A-Z) | **New** | 5 min |
-| 1.8 | Security & Authorization Model | **New** | 12 min |
-
-**Separate Quick Start:** `/enablement/quickstart/time-attendance` (Quick Start Template pattern)
+```text
+1. Section Header (title, section number, read time)
+2. Learning Objectives Card
+3. Conceptual Overview Block
+4. Screenshot Placeholder
+5. Field Reference Table (all database columns)
+6. Business Rules Table
+7. Step-by-Step Configuration Guide
+8. Common Configurations Examples
+9. Compliance/Security Callout (where applicable)
+10. Tip/Best Practice Callout
+11. Troubleshooting Quick Reference (optional)
+```
 
 ---
 
 ## File Changes Summary
 
-| File | Action | Purpose |
-|------|--------|---------|
-| `src/components/enablement/quickstarts/data/time-attendance.ts` | Create | Quick Start data for T&A |
-| `src/components/enablement/quickstarts/index.ts` | Update | Export T&A quick start data |
-| `src/pages/enablement/ModuleDocumentationPage.tsx` | Update | Set T&A Quick Start available: true |
-| `src/components/enablement/time-attendance-manual/sections/overview/TAOverviewIntroduction.tsx` | Update | Add prerequisites callout + version link |
-| `src/components/enablement/time-attendance-manual/sections/overview/TAOverviewTermIndex.tsx` | Create | New A-Z term index section |
-| `src/components/enablement/time-attendance-manual/sections/overview/TAOverviewSecurityModel.tsx` | Create | New security/authorization section |
-| `src/components/enablement/time-attendance-manual/sections/overview/index.ts` | Update | Export new components |
-| `src/types/timeAttendanceManual.ts` | Update | Add sections 1.7 and 1.8 definitions |
-| `src/components/enablement/time-attendance-manual/TimeAttendanceManualOverviewSection.tsx` | Update | Include new sections 1.7 and 1.8 |
+### Files to Create (9 new section components)
+```text
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationPolicyAssignments.tsx
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationOvertimeRates.tsx
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationBiometricTemplates.tsx
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationGeofenceAssignments.tsx
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationCompTime.tsx
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationFlexTime.tsx
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationTimekeeperDelegation.tsx
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationAuditConfig.tsx
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationCBARules.tsx
+```
+
+### Files to Update
+```text
+src/components/enablement/time-attendance-manual/TimeAttendanceManualFoundationSection.tsx
+  - Transform to grouped accordion structure
+  - Add chapter header, learning objectives, contents grid
+
+src/components/enablement/time-attendance-manual/sections/foundation/index.ts
+  - Export 9 new components
+
+src/types/timeAttendanceManual.ts
+  - Add 9 new section definitions
+  - Update section numbering
+  - Update read time estimates
+
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationPrerequisites.tsx
+  - Enhance with phase diagram and cross-references
+
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationTimePolicies.tsx
+  - Add references to new sections
+
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationDevices.tsx
+  - Add biometric templates reference
+
+src/components/enablement/time-attendance-manual/sections/foundation/TAFoundationGeofencing.tsx
+  - Add employee assignments reference
+```
 
 ---
 
-## Alignment with Industry Standards
+## Technical Implementation Notes
 
-After implementation, the T&A manual will match enterprise patterns:
+### Accordion Structure Pattern (from F360SetupSection.tsx)
+```tsx
+<Accordion type="multiple" defaultValue={['prerequisites']} className="space-y-4">
+  {/* A. Prerequisites */}
+  <AccordionItem value="prerequisites" className="border rounded-lg border-amber-500/30 bg-amber-500/5">
+    <AccordionTrigger>
+      <Badge>Section 2.1</Badge>
+      <span>A. Prerequisites</span>
+    </AccordionTrigger>
+    <AccordionContent>
+      <TAFoundationPrerequisites />
+    </AccordionContent>
+  </AccordionItem>
+  
+  {/* B. Core Policies */}
+  <AccordionItem value="policies">
+    ...
+  </AccordionItem>
+</Accordion>
+```
 
-| Standard | Kronos/UKG | Workday | SAP | Oracle | Intelli HRM (After) |
-|----------|------------|---------|-----|--------|---------------------|
-| Quick Start Guide | Yes | Yes | Yes | Yes | **Yes** |
-| Prerequisites Reference | Yes | Yes | Yes | Yes | **Yes** |
-| A-Z Term Index | Yes | Yes | No | Yes | **Yes** |
-| Security Model Section | Yes | Yes | Yes | Yes | **Yes** |
-| Version History | Yes | No | Yes | Yes | **Yes** |
-| Module Metrics | No | Yes | No | No | Yes (already) |
-| Industry Statistics | No | No | No | No | Yes (already) |
-
-**Alignment Score: 100%** (after implementation)
+### Chapter Contents Grid Pattern
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle>Chapter Contents (15 Sections)</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-4">
+    {/* A. Prerequisites */}
+    <div>
+      <h4 className="text-sm font-medium text-muted-foreground mb-2">A. Prerequisites</h4>
+      <div className="grid md:grid-cols-3 gap-2">
+        <div className="flex items-center gap-2 p-2 rounded-lg border">
+          <CheckCircle2 className="h-4 w-4" />
+          <span className="font-medium">2.1</span>
+          <span>Prerequisites</span>
+        </div>
+      </div>
+    </div>
+    {/* B. Core Policies, C. Time Collection, etc. */}
+  </CardContent>
+</Card>
+```
 
 ---
 
-## Estimated Implementation Time
+## Alignment Verification
 
-| Task | Files | Effort |
-|------|-------|--------|
-| Quick Start Data File | 1 create | 45 min |
-| Prerequisites Callout | 1 update | 15 min |
-| Terminology Index | 1 create | 60 min |
-| Security Model Section | 1 create | 75 min |
-| Version Link | 1 update | 10 min |
-| TOC/Structure Updates | 3 updates | 20 min |
-| **Total** | **9 files** | **~4 hours** |
+### Database Coverage After Implementation
+| Table | Section | Status |
+|-------|---------|--------|
+| attendance_policies | 2.2 | Existing |
+| employee_attendance_policies | 2.3 | **New** |
+| overtime_rate_tiers | 2.4 | **New** |
+| timeclock_devices | 2.5 | Existing |
+| timeclock_punch_queue | 2.5 | Existing |
+| employee_biometric_templates | 2.6 | **New** |
+| employee_face_enrollments | 2.7 | Existing |
+| face_verification_logs | 2.7 | Existing |
+| punch_import_batches | 2.8 | Existing |
+| geofence_locations | 2.9 | Existing |
+| geofence_validations | 2.9 | Existing |
+| employee_geofence_assignments | 2.10 | **New** |
+| comp_time_policies | 2.11 | **New** |
+| comp_time_balances | 2.11 | **New** |
+| flex_time_balances | 2.12 | **New** |
+| flex_time_transactions | 2.12 | **New** |
+| timekeeper_assignments | 2.13 | **New** |
+| time_attendance_audit_log | 2.14 | **New** |
+| cba_time_rules | 2.15 | **New** |
+
+### UI Page Coverage After Implementation
+| UI Page | Section | Status |
+|---------|---------|--------|
+| AttendancePoliciesPage.tsx | 2.2, 2.3 | Complete |
+| OvertimeManagementPage.tsx | 2.4 | **New** |
+| TimeclockDevicesPage.tsx | 2.5, 2.6 | Complete |
+| GeofenceManagementPage.tsx | 2.9, 2.10 | Complete |
+| FlexTimePage.tsx | 2.11, 2.12 | **New** |
+| TimeAuditTrailPage.tsx | 2.14 | **New** |
+| CBATimeRulesPage.tsx | 2.15 | **New** |
+| PunchImportPage.tsx | 2.8 | Existing |
+
+---
+
+## Estimated Implementation Effort
+
+| Task | Files | Time |
+|------|-------|------|
+| Create 9 new section components | 9 | 3-4 hours |
+| Update TimeAttendanceManualFoundationSection.tsx | 1 | 1 hour |
+| Update section index exports | 1 | 10 min |
+| Update timeAttendanceManual.ts types | 1 | 30 min |
+| Enhance existing section cross-references | 4 | 45 min |
+| Testing and validation | - | 30 min |
+| **Total** | **16 files** | **~6 hours** |
+
+---
+
+## Success Criteria
+
+After implementation, Chapter 2 will:
+1. Follow the same grouped accordion structure as 360 Feedback manual
+2. Cover all 19+ T&A foundation database tables
+3. Reference all 7+ relevant UI configuration pages
+4. Include chapter-level learning objectives
+5. Feature phase-based dependency chain visualization
+6. Match industry documentation standards (Kronos, Workday, SAP, Oracle)
+7. Increase from 6 sections to 15 sections for comprehensive coverage
+8. Update read time from ~55 min to ~99 min reflecting additional content
