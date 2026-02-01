@@ -1,8 +1,78 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Layers, ArrowRight, ArrowDown, Workflow, Plug, Database, Brain, Shield } from 'lucide-react';
+import { Clock, Layers, ArrowRight, ArrowDown, Workflow, Plug, Database, Brain, Shield, Timer, Calendar, MapPin, FileText, Users, TrendingUp, Settings } from 'lucide-react';
+import { LearningObjectives } from '@/components/enablement/manual/components/LearningObjectives';
+import { InfoCallout, IntegrationCallout } from '@/components/enablement/manual/components/Callout';
 
 export function TAOverviewArchitecture() {
+  const domainTableCounts = [
+    { domain: 'Clock-In & Time Capture', tables: 8, primary: 'time_clock_entries', icon: Timer, color: 'indigo' },
+    { domain: 'Shift Management', tables: 16, primary: 'shifts', icon: Calendar, color: 'blue' },
+    { domain: 'Attendance Policies', tables: 7, primary: 'attendance_policies', icon: Shield, color: 'green' },
+    { domain: 'Geofencing', tables: 5, primary: 'geofence_locations', icon: MapPin, color: 'teal' },
+    { domain: 'Face Verification', tables: 3, primary: 'employee_face_enrollments', icon: Users, color: 'cyan' },
+    { domain: 'Overtime & Requests', tables: 4, primary: 'overtime_requests', icon: TrendingUp, color: 'amber' },
+    { domain: 'CBA & Compliance', tables: 12, primary: 'cba_time_rules', icon: Shield, color: 'rose' },
+    { domain: 'Timesheets', tables: 8, primary: 'timesheet_submissions', icon: FileText, color: 'purple' },
+    { domain: 'Project Time', tables: 3, primary: 'project_time_entries', icon: Layers, color: 'violet' },
+    { domain: 'AI & Analytics', tables: 6, primary: 'ai_schedule_runs', icon: Brain, color: 'fuchsia' },
+  ];
+
+  const integrationMatrix = [
+    {
+      module: 'Workforce Module',
+      direction: 'Inbound',
+      color: 'blue',
+      icon: Users,
+      dataFlows: [
+        { flow: 'Employee records and active status', table: 'profiles' },
+        { flow: 'Position assignments and departments', table: 'positions' },
+        { flow: 'Manager relationships for approvals', table: 'reporting_relationships' },
+        { flow: 'Work location and cost center mapping', table: 'work_locations' },
+        { flow: 'Employee eligibility and certifications', table: 'employee_certifications' }
+      ]
+    },
+    {
+      module: 'Payroll Module',
+      direction: 'Outbound',
+      color: 'green',
+      icon: TrendingUp,
+      dataFlows: [
+        { flow: 'Regular hours and overtime hours', table: 'timesheet_submissions' },
+        { flow: 'Shift differentials and premiums', table: 'shift_differentials' },
+        { flow: 'Project time allocations', table: 'project_time_entries' },
+        { flow: 'Approved timesheet data', table: 'payroll_time_sync_logs' },
+        { flow: 'Comp time conversions', table: 'comp_time_used' }
+      ]
+    },
+    {
+      module: 'Leave Module',
+      direction: 'Bidirectional',
+      color: 'purple',
+      icon: Calendar,
+      dataFlows: [
+        { flow: 'Approved leave reduces expected hours', table: 'leave_requests' },
+        { flow: 'Absence data feeds Bradford Factor', table: 'employee_bradford_scores' },
+        { flow: 'Comp time conversions to leave balance', table: 'comp_time_balances' },
+        { flow: 'Leave requests affect schedule coverage', table: 'shift_coverage_snapshots' },
+        { flow: 'Sick leave triggers wellness alerts', table: 'employee_wellness_indicators' }
+      ]
+    },
+    {
+      module: 'Analytics Module',
+      direction: 'Outbound',
+      color: 'orange',
+      icon: TrendingUp,
+      dataFlows: [
+        { flow: 'Attendance metrics and trends', table: 'attendance_summary' },
+        { flow: 'Overtime patterns and costs', table: 'overtime_rate_tiers' },
+        { flow: 'Absenteeism rates by department', table: 'employee_bradford_scores' },
+        { flow: 'Schedule coverage and utilization', table: 'shift_coverage_snapshots' },
+        { flow: 'Labor cost projections', table: 'shift_cost_projections' }
+      ]
+    }
+  ];
+
   return (
     <Card id="ta-sec-1-3" data-manual-anchor="ta-sec-1-3" className="scroll-mt-32">
       <CardHeader>
@@ -10,12 +80,48 @@ export function TAOverviewArchitecture() {
           <Badge variant="outline">Section 1.3</Badge>
           <span>•</span>
           <Clock className="h-3 w-3" />
-          <span>8 min read</span>
+          <span>12 min read</span>
         </div>
         <CardTitle className="text-2xl">System Architecture</CardTitle>
-        <CardDescription>Technical architecture, integration points, and data flows</CardDescription>
+        <CardDescription>Technical architecture, 87 database tables across 10 domains, and integration points</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
+        {/* Learning Objectives */}
+        <LearningObjectives objectives={[
+          'Understand the 5-layer T&A architecture from clock-in to integration',
+          'Identify the 10 functional domains and their primary database tables',
+          'Explain data flows between T&A and other modules (Workforce, Payroll, Leave)',
+          'Describe security controls and audit trail coverage',
+          'Recognize AI components and their roles in scheduling and wellness'
+        ]} />
+
+        {/* Database Domain Overview */}
+        <div>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Database className="h-5 w-5 text-primary" />
+            Database Domains (10 Domains, 87 Tables)
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {domainTableCounts.map((domain, i) => (
+              <div key={i} className={`p-3 border rounded-lg bg-${domain.color}-500/5 border-${domain.color}-500/20`}>
+                <domain.icon className={`h-5 w-5 text-${domain.color}-600 mb-2`} />
+                <div className="text-sm font-medium">{domain.domain}</div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary" className="text-xs">{domain.tables} tables</Badge>
+                </div>
+                <Badge variant="outline" className="text-xs font-mono mt-2">{domain.primary}</Badge>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 p-3 bg-muted/50 rounded-lg flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Total Database Coverage</span>
+            <div className="flex items-center gap-4">
+              <Badge className="bg-primary/10 text-primary border-primary/20">87 Tables</Badge>
+              <Badge variant="outline">10 Domains</Badge>
+            </div>
+          </div>
+        </div>
+
         {/* Architecture Layers */}
         <div>
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -30,6 +136,7 @@ export function TAOverviewArchitecture() {
                   Layer 1
                 </Badge>
                 <span className="font-medium">Clock-In Layer</span>
+                <Badge variant="outline" className="ml-auto text-xs font-mono">timeclock_devices, time_clock_entries</Badge>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                 {['Biometric Devices', 'Face Recognition', 'Mobile GPS App', 'Web Clock Portal', 'Card Readers', 'Punch Import'].map((item, i) => (
@@ -51,6 +158,7 @@ export function TAOverviewArchitecture() {
                   Layer 2
                 </Badge>
                 <span className="font-medium">Processing Layer</span>
+                <Badge variant="outline" className="ml-auto text-xs font-mono">attendance_policies, shift_rounding_rules</Badge>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {['Punch Validation', 'Time Rounding', 'Geofence Check', 'Face Matching', 'Break Calculation'].map((item, i) => (
@@ -72,6 +180,7 @@ export function TAOverviewArchitecture() {
                   Layer 3
                 </Badge>
                 <span className="font-medium">Data Layer</span>
+                <Badge variant="outline" className="ml-auto text-xs font-mono">shifts, timesheet_submissions</Badge>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {['Clock Entries', 'Shifts & Schedules', 'Timesheets', 'Exceptions', 'Audit Trail'].map((item, i) => (
@@ -93,6 +202,7 @@ export function TAOverviewArchitecture() {
                   Layer 4
                 </Badge>
                 <span className="font-medium">Intelligence Layer</span>
+                <Badge variant="outline" className="ml-auto text-xs font-mono">ai_schedule_runs, employee_wellness_indicators</Badge>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {['AI Scheduler', 'Wellness AI', 'Bradford Engine', 'Demand Forecast', 'OT Prediction'].map((item, i) => (
@@ -114,6 +224,7 @@ export function TAOverviewArchitecture() {
                   Layer 5
                 </Badge>
                 <span className="font-medium">Integration Layer</span>
+                <Badge variant="outline" className="ml-auto text-xs font-mono">payroll_time_sync_logs</Badge>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {['Payroll Sync', 'Workforce Sync', 'Leave Integration', 'Reporting API', 'External Systems'].map((item, i) => (
@@ -130,58 +241,16 @@ export function TAOverviewArchitecture() {
         <div>
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Plug className="h-5 w-5 text-primary" />
-            Module Integration Points
+            Module Integration Matrix
           </h3>
           <div className="grid md:grid-cols-2 gap-4">
-            {[
-              {
-                module: 'Workforce Module',
-                direction: 'Inbound',
-                color: 'blue',
-                dataFlows: [
-                  'Employee records and active status',
-                  'Position assignments and departments',
-                  'Manager relationships for approvals',
-                  'Work location and cost center mapping'
-                ]
-              },
-              {
-                module: 'Payroll Module',
-                direction: 'Outbound',
-                color: 'green',
-                dataFlows: [
-                  'Regular hours and overtime hours',
-                  'Shift differentials and premiums',
-                  'Project time allocations',
-                  'Approved timesheet data'
-                ]
-              },
-              {
-                module: 'Leave Module',
-                direction: 'Bidirectional',
-                color: 'purple',
-                dataFlows: [
-                  'Approved leave reduces expected hours',
-                  'Absence data feeds Bradford Factor',
-                  'Comp time conversions to leave balance',
-                  'Leave requests affect schedule coverage'
-                ]
-              },
-              {
-                module: 'Analytics Module',
-                direction: 'Outbound',
-                color: 'orange',
-                dataFlows: [
-                  'Attendance metrics and trends',
-                  'Overtime patterns and costs',
-                  'Absenteeism rates by department',
-                  'Schedule coverage and utilization'
-                ]
-              }
-            ].map((integration, i) => (
+            {integrationMatrix.map((integration, i) => (
               <div key={i} className={`p-4 border rounded-lg bg-${integration.color}-500/5 border-${integration.color}-500/20`}>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium">{integration.module}</h4>
+                  <div className="flex items-center gap-2">
+                    <integration.icon className={`h-5 w-5 text-${integration.color}-600`} />
+                    <h4 className="font-medium">{integration.module}</h4>
+                  </div>
                   <Badge variant="outline" className="text-xs">
                     {integration.direction}
                   </Badge>
@@ -190,7 +259,10 @@ export function TAOverviewArchitecture() {
                   {integration.dataFlows.map((flow, j) => (
                     <li key={j} className="flex items-start gap-2">
                       <ArrowRight className="h-3 w-3 mt-1.5 text-primary shrink-0" />
-                      <span>{flow}</span>
+                      <div className="flex-1">
+                        <span>{flow.flow}</span>
+                        <Badge variant="outline" className="ml-2 text-xs font-mono">{flow.table}</Badge>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -198,6 +270,11 @@ export function TAOverviewArchitecture() {
             ))}
           </div>
         </div>
+
+        <IntegrationCallout title="Cross-Module Dependencies">
+          Time & Attendance requires active Workforce data (employees, positions, departments) before clock-in can function. 
+          Ensure Workforce module is configured first during implementation.
+        </IntegrationCallout>
 
         {/* Data Flow Diagram */}
         <div>
@@ -207,47 +284,27 @@ export function TAOverviewArchitecture() {
           </h3>
           <div className="p-6 bg-muted/30 border rounded-lg overflow-x-auto">
             <div className="flex items-center gap-2 min-w-max">
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-16 flex items-center justify-center bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-xs text-center font-medium">
-                  Clock-In<br />Event
+              {[
+                { label: 'Clock-In\nEvent', table: 'timeclock_devices', color: 'indigo' },
+                { label: 'Validation\n(GPS + Face)', table: 'geofence_validations', color: 'blue' },
+                { label: 'Rounding\nRules', table: 'shift_rounding_rules', color: 'cyan' },
+                { label: 'Clock\nEntry', table: 'time_clock_entries', color: 'green' },
+                { label: 'Timesheet\nAggregation', table: 'timesheet_entries', color: 'amber' },
+                { label: 'Manager\nApproval', table: 'timesheet_approval_history', color: 'orange' },
+                { label: 'Payroll\nSync', table: 'payroll_time_sync_logs', color: 'rose' }
+              ].map((step, i, arr) => (
+                <div key={i} className="flex items-center">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-28 h-20 flex flex-col items-center justify-center bg-${step.color}-500/10 border border-${step.color}-500/30 rounded-lg text-xs text-center font-medium p-2`}>
+                      <span className="whitespace-pre-line">{step.label}</span>
+                      <Badge variant="outline" className="text-[10px] font-mono mt-1">{step.table}</Badge>
+                    </div>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 mx-1" />
+                  )}
                 </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-16 flex items-center justify-center bg-blue-500/10 border border-blue-500/30 rounded-lg text-xs text-center font-medium">
-                  Validation<br />(GPS + Face)
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-16 flex items-center justify-center bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs text-center font-medium">
-                  Rounding<br />Rules
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-16 flex items-center justify-center bg-green-500/10 border border-green-500/30 rounded-lg text-xs text-center font-medium">
-                  Clock<br />Entry
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-16 flex items-center justify-center bg-amber-500/10 border border-amber-500/30 rounded-lg text-xs text-center font-medium">
-                  Timesheet<br />Aggregation
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-16 flex items-center justify-center bg-orange-500/10 border border-orange-500/30 rounded-lg text-xs text-center font-medium">
-                  Manager<br />Approval
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-16 flex items-center justify-center bg-rose-500/10 border border-rose-500/30 rounded-lg text-xs text-center font-medium">
-                  Payroll<br />Sync
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -261,15 +318,19 @@ export function TAOverviewArchitecture() {
             </h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {[
-                'Role-based access control (RBAC) for all T&A functions',
-                'Geofence and face verification for clock-in fraud prevention',
-                'Manager approval workflows for sensitive changes',
-                'Audit trail on all punch modifications and regularizations',
-                'Data encryption at rest and in transit'
+                { control: 'Role-based access control (RBAC) for all T&A functions', scope: 'All entities' },
+                { control: 'Geofence and face verification for clock-in fraud prevention', scope: 'Clock entries' },
+                { control: 'Manager approval workflows for sensitive changes', scope: 'Timesheets, exceptions' },
+                { control: 'Audit trail on all punch modifications and regularizations', scope: 'All changes' },
+                { control: 'Data encryption at rest (AES-256) and in transit (TLS 1.3)', scope: 'All data' },
+                { control: 'IP-based restrictions for web clock access', scope: 'Clock entries' }
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <Shield className="h-3 w-3 mt-1 text-green-500 shrink-0" />
-                  <span>{item}</span>
+                  <div>
+                    <span>{item.control}</span>
+                    <Badge variant="outline" className="ml-2 text-xs">{item.scope}</Badge>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -281,15 +342,19 @@ export function TAOverviewArchitecture() {
             </h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               {[
-                'All clock-in/out events with method and location',
-                'Timesheet modifications and approvals',
-                'Regularization requests and resolutions',
-                'Schedule changes and shift swaps',
-                'Policy and configuration changes'
+                { event: 'All clock-in/out events with method and location', table: 'time_clock_entries' },
+                { event: 'Timesheet modifications and approvals', table: 'timesheet_approval_history' },
+                { event: 'Regularization requests and resolutions', table: 'attendance_regularization_requests' },
+                { event: 'Schedule changes and shift swaps', table: 'shift_swap_requests' },
+                { event: 'Policy and configuration changes', table: 'time_attendance_audit_log' },
+                { event: 'Face enrollment and verification attempts', table: 'face_verification_logs' }
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <Database className="h-3 w-3 mt-1 text-blue-500 shrink-0" />
-                  <span>{item}</span>
+                  <div>
+                    <span>{item.event}</span>
+                    <Badge variant="outline" className="ml-2 text-xs font-mono">{item.table}</Badge>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -306,23 +371,36 @@ export function TAOverviewArchitecture() {
             {[
               {
                 name: 'AI Scheduler',
+                table: 'ai_schedule_runs',
                 description: 'Constraint-based schedule optimization with skill matching, preference handling, and fatigue management.'
               },
               {
                 name: 'Wellness AI',
+                table: 'employee_wellness_indicators',
                 description: 'Fatigue and burnout prediction based on overtime patterns, shift frequency, and break compliance.'
               },
               {
                 name: 'Demand Forecast',
+                table: 'shift_demand_forecasts',
                 description: 'Shift demand prediction using historical patterns, seasonality, and external factors.'
               }
             ].map((ai, i) => (
               <div key={i} className="p-3 bg-background/80 rounded-lg">
                 <div className="font-medium text-sm mb-1">{ai.name}</div>
+                <Badge variant="outline" className="text-xs font-mono mb-2">{ai.table}</Badge>
                 <p className="text-xs text-muted-foreground">{ai.description}</p>
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Section Footer */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <span>Estimated reading time: 10-12 minutes</span>
+          </div>
+          <Badge variant="outline">Section 1.3 of 1.6</Badge>
         </div>
       </CardContent>
     </Card>
