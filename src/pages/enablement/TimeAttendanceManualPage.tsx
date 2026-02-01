@@ -257,7 +257,7 @@ export default function TimeAttendanceManualPage() {
                       >
                         <CollapsibleTrigger asChild>
                           <button
-                            className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors
+                            className={`w-full flex items-start gap-2 p-2 rounded-lg text-left text-sm transition-colors
                               ${activePartId === section.id 
                                 ? 'bg-primary/10 text-primary font-medium' 
                                 : 'hover:bg-muted'
@@ -265,17 +265,17 @@ export default function TimeAttendanceManualPage() {
                             onClick={() => scrollToSection(section.id)}
                           >
                             {completedSections.includes(section.id) ? (
-                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                             ) : (
-                              <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                             )}
-                            <span className="flex-1 truncate">
+                            <span className="flex-1 leading-snug">
                               {section.sectionNumber}. {section.title}
                             </span>
                             {section.subsections && section.subsections.length > 0 && (
                               expandedSections.includes(section.id) 
-                                ? <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                                : <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                                ? <ChevronDown className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                                : <ChevronRight className="h-4 w-4 flex-shrink-0 mt-0.5" />
                             )}
                           </button>
                         </CollapsibleTrigger>
@@ -285,7 +285,7 @@ export default function TimeAttendanceManualPage() {
                               {section.subsections.map((sub) => (
                                 <button
                                   key={sub.id}
-                                  className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors
+                                  className={`w-full flex items-start gap-2 p-1.5 rounded text-left text-xs transition-colors
                                     ${selectedSectionId === sub.id 
                                       ? 'bg-primary/10 text-primary font-medium' 
                                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -293,11 +293,11 @@ export default function TimeAttendanceManualPage() {
                                   onClick={() => scrollToSection(sub.id)}
                                 >
                                   {completedSections.includes(sub.id) ? (
-                                    <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                                    <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0 mt-0.5" />
                                   ) : (
-                                    <Circle className="h-3 w-3 flex-shrink-0" />
+                                    <Circle className="h-3 w-3 flex-shrink-0 mt-0.5" />
                                   )}
-                                  <span className="truncate">{sub.sectionNumber} {sub.title}</span>
+                                  <span className="leading-snug">{sub.sectionNumber} {sub.title}</span>
                                 </button>
                               ))}
                             </div>
