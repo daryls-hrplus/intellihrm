@@ -4,7 +4,9 @@ import {
   TAOverviewArchitecture,
   TAOverviewPersonas,
   TAOverviewCalendar,
-  TAOverviewMigration
+  TAOverviewMigration,
+  TAOverviewTermIndex,
+  TAOverviewSecurityModel
 } from './sections/overview';
 
 export function TimeAttendanceManualOverviewSection() {
@@ -38,6 +40,16 @@ export function TimeAttendanceManualOverviewSection() {
       {/* Section 1.6: Legacy Migration Guide */}
       <section id="ta-sec-1-6" data-manual-anchor="ta-sec-1-6" className="scroll-mt-32">
         <TAOverviewMigration />
+      </section>
+
+      {/* Section 1.7: Terminology Index (A-Z) - NEW */}
+      <section id="ta-sec-1-7" data-manual-anchor="ta-sec-1-7" className="scroll-mt-32">
+        <TAOverviewTermIndex />
+      </section>
+
+      {/* Section 1.8: Security & Authorization Model - NEW */}
+      <section id="ta-sec-1-8" data-manual-anchor="ta-sec-1-8" className="scroll-mt-32">
+        <TAOverviewSecurityModel />
       </section>
     </div>
   );
