@@ -148,11 +148,12 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
     id: 'ta-part-2',
     sectionNumber: '2',
     title: 'Foundation Setup',
-    description: 'Time policies, devices, geofencing, and face verification configuration',
+    description: 'Time policies, devices, geofencing, governance, and advanced configuration',
     contentLevel: 'procedure',
-    estimatedReadTime: 55,
+    estimatedReadTime: 120,
     targetRoles: ['Super Admin', 'Time Admin', 'Consultant'],
     subsections: [
+      // A. Prerequisites
       {
         id: 'ta-sec-2-1',
         sectionNumber: '2.1',
@@ -167,10 +168,11 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
           benchmark: 'Implementation readiness checklist'
         }
       },
+      // B. Core Policies
       {
         id: 'ta-sec-2-2',
         sectionNumber: '2.2',
-        title: 'Time Policies Configuration',
+        title: 'Attendance Policies Configuration',
         description: 'Rounding rules, grace periods, overtime thresholds, break policies',
         contentLevel: 'procedure',
         estimatedReadTime: 12,
@@ -184,6 +186,35 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'ta-sec-2-3',
         sectionNumber: '2.3',
+        title: 'Policy Assignments',
+        description: 'Assigning policies to employees, departments, locations, and jobs',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Time Admin'],
+        industryContext: {
+          frequency: 'Initial setup, org changes',
+          timing: 'Post-policy creation',
+          benchmark: 'Hierarchical policy assignment'
+        }
+      },
+      {
+        id: 'ta-sec-2-4',
+        sectionNumber: '2.4',
+        title: 'Overtime Rate Tiers',
+        description: 'Tiered overtime multipliers, daily/weekly thresholds, holiday premiums',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Time Admin', 'Payroll Admin'],
+        industryContext: {
+          frequency: 'Initial setup, policy updates',
+          timing: 'Pre-payroll integration',
+          benchmark: 'Multi-tier OT calculation'
+        }
+      },
+      // C. Time Collection
+      {
+        id: 'ta-sec-2-5',
+        sectionNumber: '2.5',
         title: 'Timeclock Devices Setup',
         description: 'Biometric readers, card readers, mobile app, web clock configuration',
         contentLevel: 'procedure',
@@ -196,22 +227,22 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'ta-sec-2-4',
-        sectionNumber: '2.4',
-        title: 'Geofencing Configuration',
-        description: 'GPS-based clock-in validation, location boundaries, remote work zones',
+        id: 'ta-sec-2-6',
+        sectionNumber: '2.6',
+        title: 'Biometric Templates',
+        description: 'Fingerprint, card, PIN, and mobile token enrollment',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['Time Admin'],
+        estimatedReadTime: 8,
+        targetRoles: ['IT Admin', 'Time Admin'],
         industryContext: {
-          frequency: 'Per location setup',
-          timing: 'Post-branch setup',
-          benchmark: 'Location-verified attendance'
+          frequency: 'Per employee enrollment',
+          timing: 'Post-device setup',
+          benchmark: 'Multi-factor authentication'
         }
       },
       {
-        id: 'ta-sec-2-5',
-        sectionNumber: '2.5',
+        id: 'ta-sec-2-7',
+        sectionNumber: '2.7',
         title: 'Face Verification Setup',
         description: 'AI face recognition enrollment, matching thresholds, liveness detection',
         contentLevel: 'procedure',
@@ -224,8 +255,8 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'ta-sec-2-6',
-        sectionNumber: '2.6',
+        id: 'ta-sec-2-8',
+        sectionNumber: '2.8',
         title: 'Punch Import Configuration',
         description: 'External system imports, legacy data migration, batch processing',
         contentLevel: 'procedure',
@@ -235,6 +266,108 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
           frequency: 'Implementation, ongoing imports',
           timing: 'Data migration phase',
           benchmark: 'Third-party device integration'
+        }
+      },
+      // D. Location Validation
+      {
+        id: 'ta-sec-2-9',
+        sectionNumber: '2.9',
+        title: 'Geofencing Configuration',
+        description: 'GPS-based clock-in validation, location boundaries, remote work zones',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Time Admin'],
+        industryContext: {
+          frequency: 'Per location setup',
+          timing: 'Post-branch setup',
+          benchmark: 'Location-verified attendance'
+        }
+      },
+      {
+        id: 'ta-sec-2-10',
+        sectionNumber: '2.10',
+        title: 'Employee Geofence Assignments',
+        description: 'Linking employees to work locations, home offices, and client sites',
+        contentLevel: 'procedure',
+        estimatedReadTime: 7,
+        targetRoles: ['Time Admin'],
+        industryContext: {
+          frequency: 'Per employee assignment',
+          timing: 'Post-geofence creation',
+          benchmark: 'Multi-location workforce'
+        }
+      },
+      // E. Time Banking
+      {
+        id: 'ta-sec-2-11',
+        sectionNumber: '2.11',
+        title: 'Comp Time Policies',
+        description: 'Compensatory time accrual, balances, expiration, and usage rules',
+        contentLevel: 'procedure',
+        estimatedReadTime: 9,
+        targetRoles: ['Time Admin', 'HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, policy updates',
+          timing: 'Pre-deployment',
+          benchmark: 'Time-off-in-lieu programs'
+        }
+      },
+      {
+        id: 'ta-sec-2-12',
+        sectionNumber: '2.12',
+        title: 'Flex Time Configuration',
+        description: 'Flexible working hours, core time, flex bands, and balance tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 9,
+        targetRoles: ['Time Admin', 'HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, policy updates',
+          timing: 'Pre-deployment',
+          benchmark: 'Flexible work arrangements'
+        }
+      },
+      // F. Governance
+      {
+        id: 'ta-sec-2-13',
+        sectionNumber: '2.13',
+        title: 'Timekeeper Delegation',
+        description: 'Assigning time administrators, delegation scope, and approval authority',
+        contentLevel: 'procedure',
+        estimatedReadTime: 7,
+        targetRoles: ['HR Admin', 'Time Admin'],
+        industryContext: {
+          frequency: 'Initial setup, org changes',
+          timing: 'Pre-deployment',
+          benchmark: 'Decentralized time management'
+        }
+      },
+      {
+        id: 'ta-sec-2-14',
+        sectionNumber: '2.14',
+        title: 'Audit Trail Configuration',
+        description: 'Logging time-sensitive operations, retention policies, compliance reporting',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'Compliance Officer'],
+        industryContext: {
+          frequency: 'Initial setup',
+          timing: 'Pre-deployment',
+          benchmark: 'SOX/labor law compliance'
+        }
+      },
+      // G. Advanced
+      {
+        id: 'ta-sec-2-15',
+        sectionNumber: '2.15',
+        title: 'CBA/Union Time Rules',
+        description: 'Collective bargaining agreement overtime, scheduling, and seniority rules',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['HR Admin', 'Time Admin'],
+        industryContext: {
+          frequency: 'Per CBA agreement',
+          timing: 'Contract negotiation',
+          benchmark: 'Union compliance'
         }
       }
     ]
