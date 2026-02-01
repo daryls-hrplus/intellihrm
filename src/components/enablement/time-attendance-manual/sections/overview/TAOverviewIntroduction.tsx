@@ -4,7 +4,8 @@ import {
   Clock, BookOpen, Target, Users, CheckCircle, Building2, Brain, Timer,
   Fingerprint, MapPin, Smartphone, Globe, CreditCard, Upload,
   TrendingUp, Shield, Heart, Scale, GraduationCap, AlertTriangle,
-  Database, Layout, Layers, Info, Lightbulb, FileText, AlertCircle
+  Database, Layout, Layers, Info, Lightbulb, FileText, AlertCircle,
+  History, ArrowRight
 } from 'lucide-react';
 import { InfoCallout, TipCallout, WarningCallout, NoteCallout } from '@/components/enablement/manual/components/Callout';
 
@@ -87,6 +88,37 @@ export function TAOverviewIntroduction() {
                   <div className="text-xs text-muted-foreground">AI Monitoring</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Prerequisites Callout - Cross-reference to Chapter 2 */}
+        <div className="p-4 border-l-4 border-l-amber-500 bg-amber-500/5 rounded-r-lg">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h4 className="font-semibold text-foreground">Before You Begin</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                T&A configuration requires completed setup in Workforce and Payroll modules. 
+                Ensure these prerequisites are met before proceeding.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Badge variant="outline">Employee Records</Badge>
+                <Badge variant="outline">Locations</Badge>
+                <Badge variant="outline">Pay Periods</Badge>
+                <Badge variant="outline">Manager Hierarchy</Badge>
+              </div>
+              <button
+                className="text-primary text-sm mt-3 hover:underline flex items-center gap-1"
+                onClick={() => {
+                  const element = document.querySelector('[data-manual-anchor="ta-sec-2-1"]');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+              >
+                See Section 2.1: Prerequisites Checklist →
+              </button>
             </div>
           </div>
         </div>
@@ -454,14 +486,31 @@ export function TAOverviewIntroduction() {
           </div>
         </div>
 
-        {/* Section Footer */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4">
+        {/* Section Footer with Version Link */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm text-muted-foreground border-t pt-4 gap-3">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             <span>Estimated reading time: 12-15 minutes</span>
           </div>
-          <Badge variant="outline">Section 1.1 of 1.6</Badge>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              <span>Manual Version: 1.0.0 (Pre-Release)</span>
+            </div>
+            <button
+              className="flex items-center gap-1 text-primary hover:underline"
+              onClick={() => {
+                const element = document.querySelector('[data-manual-anchor="version-history"]');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+            >
+              View Change Log <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
         </div>
+        <Badge variant="outline" className="mt-2">Section 1.1 of 1.8</Badge>
       </CardContent>
     </Card>
   );

@@ -38,6 +38,7 @@ const ImplementationChecklistsPage = lazy(() => import('@/pages/enablement/Imple
 const ModulesIndexPage = lazy(() => import('@/pages/enablement/ModulesIndexPage'));
 const ModuleDocumentationPage = lazy(() => import('@/pages/enablement/ModuleDocumentationPage'));
 const LnDQuickStartPage = lazy(() => import('@/pages/enablement/LnDQuickStartPage'));
+const TAQuickStartPage = lazy(() => import('@/pages/enablement/TAQuickStartPage'));
 const CareerDevelopmentManualPage = lazy(() => import('@/pages/enablement/CareerDevelopmentManualPage'));
 const SuccessionManualPage = lazy(() => import('@/pages/enablement/SuccessionManualPage'));
 const LearningDevelopmentManualPage = lazy(() => import('@/pages/enablement/LearningDevelopmentManualPage'));
@@ -131,6 +132,7 @@ export function EnablementRoutes() {
       <Route path="/enablement/quickstarts/admin" element={<EnablementRoute><QuickStartAdminPage /></EnablementRoute>} />
       <Route path="/enablement/quickstarts" element={<EnablementRoute><QuickStartGuidesPage /></EnablementRoute>} />
       <Route path="/enablement/quickstart/learning-development" element={<EnablementRoute><LnDQuickStartPage /></EnablementRoute>} />
+      <Route path="/enablement/quickstart/time-attendance" element={<EnablementRoute><TAQuickStartPage /></EnablementRoute>} />
       
       {/* Implementation Checklists */}
       <Route path="/enablement/checklists" element={<EnablementRoute><ImplementationChecklistsPage /></EnablementRoute>} />

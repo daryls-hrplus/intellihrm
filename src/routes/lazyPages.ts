@@ -116,6 +116,7 @@ export const ImplementationChecklistsPage = lazy(() => import('@/pages/enablemen
 export const ModulesIndexPage = lazy(() => import('@/pages/enablement/ModulesIndexPage'));
 export const ModuleDocumentationPage = lazy(() => import('@/pages/enablement/ModuleDocumentationPage'));
 export const LnDQuickStartPage = lazy(() => import('@/pages/enablement/LnDQuickStartPage'));
+export const TAQuickStartPage = lazy(() => import('@/pages/enablement/TAQuickStartPage'));
 export const PlatformStandardsPage = lazy(() => import('@/pages/enablement/PlatformStandardsPage'));
 export const WorkspaceNavigationStandardPage = lazy(() => import('@/pages/enablement/WorkspaceNavigationStandardPage'));
 export const Feedback360ManualPage = lazy(() => import('@/pages/enablement/Feedback360ManualPage'));

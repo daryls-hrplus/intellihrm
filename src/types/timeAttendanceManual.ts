@@ -112,6 +112,34 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
           timing: 'Go-live preparation',
           benchmark: 'Enterprise data migration standards'
         }
+      },
+      {
+        id: 'ta-sec-1-7',
+        sectionNumber: '1.7',
+        title: 'Terminology Index (A-Z)',
+        description: 'Alphabetical quick reference to all T&A terms with database table mappings',
+        contentLevel: 'reference',
+        estimatedReadTime: 5,
+        targetRoles: ['All'],
+        industryContext: {
+          frequency: 'Reference material',
+          timing: 'Ongoing',
+          benchmark: 'UKG/Workday style term index'
+        }
+      },
+      {
+        id: 'ta-sec-1-8',
+        sectionNumber: '1.8',
+        title: 'Security & Authorization Model',
+        description: 'Role-based access control, sensitive operations, audit trail coverage',
+        contentLevel: 'reference',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'Compliance Officer', 'Consultant'],
+        industryContext: {
+          frequency: 'Reference material',
+          timing: 'Implementation and audits',
+          benchmark: 'Enterprise security documentation standards'
+        }
       }
     ]
   },

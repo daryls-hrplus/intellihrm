@@ -142,7 +142,7 @@ const MODULE_CONFIGS: Record<string, ModuleDocConfig> = {
       title: "T&A Quick Start",
       href: "/enablement/quickstart/time-attendance",
       minutes: 20,
-      available: false,
+      available: true,
     },
     checklists: [],
     videos: [],
