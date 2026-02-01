@@ -98,6 +98,20 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
           timing: 'Fiscal year alignment',
           benchmark: 'Industry-standard payroll calendar'
         }
+      },
+      {
+        id: 'ta-sec-1-6',
+        sectionNumber: '1.6',
+        title: 'Legacy Migration Guide',
+        description: 'Data migration strategies, entity mapping, validation checklists',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'One-time implementation',
+          timing: 'Go-live preparation',
+          benchmark: 'Enterprise data migration standards'
+        }
       }
     ]
   },
