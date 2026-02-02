@@ -28,3 +28,6 @@ export { TAFoundationAuditConfig } from './TAFoundationAuditConfig';
 
 // G. Advanced
 export { TAFoundationCBARules } from './TAFoundationCBARules';
+
+// H. Shift-Level Overrides
+export { TAFoundationShiftRoundingRules } from './TAFoundationShiftRoundingRules';

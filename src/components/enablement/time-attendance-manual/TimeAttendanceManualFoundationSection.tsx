@@ -26,7 +26,8 @@ import {
   TAFoundationFlexTime,
   TAFoundationTimekeeperDelegation,
   TAFoundationAuditConfig,
-  TAFoundationCBARules
+  TAFoundationCBARules,
+  TAFoundationShiftRoundingRules
 } from './sections/foundation';
 
 const chapterObjectives = [
@@ -109,6 +110,15 @@ const sectionGroups = [
     sections: [
       { number: '2.15', title: 'CBA/Union Rules', time: '10 min' }
     ]
+  },
+  {
+    id: 'shift-overrides',
+    label: 'H. Shift-Level Overrides',
+    color: 'cyan',
+    icon: Timer,
+    sections: [
+      { number: '2.16', title: 'Shift Rounding Rules', time: '12 min' }
+    ]
   }
 ];
 
@@ -120,7 +130,8 @@ const getColorClasses = (color: string) => {
     purple: { border: 'border-purple-500/30', bg: 'bg-purple-500/5', text: 'text-purple-600' },
     teal: { border: 'border-teal-500/30', bg: 'bg-teal-500/5', text: 'text-teal-600' },
     red: { border: 'border-red-500/30', bg: 'bg-red-500/5', text: 'text-red-600' },
-    indigo: { border: 'border-indigo-500/30', bg: 'bg-indigo-500/5', text: 'text-indigo-600' }
+    indigo: { border: 'border-indigo-500/30', bg: 'bg-indigo-500/5', text: 'text-indigo-600' },
+    cyan: { border: 'border-cyan-500/30', bg: 'bg-cyan-500/5', text: 'text-cyan-600' }
   };
   return colorMap[color] || colorMap.blue;
 };
@@ -141,7 +152,7 @@ export function TimeAttendanceManualFoundationSection() {
             <Clock className="h-3 w-3" />
             <span>{totalReadTime} min read</span>
             <span>•</span>
-            <span>15 Sections</span>
+            <span>16 Sections</span>
           </div>
           <CardTitle className="text-2xl">Foundation Setup</CardTitle>
           <p className="text-muted-foreground">
@@ -310,6 +321,23 @@ export function TimeAttendanceManualFoundationSection() {
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <TAFoundationCBARules />
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* H. Shift-Level Overrides */}
+        <AccordionItem 
+          value="shift-overrides" 
+          className={`border rounded-lg ${getColorClasses('cyan').border} ${getColorClasses('cyan').bg}`}
+        >
+          <AccordionTrigger className="px-4 hover:no-underline">
+            <div className="flex items-center gap-3">
+              <Timer className={`h-5 w-5 ${getColorClasses('cyan').text}`} />
+              <span className="font-medium">H. Shift-Level Overrides</span>
+              <Badge variant="secondary" className="ml-2">1 Section</Badge>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <TAFoundationShiftRoundingRules />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
