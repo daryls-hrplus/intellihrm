@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Loader2, Shield } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Plus, Edit, Trash2, Loader2, Shield, ChevronDown } from "lucide-react";
 
 interface AttendancePolicy {
   id: string;
@@ -33,8 +34,14 @@ interface AttendancePolicy {
   require_photo_clock_out: boolean;
   require_geolocation: boolean;
   max_daily_hours: number;
+  min_break_duration_minutes: number;
+  auto_clock_out_hours: number | null;
   is_default: boolean;
   is_active: boolean;
+  start_date: string;
+  end_date: string | null;
+  name_en: string | null;
+  description_en: string | null;
 }
 
 export default function AttendancePoliciesPage() {
@@ -45,6 +52,7 @@ export default function AttendancePoliciesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState<AttendancePolicy | null>(null);
+  const [i18nOpen, setI18nOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     code: "",
@@ -60,12 +68,21 @@ export default function AttendancePoliciesPage() {
     require_photo_clock_out: false,
     require_geolocation: false,
     max_daily_hours: 24,
+    min_break_duration_minutes: 0,
+    auto_clock_out_hours: null as number | null,
     is_default: false,
+    is_active: true,
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: null as string | null,
+    name_en: "",
+    description_en: "",
   });
 
   const roundingOptions = [
     { value: "none", label: t("timeAttendance.policies.noRounding") },
     { value: "nearest_5", label: t("timeAttendance.policies.nearest5") },
+    { value: "nearest_6", label: t("timeAttendance.policies.nearest6") },
+    { value: "nearest_10", label: t("timeAttendance.policies.nearest10") },
     { value: "nearest_15", label: t("timeAttendance.policies.nearest15") },
     { value: "nearest_30", label: t("timeAttendance.policies.nearest30") },
     { value: "up", label: t("timeAttendance.policies.roundUp") },
@@ -90,7 +107,14 @@ export default function AttendancePoliciesPage() {
   const handleSave = async () => {
     if (!profile?.company_id) return;
     try {
-      const payload = { ...formData, company_id: profile.company_id };
+      const payload = { 
+        ...formData, 
+        company_id: profile.company_id,
+        auto_clock_out_hours: formData.auto_clock_out_hours || null,
+        end_date: formData.end_date || null,
+        name_en: formData.name_en || null,
+        description_en: formData.description_en || null,
+      };
       if (editingPolicy) {
         await supabase.from("attendance_policies").update(payload).eq("id", editingPolicy.id);
         toast({ title: t("timeAttendance.policies.policyUpdated") });
@@ -129,18 +153,44 @@ export default function AttendancePoliciesPage() {
       require_photo_clock_out: policy.require_photo_clock_out,
       require_geolocation: policy.require_geolocation,
       max_daily_hours: policy.max_daily_hours,
+      min_break_duration_minutes: policy.min_break_duration_minutes || 0,
+      auto_clock_out_hours: policy.auto_clock_out_hours,
       is_default: policy.is_default,
+      is_active: policy.is_active,
+      start_date: policy.start_date,
+      end_date: policy.end_date,
+      name_en: policy.name_en || "",
+      description_en: policy.description_en || "",
     });
     setDialogOpen(true);
   };
 
   const resetForm = () => {
     setEditingPolicy(null);
+    setI18nOpen(false);
     setFormData({
-      name: "", code: "", description: "", grace_period_minutes: 0, late_threshold_minutes: 15,
-      early_departure_threshold_minutes: 15, auto_deduct_late: false, late_deduction_minutes: 0,
-      round_clock_in: "none", round_clock_out: "none", require_photo_clock_in: false,
-      require_photo_clock_out: false, require_geolocation: false, max_daily_hours: 24, is_default: false,
+      name: "",
+      code: "",
+      description: "",
+      grace_period_minutes: 0,
+      late_threshold_minutes: 15,
+      early_departure_threshold_minutes: 15,
+      auto_deduct_late: false,
+      late_deduction_minutes: 0,
+      round_clock_in: "none",
+      round_clock_out: "none",
+      require_photo_clock_in: false,
+      require_photo_clock_out: false,
+      require_geolocation: false,
+      max_daily_hours: 24,
+      min_break_duration_minutes: 0,
+      auto_clock_out_hours: null,
+      is_default: false,
+      is_active: true,
+      start_date: new Date().toISOString().split('T')[0],
+      end_date: null,
+      name_en: "",
+      description_en: "",
     });
   };
 
@@ -169,6 +219,7 @@ export default function AttendancePoliciesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t("common.name")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
                 <TableHead>{t("timeAttendance.policies.gracePeriod")}</TableHead>
                 <TableHead>{t("timeAttendance.policies.lateThreshold")}</TableHead>
                 <TableHead>{t("timeAttendance.policies.rounding")}</TableHead>
@@ -179,12 +230,17 @@ export default function AttendancePoliciesPage() {
             </TableHeader>
             <TableBody>
               {policies.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">{t("timeAttendance.policies.noPolicies")}</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground">{t("timeAttendance.policies.noPolicies")}</TableCell></TableRow>
               ) : policies.map((policy) => (
                 <TableRow key={policy.id}>
                   <TableCell>
                     <div className="font-medium">{policy.name}</div>
                     <div className="text-sm text-muted-foreground">{policy.code}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={policy.is_active ? "default" : "secondary"}>
+                      {policy.is_active ? t("common.active") : t("common.inactive")}
+                    </Badge>
                   </TableCell>
                   <TableCell>{policy.grace_period_minutes} min</TableCell>
                   <TableCell>{policy.late_threshold_minutes} min</TableCell>
@@ -214,15 +270,17 @@ export default function AttendancePoliciesPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[85vh]">
           <DialogHeader><DialogTitle>{editingPolicy ? t("timeAttendance.policies.editPolicy") : t("timeAttendance.policies.addPolicy")}</DialogTitle></DialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+          <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-2">
+            {/* Identity Section */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>{t("common.name")} *</Label><Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} /></div>
               <div className="space-y-2"><Label>{t("common.code")} *</Label><Input value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} /></div>
             </div>
             <div className="space-y-2"><Label>{t("common.description")}</Label><Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} /></div>
             
+            {/* Time Thresholds Section */}
             <div className="border-t pt-4">
               <h4 className="font-medium mb-3">{t("timeAttendance.policies.timeThresholds")}</h4>
               <div className="grid grid-cols-3 gap-4">
@@ -232,6 +290,7 @@ export default function AttendancePoliciesPage() {
               </div>
             </div>
 
+            {/* Punch Rounding Section */}
             <div className="border-t pt-4">
               <h4 className="font-medium mb-3">{t("timeAttendance.policies.roundingRules")}</h4>
               <div className="grid grid-cols-2 gap-4">
@@ -252,20 +311,89 @@ export default function AttendancePoliciesPage() {
               </div>
             </div>
 
+            {/* Time Collection Requirements Section */}
             <div className="border-t pt-4">
               <h4 className="font-medium mb-3">{t("timeAttendance.policies.requirementsOptions")}</h4>
               <div className="space-y-3">
                 <div className="flex items-center justify-between"><Label>{t("timeAttendance.policies.requirePhotoIn")}</Label><Switch checked={formData.require_photo_clock_in} onCheckedChange={(v) => setFormData({ ...formData, require_photo_clock_in: v })} /></div>
                 <div className="flex items-center justify-between"><Label>{t("timeAttendance.policies.requirePhotoOut")}</Label><Switch checked={formData.require_photo_clock_out} onCheckedChange={(v) => setFormData({ ...formData, require_photo_clock_out: v })} /></div>
                 <div className="flex items-center justify-between"><Label>{t("timeAttendance.policies.requireGeolocation")}</Label><Switch checked={formData.require_geolocation} onCheckedChange={(v) => setFormData({ ...formData, require_geolocation: v })} /></div>
+              </div>
+            </div>
+
+            {/* Late Deduction Section */}
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-3">{t("timeAttendance.policies.lateDeduction")}</h4>
+              <div className="space-y-3">
                 <div className="flex items-center justify-between"><Label>{t("timeAttendance.policies.autoDeductLate")}</Label><Switch checked={formData.auto_deduct_late} onCheckedChange={(v) => setFormData({ ...formData, auto_deduct_late: v })} /></div>
+                {formData.auto_deduct_late && (
+                  <div className="space-y-2 ml-6">
+                    <Label>{t("timeAttendance.policies.lateDeductionMinutes")}</Label>
+                    <Input type="number" value={formData.late_deduction_minutes} onChange={(e) => setFormData({ ...formData, late_deduction_minutes: parseInt(e.target.value) || 0 })} />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Operational Limits Section */}
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-3">{t("timeAttendance.policies.operationalLimits")}</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("timeAttendance.policies.maxDailyHours")}</Label>
+                  <Input type="number" value={formData.max_daily_hours} onChange={(e) => setFormData({ ...formData, max_daily_hours: parseFloat(e.target.value) || 24 })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("timeAttendance.policies.minBreakDuration")} (min)</Label>
+                  <Input type="number" value={formData.min_break_duration_minutes} onChange={(e) => setFormData({ ...formData, min_break_duration_minutes: parseInt(e.target.value) || 0 })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("timeAttendance.policies.autoClockOut")} (hrs)</Label>
+                  <Input type="number" placeholder={t("common.optional")} value={formData.auto_clock_out_hours || ""} onChange={(e) => setFormData({ ...formData, auto_clock_out_hours: e.target.value ? parseFloat(e.target.value) : null })} />
+                </div>
+              </div>
+            </div>
+
+            {/* Policy Lifecycle Section */}
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-3">{t("timeAttendance.policies.policyLifecycle")}</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between"><Label>{t("common.active")}</Label><Switch checked={formData.is_active} onCheckedChange={(v) => setFormData({ ...formData, is_active: v })} /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t("timeAttendance.policies.startDate")} *</Label>
+                    <Input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("timeAttendance.policies.endDate")}</Label>
+                    <Input type="date" value={formData.end_date || ""} onChange={(e) => setFormData({ ...formData, end_date: e.target.value || null })} />
+                  </div>
+                </div>
                 <div className="flex items-center justify-between"><Label>{t("timeAttendance.policies.setAsDefault")}</Label><Switch checked={formData.is_default} onCheckedChange={(v) => setFormData({ ...formData, is_default: v })} /></div>
               </div>
             </div>
+
+            {/* Internationalization Section (Collapsible) */}
+            <Collapsible open={i18nOpen} onOpenChange={setI18nOpen} className="border-t pt-4">
+              <CollapsibleTrigger className="flex items-center justify-between w-full">
+                <h4 className="font-medium">{t("timeAttendance.policies.internationalization")}</h4>
+                <ChevronDown className={`h-4 w-4 transition-transform ${i18nOpen ? "rotate-180" : ""}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-3 space-y-3">
+                <div className="space-y-2">
+                  <Label>{t("timeAttendance.policies.englishName")}</Label>
+                  <Input value={formData.name_en} onChange={(e) => setFormData({ ...formData, name_en: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("timeAttendance.policies.englishDescription")}</Label>
+                  <Textarea value={formData.description_en} onChange={(e) => setFormData({ ...formData, description_en: e.target.value })} />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
-            <Button onClick={handleSave} disabled={!formData.name || !formData.code}>{t("common.save")}</Button>
+            <Button onClick={handleSave} disabled={!formData.name || !formData.code || !formData.start_date}>{t("common.save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
