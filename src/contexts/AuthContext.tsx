@@ -85,21 +85,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        // Check if MFA verification is required for existing session
-        const { data: factorsData } = await supabase.auth.mfa.listFactors();
-        const hasEnrolledFactors = (factorsData?.totp?.length ?? 0) > 0;
-        
-        if (hasEnrolledFactors) {
-          const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-          if (aalData?.currentLevel !== aalData?.nextLevel) {
-            setRequiresMFA(true);
+        try {
+          // Check if MFA verification is required for existing session
+          const { data: factorsData } = await supabase.auth.mfa.listFactors();
+          const hasEnrolledFactors = (factorsData?.totp?.length ?? 0) > 0;
+          
+          if (hasEnrolledFactors) {
+            const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+            if (aalData?.currentLevel !== aalData?.nextLevel) {
+              setRequiresMFA(true);
+            }
           }
+        } catch (mfaError) {
+          console.error("Error checking MFA status:", mfaError);
+          // Continue without MFA check if it fails
         }
         
         fetchUserData(session.user.id);
       } else {
         setIsLoading(false);
       }
+    }).catch((error) => {
+      console.error("Error getting session:", error);
+      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
