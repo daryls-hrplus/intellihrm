@@ -81,10 +81,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        // Check if MFA verification is required for existing session
+        const { data: factorsData } = await supabase.auth.mfa.listFactors();
+        const hasEnrolledFactors = (factorsData?.totp?.length ?? 0) > 0;
+        
+        if (hasEnrolledFactors) {
+          const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (aalData?.currentLevel !== aalData?.nextLevel) {
+            setRequiresMFA(true);
+          }
+        }
+        
         fetchUserData(session.user.id);
       } else {
         setIsLoading(false);

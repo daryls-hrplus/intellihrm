@@ -29,7 +29,7 @@ export default function MFAChallengePage() {
         <CardContent>
           <MFAVerification
             onSuccess={handleVerificationSuccess}
-            onCancel={() => navigate("/auth")}
+            onCancel={() => navigate("/")}
           />
         </CardContent>
       </Card>
