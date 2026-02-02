@@ -43,7 +43,7 @@ export default function AuthPage() {
     confirmPassword: "",
   });
 
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -56,10 +56,10 @@ export default function AuthPage() {
     }
   }, [user, navigate, location.state]);
 
-  // Show loading while checking auth state and redirecting
-  if (user) {
+  // Show loading while checking auth state
+  if (authLoading || user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
