@@ -75,8 +75,8 @@ export function useLogoutWithTabValidation(): UseLogoutWithTabValidationReturn {
     // Sign out
     await signOut();
     
-    // Navigate to login
-    navigate("/auth/login", { replace: true });
+    // Navigate to login (root route is the auth page)
+    navigate("/", { replace: true });
   }, [clearTabStorage, closeAllExcept, signOut, navigate]);
 
   const logout = useCallback(() => {
