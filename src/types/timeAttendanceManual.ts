@@ -369,6 +369,21 @@ export const TIME_ATTENDANCE_MANUAL_STRUCTURE: ManualSection[] = [
           timing: 'Contract negotiation',
           benchmark: 'Union compliance'
         }
+      },
+      // H. Shift-Level Overrides
+      {
+        id: 'ta-sec-2-16',
+        sectionNumber: '2.16',
+        title: 'Shift Rounding Rules Configuration',
+        description: 'Granular shift-level rounding overrides for punch-specific intervals and directions',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Time Admin'],
+        industryContext: {
+          frequency: 'Initial setup, periodic updates',
+          timing: 'Post-shift definition',
+          benchmark: 'Dual-layer rounding architecture'
+        }
       }
     ]
   },
