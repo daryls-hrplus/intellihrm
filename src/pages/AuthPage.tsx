@@ -43,21 +43,23 @@ export default function AuthPage() {
     confirmPassword: "",
   });
 
-  const { signIn, signUp, user, isLoading: authLoading } = useAuth();
+  const { signIn, signUp, user, isLoading: authLoading, requiresMFA } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
-  // Redirect if already logged in - must be in useEffect
+  // Redirect if already logged in or MFA required - must be in useEffect
   useEffect(() => {
-    if (user) {
+    if (requiresMFA) {
+      navigate("/auth/mfa", { replace: true });
+    } else if (user) {
       const from = location.state?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
     }
-  }, [user, navigate, location.state]);
+  }, [user, requiresMFA, navigate, location.state]);
 
   // Show loading while checking auth state
-  if (authLoading || user) {
+  if (authLoading || user || requiresMFA) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
