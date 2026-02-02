@@ -51,9 +51,12 @@ const App = () => (
           <TranslationsProvider>
             <AuthProvider>
             <Routes>
-            {/* Public Landing Page at Root */}
+            {/* Root route - Login page */}
+            <Route path="/" element={<AuthPage />} />
+            
+            {/* Marketing Landing Page (optional access) */}
             <Route element={<MarketingLayout />}>
-              <Route path="/" element={<LazyPage><Pages.LandingPage /></LazyPage>} />
+              <Route path="/landing" element={<LazyPage><Pages.LandingPage /></LazyPage>} />
             </Route>
             
             <Route path="/auth" element={<AuthPage />} />
