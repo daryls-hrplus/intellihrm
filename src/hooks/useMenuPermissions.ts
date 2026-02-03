@@ -13,24 +13,43 @@ export function useMenuPermissions() {
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchMenuPermissions = async () => {
-      if (!user || roles.length === 0) {
+      // Safety timeout: never allow the UI to hang indefinitely waiting for permissions.
+      // If this triggers, we fail-safe to "no access" (except whitelisted modules in hasMenuAccess).
+      const timeoutId = window.setTimeout(() => {
+        if (!isMounted) return;
+        console.error("Menu permissions fetch timed out; failing safe to no permissions.");
         setMenuPermissions([]);
+        cachedPermissionsRef.current = [];
+        hasFetchedRef.current = true;
         setIsLoading(false);
-        fetchedForUserRef.current = null;
-        hasFetchedRef.current = false;
+      }, 8000);
+
+      if (!user || roles.length === 0) {
+        window.clearTimeout(timeoutId);
+        if (isMounted) {
+          setMenuPermissions([]);
+          setIsLoading(false);
+          fetchedForUserRef.current = null;
+          hasFetchedRef.current = false;
+        }
         return;
       }
 
       // Skip re-fetch if we already have permissions for this exact user
       if (fetchedForUserRef.current === user.id && hasFetchedRef.current) {
-        setMenuPermissions(cachedPermissionsRef.current);
-        setIsLoading(false);
+        window.clearTimeout(timeoutId);
+        if (isMounted) {
+          setMenuPermissions(cachedPermissionsRef.current);
+          setIsLoading(false);
+        }
         return;
       }
 
       // Set loading true while fetching
-      setIsLoading(true);
+      if (isMounted) setIsLoading(true);
 
       try {
         // Get the user's role_ids from user_roles
@@ -42,11 +61,14 @@ export function useMenuPermissions() {
         if (rolesError) throw rolesError;
 
         if (!userRoles || userRoles.length === 0) {
-          setMenuPermissions([]);
-          cachedPermissionsRef.current = [];
-          fetchedForUserRef.current = user.id;
-          hasFetchedRef.current = true;
-          setIsLoading(false);
+          window.clearTimeout(timeoutId);
+          if (isMounted) {
+            setMenuPermissions([]);
+            cachedPermissionsRef.current = [];
+            fetchedForUserRef.current = user.id;
+            hasFetchedRef.current = true;
+            setIsLoading(false);
+          }
           return;
         }
 
@@ -81,11 +103,14 @@ export function useMenuPermissions() {
           });
 
           const permissionsArray = Array.from(allPermissions);
-          setMenuPermissions(permissionsArray);
-          cachedPermissionsRef.current = permissionsArray;
-          fetchedForUserRef.current = user.id;
-          hasFetchedRef.current = true;
-          setIsLoading(false);
+          window.clearTimeout(timeoutId);
+          if (isMounted) {
+            setMenuPermissions(permissionsArray);
+            cachedPermissionsRef.current = permissionsArray;
+            fetchedForUserRef.current = user.id;
+            hasFetchedRef.current = true;
+            setIsLoading(false);
+          }
           return;
         }
 
@@ -98,21 +123,30 @@ export function useMenuPermissions() {
         });
 
         const permissionsArray = Array.from(allPermissions);
-        setMenuPermissions(permissionsArray);
-        cachedPermissionsRef.current = permissionsArray;
-        fetchedForUserRef.current = user.id;
-        hasFetchedRef.current = true;
+        if (isMounted) {
+          setMenuPermissions(permissionsArray);
+          cachedPermissionsRef.current = permissionsArray;
+          fetchedForUserRef.current = user.id;
+          hasFetchedRef.current = true;
+        }
       } catch (error) {
         console.error("Error fetching menu permissions:", error);
-        setMenuPermissions([]);
-        cachedPermissionsRef.current = [];
-        hasFetchedRef.current = true;
+        if (isMounted) {
+          setMenuPermissions([]);
+          cachedPermissionsRef.current = [];
+          hasFetchedRef.current = true;
+        }
       } finally {
-        setIsLoading(false);
+        window.clearTimeout(timeoutId);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchMenuPermissions();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user?.id, roles.length]); // Only re-fetch when user ID or roles count changes
 
   const hasMenuAccess = useCallback((moduleCode: string): boolean => {

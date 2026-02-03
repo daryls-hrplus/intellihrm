@@ -50,10 +50,13 @@ function TabKeyboardHandler({ children }: { children: React.ReactNode }) {
 
 export function ProtectedLayout() {
   const { user, isLoading } = useAuth();
-  const { isLoading: isPermissionsLoading } = useMenuPermissions();
+  // Do not gate the entire layout on permissions fetch.
+  // Route-level guards (ProtectedRoute) still enforce access, and the sidebar
+  // fails-safe to hiding modules while permissions are loading.
+  useMenuPermissions();
   const location = useLocation();
 
-  if (isLoading || isPermissionsLoading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
