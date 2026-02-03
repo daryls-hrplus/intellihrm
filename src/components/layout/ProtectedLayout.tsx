@@ -4,7 +4,7 @@ import { useMenuPermissions } from "@/hooks/useMenuPermissions";
 import { Loader2 } from "lucide-react";
 import { DraggableSidebar } from "./DraggableSidebar";
 import { AppHeader } from "./AppHeader";
-import { WorkspaceTabBar } from "./WorkspaceTabBar";
+import { WorkspaceTabSidebar } from "./WorkspaceTabSidebar";
 import { RealtimeNotifications } from "./RealtimeNotifications";
 import { SessionRecoveryManager } from "./SessionRecoveryManager";
 import { TabProvider } from "@/contexts/TabContext";
@@ -80,13 +80,13 @@ export function ProtectedLayout() {
           <div className="min-h-screen bg-background">
             <RealtimeNotifications />
             <DraggableSidebar />
-            <main className="lg:pl-64 transition-all duration-300">
+            <main className="lg:pl-64 lg:pr-14 transition-all duration-300">
               <div className="min-h-screen p-4 lg:p-8">
                 <AppHeader />
-                <WorkspaceTabBar />
                 <Outlet />
               </div>
             </main>
+            <WorkspaceTabSidebar />
             
             {/* Tour System Components */}
             <TourEngine />
