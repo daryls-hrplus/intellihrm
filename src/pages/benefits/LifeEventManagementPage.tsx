@@ -92,7 +92,7 @@ export default function LifeEventManagementPage() {
         .from("benefit_life_events")
         .select(`
           *,
-          employee:profiles(full_name, email),
+          employee:profiles!benefit_life_events_employee_id_fkey(full_name, email),
           processor:profiles!benefit_life_events_processed_by_fkey(full_name)
         `)
         .eq("company_id", selectedCompany)
