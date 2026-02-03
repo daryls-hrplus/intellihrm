@@ -7,9 +7,10 @@ import { WorkspaceTab } from "@/contexts/TabContext";
 interface SortableTabProps {
   tab: WorkspaceTab;
   children: React.ReactNode;
+  orientation?: "horizontal" | "vertical";
 }
 
-export function SortableTab({ tab, children }: SortableTabProps) {
+export function SortableTab({ tab, children, orientation = "horizontal" }: SortableTabProps) {
   const {
     attributes,
     listeners,
@@ -27,7 +28,7 @@ export function SortableTab({ tab, children }: SortableTabProps) {
     transition,
     zIndex: isDragging ? 50 : undefined,
     opacity: isDragging ? 0.5 : 1,
-    cursor: tab.isPinned ? "default" : "grab",
+    cursor: tab.isPinned ? "default" : orientation === "vertical" ? "ns-resize" : "grab",
   };
 
   return (
