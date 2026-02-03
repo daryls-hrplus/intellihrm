@@ -26,14 +26,61 @@ export default defineConfig(({ mode, command }) => ({
     modulePreload: false,
     rollupOptions: {
       output: {
-        // Simpler chunking to reduce bundler memory overhead
-        manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom"],
-          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tabs", "@radix-ui/react-popover", "@radix-ui/react-tooltip"],
-          charts: ["recharts"],
-          supabase: ["@supabase/supabase-js"],
-          query: ["@tanstack/react-query"],
-          forms: ["react-hook-form", "@hookform/resolvers", "zod"],
+        // Group chunks by module to reduce number of HTTP requests
+        manualChunks(id) {
+          // Core vendor libraries
+          if (id.includes('node_modules')) {
+            if (id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('@tanstack')) {
+              return 'vendor-query';
+            }
+            if (id.includes('react-hook-form') || id.includes('zod') || id.includes('@hookform')) {
+              return 'vendor-forms';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('date-fns') || id.includes('i18next')) {
+              return 'vendor-utils';
+            }
+          }
+          
+          // Group pages by module to reduce chunk fragmentation
+          if (id.includes('/pages/workforce/')) return 'pages-workforce';
+          if (id.includes('/pages/performance/')) return 'pages-performance';
+          if (id.includes('/pages/leave/')) return 'pages-leave';
+          if (id.includes('/pages/payroll/')) return 'pages-payroll';
+          if (id.includes('/pages/compensation/')) return 'pages-compensation';
+          if (id.includes('/pages/recruitment/')) return 'pages-recruitment';
+          if (id.includes('/pages/learning/')) return 'pages-learning';
+          if (id.includes('/pages/admin/')) return 'pages-admin';
+          if (id.includes('/pages/ess/')) return 'pages-ess';
+          if (id.includes('/pages/mss/')) return 'pages-mss';
+          if (id.includes('/pages/hse/')) return 'pages-hse';
+          if (id.includes('/pages/relations/')) return 'pages-relations';
+          if (id.includes('/pages/enablement/')) return 'pages-enablement';
+          if (id.includes('/pages/hr-hub/')) return 'pages-hr-hub';
+          if (id.includes('/pages/time-attendance/')) return 'pages-time';
+          if (id.includes('/pages/property/')) return 'pages-property';
+          if (id.includes('/pages/succession/')) return 'pages-succession';
+          if (id.includes('/pages/ai/')) return 'pages-ai';
+          if (id.includes('/pages/help/')) return 'pages-help';
+          
+          // Group shared components
+          if (id.includes('/components/ui/')) return 'components-ui';
+          if (id.includes('/components/dashboard/')) return 'components-dashboard';
+          if (id.includes('/components/layout/')) return 'components-layout';
         },
       },
       // Reduce memory usage during tree-shaking
