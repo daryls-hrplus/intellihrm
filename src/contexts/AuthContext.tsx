@@ -1,7 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 type AppRole = "admin" | "system_admin" | "enablement_admin" | "billing_admin" | "hr_manager" | "employee";
 
@@ -59,6 +58,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [requiresMFA, setRequiresMFA] = useState(false);
 
+  // Prevent perma-loading if a request hangs (network stalls, extensions, etc.)
+  const bootstrapTimeoutRef = useRef<number | null>(null);
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -114,6 +116,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchUserData = async (userId: string) => {
+    // Safety timeout: never let auth bootstrap hang the whole app.
+    if (bootstrapTimeoutRef.current) {
+      window.clearTimeout(bootstrapTimeoutRef.current);
+    }
+    bootstrapTimeoutRef.current = window.setTimeout(() => {
+      console.error("Auth bootstrap timed out; allowing app to render with partial context.");
+      setIsLoading(false);
+    }, 12000);
+
     try {
       // Fetch profile
       const { data: profileData } = await supabase
@@ -179,6 +190,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
+      if (bootstrapTimeoutRef.current) {
+        window.clearTimeout(bootstrapTimeoutRef.current);
+        bootstrapTimeoutRef.current = null;
+      }
       setIsLoading(false);
     }
   };
