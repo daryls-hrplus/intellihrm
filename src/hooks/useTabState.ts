@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTabContext } from "@/contexts/TabContext";
 
@@ -82,6 +82,17 @@ export function useTabState<T extends Record<string, unknown>>(
     isInitializedRef.current = true;
   }, [activeTabId, searchParams, syncToUrl, updateTabState]);
 
+  // Memoize the synced values to avoid infinite loops
+  // Only extract the values that are synced to URL
+  const syncedValuesKey = useMemo(() => {
+    if (syncToUrl.length === 0) return "";
+    const syncedValues: Record<string, unknown> = {};
+    syncToUrl.forEach((key) => {
+      syncedValues[String(key)] = currentState[key];
+    });
+    return JSON.stringify(syncedValues);
+  }, [syncToUrl, ...syncToUrl.map(key => currentState[key])]);
+
   // Sync state changes to URL
   useEffect(() => {
     if (!isInitializedRef.current || syncToUrl.length === 0) return;
@@ -108,7 +119,8 @@ export function useTabState<T extends Record<string, unknown>>(
     if (hasChanges) {
       setSearchParams(newParams, { replace: true });
     }
-  }, [currentState, syncToUrl, searchParams, setSearchParams]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncedValuesKey, searchParams, setSearchParams]);
 
   // Update function - merges partial updates
   const setState = useCallback((updates: Partial<T>) => {
