@@ -2,12 +2,14 @@ import { useState, useCallback, useMemo } from "react";
 import { useCodeRegistryScanner } from "./useCodeRegistryScanner";
 import { useHandbookTasks } from "./useHandbookTasks";
 import { CAPABILITIES_DATA } from "@/components/enablement/product-capabilities/data/capabilitiesData";
-import { ADMIN_SECURITY_NAVIGATION_PATHS } from "@/components/enablement/admin-manual/navigationPaths";
 import {
   ContentCurrencyReport,
   ContentCurrencyIssue,
   ContentCurrencySummary,
 } from "@/types/contentCurrency";
+
+// Placeholder for admin navigation paths since component was migrated to streaming
+const ADMIN_SECURITY_NAVIGATION_PATHS: Record<string, string[]> = {};
 
 /**
  * Hook for Content Currency Validation
@@ -74,7 +76,7 @@ export function useContentCurrencyValidation() {
     for (const [sectionId, pathParts] of Object.entries(ADMIN_SECURITY_NAVIGATION_PATHS)) {
       sections.add(sectionId);
       // Build pattern from path parts
-      const pattern = pathParts.join(' > ').toLowerCase();
+      const pattern = (pathParts as string[]).join(' > ').toLowerCase();
       pathPatterns.push(pattern);
     }
     

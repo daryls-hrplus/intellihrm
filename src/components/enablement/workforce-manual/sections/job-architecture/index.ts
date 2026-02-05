@@ -1,9 +1,0 @@
-export { JobArchitectureOverview } from './JobArchitectureOverview';
-export { JobArchitectureFamilies } from './JobArchitectureFamilies';
-export { JobArchitectureJobs } from './JobArchitectureJobs';
-export { JobArchitectureSkills } from './JobArchitectureSkills';
-export { JobArchitectureQualifications } from './JobArchitectureQualifications';
-export { JobArchitectureResponsibilities } from './JobArchitectureResponsibilities';
-export { JobArchitecturePositions } from './JobArchitecturePositions';
-export { JobArchitectureBudgeting } from './JobArchitectureBudgeting';
-export { JobArchitectureMapping } from './JobArchitectureMapping';
