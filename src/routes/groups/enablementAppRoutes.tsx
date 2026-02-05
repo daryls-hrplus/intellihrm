@@ -18,6 +18,11 @@ const ArtifactEditorPage = lazy(() => import("@/pages/enablement/ArtifactEditorP
 const ToursManagementPage = lazy(() => import("@/pages/enablement/ToursManagementPage"));
 const ImplementationDetailPage = lazy(() => import("@/pages/enablement/ImplementationDetailPage"));
 const ManualsIndexPage = lazy(() => import("@/pages/enablement/ManualsIndexPage"));
+
+// Universal Manual Viewer - streams content from database (new architecture)
+const ManualViewerPage = lazy(() => import("@/pages/enablement/ManualViewerPage"));
+
+// Legacy manual pages - kept temporarily during migration
 const AppraisalsManualPage = lazy(() => import("@/pages/enablement/AppraisalsManualPage"));
 const AdminSecurityManualPage = lazy(() => import("@/pages/enablement/AdminSecurityManualPage"));
 const GoalsManualPage = lazy(() => import("@/pages/enablement/GoalsManualPage"));
@@ -29,6 +34,7 @@ const Feedback360ManualPage = lazy(() => import("@/pages/enablement/Feedback360M
 const SuccessionManualPage = lazy(() => import("@/pages/enablement/SuccessionManualPage"));
 const CareerDevelopmentManualPage = lazy(() => import("@/pages/enablement/CareerDevelopmentManualPage"));
 const LearningDevelopmentManualPage = lazy(() => import("@/pages/enablement/LearningDevelopmentManualPage"));
+
 const ClientProvisioningGuidePage = lazy(() => import("@/pages/enablement/ClientProvisioningGuidePage"));
 const ClientProvisioningTestingPage = lazy(() => import("@/pages/enablement/ClientProvisioningTestingPage"));
 const ManualPublishingPage = lazy(() => import("@/pages/enablement/ManualPublishingPage"));
@@ -87,9 +93,12 @@ export function EnablementAppRoutes() {
     { path: "/enablement/manuals/succession", Component: SuccessionManualPage },
     { path: "/enablement/manuals/career-development", Component: CareerDevelopmentManualPage },
     { path: "/enablement/manuals/learning-development", Component: LearningDevelopmentManualPage },
+    // Universal viewer for streamed content (new architecture)
+    { path: "/enablement/manual/:manualId", Component: ManualViewerPage },
     { path: "/enablement/manuals/client-provisioning", Component: ClientProvisioningGuidePage },
     { path: "/enablement/manuals/client-provisioning/testing", Component: ClientProvisioningTestingPage },
     { path: "/enablement/manuals/publishing", Component: ManualPublishingPage },
+    { path: "/enablement/manual-publishing", Component: ManualPublishingPage },
     { path: "/enablement/manual-publishing", Component: ManualPublishingPage },
     { path: "/enablement/route-registry", Component: RouteRegistryPage },
     { path: "/enablement/product-capabilities", Component: ProductCapabilitiesPage },

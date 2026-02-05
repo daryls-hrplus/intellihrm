@@ -48030,6 +48030,60 @@ export type Database = {
           },
         ]
       }
+      manual_content: {
+        Row: {
+          chapter_id: string
+          chapter_order: number
+          content_markdown: string
+          created_at: string
+          id: string
+          manual_id: string
+          metadata: Json | null
+          order_index: number
+          parent_section_id: string | null
+          read_time_minutes: number | null
+          search_vector: unknown
+          section_id: string
+          target_roles: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chapter_id: string
+          chapter_order?: number
+          content_markdown: string
+          created_at?: string
+          id?: string
+          manual_id: string
+          metadata?: Json | null
+          order_index?: number
+          parent_section_id?: string | null
+          read_time_minutes?: number | null
+          search_vector?: unknown
+          section_id: string
+          target_roles?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chapter_id?: string
+          chapter_order?: number
+          content_markdown?: string
+          created_at?: string
+          id?: string
+          manual_id?: string
+          metadata?: Json | null
+          order_index?: number
+          parent_section_id?: string | null
+          read_time_minutes?: number | null
+          search_vector?: unknown
+          section_id?: string
+          target_roles?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       manual_definitions: {
         Row: {
           badge_color: string | null
