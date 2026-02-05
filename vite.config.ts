@@ -17,13 +17,17 @@ export default defineConfig(({ mode, command }) => ({
   },
   build: {
     target: "esnext",
-    minify: "esbuild",
-    cssMinify: "esbuild",
+    // Reduce peak memory usage during production builds in very large projects.
+    // (Trade-off: larger output bundles, but stable builds in constrained CI memory.)
+    minify: false,
+    cssMinify: false,
     sourcemap: false,
     reportCompressedSize: false,
     modulePreload: false,
     chunkSizeWarningLimit: 3000,
     rollupOptions: {
+      // Tree-shaking can be memory intensive for huge module graphs.
+      treeshake: false,
       // Limit parallel processing to reduce memory pressure
       maxParallelFileOps: 2,
       output: {
