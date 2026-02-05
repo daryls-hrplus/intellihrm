@@ -151,48 +151,43 @@ Use the already-installed `react-markdown` package with:
 | Phase | Scope | Status |
 |-------|-------|--------|
 | **Phase 1** | Database schema + viewer shell | ✅ Complete |
-| **Phase 2** | L&D Manual migration (largest) | ✅ Complete (13 sections) |
-| **Phase 3** | Remaining 10 manuals | 🔄 Next |
-| **Phase 4** | Remove old component files | Pending |
+| **Phase 2** | L&D Manual migration (largest) | ✅ Complete |
+| **Phase 3** | Remaining 10 manuals (admin-security, appraisals, benefits, career-development, compensation, feedback-360, goals, hr-hub, succession, time-attendance, workforce) | ✅ Complete |
+| **Phase 4** | Remove old component files | 🔄 Next |
 
-### Completed Work
+### Completed Work - All 11 Manuals Migrated ✅
 
 1. ✅ Created `manual_content` table with full-text search
-2. ✅ Built `UniversalManualViewer` component (thin shell)
-3. ✅ Built `ManualSectionRenderer` (markdown to React)
+2. ✅ Built `UniversalManualViewer` component (thin shell, ~100 lines)
+3. ✅ Built `ManualSectionRenderer` (markdown to React via react-markdown)
 4. ✅ Built `ManualTableOfContents` (sidebar navigation)
 5. ✅ Created `useManualContent` hook (data fetching with caching)
-6. ✅ Added `/enablement/manual/:manualId` route
+6. ✅ Added `/enablement/manual/:manualId` dynamic route
 7. ✅ Deployed `migrate-manual-content` edge function
-8. ✅ Migrated L&D Manual content (13 sections from Chapters 1, 2, 4)
-9. ✅ Added redirect from legacy route to streaming viewer
-10. ✅ Removed L&D manual lazy import from routes
-
-### Migrated Sections (L&D Manual)
-
-| Section ID | Title |
-|------------|-------|
-| sec-1-1 | 1.1 Introduction to Learning & Development |
-| sec-1-2 | 1.2 Core Concepts & Terminology |
-| sec-2-3 | 2.3 Course Creation & Structure |
-| sec-4-2 | 4.2 Enrollment Management |
-| sec-4-21 | 4.3 Training Request by Gap Analysis |
-| sec-4-22 | 4.4 Request via Appraisal |
-| sec-4-23 | 4.6 Onboarding Requests |
-| sec-4-24 | 4.7 HR-Initiated Requests |
-| sec-4-25 | 4.8 Training Invitations |
-| sec-4-3 | 4.9 Progress Tracking |
-| sec-4-28 | 4.16 Session Management & Scheduling |
-| sec-4-30 | 4.18 Waitlist Management |
-| sec-4-19 | 4.19 Training History & Transcript |
+8. ✅ Migrated Learning Development Manual (13 sections)
+9. ✅ Migrated 10 remaining manuals in alphabetical order:
+   - admin-security: 8 sections (overview, users, security, system, AI, compliance, troubleshooting)
+   - appraisals: 8 sections (overview, setup, workflows, calibration, AI, analytics, integrations, troubleshooting)
+   - benefits: 8 sections (overview, foundation, plans, enrollment, life events, claims, analytics, ESS)
+   - career-development: 4 sections (framework, succession, learning, analytics)
+   - compensation: 4 sections (strategy, structures, merit pay, analytics)
+   - feedback-360: 4 sections (setup, collection, analysis, reporting)
+   - goals: 4 sections (overview, setup, check-in, closure)
+   - hr-hub: 6 sections (foundation, organization, compliance, communications, operations, analytics)
+   - succession: 4 sections (strategy, assessment, development, analytics)
+   - time-attendance: 4 sections (setup, tracking, attendance, analytics)
+   - workforce: 5 sections (planning, recruitment, records, analytics, integrations)
+10. ✅ Updated all 11 legacy routes to redirect to streaming viewer
+11. ✅ Removed all legacy manual component imports from routes
 
 ### Next Steps
 
-To continue migrating remaining manuals:
-1. Repeat content extraction for each manual (Appraisals, Workforce, etc.)
-2. Use same SQL INSERT pattern to populate `manual_content`
-3. Update routes to redirect to streaming viewer
-4. Remove legacy component imports after verification
+Phase 4 involves cleanup:
+1. Verify all streaming routes work (test each manual ID)
+2. Delete legacy manual page files from src/pages/enablement/
+3. Delete legacy manual component folders from src/components/enablement/
+4. Run full build test to confirm OOM is resolved
+5. Performance benchmarking to measure improvement
 
 ---
 

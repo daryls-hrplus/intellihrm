@@ -22,17 +22,8 @@ const ManualsIndexPage = lazy(() => import("@/pages/enablement/ManualsIndexPage"
 // Universal Manual Viewer - streams content from database (new architecture)
 const ManualViewerPage = lazy(() => import("@/pages/enablement/ManualViewerPage"));
 
-// Legacy manual pages - kept temporarily during migration (L&D migrated to streaming)
-const AppraisalsManualPage = lazy(() => import("@/pages/enablement/AppraisalsManualPage"));
-const AdminSecurityManualPage = lazy(() => import("@/pages/enablement/AdminSecurityManualPage"));
-const GoalsManualPage = lazy(() => import("@/pages/enablement/GoalsManualPage"));
-const WorkforceManualPage = lazy(() => import("@/pages/enablement/WorkforceManualPage"));
-const HRHubManualPage = lazy(() => import("@/pages/enablement/HRHubManualPage"));
-const BenefitsManualPage = lazy(() => import("@/pages/enablement/BenefitsManualPage"));
-const TimeAttendanceManualPage = lazy(() => import("@/pages/enablement/TimeAttendanceManualPage"));
-const Feedback360ManualPage = lazy(() => import("@/pages/enablement/Feedback360ManualPage"));
-const SuccessionManualPage = lazy(() => import("@/pages/enablement/SuccessionManualPage"));
-const CareerDevelopmentManualPage = lazy(() => import("@/pages/enablement/CareerDevelopmentManualPage"));
+// All legacy manual pages are now migrated to streaming viewer
+// No component imports needed
 
 const ClientProvisioningGuidePage = lazy(() => import("@/pages/enablement/ClientProvisioningGuidePage"));
 const ClientProvisioningTestingPage = lazy(() => import("@/pages/enablement/ClientProvisioningTestingPage"));
@@ -81,17 +72,7 @@ export function EnablementAppRoutes() {
     { path: "/enablement/tours-management", Component: ToursManagementPage },
     { path: "/enablement/implementation/:moduleCode", Component: ImplementationDetailPage },
     { path: "/enablement/manuals", Component: ManualsIndexPage },
-    { path: "/enablement/manuals/appraisals", Component: AppraisalsManualPage },
-    { path: "/enablement/manuals/admin-security", Component: AdminSecurityManualPage },
-    { path: "/enablement/manuals/goals", Component: GoalsManualPage },
-    { path: "/enablement/manuals/workforce", Component: WorkforceManualPage },
-    { path: "/enablement/manuals/hr-hub", Component: HRHubManualPage },
-    { path: "/enablement/manuals/benefits", Component: BenefitsManualPage },
-    { path: "/enablement/manuals/time-attendance", Component: TimeAttendanceManualPage },
-    { path: "/enablement/manuals/feedback-360", Component: Feedback360ManualPage },
-    { path: "/enablement/manuals/succession", Component: SuccessionManualPage },
-    { path: "/enablement/manuals/career-development", Component: CareerDevelopmentManualPage },
-    // Universal viewer for streamed content (new architecture) - supports both old and new URL patterns
+    // Universal viewer for streamed content (new architecture)
     { path: "/enablement/manual/:manualId", Component: ManualViewerPage },
     { path: "/enablement/manuals/client-provisioning", Component: ClientProvisioningGuidePage },
     { path: "/enablement/manuals/client-provisioning/testing", Component: ClientProvisioningTestingPage },
@@ -130,8 +111,19 @@ export function EnablementAppRoutes() {
       <Route path="/enablement/release-calendar" element={<Navigate to="/enablement/release-center?activeTab=milestones" replace />} />
       <Route path="/enablement/feature-audit" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
       <Route path="/enablement/content-lifecycle" element={<Navigate to="/enablement/release-center" replace />} />
-      {/* L&D Manual redirect to streaming viewer */}
+      {/* All manual routes redirect to streaming viewer (Phase 3 migration complete) */}
       <Route path="/enablement/manuals/learning-development" element={<Navigate to="/enablement/manual/learning-development" replace />} />
+      <Route path="/enablement/manuals/admin-security" element={<Navigate to="/enablement/manual/admin-security" replace />} />
+      <Route path="/enablement/manuals/appraisals" element={<Navigate to="/enablement/manual/appraisals" replace />} />
+      <Route path="/enablement/manuals/benefits" element={<Navigate to="/enablement/manual/benefits" replace />} />
+      <Route path="/enablement/manuals/career-development" element={<Navigate to="/enablement/manual/career-development" replace />} />
+      <Route path="/enablement/manuals/compensation" element={<Navigate to="/enablement/manual/compensation" replace />} />
+      <Route path="/enablement/manuals/feedback-360" element={<Navigate to="/enablement/manual/feedback-360" replace />} />
+      <Route path="/enablement/manuals/goals" element={<Navigate to="/enablement/manual/goals" replace />} />
+      <Route path="/enablement/manuals/hr-hub" element={<Navigate to="/enablement/manual/hr-hub" replace />} />
+      <Route path="/enablement/manuals/succession" element={<Navigate to="/enablement/manual/succession" replace />} />
+      <Route path="/enablement/manuals/time-attendance" element={<Navigate to="/enablement/manual/time-attendance" replace />} />
+      <Route path="/enablement/manuals/workforce" element={<Navigate to="/enablement/manual/workforce" replace />} />
     </>
   );
 }
