@@ -95,13 +95,7 @@ export const ArtifactDetailPage = lazy(() => import('@/pages/enablement/Artifact
 export const ToursManagementPage = lazy(() => import('@/pages/enablement/ToursManagementPage'));
 // Deprecated: FeatureAuditDashboard - now redirects to /enablement/release-center?activeTab=coverage
 export const ImplementationDetailPage = lazy(() => import('@/pages/enablement/ImplementationDetailPage'));
-export const AppraisalsManualPage = lazy(() => import('@/pages/enablement/AppraisalsManualPage'));
-export const AdminSecurityManualPage = lazy(() => import('@/pages/enablement/AdminSecurityManualPage'));
-export const GoalsManualPage = lazy(() => import('@/pages/enablement/GoalsManualPage'));
-export const WorkforceManualPage = lazy(() => import('@/pages/enablement/WorkforceManualPage'));
-export const HRHubManualPage = lazy(() => import('@/pages/enablement/HRHubManualPage'));
-export const BenefitsManualPage = lazy(() => import('@/pages/enablement/BenefitsManualPage'));
-export const TimeAttendanceManualPage = lazy(() => import('@/pages/enablement/TimeAttendanceManualPage'));
+// Legacy manual pages removed - content now served via UniversalManualViewer at /enablement/manual/:manualId
 export const RouteRegistryPage = lazy(() => import('@/pages/enablement/RouteRegistryPage'));
 export const ClientProvisioningGuidePage = lazy(() => import('@/pages/enablement/ClientProvisioningGuidePage'));
 export const ClientProvisioningTestingPage = lazy(() => import('@/pages/enablement/ClientProvisioningTestingPage'));
@@ -119,10 +113,7 @@ export const LnDQuickStartPage = lazy(() => import('@/pages/enablement/LnDQuickS
 export const TAQuickStartPage = lazy(() => import('@/pages/enablement/TAQuickStartPage'));
 export const PlatformStandardsPage = lazy(() => import('@/pages/enablement/PlatformStandardsPage'));
 export const WorkspaceNavigationStandardPage = lazy(() => import('@/pages/enablement/WorkspaceNavigationStandardPage'));
-export const Feedback360ManualPage = lazy(() => import('@/pages/enablement/Feedback360ManualPage'));
-export const SuccessionManualPage = lazy(() => import('@/pages/enablement/SuccessionManualPage'));
-export const CareerDevelopmentManualPage = lazy(() => import('@/pages/enablement/CareerDevelopmentManualPage'));
-export const LearningDevelopmentManualPage = lazy(() => import('@/pages/enablement/LearningDevelopmentManualPage'));
+// Legacy manual pages removed - content now served via UniversalManualViewer at /enablement/manual/:manualId
 export const ReleaseCommandCenterPage = lazy(() => import('@/pages/enablement/ReleaseCommandCenterPage'));
 export const ReleaseCommandCenterGuidePage = lazy(() => import('@/pages/enablement/ReleaseCommandCenterGuidePage'));
 
