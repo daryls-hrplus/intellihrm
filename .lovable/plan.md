@@ -146,14 +146,33 @@ Use the already-installed `react-markdown` package with:
 
 ---
 
-## Migration Phases
+## Migration Progress
 
-| Phase | Scope | Timeline |
-|-------|-------|----------|
-| **Phase 1** | Database schema + viewer shell | Day 1 |
-| **Phase 2** | L&D Manual migration (largest) | Day 2 |
-| **Phase 3** | Remaining 10 manuals | Day 3-4 |
-| **Phase 4** | Remove old component files | Day 5 |
+| Phase | Scope | Status |
+|-------|-------|--------|
+| **Phase 1** | Database schema + viewer shell | ✅ Complete |
+| **Phase 2** | L&D Manual migration (largest) | 🔄 Next |
+| **Phase 3** | Remaining 10 manuals | Pending |
+| **Phase 4** | Remove old component files | Pending |
+
+### Completed Work
+
+1. ✅ Created `manual_content` table with full-text search
+2. ✅ Built `UniversalManualViewer` component (thin shell)
+3. ✅ Built `ManualSectionRenderer` (markdown to React)
+4. ✅ Built `ManualTableOfContents` (sidebar navigation)
+5. ✅ Created `useManualContent` hook (data fetching with caching)
+6. ✅ Added `/enablement/manual/:manualId` route
+7. ✅ Deployed `migrate-manual-content` edge function
+
+### Next Steps
+
+To migrate the L&D Manual content:
+1. Extract content from each JSX section component
+2. Convert to markdown format
+3. POST to `/migrate-manual-content` endpoint
+4. Verify in UniversalManualViewer
+5. Remove legacy component imports
 
 ---
 
