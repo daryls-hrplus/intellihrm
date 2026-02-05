@@ -33,9 +33,10 @@ export default defineConfig(({ mode, command }) => ({
       treeshake: false,
 
       output: {
-        // Keep chunk count low (avoid Rollup generating thousands of tiny chunks),
-        // but also avoid a single massive bundle which can OOM while concatenating.
+        // Aggressive chunking: group ALL application code into a few large chunks
+        // to minimize chunk graph complexity during "rendering chunks" phase.
         manualChunks(id) {
+          // Vendor chunks - keep separate for caching
           if (id.includes("node_modules")) {
             if (id.includes("react-dom") || id.includes("react-router")) return "vendor-react";
             if (id.includes("@radix-ui")) return "vendor-radix";
@@ -46,19 +47,24 @@ export default defineConfig(({ mode, command }) => ({
             if (id.includes("i18next")) return "vendor-i18n";
             if (id.includes("date-fns")) return "vendor-date";
             if (id.includes("zod") || id.includes("react-hook-form")) return "vendor-forms";
+            if (id.includes("mermaid") || id.includes("react-markdown") || id.includes("marked")) return "vendor-content";
+            if (id.includes("docx") || id.includes("pptx") || id.includes("jspdf") || id.includes("html2canvas")) return "vendor-export";
             return "vendor-misc";
           }
 
-          // Group pages by top-level folder to reduce chunk graph complexity.
-          const pagesMarker = "/src/pages/";
-          const idx = id.indexOf(pagesMarker);
-          if (idx !== -1) {
-            const rel = id.slice(idx + pagesMarker.length);
-            const top = rel.split("/")[0] ?? "core";
-            if (top.endsWith(".ts") || top.endsWith(".tsx") || top.endsWith(".js") || top.endsWith(".jsx")) {
-              return "pages-core";
-            }
-            return `pages-${top}`;
+          // All pages in ONE chunk to reduce graph complexity
+          if (id.includes("/src/pages/")) {
+            return "app-pages";
+          }
+
+          // All components in ONE chunk
+          if (id.includes("/src/components/")) {
+            return "app-components";
+          }
+
+          // All hooks/utils/lib in ONE chunk
+          if (id.includes("/src/hooks/") || id.includes("/src/utils/") || id.includes("/src/lib/")) {
+            return "app-utils";
           }
         },
       },
