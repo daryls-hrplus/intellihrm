@@ -1,195 +1,63 @@
 
-## Right-Side Icon-Only Workspace Tab Bar
+## Fix TypeScript Build Errors in Route Group Files
 
-This plan moves the workspace tabs from the horizontal header bar to a vertical bar on the right side of the screen, using icon-only tabs with tooltips for page names.
-
----
-
-### Visual Comparison
-
-```text
-CURRENT LAYOUT:
-+------------------+-------------------------------------------------------+
-|                  | Header (logos, trial banner, icons)                   |
-|                  +-------------------------------------------------------+
-|    Left          | [🏠] [👤 HR Hub] [👥 Workforce] [🎯 Performance]      |
-|    Sidebar       +-------------------------------------------------------+
-|    (Nav)         |                                                       |
-|                  |              PAGE CONTENT                             |
-|                  |                                                       |
-+------------------+-------------------------------------------------------+
-
-PROPOSED LAYOUT:
-+------------------+------------------------------------------+----+
-|                  | Header (logos, trial banner, icons)      |    |
-|                  +------------------------------------------+ 🏠 |
-|    Left          |                                          +----+
-|    Sidebar       |              PAGE CONTENT                | 👤 |
-|    (Nav)         |                                          +----+
-|                  |                                          | 👥 |
-|                  |                                          +----+
-|                  |                                          | 🎯 |
-+------------------+------------------------------------------+----+
-                                                           (Icon tabs)
-```
+The build is failing because several lazy import paths in the new route group files don't match the actual file locations in the project. This plan corrects all import paths to match the existing file structure.
 
 ---
 
-### Implementation Summary
+### Changes Required
 
-| Component | Change |
-|-----------|--------|
-| `WorkspaceTabSidebar.tsx` | New vertical tab bar component (icon-only with tooltips) |
-| `ProtectedLayout.tsx` | Replace `WorkspaceTabBar` with `WorkspaceTabSidebar`, adjust layout structure |
-| `SortableTab.tsx` | Add vertical orientation support |
+#### 1. Fix `src/routes/groups/essRoutes.tsx`
+- **Line 53**: Change `EssNotificationPreferencesPage` to import from `@/pages/ess/NotificationPreferencesPage` (the file is named `NotificationPreferencesPage.tsx`, not `EssNotificationPreferencesPage.tsx`)
+
+#### 2. Fix `src/routes/groups/hrHubRoutes.tsx`
+- **Line 8**: Change import path from `@/pages/hr-hub/ESSChangeRequestsPage` to `@/pages/hr/ESSChangeRequestsPage` (the file lives in the `/hr` folder, not `/hr-hub`)
+
+#### 3. Fix `src/routes/groups/miscProtectedRoutes.tsx`
+- **Line 21**: Change `SystemAuditLogsPage` to import from `@/pages/system/AuditLogsPage` (the file is named `AuditLogsPage.tsx`, not `SystemAuditLogsPage.tsx`)
+
+#### 4. Fix `src/routes/groups/timeAttendanceRoutes.tsx`
+This file has two categories of errors:
+
+**A. Shift sub-pages (lines 10-23)** - These files are in a `/shifts` subfolder:
+| Current Import | Correct Import |
+|---|---|
+| `@/pages/time-attendance/ShiftsPage` | `@/pages/time-attendance/shifts/ShiftsPage` |
+| `@/pages/time-attendance/RoundingRulesPage` | `@/pages/time-attendance/shifts/RoundingRulesPage` |
+| `@/pages/time-attendance/PaymentRulesPage` | `@/pages/time-attendance/shifts/PaymentRulesPage` |
+| `@/pages/time-attendance/ShiftAssignmentsPage` | `@/pages/time-attendance/shifts/ShiftAssignmentsPage` |
+| `@/pages/time-attendance/ShiftCalendarPage` | `@/pages/time-attendance/shifts/ShiftCalendarPage` |
+| `@/pages/time-attendance/ShiftSwapRequestsPage` | `@/pages/time-attendance/shifts/ShiftSwapRequestsPage` |
+| `@/pages/time-attendance/OpenShiftBoardPage` | `@/pages/time-attendance/shifts/OpenShiftBoardPage` |
+| `@/pages/time-attendance/ShiftTemplatesPage` | `@/pages/time-attendance/shifts/ShiftTemplatesPage` |
+| `@/pages/time-attendance/RotationPatternsPage` | `@/pages/time-attendance/shifts/RotationPatternsPage` |
+| `@/pages/time-attendance/FatigueManagementPage` | `@/pages/time-attendance/shifts/FatigueManagementPage` |
+| `@/pages/time-attendance/ShiftCoveragePage` | `@/pages/time-attendance/shifts/ShiftCoveragePage` |
+| `@/pages/time-attendance/ShiftBiddingPage` | `@/pages/time-attendance/shifts/ShiftBiddingPage` |
+| `@/pages/time-attendance/AISchedulerPage` | `@/pages/time-attendance/shifts/AISchedulerPage` |
+| `@/pages/time-attendance/MultiLocationSchedulePage` | `@/pages/time-attendance/shifts/MultiLocationSchedulePage` |
+
+**B. Time module pages (lines 43-48)** - These files are in `/time`, not `/time-attendance`:
+| Current Import | Correct Import |
+|---|---|
+| `@/pages/time-attendance/ShiftDifferentialsPage` | `@/pages/time/ShiftDifferentialsPage` |
+| `@/pages/time-attendance/GeofenceLocationsPage` | `@/pages/time/GeofenceLocationsPage` |
+| `@/pages/time-attendance/FaceVerificationPage` | `@/pages/time/FaceVerificationPage` |
+| `@/pages/time-attendance/ProjectCostDashboardPage` | `@/pages/time/ProjectCostDashboardPage` |
+| `@/pages/time-attendance/ProjectCostConfigPage` | `@/pages/time/ProjectCostConfigPage` |
+| `@/pages/time-attendance/CostAllocationPage` | `@/pages/time/CostAllocationPage` |
 
 ---
 
 ### Technical Details
 
-#### 1. Create `WorkspaceTabSidebar.tsx`
+All changes are import path corrections only. No logic or routing changes are needed. After these fixes:
+- TypeScript will resolve all modules correctly
+- The build will proceed past the transformation phase
+- The chunking strategy will split the bundle to prevent memory exhaustion
 
-A new component for the right-side vertical tab bar:
-
-| Feature | Implementation |
-|---------|----------------|
-| Icon-only tabs | Fixed 44x44px square buttons, icon centered |
-| Tooltips | Enhanced tooltip showing title, subtitle, context type, unsaved status |
-| Vertical scrolling | Scroll arrows when tabs exceed viewport height |
-| Drag-and-drop | Vertical list sorting strategy via @dnd-kit |
-| Close button | Small X overlay on hover (positioned top-right corner) |
-| Unsaved indicator | Orange dot in top-left corner of tab |
-| Active indicator | Left border highlight + background color |
-
-Structure:
-```tsx
-<aside className="fixed right-0 top-0 h-screen w-14 bg-muted/30 border-l z-40">
-  {/* Scroll up arrow if needed */}
-  <DndContext>
-    <SortableContext items={tabs} strategy={verticalListSortingStrategy}>
-      <div className="flex flex-col items-center py-2 overflow-y-auto">
-        {tabs.map(tab => (
-          <SortableTab key={tab.id} tab={tab} orientation="vertical">
-            <Tooltip>
-              <TooltipTrigger>
-                <button className="w-10 h-10 flex items-center justify-center">
-                  <TabIcon />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <p>{tab.title}</p>
-                {tab.subtitle && <p>{tab.subtitle}</p>}
-                {tab.hasUnsavedChanges && <p>Has unsaved changes</p>}
-              </TooltipContent>
-            </Tooltip>
-          </SortableTab>
-        ))}
-      </div>
-    </SortableContext>
-  </DndContext>
-  {/* Scroll down arrow if needed */}
-</aside>
-```
-
-#### 2. Update `ProtectedLayout.tsx`
-
-Adjust the layout grid to accommodate the right sidebar:
-
-From:
-```tsx
-<main className="lg:pl-64 transition-all duration-300">
-  <div className="min-h-screen p-4 lg:p-8">
-    <AppHeader />
-    <WorkspaceTabBar />
-    <Outlet />
-  </div>
-</main>
-```
-
-To:
-```tsx
-<main className="lg:pl-64 lg:pr-14 transition-all duration-300">
-  <div className="min-h-screen p-4 lg:p-8">
-    <AppHeader />
-    <Outlet />
-  </div>
-</main>
-<WorkspaceTabSidebar />
-```
-
-Key changes:
-- Add `lg:pr-14` to main content to make room for the right tab bar
-- Remove `WorkspaceTabBar` import and usage
-- Add `WorkspaceTabSidebar` after the main content
-
-#### 3. Update `SortableTab.tsx`
-
-Add orientation prop for vertical dragging:
-
-```tsx
-interface SortableTabProps {
-  tab: WorkspaceTab;
-  children: React.ReactNode;
-  orientation?: "horizontal" | "vertical";
-}
-
-// Adjust cursor and styles based on orientation
-const style: React.CSSProperties = {
-  transform: CSS.Transform.toString(transform),
-  transition,
-  cursor: tab.isPinned ? "default" : orientation === "vertical" ? "ns-resize" : "grab",
-};
-```
-
----
-
-### Tooltip Content Structure
-
-Each icon tab will show a rich tooltip on hover (positioned to the left):
-
-| Element | Description |
-|---------|-------------|
-| Title | Bold page name (e.g., "HR Hub") |
-| Subtitle | If present (e.g., "John Smith - Employee") |
-| Context type | Capitalized entity type (e.g., "Employee") |
-| Unsaved warning | Orange text if tab has unsaved changes |
-
----
-
-### Visual Styling
-
-| Property | Value |
-|----------|-------|
-| Right sidebar width | 56px (w-14) |
-| Tab button size | 40x40px |
-| Tab spacing | 4px gap |
-| Active indicator | 2px left border (primary color) + slightly darker background |
-| Hover state | Background highlight + close button appears |
-| Scroll arrows | ChevronUp / ChevronDown at top/bottom |
-
----
-
-### Fallback Icon Handling
-
-When a tab has no defined icon:
-- Use `FileText` as the default fallback icon
-- Ensures every tab is visually represented
-
----
-
-### Mobile Behavior
-
-On small screens (below lg breakpoint):
-- The right tab bar is hidden by default
-- Users navigate via standard routing or can access tabs via a floating button/panel (optional enhancement)
-
----
-
-### Files Summary
-
-| Action | File |
-|--------|------|
-| Create | `src/components/layout/WorkspaceTabSidebar.tsx` |
-| Modify | `src/components/layout/ProtectedLayout.tsx` |
-| Modify | `src/components/layout/SortableTab.tsx` |
-
+### Files to Modify
+1. `src/routes/groups/essRoutes.tsx` (1 import fix)
+2. `src/routes/groups/hrHubRoutes.tsx` (1 import fix)
+3. `src/routes/groups/miscProtectedRoutes.tsx` (1 import fix)
+4. `src/routes/groups/timeAttendanceRoutes.tsx` (20 import fixes)
