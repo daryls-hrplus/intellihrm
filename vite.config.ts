@@ -22,7 +22,7 @@ export default defineConfig(({ mode, command }) => ({
     // Trade-off: larger output bundles, but stable builds in constrained CI memory.
     minify: false,
     cssMinify: false,
-    cssCodeSplit: false,
+    cssCodeSplit: true,
     sourcemap: false,
     reportCompressedSize: false,
     modulePreload: false,
@@ -32,10 +32,35 @@ export default defineConfig(({ mode, command }) => ({
       // Tree-shaking can be memory intensive for huge module graphs.
       treeshake: false,
 
-      // Disable code-splitting to dramatically reduce Rollup's chunk graph complexity.
-      // This is the most reliable fix for "rendering chunks" OOM failures.
       output: {
-        inlineDynamicImports: true,
+        // Keep chunk count low (avoid Rollup generating thousands of tiny chunks),
+        // but also avoid a single massive bundle which can OOM while concatenating.
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("react-dom") || id.includes("react-router")) return "vendor-react";
+            if (id.includes("@radix-ui")) return "vendor-radix";
+            if (id.includes("recharts")) return "vendor-charts";
+            if (id.includes("@supabase")) return "vendor-backend";
+            if (id.includes("@tanstack")) return "vendor-query";
+            if (id.includes("lucide-react")) return "vendor-icons";
+            if (id.includes("i18next")) return "vendor-i18n";
+            if (id.includes("date-fns")) return "vendor-date";
+            if (id.includes("zod") || id.includes("react-hook-form")) return "vendor-forms";
+            return "vendor-misc";
+          }
+
+          // Group pages by top-level folder to reduce chunk graph complexity.
+          const pagesMarker = "/src/pages/";
+          const idx = id.indexOf(pagesMarker);
+          if (idx !== -1) {
+            const rel = id.slice(idx + pagesMarker.length);
+            const top = rel.split("/")[0] ?? "core";
+            if (top.endsWith(".ts") || top.endsWith(".tsx") || top.endsWith(".js") || top.endsWith(".jsx")) {
+              return "pages-core";
+            }
+            return `pages-${top}`;
+          }
+        },
       },
     },
   },
