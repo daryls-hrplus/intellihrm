@@ -22,7 +22,7 @@ const ManualsIndexPage = lazy(() => import("@/pages/enablement/ManualsIndexPage"
 // Universal Manual Viewer - streams content from database (new architecture)
 const ManualViewerPage = lazy(() => import("@/pages/enablement/ManualViewerPage"));
 
-// Legacy manual pages - kept temporarily during migration
+// Legacy manual pages - kept temporarily during migration (L&D migrated to streaming)
 const AppraisalsManualPage = lazy(() => import("@/pages/enablement/AppraisalsManualPage"));
 const AdminSecurityManualPage = lazy(() => import("@/pages/enablement/AdminSecurityManualPage"));
 const GoalsManualPage = lazy(() => import("@/pages/enablement/GoalsManualPage"));
@@ -33,7 +33,6 @@ const TimeAttendanceManualPage = lazy(() => import("@/pages/enablement/TimeAtten
 const Feedback360ManualPage = lazy(() => import("@/pages/enablement/Feedback360ManualPage"));
 const SuccessionManualPage = lazy(() => import("@/pages/enablement/SuccessionManualPage"));
 const CareerDevelopmentManualPage = lazy(() => import("@/pages/enablement/CareerDevelopmentManualPage"));
-const LearningDevelopmentManualPage = lazy(() => import("@/pages/enablement/LearningDevelopmentManualPage"));
 
 const ClientProvisioningGuidePage = lazy(() => import("@/pages/enablement/ClientProvisioningGuidePage"));
 const ClientProvisioningTestingPage = lazy(() => import("@/pages/enablement/ClientProvisioningTestingPage"));
@@ -92,8 +91,7 @@ export function EnablementAppRoutes() {
     { path: "/enablement/manuals/feedback-360", Component: Feedback360ManualPage },
     { path: "/enablement/manuals/succession", Component: SuccessionManualPage },
     { path: "/enablement/manuals/career-development", Component: CareerDevelopmentManualPage },
-    { path: "/enablement/manuals/learning-development", Component: LearningDevelopmentManualPage },
-    // Universal viewer for streamed content (new architecture)
+    // Universal viewer for streamed content (new architecture) - supports both old and new URL patterns
     { path: "/enablement/manual/:manualId", Component: ManualViewerPage },
     { path: "/enablement/manuals/client-provisioning", Component: ClientProvisioningGuidePage },
     { path: "/enablement/manuals/client-provisioning/testing", Component: ClientProvisioningTestingPage },
@@ -132,6 +130,8 @@ export function EnablementAppRoutes() {
       <Route path="/enablement/release-calendar" element={<Navigate to="/enablement/release-center?activeTab=milestones" replace />} />
       <Route path="/enablement/feature-audit" element={<Navigate to="/enablement/release-center?activeTab=coverage" replace />} />
       <Route path="/enablement/content-lifecycle" element={<Navigate to="/enablement/release-center" replace />} />
+      {/* L&D Manual redirect to streaming viewer */}
+      <Route path="/enablement/manuals/learning-development" element={<Navigate to="/enablement/manual/learning-development" replace />} />
     </>
   );
 }
