@@ -1,63 +1,194 @@
 
-## Fix TypeScript Build Errors in Route Group Files
+# Plan: Convert Administrator Manuals to Streamed Content
 
-The build is failing because several lazy import paths in the new route group files don't match the actual file locations in the project. This plan corrects all import paths to match the existing file structure.
+## Problem Summary
 
----
+The build process exhausts memory (OOM at ~3GB) because Rollup must analyze 600+ deeply nested manual components at build time, even though they're lazy-loaded. The L&D Manual alone has 100+ sub-components across 10 chapters.
 
-### Changes Required
+## Solution: Content Streaming Architecture
 
-#### 1. Fix `src/routes/groups/essRoutes.tsx`
-- **Line 53**: Change `EssNotificationPreferencesPage` to import from `@/pages/ess/NotificationPreferencesPage` (the file is named `NotificationPreferencesPage.tsx`, not `EssNotificationPreferencesPage.tsx`)
-
-#### 2. Fix `src/routes/groups/hrHubRoutes.tsx`
-- **Line 8**: Change import path from `@/pages/hr-hub/ESSChangeRequestsPage` to `@/pages/hr/ESSChangeRequestsPage` (the file lives in the `/hr` folder, not `/hr-hub`)
-
-#### 3. Fix `src/routes/groups/miscProtectedRoutes.tsx`
-- **Line 21**: Change `SystemAuditLogsPage` to import from `@/pages/system/AuditLogsPage` (the file is named `AuditLogsPage.tsx`, not `SystemAuditLogsPage.tsx`)
-
-#### 4. Fix `src/routes/groups/timeAttendanceRoutes.tsx`
-This file has two categories of errors:
-
-**A. Shift sub-pages (lines 10-23)** - These files are in a `/shifts` subfolder:
-| Current Import | Correct Import |
-|---|---|
-| `@/pages/time-attendance/ShiftsPage` | `@/pages/time-attendance/shifts/ShiftsPage` |
-| `@/pages/time-attendance/RoundingRulesPage` | `@/pages/time-attendance/shifts/RoundingRulesPage` |
-| `@/pages/time-attendance/PaymentRulesPage` | `@/pages/time-attendance/shifts/PaymentRulesPage` |
-| `@/pages/time-attendance/ShiftAssignmentsPage` | `@/pages/time-attendance/shifts/ShiftAssignmentsPage` |
-| `@/pages/time-attendance/ShiftCalendarPage` | `@/pages/time-attendance/shifts/ShiftCalendarPage` |
-| `@/pages/time-attendance/ShiftSwapRequestsPage` | `@/pages/time-attendance/shifts/ShiftSwapRequestsPage` |
-| `@/pages/time-attendance/OpenShiftBoardPage` | `@/pages/time-attendance/shifts/OpenShiftBoardPage` |
-| `@/pages/time-attendance/ShiftTemplatesPage` | `@/pages/time-attendance/shifts/ShiftTemplatesPage` |
-| `@/pages/time-attendance/RotationPatternsPage` | `@/pages/time-attendance/shifts/RotationPatternsPage` |
-| `@/pages/time-attendance/FatigueManagementPage` | `@/pages/time-attendance/shifts/FatigueManagementPage` |
-| `@/pages/time-attendance/ShiftCoveragePage` | `@/pages/time-attendance/shifts/ShiftCoveragePage` |
-| `@/pages/time-attendance/ShiftBiddingPage` | `@/pages/time-attendance/shifts/ShiftBiddingPage` |
-| `@/pages/time-attendance/AISchedulerPage` | `@/pages/time-attendance/shifts/AISchedulerPage` |
-| `@/pages/time-attendance/MultiLocationSchedulePage` | `@/pages/time-attendance/shifts/MultiLocationSchedulePage` |
-
-**B. Time module pages (lines 43-48)** - These files are in `/time`, not `/time-attendance`:
-| Current Import | Correct Import |
-|---|---|
-| `@/pages/time-attendance/ShiftDifferentialsPage` | `@/pages/time/ShiftDifferentialsPage` |
-| `@/pages/time-attendance/GeofenceLocationsPage` | `@/pages/time/GeofenceLocationsPage` |
-| `@/pages/time-attendance/FaceVerificationPage` | `@/pages/time/FaceVerificationPage` |
-| `@/pages/time-attendance/ProjectCostDashboardPage` | `@/pages/time/ProjectCostDashboardPage` |
-| `@/pages/time-attendance/ProjectCostConfigPage` | `@/pages/time/ProjectCostConfigPage` |
-| `@/pages/time-attendance/CostAllocationPage` | `@/pages/time/CostAllocationPage` |
+Move manual content from React components to **runtime-loaded markdown** stored in the database or as static files. The build no longer needs to process this content—it's fetched at runtime.
 
 ---
 
-### Technical Details
+## Architecture Overview
 
-All changes are import path corrections only. No logic or routing changes are needed. After these fixes:
-- TypeScript will resolve all modules correctly
-- The build will proceed past the transformation phase
-- The chunking strategy will split the bundle to prevent memory exhaustion
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                     CURRENT ARCHITECTURE                        │
+├─────────────────────────────────────────────────────────────────┤
+│  Build Time                                                     │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ Vite/Rollup transforms ALL 600+ manual components        │   │
+│  │ even though they're lazy-loaded (analyzes full graph)    │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                          ↓ OOM at 3GB                           │
+└─────────────────────────────────────────────────────────────────┘
 
-### Files to Modify
-1. `src/routes/groups/essRoutes.tsx` (1 import fix)
-2. `src/routes/groups/hrHubRoutes.tsx` (1 import fix)
-3. `src/routes/groups/miscProtectedRoutes.tsx` (1 import fix)
-4. `src/routes/groups/timeAttendanceRoutes.tsx` (20 import fixes)
+┌─────────────────────────────────────────────────────────────────┐
+│                     NEW ARCHITECTURE                            │
+├─────────────────────────────────────────────────────────────────┤
+│  Build Time                      Runtime                        │
+│  ┌─────────────────────┐         ┌─────────────────────────┐   │
+│  │ Thin viewer shell   │         │ Fetch markdown content  │   │
+│  │ (~5 components)     │────────>│ from database/CDN       │   │
+│  └─────────────────────┘         └─────────────────────────┘   │
+│          ↓                                ↓                     │
+│     Builds in <1GB                 Renders via react-markdown   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Implementation Steps
+
+### Phase 1: Database Schema for Manual Content
+
+Create a `manual_content` table to store markdown content:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | uuid | Primary key |
+| `manual_id` | text | e.g., "learning-development" |
+| `section_id` | text | e.g., "sec-4-1" |
+| `chapter_id` | text | e.g., "chapter-4" |
+| `title` | text | Section title |
+| `content_markdown` | text | Full markdown content |
+| `read_time_minutes` | integer | Estimated read time |
+| `target_roles` | jsonb | Array of applicable personas |
+| `order_index` | integer | Display order |
+| `updated_at` | timestamptz | Last update |
+
+### Phase 2: Content Migration Edge Function
+
+Create an edge function to convert existing React component content to markdown:
+
+1. Extract text content from each manual section
+2. Convert JSX structures to markdown equivalents
+3. Store in `manual_content` table
+4. Preserve section IDs for navigation continuity
+
+### Phase 3: Universal Manual Viewer Component
+
+Replace all 11 individual manual pages with a single `UniversalManualViewer`:
+
+```text
+src/components/enablement/manuals/
+├── UniversalManualViewer.tsx    # Main viewer (fetches content at runtime)
+├── ManualSectionRenderer.tsx    # Renders markdown via react-markdown
+├── ManualTableOfContents.tsx    # TOC sidebar (already exists pattern)
+└── ManualSearch.tsx             # Search within loaded content
+```
+
+Key features:
+- Fetches section list on mount (lightweight metadata query)
+- Streams individual section content on-demand
+- Uses `react-markdown` (already installed) for rendering
+- Preserves existing navigation, progress tracking, and print features
+
+### Phase 4: Route Simplification
+
+Before (11 separate page imports):
+```typescript
+const LearningDevelopmentManualPage = lazy(() => import("..."));
+const SuccessionManualPage = lazy(() => import("..."));
+// ... 9 more
+```
+
+After (1 universal viewer):
+```typescript
+const ManualViewerPage = lazy(() => import("@/pages/enablement/ManualViewerPage"));
+
+// Route: /enablement/manuals/:manualId
+```
+
+### Phase 5: Content Seeding
+
+Options for initial content population:
+1. **Automated extraction**: Parse existing TSX files server-side to extract content
+2. **Manual migration**: Export each section's content to markdown files, then bulk import
+3. **Hybrid**: Keep current components temporarily, run extraction in background
+
+---
+
+## Technical Details
+
+### Markdown Rendering
+
+Use the already-installed `react-markdown` package with:
+- Custom components for callouts (Info, Warning, Tip)
+- Code syntax highlighting
+- Table support
+- Anchor links for cross-references
+
+### Caching Strategy
+
+- **Section metadata**: Cache for 5 minutes (lightweight, frequently accessed)
+- **Section content**: Cache for 1 hour (larger, less frequently changing)
+- **Invalidation**: On publish from Release Command Center
+
+### Search Implementation
+
+- Query `manual_content` with full-text search
+- Highlight matching terms in results
+- Jump to specific sections
+
+---
+
+## Impact Assessment
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Build memory | ~3.5GB (OOM) | ~1GB |
+| Manual components in bundle | 600+ | ~10 |
+| Content update process | Code change + deploy | Database update |
+| Build time | ~45s (when it works) | ~15s |
+
+---
+
+## Migration Phases
+
+| Phase | Scope | Timeline |
+|-------|-------|----------|
+| **Phase 1** | Database schema + viewer shell | Day 1 |
+| **Phase 2** | L&D Manual migration (largest) | Day 2 |
+| **Phase 3** | Remaining 10 manuals | Day 3-4 |
+| **Phase 4** | Remove old component files | Day 5 |
+
+---
+
+## Rollback Plan
+
+Keep existing component files in a `legacy-manuals/` folder during migration. If issues arise, routes can be switched back to the component-based pages.
+
+---
+
+## Alternative: Static JSON Bundles
+
+If database storage is undesirable, content can be stored as static JSON files in `public/manuals/`:
+
+```text
+public/manuals/
+├── learning-development/
+│   ├── index.json          # TOC and metadata
+│   ├── chapter-1.json      # Chapter content
+│   ├── chapter-2.json
+│   └── ...
+└── succession/
+    └── ...
+```
+
+This removes content from the Vite module graph while keeping it version-controlled.
+
+---
+
+## Approval Required
+
+This plan requires:
+1. Creating new database table (`manual_content`)
+2. Creating content migration edge function
+3. Building the `UniversalManualViewer` component
+4. Migrating content from 11 manuals
+5. Removing 600+ component files after verification
+
+Shall I proceed with implementation?
