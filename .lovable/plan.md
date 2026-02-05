@@ -151,8 +151,8 @@ Use the already-installed `react-markdown` package with:
 | Phase | Scope | Status |
 |-------|-------|--------|
 | **Phase 1** | Database schema + viewer shell | ✅ Complete |
-| **Phase 2** | L&D Manual migration (largest) | 🔄 Next |
-| **Phase 3** | Remaining 10 manuals | Pending |
+| **Phase 2** | L&D Manual migration (largest) | ✅ Complete (13 sections) |
+| **Phase 3** | Remaining 10 manuals | 🔄 Next |
 | **Phase 4** | Remove old component files | Pending |
 
 ### Completed Work
@@ -164,15 +164,35 @@ Use the already-installed `react-markdown` package with:
 5. ✅ Created `useManualContent` hook (data fetching with caching)
 6. ✅ Added `/enablement/manual/:manualId` route
 7. ✅ Deployed `migrate-manual-content` edge function
+8. ✅ Migrated L&D Manual content (13 sections from Chapters 1, 2, 4)
+9. ✅ Added redirect from legacy route to streaming viewer
+10. ✅ Removed L&D manual lazy import from routes
+
+### Migrated Sections (L&D Manual)
+
+| Section ID | Title |
+|------------|-------|
+| sec-1-1 | 1.1 Introduction to Learning & Development |
+| sec-1-2 | 1.2 Core Concepts & Terminology |
+| sec-2-3 | 2.3 Course Creation & Structure |
+| sec-4-2 | 4.2 Enrollment Management |
+| sec-4-21 | 4.3 Training Request by Gap Analysis |
+| sec-4-22 | 4.4 Request via Appraisal |
+| sec-4-23 | 4.6 Onboarding Requests |
+| sec-4-24 | 4.7 HR-Initiated Requests |
+| sec-4-25 | 4.8 Training Invitations |
+| sec-4-3 | 4.9 Progress Tracking |
+| sec-4-28 | 4.16 Session Management & Scheduling |
+| sec-4-30 | 4.18 Waitlist Management |
+| sec-4-19 | 4.19 Training History & Transcript |
 
 ### Next Steps
 
-To migrate the L&D Manual content:
-1. Extract content from each JSX section component
-2. Convert to markdown format
-3. POST to `/migrate-manual-content` endpoint
-4. Verify in UniversalManualViewer
-5. Remove legacy component imports
+To continue migrating remaining manuals:
+1. Repeat content extraction for each manual (Appraisals, Workforce, etc.)
+2. Use same SQL INSERT pattern to populate `manual_content`
+3. Update routes to redirect to streaming viewer
+4. Remove legacy component imports after verification
 
 ---
 
