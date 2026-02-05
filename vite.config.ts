@@ -33,8 +33,8 @@ export default defineConfig(({ mode, command }) => ({
       treeshake: false,
 
       output: {
-        // Aggressive chunking: group ALL application code into a few large chunks
-        // to minimize chunk graph complexity during "rendering chunks" phase.
+        // Balanced chunking: avoid thousands of tiny chunks *and* avoid a single massive chunk
+        // which can OOM while concatenating during "rendering chunks...".
         manualChunks(id) {
           // Vendor chunks - keep separate for caching
           if (id.includes("node_modules")) {
@@ -52,18 +52,32 @@ export default defineConfig(({ mode, command }) => ({
             return "vendor-misc";
           }
 
-          // All pages in ONE chunk to reduce graph complexity
-          if (id.includes("/src/pages/")) {
-            return "app-pages";
+          // Pages: group by top-level folder under src/pages
+          const pagesMarker = "/src/pages/";
+          const pagesIdx = id.indexOf(pagesMarker);
+          if (pagesIdx !== -1) {
+            const rel = id.slice(pagesIdx + pagesMarker.length);
+            const top = rel.split("/")[0] ?? "core";
+            if (/\.(t|j)sx?$/.test(top)) return "pages-core";
+            return `pages-${top}`;
           }
 
-          // All components in ONE chunk
-          if (id.includes("/src/components/")) {
-            return "app-components";
+          // Components: group by top-level folder under src/components
+          const componentsMarker = "/src/components/";
+          const componentsIdx = id.indexOf(componentsMarker);
+          if (componentsIdx !== -1) {
+            const rel = id.slice(componentsIdx + componentsMarker.length);
+            const top = rel.split("/")[0] ?? "core";
+            if (/\.(t|j)sx?$/.test(top)) return "components-core";
+            return `components-${top}`;
           }
 
-          // All hooks/utils/lib in ONE chunk
-          if (id.includes("/src/hooks/") || id.includes("/src/utils/") || id.includes("/src/lib/")) {
+          // Hooks/utils/lib: keep consolidated
+          if (
+            id.includes("/src/hooks/") ||
+            id.includes("/src/utils/") ||
+            id.includes("/src/lib/")
+          ) {
             return "app-utils";
           }
         },
