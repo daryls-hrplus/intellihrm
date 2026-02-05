@@ -57,10 +57,6 @@ export default defineConfig(({ mode, command }) => ({
           }
         },
       },
-
-      // Tree-shaking analysis can be extremely memory-hungry on very large route graphs.
-      // Disabling it trades some bundle size for a successful build.
-      treeshake: false,
     },
   },
 }));
