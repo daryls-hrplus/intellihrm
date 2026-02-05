@@ -7,20 +7,20 @@ const AttendanceRecordsPage = lazy(() => import("@/pages/time-attendance/Attenda
 const SchedulesPage = lazy(() => import("@/pages/time-attendance/SchedulesPage"));
 const OvertimeManagementPage = lazy(() => import("@/pages/time-attendance/OvertimeManagementPage"));
 const ShiftManagementPage = lazy(() => import("@/pages/time-attendance/ShiftManagementPage"));
-const ShiftsPage = lazy(() => import("@/pages/time-attendance/ShiftsPage"));
-const RoundingRulesPage = lazy(() => import("@/pages/time-attendance/RoundingRulesPage"));
-const PaymentRulesPage = lazy(() => import("@/pages/time-attendance/PaymentRulesPage"));
-const ShiftAssignmentsPage = lazy(() => import("@/pages/time-attendance/ShiftAssignmentsPage"));
-const ShiftCalendarPage = lazy(() => import("@/pages/time-attendance/ShiftCalendarPage"));
-const ShiftSwapRequestsPage = lazy(() => import("@/pages/time-attendance/ShiftSwapRequestsPage"));
-const OpenShiftBoardPage = lazy(() => import("@/pages/time-attendance/OpenShiftBoardPage"));
-const ShiftTemplatesPage = lazy(() => import("@/pages/time-attendance/ShiftTemplatesPage"));
-const RotationPatternsPage = lazy(() => import("@/pages/time-attendance/RotationPatternsPage"));
-const FatigueManagementPage = lazy(() => import("@/pages/time-attendance/FatigueManagementPage"));
-const ShiftCoveragePage = lazy(() => import("@/pages/time-attendance/ShiftCoveragePage"));
-const ShiftBiddingPage = lazy(() => import("@/pages/time-attendance/ShiftBiddingPage"));
-const AISchedulerPage = lazy(() => import("@/pages/time-attendance/AISchedulerPage"));
-const MultiLocationSchedulePage = lazy(() => import("@/pages/time-attendance/MultiLocationSchedulePage"));
+ const ShiftsPage = lazy(() => import("@/pages/time-attendance/shifts/ShiftsPage"));
+ const RoundingRulesPage = lazy(() => import("@/pages/time-attendance/shifts/RoundingRulesPage"));
+ const PaymentRulesPage = lazy(() => import("@/pages/time-attendance/shifts/PaymentRulesPage"));
+ const ShiftAssignmentsPage = lazy(() => import("@/pages/time-attendance/shifts/ShiftAssignmentsPage"));
+ const ShiftCalendarPage = lazy(() => import("@/pages/time-attendance/shifts/ShiftCalendarPage"));
+ const ShiftSwapRequestsPage = lazy(() => import("@/pages/time-attendance/shifts/ShiftSwapRequestsPage"));
+ const OpenShiftBoardPage = lazy(() => import("@/pages/time-attendance/shifts/OpenShiftBoardPage"));
+ const ShiftTemplatesPage = lazy(() => import("@/pages/time-attendance/shifts/ShiftTemplatesPage"));
+ const RotationPatternsPage = lazy(() => import("@/pages/time-attendance/shifts/RotationPatternsPage"));
+ const FatigueManagementPage = lazy(() => import("@/pages/time-attendance/shifts/FatigueManagementPage"));
+ const ShiftCoveragePage = lazy(() => import("@/pages/time-attendance/shifts/ShiftCoveragePage"));
+ const ShiftBiddingPage = lazy(() => import("@/pages/time-attendance/shifts/ShiftBiddingPage"));
+ const AISchedulerPage = lazy(() => import("@/pages/time-attendance/shifts/AISchedulerPage"));
+ const MultiLocationSchedulePage = lazy(() => import("@/pages/time-attendance/shifts/MultiLocationSchedulePage"));
 const GeofenceManagementPage = lazy(() => import("@/pages/time-attendance/GeofenceManagementPage"));
 const ProjectTimeTrackingPage = lazy(() => import("@/pages/time-attendance/ProjectTimeTrackingPage"));
 const TimesheetApprovalsPage = lazy(() => import("@/pages/time-attendance/TimesheetApprovalsPage"));
@@ -40,12 +40,12 @@ const CBATimeRulesPage = lazy(() => import("@/pages/time-attendance/CBATimeRules
 const CBAExtensionsPage = lazy(() => import("@/pages/time-attendance/CBAExtensionsPage"));
 const TimeAuditTrailPage = lazy(() => import("@/pages/time-attendance/TimeAuditTrailPage"));
 const ShiftSwapsPage = lazy(() => import("@/pages/time-attendance/ShiftSwapsPage"));
-const ShiftDifferentialsPage = lazy(() => import("@/pages/time-attendance/ShiftDifferentialsPage"));
-const GeofenceLocationsPage = lazy(() => import("@/pages/time-attendance/GeofenceLocationsPage"));
-const FaceVerificationPage = lazy(() => import("@/pages/time-attendance/FaceVerificationPage"));
-const ProjectCostDashboardPage = lazy(() => import("@/pages/time-attendance/ProjectCostDashboardPage"));
-const ProjectCostConfigPage = lazy(() => import("@/pages/time-attendance/ProjectCostConfigPage"));
-const CostAllocationPage = lazy(() => import("@/pages/time-attendance/CostAllocationPage"));
+ const ShiftDifferentialsPage = lazy(() => import("@/pages/time/ShiftDifferentialsPage"));
+ const GeofenceLocationsPage = lazy(() => import("@/pages/time/GeofenceLocationsPage"));
+ const FaceVerificationPage = lazy(() => import("@/pages/time/FaceVerificationPage"));
+ const ProjectCostDashboardPage = lazy(() => import("@/pages/time/ProjectCostDashboardPage"));
+ const ProjectCostConfigPage = lazy(() => import("@/pages/time/ProjectCostConfigPage"));
+ const CostAllocationPage = lazy(() => import("@/pages/time/CostAllocationPage"));
 
 export function TimeAttendanceRoutes() {
   return (
