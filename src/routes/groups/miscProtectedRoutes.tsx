@@ -18,7 +18,7 @@ const OperationalInsightsPage = lazy(() => import("@/pages/insights/OperationalI
 const SystemHubPage = lazy(() => import("@/pages/system/SystemHubPage"));
 const AgentManagementHubPage = lazy(() => import("@/pages/system/AgentManagementHubPage"));
 const APIManagementPage = lazy(() => import("@/pages/system/APIManagementPage"));
-const SystemAuditLogsPage = lazy(() => import("@/pages/system/SystemAuditLogsPage"));
+ const SystemAuditLogsPage = lazy(() => import("@/pages/system/AuditLogsPage"));
 const SecuritySettingsPage = lazy(() => import("@/pages/system/SecuritySettingsPage"));
 const SystemConfigPage = lazy(() => import("@/pages/system/SystemConfigPage"));
 

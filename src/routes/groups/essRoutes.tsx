@@ -50,7 +50,7 @@ const MyEvidencePortfolioPage = lazy(() => import("@/pages/ess/MyEvidencePortfol
 const MyCareerPathsPage = lazy(() => import("@/pages/ess/MyCareerPathsPage"));
 const MyCareerPlanPage = lazy(() => import("@/pages/ess/MyCareerPlanPage"));
 const MyMentorshipPage = lazy(() => import("@/pages/ess/MyMentorshipPage"));
-const EssNotificationPreferencesPage = lazy(() => import("@/pages/ess/EssNotificationPreferencesPage"));
+ const EssNotificationPreferencesPage = lazy(() => import("@/pages/ess/NotificationPreferencesPage"));
 const MyBenefitsPage = lazy(() => import("@/pages/ess/MyBenefitsPage"));
 const MyInboxPage = lazy(() => import("@/pages/ess/MyInboxPage"));
 const EmployeeDirectoryPage = lazy(() => import("@/pages/admin/EmployeeDirectoryPage"));

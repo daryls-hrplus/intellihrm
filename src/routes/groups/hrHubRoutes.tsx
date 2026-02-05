@@ -5,7 +5,7 @@ import { renderProtectedLazyRoutes } from "@/routes/routeHelpers";
 const HRHubDashboardPage = lazy(() => import("@/pages/hr-hub/HRHubDashboardPage"));
 const HRCalendarPage = lazy(() => import("@/pages/hr-hub/HRCalendarPage"));
 const HRTasksPage = lazy(() => import("@/pages/hr-hub/HRTasksPage"));
-const ESSChangeRequestsPage = lazy(() => import("@/pages/hr-hub/ESSChangeRequestsPage"));
+ const ESSChangeRequestsPage = lazy(() => import("@/pages/hr/ESSChangeRequestsPage"));
 const HRMilestonesPage = lazy(() => import("@/pages/hr-hub/HRMilestonesPage"));
 const ComplianceTrackerPage = lazy(() => import("@/pages/hr-hub/ComplianceTrackerPage"));
 const HRRemindersPage = lazy(() => import("@/pages/hr-hub/HRRemindersPage"));
