@@ -40,12 +40,27 @@ export default defineConfig(({ mode, command }) => ({
             if (id.includes('zod') || id.includes('react-hook-form')) return 'vendor-forms';
             return 'vendor-misc';
           }
+
+          // Group pages by top-level folder to reduce chunk graph complexity in very large apps.
+          // This significantly reduces memory pressure in Rollup's chunking & tree-shaking passes.
+          const pagesMarker = '/src/pages/';
+          const idx = id.indexOf(pagesMarker);
+          if (idx !== -1) {
+            const rel = id.slice(idx + pagesMarker.length);
+            const top = rel.split('/')[0] ?? 'core';
+            // Files directly under /pages (e.g. Index.tsx) go into a single core chunk
+            if (top.endsWith('.ts') || top.endsWith('.tsx') || top.endsWith('.js') || top.endsWith('.jsx')) {
+              return 'pages-core';
+            }
+            // Keep chunk names stable and short
+            return `pages-${top}`;
+          }
         },
       },
-      // Reduce tree-shaking aggressiveness to save memory
-      treeshake: {
-        moduleSideEffects: 'no-external',
-      },
+
+      // Tree-shaking analysis can be extremely memory-hungry on very large route graphs.
+      // Disabling it trades some bundle size for a successful build.
+      treeshake: false,
     },
   },
 }));
