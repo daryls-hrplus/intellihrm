@@ -46,10 +46,10 @@ export default defineConfig(({ mode, command }) => ({
             return "vendor-misc";
           }
 
-          // ALL app source into ONE chunk to minimise chunk-graph memory
-          if (id.includes("/src/")) {
-            return "app";
-          }
+          // Split app into 3 chunks to balance graph complexity vs chunk size
+          if (id.includes("/src/pages/")) return "app-pages";
+          if (id.includes("/src/components/")) return "app-components";
+          if (id.includes("/src/")) return "app-core";
         },
       },
     },
