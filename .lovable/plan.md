@@ -1,94 +1,136 @@
 
 
-# Update Admin & Security and HR Hub Capability Components
+# Update Act 2 Module Capabilities: ESS, MSS, Time and Attendance, Leave Management
 
-## Problem
+## Summary
 
-Same root cause as Workforce: the section components render hardcoded content and do not read from `capabilitiesData.ts`. The data file was updated but the two Prologue rendering components were not.
-
-## Changes Required
-
-### File 1: `src/components/enablement/product-capabilities/sections/prologue/AdminSecurityCapabilities.tsx`
-
-#### 1. Update badge (line 21)
-Change `"75+ Capabilities"` to `"95+ Capabilities"`
-
-#### 2. Expand "Organizational Scope Controls" (lines 156-167)
-Add 2 items:
-- Cross-company reporting relationships for corporate groups, joint ventures, and managed services
-- Company tag management with creation, assignment, and access-control integration
-
-#### 3. Add new category: "ESS Administration" (~4 items)
-Insert after "Approval Workflows & Delegation" block (after line 181):
-- ESS module enablement with per-company on/off toggles for self-service features
-- ESS approval policy configuration with auto-approve, HR review, and full workflow modes
-- ESS field-level permissions controlling employee view/edit access per data domain
-- ESS setup wizard with guided configuration and validation checks
-
-Icon: `UserCog` (already imported)
-
-#### 4. Add new category: "Platform Configuration" (~8 items)
-Insert after ESS Administration:
-- Custom field engine with field type configuration, module assignment, validation rules, and display ordering
-- Brand customization with color scheme wizard, preset themes, and advanced CSS variable controls
-- Translation management console with AI-assisted generation, bulk import/export, and coverage analytics
-- Currency management with exchange rates, base currency configuration, and multi-currency support
-- Territory management with geographic hierarchy, region definitions, and territory-based scoping
-- Data management tools with sample data population, selective purge by module, and environment reset
-- System-wide notification preferences and delivery channel configuration
-- Platform health monitoring with usage analytics and capacity metrics
-
-Icon: `Settings` (already imported)
-
-#### 5. Add new category: "Multi-Tenant & Client Management" (~5 items)
-Insert after Platform Configuration:
-- Client registry with organization profiles, contact management, and status tracking
-- Client provisioning workflows with environment setup and configuration templates
-- Demo environment management with data seeding and automated teardown
-- Prospect journey tracking with pipeline stages and conversion analytics
-- Subscription management with plan tiers, billing cycles, and usage metering
-
-Icon: `Briefcase` (already imported)
+After comparing the actual implemented pages against the rendered capability components, I found gaps across all four Act 2 modules. Additionally, the Table of Contents shows severely outdated counts that don't match even the current component badges.
 
 ---
 
-### File 2: `src/components/enablement/product-capabilities/sections/prologue/HRHubCapabilities.tsx`
+## Gap Analysis
 
-#### 1. Update badge (line 25)
-Change `"70+ Capabilities"` to `"85+ Capabilities"`
+### ESS (Current badge: 75+, TOC shows: 45+)
 
-#### 2. Expand "Daily Operations" (lines 106-117)
-Add 1 item:
-- Employee directory privacy configuration with field-level visibility controls per data type
+**Missing entirely from document:**
 
-#### 3. Expand "Organization & Configuration" (lines 193-204)
-Add 2 items:
-- Reference data catalog with browsable system-wide lookup data, usage tracking, and data lineage
-- Company values management with definitions, icons, alignment to recognition programs, and performance frameworks
+| Gap | Source Page | Description |
+|-----|-----------|-------------|
+| Immigration & Permits | MyImmigrationPage.tsx | Work permit, visa, and immigration document management |
+| Medical Information | MyMedicalInfoPage.tsx | Employee medical profile with conditions and emergency info |
+| My Interests | MyInterestsPage.tsx | Personal interests for culture and team-building alignment |
+| My Transactions | MyTransactionsPage.tsx (429 lines) | Full transaction history with module-based categorization and filtering |
+| My Change Requests | MyChangeRequestsPage.tsx (676 lines) | Change request submission, tracking, document upload, and status monitoring |
+| My HSE | MyHSEPage.tsx | Health and safety self-service (incident reporting, training compliance) |
+| My Employee Relations | MyEmployeeRelationsPage.tsx | Grievance submission, case tracking from employee perspective |
+| My Property | MyPropertyPage.tsx | Assigned company assets viewing and return coordination |
+| My Calendar | MyCalendarPage.tsx | Personal work calendar with leave, meetings, and milestones |
+| Professional Info (expanded) | MyProfessionalInfoPage.tsx | 5-tab view: credentials/memberships, agreements/signatures, professional history, compliance status, languages |
 
-#### 4. Add new category: "Company Intranet" (~5 items)
-Insert after "Integration Hub" block (after line 232):
-- Intranet content management with rich text articles, media embedding, and category organization
-- Company announcement publishing with targeted audience selection and scheduling
-- Banner management with priority ordering, display rules, and expiry dates
-- Company-scoped content visibility with multi-entity publishing controls
-- Content pinning, archival, and read-receipt tracking with analytics
-
-Icon: `Globe` or `Newspaper` (needs import from lucide-react)
+**Recommendation:** Add new category "Lifecycle & Requests" covering transactions, change requests, onboarding/offboarding self-service. Expand "Personal Information" with immigration, medical, interests. Add items to existing categories for HSE, Employee Relations, and Property self-service. Update badge to **90+ Capabilities**.
 
 ---
 
-## What Does Not Change
+### MSS (Current badge: 90+, TOC shows: 50+)
 
-- `capabilitiesData.ts` -- already updated
-- `TableOfContents.tsx` -- already updated
-- `ProductCapabilitiesDocument.tsx` -- already updated
-- `WorkforceCapabilities.tsx` -- already updated
-- `RecruitmentCapabilities.tsx` -- already up to date
-- `OnboardingCapabilities.tsx` -- already up to date
-- `OffboardingCapabilities.tsx` -- already up to date
+**Missing entirely from document:**
 
-## Note on Build OOM
+| Gap | Source Page | Description |
+|-----|-----------|-------------|
+| Payroll Consolidation | MssPayrollConsolidationPage.tsx (343 lines) | Team payroll summary across entities with variance analysis and cost trends |
+| Readiness Assessment | MssReadinessAssessmentPage.tsx | Succession readiness assessment for direct reports |
+| Talent Pool Nomination | MssNominateTalentPoolPage.tsx | Manager-driven talent pool nomination with justification |
+| Equity Dashboard | MssEquityPage.tsx | Team pay equity analysis with gap identification |
+| Team Reminders | MssRemindersPage.tsx | Manager reminder/to-do management for team actions |
 
-The OOM error is a pre-existing infrastructure issue (9,697 modules, 3GB heap limit). These text-only edits do not add modules or imports.
+**Recommendation:** Expand "Workforce Actions" with payroll consolidation. Add items to "Development & Succession" for readiness assessments and talent nomination. Add compa-ratio and equity items to existing categories. Update badge to **100+ Capabilities**.
+
+---
+
+### Time and Attendance (Current badge: 120+, TOC shows: 45+)
+
+**Missing or under-documented shift sub-features:**
+
+| Gap | Source Page | Description |
+|-----|-----------|-------------|
+| Fatigue Management | FatigueManagementPage.tsx | Fatigue risk scoring, rest period enforcement, consecutive shift limits |
+| AI Scheduler | AISchedulerPage.tsx | AI-powered schedule generation with demand forecasting |
+| Multi-Location Scheduling | MultiLocationSchedulePage.tsx | Cross-site schedule coordination and resource sharing |
+| Shift Bidding | ShiftBiddingPage.tsx | Employee shift preference bidding with seniority rules |
+| Shift Calendar | ShiftCalendarPage.tsx | Visual shift calendar with drag-and-drop assignment |
+| Shift Templates | ShiftTemplatesPage.tsx | Reusable shift pattern templates |
+| Shift Assignments | ShiftAssignmentsPage.tsx | Employee-to-shift assignment management |
+| Shift Coverage | ShiftCoveragePage.tsx | Coverage gap detection and fill recommendations |
+| Rotation Patterns | RotationPatternsPage.tsx | Complex rotation pattern configuration |
+| Payment Rules | PaymentRulesPage.tsx | Shift-specific payment rule configuration |
+| Rounding Rules | RoundingRulesPage.tsx | Shift-level punch rounding overrides |
+
+**Recommendation:** Expand "Shift Management" with templates, assignments, calendar, rotation patterns, and payment/rounding rules. Add new category "Advanced Scheduling" with AI scheduler, multi-location, fatigue management, and shift bidding. Update badge to **135+ Capabilities**.
+
+---
+
+### Leave Management (Current badge: 80+, TOC shows: 40+)
+
+**Missing or under-documented:**
+
+| Gap | Source Page | Description |
+|-----|-----------|-------------|
+| Leave Years/Periods | LeaveYearsPage.tsx (572 lines) | Leave year definition, period locking, year-end processing, multi-year support |
+| Conflict Rules | LeaveConflictRulesPage.tsx (439 lines) | Detailed conflict rule engine (department limits, role restrictions, concurrent leave caps) |
+| Pro-rata Settings | LeaveProrataSettingsPage.tsx (288 lines) | Granular pro-rata calculation methods per leave type with company-level config |
+| Comp Time Policies | CompTimePoliciesPage.tsx | Compensatory time policy configuration linked to overtime |
+| Compensatory Time | CompensatoryTimePage.tsx | Comp time balance management and usage tracking |
+| Balance Recalculation | LeaveBalanceRecalculationPage.tsx | Bulk balance recalculation with audit logging |
+
+**Recommendation:** Add new category "Leave Year & Period Management" with year definitions, period locking, and year-end processing. Expand "Accrual Engine" with pro-rata settings. Expand "Blackout & Conflict Management" with conflict rule engine details. Add comp time items. Update badge to **95+ Capabilities**.
+
+---
+
+## Changes Required (4 files)
+
+### File 1: `ESSCapabilities.tsx`
+- Update badge: "75+" to "90+"
+- Expand "Personal Information": add immigration/permits, medical info, interests
+- Expand "Career & Development": add competencies self-assessment and skill gap viewer
+- Expand "Communications & Documents": add personal calendar
+- Add new category: **"Lifecycle & Requests"** (~6 items): My Transactions dashboard, Change request submission/tracking, Onboarding task checklist, Offboarding task coordination, Request status with document uploads, Historical request archive
+- Add new category: **"Cross-Module Self-Service"** (~4 items): HSE incident reporting and training compliance, Employee relations grievance submission, Company property viewing and returns, Professional info management (credentials, agreements, languages)
+
+### File 2: `MSSCapabilities.tsx`
+- Update badge: "90+" to "100+"
+- Expand "Workforce Actions": add team payroll consolidation view, team reminders
+- Expand "Development & Succession": add readiness assessments, talent pool nomination
+- Expand "Team Analytics": add compa-ratio monitoring, pay equity analysis
+
+### File 3: `TimeAttendanceCapabilities.tsx`
+- Update badge: "120+" to "135+"
+- Expand "Shift Management": add shift templates, shift assignments, shift calendar, rotation patterns, payment rules, rounding rule overrides
+- Add new category: **"Advanced Scheduling"** (~5 items): AI-powered schedule generation, multi-location coordination, fatigue management with rest enforcement, shift bidding with seniority, coverage gap detection and fill recommendations
+
+### File 4: `LeaveCapabilities.tsx`
+- Update badge: "80+" to "95+"
+- Add new category: **"Leave Year & Period Management"** (~5 items): Leave year definitions with fiscal/calendar alignment, period locking and finalization, year-end processing automation, multi-year balance tracking, leave period transition rules
+- Expand "Accrual Engine": add pro-rata calculation methods with company-level configuration
+- Expand "Blackout & Conflict Management": add conflict rule engine with department limits, role restrictions, concurrent leave caps
+- Expand "Balance Management": add bulk recalculation with audit
+- Add items for compensatory time policies
+
+### File 5: `TableOfContents.tsx`
+- Update Act 2 counts:
+  - ESS: "45+" to "90+"
+  - MSS: "50+" to "100+"
+  - Time and Attendance: "45+" to "135+"
+  - Leave: "40+" to "95+"
+  - Act 2 total: "180+" to "420+"
+
+### File 6: `ProductCapabilitiesDocument.tsx`
+- Update Act 2 divider `modules` prop with new counts: `["Employee Self-Service (90+)", "Manager Self-Service (100+)", "Time & Attendance (135+)", "Leave Management (95+)"]`
+
+---
+
+## Technical Notes
+
+- All changes are text/content only -- no new imports needed except potentially one icon for new categories
+- The OOM build error is pre-existing (9,697 modules, 3GB heap limit) and unrelated to these changes
+- Same root cause as previous fixes: section components render hardcoded content, not from `capabilitiesData.ts`
 
