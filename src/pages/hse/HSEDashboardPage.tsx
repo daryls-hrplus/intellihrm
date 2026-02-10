@@ -107,24 +107,32 @@ export default function HSEDashboardPage() {
       items: filterByAccess([allModules.incidents, allModules.nearMiss, allModules.safetyObservations]),
     },
     {
-      titleKey: "Training & Compliance",
-      items: filterByAccess([allModules.safetyTraining, allModules.compliance, allModules.toolboxTalks]),
+      titleKey: "Risk & Compliance",
+      items: filterByAccess([allModules.riskAssessment, allModules.inspections, allModules.compliance]),
     },
     {
-      titleKey: "Risk Prevention",
-      items: filterByAccess([allModules.riskAssessment, allModules.inspections, allModules.ppe, allModules.chemicals, allModules.loto]),
+      titleKey: "Hazard Controls",
+      items: filterByAccess([allModules.chemicals, allModules.loto, allModules.permitToWork, allModules.ppe]),
     },
     {
-      titleKey: "Emergency Response",
-      items: filterByAccess([allModules.emergencyResponse, allModules.firstAid, allModules.workersComp, allModules.permitToWork]),
+      titleKey: "Training & Awareness",
+      items: filterByAccess([allModules.safetyTraining, allModules.toolboxTalks]),
     },
     {
-      titleKey: "Analytics",
-      items: filterByAccess([allModules.analytics]),
+      titleKey: "Emergency Preparedness",
+      items: filterByAccess([allModules.emergencyResponse, allModules.firstAid]),
     },
     {
-      titleKey: "Health & Safety Setup",
-      items: filterByAccess([allModules.policies, allModules.oshaReporting, allModules.ergonomics]),
+      titleKey: "Claims & Recovery",
+      items: filterByAccess([allModules.workersComp]),
+    },
+    {
+      titleKey: "Workplace Wellness",
+      items: filterByAccess([allModules.ergonomics]),
+    },
+    {
+      titleKey: "Governance & Reporting",
+      items: filterByAccess([allModules.policies, allModules.oshaReporting, allModules.analytics]),
     },
   ];
 
