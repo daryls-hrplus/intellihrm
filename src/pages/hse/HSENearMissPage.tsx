@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Button } from "@/components/ui/button";
@@ -14,12 +15,13 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Search, AlertTriangle, Eye, CheckCircle, Clock } from "lucide-react";
+import { Plus, Search, AlertTriangle, Eye, CheckCircle, Clock, User } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function HSENearMissPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
 
   const [tabState, setTabState] = useTabState({
     defaultState: {
@@ -161,7 +163,23 @@ export default function HSENearMissPage() {
                       <TableCell>{nm.hazard_type || "-"}</TableCell>
                       <TableCell className="max-w-xs truncate">{nm.description || "-"}</TableCell>
                       <TableCell>{getStatusBadge(nm.status)}</TableCell>
-                      <TableCell><Button variant="ghost" size="sm">{t("common.view")}</Button></TableCell>
+                      <TableCell>
+                        {nm.assigned_to ? (
+                          <Button variant="link" className="p-0 h-auto" onClick={() => navigateToRecord({
+                            route: `/workforce/employees/${nm.assigned_to}`,
+                            title: "Employee",
+                            subtitle: "Employee",
+                            moduleCode: "workforce",
+                            contextType: "employee",
+                            contextId: nm.assigned_to,
+                            icon: User,
+                          })}>
+                            {t("common.view")}
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="sm">{t("common.view")}</Button>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

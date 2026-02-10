@@ -43,8 +43,10 @@ import {
   Calendar,
   Users,
   Activity,
+  User,
 } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 
 const incidentTypes = [
   { value: "injury", label: "Injury" },
@@ -80,6 +82,7 @@ export default function HSEIncidentsPage() {
   usePageAudit('hse_incidents', 'HSE');
   const { t } = useLanguage();
   const { company } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
 
   const [tabState, setTabState] = useTabState({
     defaultState: {
@@ -346,7 +349,24 @@ export default function HSEIncidentsPage() {
                       <TableCell>{formatDateForDisplay(incident.incident_date, "MMM d, yyyy")}</TableCell>
                       <TableCell>{incident.location || "-"}</TableCell>
                       <TableCell>{getStatusBadge(incident.status)}</TableCell>
-                      <TableCell>{incident.reporter?.full_name || "-"}</TableCell>
+                      <TableCell>
+                        {incident.reported_by ? (
+                          <Button variant="link" className="p-0 h-auto font-normal" onClick={(e) => {
+                            e.stopPropagation();
+                            navigateToRecord({
+                              route: `/workforce/employees/${incident.reported_by}`,
+                              title: incident.reporter?.full_name || "Employee",
+                              subtitle: "Employee",
+                              moduleCode: "workforce",
+                              contextType: "employee",
+                              contextId: incident.reported_by!,
+                              icon: User,
+                            });
+                          }}>
+                            {incident.reporter?.full_name || "-"}
+                          </Button>
+                        ) : "-"}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
