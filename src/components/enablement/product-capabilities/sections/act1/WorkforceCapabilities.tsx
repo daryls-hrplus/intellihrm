@@ -12,7 +12,9 @@ import {
   User,
   UserCog,
   TrendingUp,
-  Database
+  Database,
+  Landmark,
+  Puzzle
 } from "lucide-react";
 import { ModuleCapabilityCard } from "../../components/ModuleCapabilityCard";
 import { CapabilityCategory, CapabilityItem } from "../../components/CapabilityCategory";
@@ -33,7 +35,7 @@ export function WorkforceCapabilities() {
       tagline="The complete employee record, from hire to retire"
       overview="Comprehensive employee master data, organization structure, position management, job architecture, headcount planning, and workforce analytics. The single source of truth for your entire organization with 16+ configurable data tabs per employee."
       accentColor="bg-indigo-500/10 text-indigo-500"
-      badge="150+ Capabilities"
+      badge="195+ Capabilities"
     >
       <div className="space-y-6">
         {/* Challenge & Promise */}
@@ -125,6 +127,9 @@ export function WorkforceCapabilities() {
             <CapabilityItem>Government ID management (TRN, NIS, NHT, SSN, etc.)</CapabilityItem>
             <CapabilityItem>Dependent and emergency contact management</CapabilityItem>
             <CapabilityItem>Multi-currency payment support</CapabilityItem>
+            <CapabilityItem>Responsibility catalog with categorization and ownership</CapabilityItem>
+            <CapabilityItem>Academic qualification tracking with institution and date management</CapabilityItem>
+            <CapabilityItem>Professional certification management with expiry alerts</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory 
@@ -153,6 +158,9 @@ export function WorkforceCapabilities() {
             <CapabilityItem>Multi-entity (company) structures</CapabilityItem>
             <CapabilityItem>Reporting relationship management</CapabilityItem>
             <CapabilityItem>Span of control analytics</CapabilityItem>
+            <CapabilityItem>Division management with hierarchical parent-child relationships</CapabilityItem>
+            <CapabilityItem>Org changes reporting with historical comparison</CapabilityItem>
+            <CapabilityItem>Org structure configuration with hierarchy rule management</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory 
@@ -167,6 +175,8 @@ export function WorkforceCapabilities() {
             <CapabilityItem>Headcount requests and approval workflows</CapabilityItem>
             <CapabilityItem>Position history and incumbent tracking</CapabilityItem>
             <CapabilityItem>Position types and classifications</CapabilityItem>
+            <CapabilityItem>Position control dashboard with fill rate analytics</CapabilityItem>
+            <CapabilityItem>Vacancy-to-requisition conversion workflow with recruitment linkage</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory 
@@ -195,6 +205,9 @@ export function WorkforceCapabilities() {
             <CapabilityItem>Acting and temporary assignments</CapabilityItem>
             <CapabilityItem>Mass update capabilities for bulk changes</CapabilityItem>
             <CapabilityItem>Payroll mapping for transaction types</CapabilityItem>
+            <CapabilityItem>Transaction dashboard with module-based categorization (Entry, Movement, Exit, Compensation, Status)</CapabilityItem>
+            <CapabilityItem>Contract extensions and conversions</CapabilityItem>
+            <CapabilityItem>Probation confirmation and extension processing</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory 
@@ -240,7 +253,41 @@ export function WorkforceCapabilities() {
           </CapabilityCategory>
 
           <CapabilityCategory 
-            title="Regional Data Support" 
+            title="Corporate Governance" 
+            icon={Landmark}
+            context="Board and management team oversight with full governance tracking and compliance reporting."
+          >
+            <CapabilityItem>Board of directors management with member profiles and term tracking</CapabilityItem>
+            <CapabilityItem>Management team composition and reporting structure</CapabilityItem>
+            <CapabilityItem>Board meeting scheduling and attendance tracking</CapabilityItem>
+            <CapabilityItem>Governance compliance reporting and oversight</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory 
+            title="Capability Framework" 
+            icon={Puzzle}
+            context="Define, track, and audit the skills, competencies, and values that drive organizational performance."
+          >
+            <CapabilityItem>Skills registry with proficiency levels and behavioral indicators</CapabilityItem>
+            <CapabilityItem>Competency framework management with job linkage</CapabilityItem>
+            <CapabilityItem>Organizational values definition with recognition alignment</CapabilityItem>
+            <CapabilityItem>Capability audit filters for governance gap identification</CapabilityItem>
+            <CapabilityItem>Capability-to-position mapping for talent architecture</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory 
+            title="Employee Assignments" 
+            icon={UserCog}
+            context="Manage concurrent positions, acting roles, and secondments with full assignment lifecycle tracking."
+          >
+            <CapabilityItem>Multi-assignment management with concurrent position support</CapabilityItem>
+            <CapabilityItem>Acting and secondment assignment tracking with date ranges</CapabilityItem>
+            <CapabilityItem>Primary vs. secondary assignment designation</CapabilityItem>
+            <CapabilityItem>Assignment history and timeline visualization</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory 
+            title="Regional Data Support"
             icon={Globe}
             context="Built for the Caribbean, Africa, and Latin America from day one. Native support for regional requirements."
           >
