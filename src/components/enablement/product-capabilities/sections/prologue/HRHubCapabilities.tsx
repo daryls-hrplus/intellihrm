@@ -1,7 +1,7 @@
 import { 
   HelpCircle, FileText, MessageSquare, BookOpen, 
   CheckSquare, Settings, BarChart3, Link2,
-  Shield, Upload, UserCog, Briefcase, User, ClipboardList
+  Shield, Upload, UserCog, Briefcase, User, ClipboardList, Newspaper
 } from "lucide-react";
 import { ModuleCapabilityCard } from "../../components/ModuleCapabilityCard";
 import { CapabilityCategory, CapabilityItem } from "../../components/CapabilityCategory";
@@ -22,7 +22,7 @@ export function HRHubCapabilities() {
       tagline="The central command center for all HR operations"
       overview="Unified hub for daily operations, documents, policies, communications, compliance tracking, workflow configuration, and cross-module integration. The single source of truth for HR operations with AI-powered insights and automation."
       accentColor="bg-purple-500/10 text-purple-500"
-      badge="70+ Capabilities"
+      badge="85+ Capabilities"
     >
       <div className="space-y-6">
         {/* Challenge & Promise */}
@@ -114,6 +114,7 @@ export function HRHubCapabilities() {
             <CapabilityItem>HR Calendar with event types (meetings, deadlines, training, holidays), company-specific views, and color-coded scheduling</CapabilityItem>
             <CapabilityItem>Milestones Dashboard tracking birthdays, work anniversaries, and probation endings with celebration automation</CapabilityItem>
             <CapabilityItem>Configurable approval modes per change type (auto-approve, HR review, full workflow) with risk-based routing</CapabilityItem>
+            <CapabilityItem>Employee directory privacy configuration with field-level visibility controls per data type</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory 
@@ -201,6 +202,8 @@ export function HRHubCapabilities() {
             <CapabilityItem>Import templates for company structure, positions, employees, and new hires</CapabilityItem>
             <CapabilityItem>Import history with full audit trail and status tracking</CapabilityItem>
             <CapabilityItem>Org structure visualization with drill-down capabilities</CapabilityItem>
+            <CapabilityItem>Reference data catalog with browsable system-wide lookup data, usage tracking, and data lineage</CapabilityItem>
+            <CapabilityItem>Company values management with definitions, icons, alignment to recognition programs, and performance frameworks</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory 
@@ -228,6 +231,21 @@ export function HRHubCapabilities() {
             <CapabilityItem>Pending approvals queue with bulk approve/reject capabilities for integration actions</CapabilityItem>
             <CapabilityItem>Failed integration retry with automatic and manual retry options</CapabilityItem>
             <CapabilityItem>By-module analytics showing success rates, activity volumes, and processing times</CapabilityItem>
+          </CapabilityCategory>
+        </div>
+
+        {/* Row 6: Company Intranet */}
+        <div className="grid md:grid-cols-1 gap-4">
+          <CapabilityCategory 
+            title="Company Intranet" 
+            icon={Newspaper}
+            context="A connected workforce starts with a central place for news, updates, and shared knowledge across every entity."
+          >
+            <CapabilityItem>Intranet content management with rich text articles, media embedding, and category organization</CapabilityItem>
+            <CapabilityItem>Company announcement publishing with targeted audience selection and scheduling</CapabilityItem>
+            <CapabilityItem>Banner management with priority ordering, display rules, and expiry dates</CapabilityItem>
+            <CapabilityItem>Company-scoped content visibility with multi-entity publishing controls</CapabilityItem>
+            <CapabilityItem>Content pinning, archival, and read-receipt tracking with analytics</CapabilityItem>
           </CapabilityCategory>
         </div>
 
