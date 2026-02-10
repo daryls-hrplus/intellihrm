@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTabState } from "@/hooks/useTabState";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { LeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Search, Eye, ThumbsUp, ThumbsDown, AlertTriangle } from "lucide-react";
+import { Plus, Search, Eye, ThumbsUp, ThumbsDown, AlertTriangle, User } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 export default function HSESafetyObservationsPage() {

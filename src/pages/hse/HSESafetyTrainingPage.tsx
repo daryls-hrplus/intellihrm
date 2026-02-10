@@ -44,7 +44,9 @@ import {
   Clock,
   Users,
   AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
+import { useWorkspaceNavigation } from "@/hooks/useWorkspaceNavigation";
 import { addMonths, isPast } from "date-fns";
 import { getTodayString, toDateString, formatDateForDisplay } from "@/utils/dateUtils";
 import { toast } from "sonner";
@@ -67,6 +69,7 @@ const recordStatusOptions = [
 export default function HSESafetyTrainingPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
 
   const [tabState, setTabState] = useTabState({
     defaultState: {
@@ -380,7 +383,7 @@ export default function HSESafetyTrainingPage() {
                               <Badge variant="outline">Inactive</Badge>
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="flex gap-2">
                             <Button
                               size="sm"
                               variant="outline"
@@ -388,6 +391,24 @@ export default function HSESafetyTrainingPage() {
                             >
                               {t("hseModule.safetyTraining.assign")}
                             </Button>
+                            {training.lms_course_id && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => navigateToRecord({
+                                  route: `/training`,
+                                  title: "LMS Courses",
+                                  subtitle: "Training",
+                                  moduleCode: "lnd",
+                                  contextType: "lms_course",
+                                  contextId: training.lms_course_id!,
+                                  icon: GraduationCap,
+                                })}
+                              >
+                                <ExternalLink className="mr-1 h-3 w-3" />
+                                LMS
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))
