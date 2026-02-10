@@ -118,19 +118,19 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
     title: "Prologue: Setting the Stage",
     level: 1,
     children: [
-      { id: "admin-security", title: "Admin & Security (80+)", level: 2 },
-      { id: "hr-hub", title: "HR Hub (70+)", level: 2 },
+      { id: "admin-security", title: "Admin & Security (95+)", level: 2 },
+      { id: "hr-hub", title: "HR Hub (85+)", level: 2 },
     ],
   },
   {
     id: "act1",
-    title: "Act 1: Attract, Onboard & Transition (245+)",
+    title: "Act 1: Attract, Onboard & Transition (415+)",
     level: 1,
     children: [
-      { id: "recruitment", title: "Recruitment (75+)", level: 2 },
+      { id: "recruitment", title: "Recruitment (110+)", level: 2 },
       { id: "onboarding", title: "Onboarding (55+)", level: 2 },
       { id: "offboarding", title: "Offboarding (55+)", level: 2 },
-      { id: "workforce", title: "Workforce Management (60+)", level: 2 },
+      { id: "workforce", title: "Workforce Management (195+)", level: 2 },
     ],
   },
   {
