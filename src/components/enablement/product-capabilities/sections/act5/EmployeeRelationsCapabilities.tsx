@@ -32,7 +32,7 @@ export const EmployeeRelationsCapabilities = () => {
       tagline="Fair, consistent, and compliant employee management"
       overview="Manage the full spectrum of employee relations from grievances to disciplinary actions. From recognition programs to wellness initiatives, from exit insights to union relations—every case is documented, every decision is defensible, and every pattern is visible. AI detects emerging issues before they escalate."
       accentColor="bg-red-500/10 text-red-600"
-      badge="130+ Capabilities"
+      badge="140+ Capabilities"
       id="employee-relations"
     >
       <div className="space-y-6">
@@ -174,17 +174,26 @@ export const EmployeeRelationsCapabilities = () => {
           <CapabilityCategory title="Employee Self-Service (ESS)" icon={UserCheck}>
             <CapabilityItem>View personal cases and track status</CapabilityItem>
             <CapabilityItem>Submit workplace concerns (with confidential option)</CapabilityItem>
-            <CapabilityItem>View recognition received</CapabilityItem>
+            <CapabilityItem>View recognition received from colleagues and management</CapabilityItem>
+            <CapabilityItem>View disciplinary history with acknowledgment workflow</CapabilityItem>
+            <CapabilityItem>Acknowledge disciplinary actions (timestamped confirmation)</CapabilityItem>
+            <CapabilityItem>View exit interview details and satisfaction ratings</CapabilityItem>
             <CapabilityItem>Respond to active pulse surveys</CapabilityItem>
             <CapabilityItem>Browse and enroll in wellness programs</CapabilityItem>
-            <CapabilityItem>Summary KPI cards (cases, recognition, surveys, wellness)</CapabilityItem>
+            <CapabilityItem>Summary KPI cards (cases, recognition, disciplinary, surveys, wellness)</CapabilityItem>
+            <CapabilityItem>6-tab lifecycle navigation (Recognition, Cases, Disciplinary, Surveys, Wellness, Exit Interview)</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Manager Self-Service (MSS)" icon={Briefcase}>
             <CapabilityItem>View team cases and case status</CapabilityItem>
             <CapabilityItem>Give recognition to direct reports</CapabilityItem>
-            <CapabilityItem>Team recognition history</CapabilityItem>
-            <CapabilityItem>Team case summary KPIs</CapabilityItem>
+            <CapabilityItem>Team recognition history and analytics</CapabilityItem>
+            <CapabilityItem>Team disciplinary actions overview (severity, acknowledgment status)</CapabilityItem>
+            <CapabilityItem>Team exit interviews with satisfaction ratings</CapabilityItem>
+            <CapabilityItem>Team sentiment overview (survey participation, health summary)</CapabilityItem>
+            <CapabilityItem>Team health dashboard (cases, disciplinary, exits, recognition metrics)</CapabilityItem>
+            <CapabilityItem>5-tab manager view (Recognition, Cases, Disciplinary, Exits, Sentiment)</CapabilityItem>
+            <CapabilityItem>5 KPI summary cards (direct reports, cases, recognition, disciplinary, exits)</CapabilityItem>
             <CapabilityItem>Cross-module drill-down to employee profiles</CapabilityItem>
           </CapabilityCategory>
 
