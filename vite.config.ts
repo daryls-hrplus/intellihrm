@@ -9,9 +9,10 @@ import { componentTagger } from "lovable-tagger";
  * entire enablement module tree (~70 components, 33 pages) is never
  * discovered, transformed, or rendered — saving ~1 GB of heap.
  */
-function excludeEnablement(mode: string): Plugin | false {
+function excludeEnablement(command: string): Plugin | false {
+  // Activate for ALL builds (both production and build:dev) unless explicitly opted in
   const isExcluded =
-    mode === "production" && process.env.VITE_INCLUDE_ENABLEMENT !== "true";
+    command === "build" && process.env.VITE_INCLUDE_ENABLEMENT !== "true";
   if (!isExcluded) return false;
 
   const VIRTUAL_ID = "\0virtual:empty-enablement";
@@ -41,7 +42,7 @@ export default defineConfig(({ mode, command }) => ({
     port: 8080,
   },
   plugins: [
-    excludeEnablement(mode),
+    excludeEnablement(command),
     react(),
     command === "serve" && mode === "development" && componentTagger(),
   ].filter(Boolean),
