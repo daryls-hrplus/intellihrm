@@ -156,15 +156,16 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
   },
   {
     id: "act4",
-    title: "Act 4: Develop & Grow (410+)",
+    title: "Act 4: Develop & Grow (460+)",
     level: 1,
     children: [
-      { id: "learning", title: "Learning & LMS (130+)", level: 2 },
+      { id: "learning", title: "Learning & LMS (140+)", level: 2 },
       { id: "goals", title: "Goals Management (45+)", level: 2 },
-      { id: "appraisals", title: "Performance Appraisals (50+)", level: 2 },
+      { id: "appraisals", title: "Performance Appraisals (60+)", level: 2 },
       { id: "feedback-360", title: "360 Feedback (35+)", level: 2 },
-      { id: "continuous-performance", title: "Continuous Performance (55+)", level: 2 },
-      { id: "succession", title: "Succession Planning (95+)", level: 2 },
+      { id: "continuous-performance", title: "Continuous Performance (60+)", level: 2 },
+      { id: "career-development", title: "Career Development (45+)", level: 2 },
+      { id: "succession", title: "Succession Planning (75+)", level: 2 },
     ],
   },
   {

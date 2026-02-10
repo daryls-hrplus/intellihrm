@@ -27,7 +27,7 @@ export const SuccessionCapabilities = () => {
       tagline="Ensure leadership continuity through data-driven talent intelligence"
       overview="Identify critical positions, build deep talent pipelines, and develop future leaders with AI-powered readiness assessments. The 9-Box becomes a living tool, flight risks are detected before resignations, and career paths light the way forward."
       accentColor="bg-purple-500/10 text-purple-600"
-      badge="95+ Capabilities"
+      badge="75+ Capabilities"
       id="succession"
     >
       <div className="space-y-6">
@@ -109,35 +109,6 @@ export const SuccessionCapabilities = () => {
             <CapabilityItem>AI-powered intervention recommendations</CapabilityItem>
           </CapabilityCategory>
 
-          <CapabilityCategory title="Career Paths" icon={GitBranch}>
-            <CapabilityItem>Career path configuration and visualization</CapabilityItem>
-            <CapabilityItem>Path step definition with requirements</CapabilityItem>
-            <CapabilityItem>Skill requirement mapping per step</CapabilityItem>
-            <CapabilityItem>Experience milestone tracking</CapabilityItem>
-            <CapabilityItem>Lateral move opportunity identification</CapabilityItem>
-            <CapabilityItem>Career aspiration capture from employees</CapabilityItem>
-            <CapabilityItem>Career ladder templates by function</CapabilityItem>
-          </CapabilityCategory>
-
-          <CapabilityCategory title="Career Development" icon={TrendingUp}>
-            <CapabilityItem>Career conversation tracking</CapabilityItem>
-            <CapabilityItem>Development theme identification</CapabilityItem>
-            <CapabilityItem>Career goal alignment with succession needs</CapabilityItem>
-            <CapabilityItem>Skill gap remediation planning</CapabilityItem>
-            <CapabilityItem>Development resource matching</CapabilityItem>
-            <CapabilityItem>Progress milestone tracking</CapabilityItem>
-          </CapabilityCategory>
-
-          <CapabilityCategory title="Mentorship Programs" icon={Heart}>
-            <CapabilityItem>Mentorship program configuration</CapabilityItem>
-            <CapabilityItem>Mentor-mentee pairing workflows</CapabilityItem>
-            <CapabilityItem>AI-assisted matching based on skills and goals</CapabilityItem>
-            <CapabilityItem>Session scheduling and tracking</CapabilityItem>
-            <CapabilityItem>Goal-based mentoring with milestones</CapabilityItem>
-            <CapabilityItem>Mentorship effectiveness metrics</CapabilityItem>
-            <CapabilityItem>Mentor pool management</CapabilityItem>
-          </CapabilityCategory>
-
           <CapabilityCategory title="Leadership Development" icon={GraduationCap}>
             <CapabilityItem>High-potential program management</CapabilityItem>
             <CapabilityItem>Leadership competency tracking</CapabilityItem>
@@ -194,6 +165,7 @@ export const SuccessionCapabilities = () => {
             { module: "Workforce", description: "Position and org structure data" },
             { module: "Compensation", description: "Retention planning for key successors" },
             { module: "360 Feedback", description: "Leadership competency assessment" },
+            { module: "Career Development", description: "Career paths and mentorship programs" },
           ]}
         />
       </div>

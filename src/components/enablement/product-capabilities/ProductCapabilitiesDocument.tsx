@@ -42,6 +42,7 @@ import {
   AppraisalsCapabilities,
   Feedback360Capabilities,
   ContinuousPerformanceCapabilities,
+  CareerDevelopmentCapabilities,
   SuccessionCapabilities,
   HealthSafetyCapabilities,
   EmployeeRelationsCapabilities,
@@ -239,7 +240,7 @@ export function ProductCapabilitiesDocument() {
           "90%+ critical position coverage with identified successors",
           "Flight risk detection 6 months before resignation",
         ]}
-        modules={["Learning & LMS (130+)", "Goals (45+)", "Appraisals (50+)", "360 Feedback (35+)", "Continuous Performance (55+)", "Succession (95+)"]}
+        modules={["Learning & LMS (140+)", "Goals (45+)", "Appraisals (60+)", "360 Feedback (35+)", "Continuous Performance (60+)", "Career Development (45+)", "Succession (75+)"]}
       />
 
       <section id="learning" className="scroll-mt-20">
@@ -260,6 +261,10 @@ export function ProductCapabilitiesDocument() {
 
       <section id="continuous-performance" className="scroll-mt-20">
         <ContinuousPerformanceCapabilities />
+      </section>
+
+      <section id="career-development" className="scroll-mt-20">
+        <CareerDevelopmentCapabilities />
       </section>
 
       <section id="succession" className="scroll-mt-20">

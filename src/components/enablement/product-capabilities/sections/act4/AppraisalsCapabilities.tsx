@@ -27,7 +27,7 @@ export const AppraisalsCapabilities = () => {
       tagline="Transform evaluation from annual burden to development catalyst"
       overview="Configurable review cycles, multi-section templates, competency-based ratings, and AI-assisted calibration ensure fair, consistent, and meaningful evaluations. Every appraisal becomes a growth conversation, not a judgment day."
       accentColor="bg-rose-500/10 text-rose-600"
-      badge="50+ Capabilities"
+      badge="60+ Capabilities"
       id="appraisals"
     >
       <div className="space-y-6">
@@ -77,6 +77,7 @@ export const AppraisalsCapabilities = () => {
             <CapabilityItem>Development gaps capture with action items</CapabilityItem>
             <CapabilityItem>Comment and narrative sections with AI suggestions</CapabilityItem>
             <CapabilityItem>Evidence attachment for accomplishments</CapabilityItem>
+            <CapabilityItem>Full form preview before submission</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Appraisal Interviews" icon={Users}>
@@ -107,6 +108,15 @@ export const AppraisalsCapabilities = () => {
             <CapabilityItem>Rating distribution visualization</CapabilityItem>
           </CapabilityCategory>
 
+          <CapabilityCategory title="Dispute & Grievance Resolution" icon={Shield}>
+            <CapabilityItem>Employee dispute filing with 6 dispute categories (Rating, Comments, Goals, Competencies, Evidence, Process)</CapabilityItem>
+            <CapabilityItem>Dispute submission with evidence and justification documentation</CapabilityItem>
+            <CapabilityItem>Manager rebuttal and response workflow</CapabilityItem>
+            <CapabilityItem>HR dispute resolution queue with options (Uphold, Modify, Overturn)</CapabilityItem>
+            <CapabilityItem>Dispute audit trail and outcome documentation</CapabilityItem>
+            <CapabilityItem>Escalation paths for unresolved disputes</CapabilityItem>
+          </CapabilityCategory>
+
           <CapabilityCategory title="Appraisal Analytics" icon={BarChart3}>
             <CapabilityItem>Rating distribution analysis by department, level</CapabilityItem>
             <CapabilityItem>Completion tracking dashboards with drill-down</CapabilityItem>
@@ -115,6 +125,7 @@ export const AppraisalsCapabilities = () => {
             <CapabilityItem>AI-powered review quality insights</CapabilityItem>
             <CapabilityItem>Manager consistency scoring</CapabilityItem>
             <CapabilityItem>Competency gap reporting across organization</CapabilityItem>
+            <CapabilityItem>Performance Intelligence Hub with AI predictions and workforce insights</CapabilityItem>
           </CapabilityCategory>
         </div>
 
