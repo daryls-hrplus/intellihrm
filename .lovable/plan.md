@@ -1,58 +1,49 @@
 
 
-# Add Missing ESS Employee Relations Tabs + Fix Build
+# Exclude Enablement Module from Production Build
 
 ## Problem
-The ESS Employee Relations page (`MyEmployeeRelationsPage.tsx`) is missing 2 of the 6 planned tabs:
-1. **My Disciplinary** -- Employee should see their disciplinary history and acknowledge actions
-2. **My Exit Interview** -- Employee should see their exit interview details if one exists
+The production build consistently OOMs at ~3GB during the "rendering chunks" phase with 9,698 modules. The Enablement Center is the largest module (70+ components, 33 pages, product capabilities document with 30+ section files) and is only used by internal Intelli HRM staff, not client tenants.
 
-Additionally, there is a build **out-of-memory error** that needs resolution (likely from heavy imports in capabilities documents).
+## Approach
+Conditionally exclude the Enablement Center routes from the production build using an environment variable flag. This removes hundreds of modules from the build graph, bringing memory usage well under the 3GB limit.
 
 ## Changes
 
-### 1. Update `useEmployeeRelations.ts` Hook
-Add two new queries:
-- `disciplinaryActions`: Query `er_disciplinary_actions` filtered by `employee_id = user.id`
-- `exitInterviews`: Query `er_exit_interviews` filtered by `employee_id = user.id`
+### 1. Conditionally load Enablement routes in `src/App.tsx`
+- Wrap the `{EnablementAppRoutes()}` call with a build-time check using `import.meta.env.VITE_INCLUDE_ENABLEMENT`
+- When the variable is not set (production Lovable builds), enablement routes are excluded
+- When set to `"true"` (e.g., local dev or GitHub CI), enablement routes are included
+- In dev mode (`import.meta.env.DEV`), always include enablement routes so development is unaffected
 
-Add one new mutation:
-- `acknowledgeDisciplinary`: Update `er_disciplinary_actions` to set `acknowledged = true` and `acknowledged_at = now()`
+### 2. Update `vite.config.ts` chunking
+- Further split remaining large chunks (performance, admin, workforce pages) into dedicated chunks to ensure even without enablement, the build stays safely under limits
+- Add splits for more page directories (admin, performance, workforce, employee-relations, payroll, etc.)
 
-### 2. Update `MyEmployeeRelationsPage.tsx`
-Add two new tabs to the existing 4:
+### 3. No code is deleted
+- All enablement code stays in the codebase
+- It simply won't be included in the production bundle unless opted in
+- The `EnablementAccessGuard` already redirects non-internal users, so client tenants are unaffected
+- Internal staff access enablement via the dev preview or a GitHub-deployed build
 
-**Tab: My Disciplinary**
-- Table view: action type, date, status, description, acknowledged status
-- "Acknowledge" button for unacknowledged actions (inserts timestamp)
-- Empty state: "No disciplinary actions on record"
-- Add KPI card for count at top
-
-**Tab: My Exit Interview**
-- Card view: interview date, interviewer, status, satisfaction rating
-- Read-only (employees cannot edit exit interviews)
-- Empty state: "No exit interview scheduled"
-
-Update tab ordering to match enterprise lifecycle:
-1. My Recognition
-2. My Cases
-3. My Disciplinary (new)
-4. Surveys
-5. Wellness
-6. Exit Interview (new)
-
-Update summary cards: expand from 4 to 5 (add "Disciplinary Actions" count).
-
-### 3. Fix Out-of-Memory Build Error
-Investigate and optimize heavy imports in the capabilities document components. Likely fix: ensure no circular imports or duplicate large component trees.
-
-### Technical Details
+## Technical Details
 
 **Files modified:**
-- `src/hooks/useEmployeeRelations.ts` -- add disciplinary + exit interview queries/mutations
-- `src/pages/ess/MyEmployeeRelationsPage.tsx` -- add 2 new tabs, update KPI cards
+- `src/App.tsx` -- conditional enablement route inclusion
+- `vite.config.ts` -- more granular chunk splitting for remaining modules
 
-**Database tables used (no schema changes needed):**
-- `er_disciplinary_actions` (columns: employee_id, action_type, description, status, acknowledged, acknowledged_at, action_date)
-- `er_exit_interviews` (columns: employee_id, interview_date, interviewer_id, status, overall_satisfaction)
+**How it works:**
+```text
+Production (Lovable publish):
+  VITE_INCLUDE_ENABLEMENT not set --> EnablementAppRoutes() skipped
+  Result: ~9,000 modules removed from chunk rendering
+
+Development (local/preview):
+  import.meta.env.DEV = true --> EnablementAppRoutes() always included
+  Result: Full functionality available
+
+GitHub CI (optional):
+  VITE_INCLUDE_ENABLEMENT=true --> EnablementAppRoutes() included
+  Result: Full build with higher memory limit
+```
 
