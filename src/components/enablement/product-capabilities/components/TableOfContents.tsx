@@ -50,7 +50,7 @@ export function TableOfContents({ sections, activeSection, onNavigate }: TableOf
       <div key={section.id}>
         <div
           className={cn(
-            "flex items-center gap-1 py-1 px-2 rounded-md cursor-pointer transition-colors",
+            "flex items-start gap-1 py-1 px-2 rounded-md cursor-pointer transition-colors",
             isActive ? "bg-primary/10 text-primary" : "hover:bg-muted",
             depth > 0 && "ml-4"
           )}
@@ -76,7 +76,7 @@ export function TableOfContents({ sections, activeSection, onNavigate }: TableOf
             <FileText className="h-3 w-3 text-muted-foreground ml-0.5 mr-1" />
           )}
           <span className={cn(
-            "text-sm truncate",
+            "text-sm",
             section.level === 1 && "font-semibold",
             section.level === 2 && "font-medium"
           )}>
@@ -159,7 +159,7 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
     title: "Act 4: Develop & Grow (460+)",
     level: 1,
     children: [
-      { id: "learning", title: "Learning & LMS (140+)", level: 2 },
+      { id: "learning", title: "Learning & Development (140+)", level: 2 },
       { id: "goals", title: "Goals Management (45+)", level: 2 },
       { id: "appraisals", title: "Performance Appraisals (60+)", level: 2 },
       { id: "feedback-360", title: "360 Feedback (35+)", level: 2 },

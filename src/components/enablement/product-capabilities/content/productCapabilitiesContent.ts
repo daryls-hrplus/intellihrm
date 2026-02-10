@@ -113,7 +113,7 @@ export const MODULES_REGISTRY: Record<string, ModuleDefinition> = {
   benefits: { key: "benefits", name: "Benefits", icon: Gift, capabilities: 40, act: "act3" },
   
   // Act 4
-  learning: { key: "learning", name: "Learning & LMS", icon: GraduationCap, capabilities: 130, act: "act4" },
+  learning: { key: "learning", name: "Learning & Development", icon: GraduationCap, capabilities: 130, act: "act4" },
   goals: { key: "goals", name: "Goals & OKRs", icon: Target, capabilities: 45, act: "act4" },
   appraisals: { key: "appraisals", name: "Appraisals", icon: BarChart3, capabilities: 50, act: "act4" },
   feedback_360: { key: "feedback_360", name: "360 Feedback", icon: MessageSquare, capabilities: 35, act: "act4" },
@@ -239,7 +239,7 @@ export const ACTS: ActDefinition[] = [
     textColorRgb: [168, 85, 247],
     capabilities: 410,
     modules: [
-      { name: "Learning & LMS", count: 130, icon: GraduationCap },
+      { name: "Learning & Development", count: 130, icon: GraduationCap },
       { name: "Goals", count: 45, icon: Target },
       { name: "Appraisals", count: 50, icon: BarChart3 },
       { name: "360 Feedback", count: 35, icon: MessageSquare },

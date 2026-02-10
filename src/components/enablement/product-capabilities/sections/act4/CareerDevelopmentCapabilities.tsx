@@ -107,7 +107,7 @@ export const CareerDevelopmentCapabilities = () => {
         <ModuleIntegrations
           integrations={[
             { module: "Succession Planning", description: "Career readiness feeds succession pipelines" },
-            { module: "Learning & LMS", description: "Development plans link to training courses" },
+            { module: "Learning & Development", description: "Development plans link to training courses" },
             { module: "Performance", description: "Performance data drives development themes" },
             { module: "360 Feedback", description: "Feedback generates AI development themes" },
             { module: "Goals Management", description: "Career goals align with performance objectives" },

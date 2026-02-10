@@ -240,7 +240,7 @@ export function ProductCapabilitiesDocument() {
           "90%+ critical position coverage with identified successors",
           "Flight risk detection 6 months before resignation",
         ]}
-        modules={["Learning & LMS (140+)", "Goals (45+)", "Appraisals (60+)", "360 Feedback (35+)", "Continuous Performance (60+)", "Career Development (45+)", "Succession (75+)"]}
+        modules={["Learning & Development (140+)", "Goals (45+)", "Appraisals (60+)", "360 Feedback (35+)", "Continuous Performance (60+)", "Career Development (45+)", "Succession (75+)"]}
       />
 
       <section id="learning" className="scroll-mt-20">
