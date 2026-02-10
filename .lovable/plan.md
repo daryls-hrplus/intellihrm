@@ -1,91 +1,94 @@
 
 
-# Update WorkforceCapabilities.tsx to Close Remaining Gaps
+# Update Admin & Security and HR Hub Capability Components
 
 ## Problem
 
-The `WorkforceCapabilities.tsx` component renders hardcoded `<CapabilityCategory>` blocks -- it does **not** read from `capabilitiesData.ts`. While the data file was updated with new categories, the actual rendered document still shows the old 10 categories. Three entirely new categories are missing, and several existing ones need expanded items.
+Same root cause as Workforce: the section components render hardcoded content and do not read from `capabilitiesData.ts`. The data file was updated but the two Prologue rendering components were not.
 
-## Root Cause
+## Changes Required
 
-Each section component (e.g., `WorkforceCapabilities.tsx`, `RecruitmentCapabilities.tsx`) maintains its own hardcoded capability items. The `capabilitiesData.ts` file serves as a reference/registry but is not consumed by the section components for rendering.
+### File 1: `src/components/enablement/product-capabilities/sections/prologue/AdminSecurityCapabilities.tsx`
 
-Recruitment, Onboarding, and Offboarding components were already up to date. Only **Workforce Management** has gaps.
+#### 1. Update badge (line 21)
+Change `"75+ Capabilities"` to `"95+ Capabilities"`
 
-## Changes (Single File)
+#### 2. Expand "Organizational Scope Controls" (lines 156-167)
+Add 2 items:
+- Cross-company reporting relationships for corporate groups, joint ventures, and managed services
+- Company tag management with creation, assignment, and access-control integration
 
-**File:** `src/components/enablement/product-capabilities/sections/act1/WorkforceCapabilities.tsx`
+#### 3. Add new category: "ESS Administration" (~4 items)
+Insert after "Approval Workflows & Delegation" block (after line 181):
+- ESS module enablement with per-company on/off toggles for self-service features
+- ESS approval policy configuration with auto-approve, HR review, and full workflow modes
+- ESS field-level permissions controlling employee view/edit access per data domain
+- ESS setup wizard with guided configuration and validation checks
 
-### 1. Add new category: "Corporate Governance" (4 items)
-Insert after the existing "Compliance & Documentation" category (around line 240):
+Icon: `UserCog` (already imported)
 
-- Board of directors management with member profiles and term tracking
-- Management team composition and reporting structure
-- Board meeting scheduling and attendance tracking
-- Governance compliance reporting and oversight
+#### 4. Add new category: "Platform Configuration" (~8 items)
+Insert after ESS Administration:
+- Custom field engine with field type configuration, module assignment, validation rules, and display ordering
+- Brand customization with color scheme wizard, preset themes, and advanced CSS variable controls
+- Translation management console with AI-assisted generation, bulk import/export, and coverage analytics
+- Currency management with exchange rates, base currency configuration, and multi-currency support
+- Territory management with geographic hierarchy, region definitions, and territory-based scoping
+- Data management tools with sample data population, selective purge by module, and environment reset
+- System-wide notification preferences and delivery channel configuration
+- Platform health monitoring with usage analytics and capacity metrics
 
-Requires importing `Landmark` icon from lucide-react.
+Icon: `Settings` (already imported)
 
-### 2. Add new category: "Capability Framework" (5 items)
-Insert after Corporate Governance:
+#### 5. Add new category: "Multi-Tenant & Client Management" (~5 items)
+Insert after Platform Configuration:
+- Client registry with organization profiles, contact management, and status tracking
+- Client provisioning workflows with environment setup and configuration templates
+- Demo environment management with data seeding and automated teardown
+- Prospect journey tracking with pipeline stages and conversion analytics
+- Subscription management with plan tiers, billing cycles, and usage metering
 
-- Skills registry with proficiency levels and behavioral indicators
-- Competency framework management with job linkage
-- Organizational values definition with recognition alignment
-- Capability audit filters for governance gap identification
-- Capability-to-position mapping for talent architecture
+Icon: `Briefcase` (already imported)
 
-Requires importing `Puzzle` or `Boxes` icon from lucide-react.
+---
 
-### 3. Add new category: "Employee Assignments" (4 items)
-Insert after Capability Framework:
+### File 2: `src/components/enablement/product-capabilities/sections/prologue/HRHubCapabilities.tsx`
 
-- Multi-assignment management with concurrent position support
-- Acting and secondment assignment tracking with date ranges
-- Primary vs. secondary assignment designation
-- Assignment history and timeline visualization
+#### 1. Update badge (line 25)
+Change `"70+ Capabilities"` to `"85+ Capabilities"`
 
-Requires importing `UserCog` icon (already imported).
+#### 2. Expand "Daily Operations" (lines 106-117)
+Add 1 item:
+- Employee directory privacy configuration with field-level visibility controls per data type
 
-### 4. Expand "Organization Structure" category (line 144-156)
-Add items for divisions, org changes, and config:
+#### 3. Expand "Organization & Configuration" (lines 193-204)
+Add 2 items:
+- Reference data catalog with browsable system-wide lookup data, usage tracking, and data lineage
+- Company values management with definitions, icons, alignment to recognition programs, and performance frameworks
 
-- Division management with hierarchical parent-child relationships
-- Org changes reporting with historical comparison
-- Org structure configuration with hierarchy rule management
+#### 4. Add new category: "Company Intranet" (~5 items)
+Insert after "Integration Hub" block (after line 232):
+- Intranet content management with rich text articles, media embedding, and category organization
+- Company announcement publishing with targeted audience selection and scheduling
+- Banner management with priority ordering, display rules, and expiry dates
+- Company-scoped content visibility with multi-entity publishing controls
+- Content pinning, archival, and read-receipt tracking with analytics
 
-### 5. Expand "Employee Master Data" category (line 116-128)
-Add items for qualifications and responsibilities:
+Icon: `Globe` or `Newspaper` (needs import from lucide-react)
 
-- Responsibility catalog with categorization and ownership
-- Academic qualification tracking with institution and date management
-- Professional certification management with expiry alerts
-
-### 6. Expand "Position Management" category (line 158-170)
-Add items for position control and vacancies:
-
-- Position control dashboard with fill rate analytics
-- Vacancy-to-requisition conversion workflow with recruitment linkage
-
-### 7. Expand "Lifecycle Transactions" category (line 186-198)
-Add items for transaction dashboard and expanded types:
-
-- Transaction dashboard with module-based categorization (Entry, Movement, Exit, Compensation, Status)
-- Contract extensions and conversions
-- Probation confirmation and extension processing
-
-### 8. Update module badge
-Update the `badge` prop on the `ModuleCapabilityCard` (line 30 area) from whatever the current value is to `"195+ Capabilities"`.
+---
 
 ## What Does Not Change
 
 - `capabilitiesData.ts` -- already updated
 - `TableOfContents.tsx` -- already updated
 - `ProductCapabilitiesDocument.tsx` -- already updated
-- `RecruitmentCapabilities.tsx` -- already has all needed categories
-- `OffboardingCapabilities.tsx` -- already has all needed categories
-- `OnboardingCapabilities.tsx` -- no gaps identified
+- `WorkforceCapabilities.tsx` -- already updated
+- `RecruitmentCapabilities.tsx` -- already up to date
+- `OnboardingCapabilities.tsx` -- already up to date
+- `OffboardingCapabilities.tsx` -- already up to date
 
-## Note on Build Error
+## Note on Build OOM
 
-The OOM error (heap out of memory during build) is a pre-existing infrastructure issue caused by the project's 9,697 modules exceeding the 3GB heap limit. It is unrelated to these content changes.
+The OOM error is a pre-existing infrastructure issue (9,697 modules, 3GB heap limit). These text-only edits do not add modules or imports.
+
