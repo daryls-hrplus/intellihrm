@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +22,7 @@ interface ERUnionsTabProps {
 
 export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAgreementDialogOpen, setIsAgreementDialogOpen] = useState(false);
@@ -477,7 +477,15 @@ export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
                     <TableRow 
                       key={agreement.id} 
                       className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => navigate(`/employee-relations/cba/${agreement.id}`)}
+                      onClick={() => navigateToRecord({
+                        route: `/employee-relations/cba/${agreement.id}`,
+                        title: agreement.title,
+                        subtitle: "CBA",
+                        moduleCode: "employee_relations",
+                        contextType: "cba",
+                        contextId: agreement.id,
+                        icon: FileText,
+                      })}
                     >
                       <TableCell className="font-mono">{agreement.agreement_number || '-'}</TableCell>
                       <TableCell>{agreement.unions?.name}</TableCell>

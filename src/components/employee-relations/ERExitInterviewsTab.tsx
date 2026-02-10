@@ -10,10 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Slider } from "@/components/ui/slider";
-import { Plus, Search, Loader2, LogOut, Eye, Star } from 'lucide-react';
+import { Plus, Search, Loader2, LogOut, Eye, Star, User } from 'lucide-react';
 import { useEmployeeRelations, ERExitInterview } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 
 const DEPARTURE_REASONS = ['resignation', 'retirement', 'termination', 'layoff', 'other'];
 const STATUSES = ['scheduled', 'completed', 'cancelled'];
@@ -25,6 +26,7 @@ interface ERExitInterviewsTabProps {
 export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { exitInterviews, loadingExitInterviews, createExitInterview, updateExitInterview } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -221,7 +223,20 @@ export function ERExitInterviewsTab({ companyId }: ERExitInterviewsTabProps) {
                 <TableRow key={interview.id}>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{interview.employee?.full_name}</p>
+                      <button
+                        className="font-medium text-primary hover:underline cursor-pointer"
+                        onClick={() => interview.employee_id && navigateToRecord({
+                          route: `/workforce/employees/${interview.employee_id}`,
+                          title: interview.employee?.full_name || 'Employee',
+                          subtitle: "Employee",
+                          moduleCode: "workforce",
+                          contextType: "employee",
+                          contextId: interview.employee_id,
+                          icon: User,
+                        })}
+                      >
+                        {interview.employee?.full_name}
+                      </button>
                       <p className="text-xs text-muted-foreground">{interview.employee?.email}</p>
                     </div>
                   </TableCell>

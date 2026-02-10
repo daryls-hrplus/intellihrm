@@ -9,10 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Loader2, Eye, AlertCircle } from 'lucide-react';
+import { Plus, Search, Loader2, Eye, AlertCircle, User } from 'lucide-react';
 import { useEmployeeRelations, ERCase } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 
 const CASE_TYPES = ['grievance', 'complaint', 'investigation', 'harassment', 'discrimination', 'conflict'];
 const CATEGORIES = ['workplace_safety', 'harassment', 'discrimination', 'policy_violation', 'manager_conflict', 'peer_conflict', 'compensation', 'other'];
@@ -26,6 +27,7 @@ interface ERCasesTabProps {
 export function ERCasesTab({ companyId }: ERCasesTabProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { cases, loadingCases, createCase, updateCase } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -265,7 +267,22 @@ export function ERCasesTab({ companyId }: ERCasesTabProps) {
                   <TableCell>
                     <div>
                       <p className="font-medium">{c.title}</p>
-                      {c.employee && <p className="text-xs text-muted-foreground">{c.employee.full_name}</p>}
+                      {c.employee && (
+                        <button
+                          className="text-xs text-primary hover:underline cursor-pointer"
+                          onClick={() => navigateToRecord({
+                            route: `/workforce/employees/${c.employee_id}`,
+                            title: c.employee.full_name || 'Employee',
+                            subtitle: "Employee",
+                            moduleCode: "workforce",
+                            contextType: "employee",
+                            contextId: c.employee_id,
+                            icon: User,
+                          })}
+                        >
+                          {c.employee.full_name}
+                        </button>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="capitalize">

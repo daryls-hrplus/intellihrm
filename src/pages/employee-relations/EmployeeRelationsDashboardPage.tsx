@@ -31,6 +31,10 @@ interface Stats {
   pendingGrievances: number;
   recognitionsThisMonth: number;
   activeUnions: number;
+  activeDisciplinary: number;
+  pendingExits: number;
+  activeSurveys: number;
+  wellnessPrograms: number;
 }
 
 export default function EmployeeRelationsDashboardPage() {
@@ -82,11 +86,15 @@ export default function EmployeeRelationsDashboardPage() {
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      const [casesRes, grievancesRes, recognitionsRes, unionsRes] = await Promise.all([
+      const [casesRes, grievancesRes, recognitionsRes, unionsRes, disciplinaryRes, exitsRes, surveysRes, wellnessRes] = await Promise.all([
         supabase.from("er_cases").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("status", "open"),
         supabase.from("grievances").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).in("status", ["filed", "under_review", "in_progress"]),
         supabase.from("er_recognition").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).gte("award_date", startOfMonth.toISOString().split('T')[0]),
         supabase.from("unions").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("is_active", true),
+        supabase.from("er_disciplinary_actions").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("status", "active"),
+        supabase.from("er_exit_interviews").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("status", "scheduled"),
+        supabase.from("er_surveys").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("status", "active"),
+        supabase.from("er_wellness_programs").select("id", { count: "exact", head: true }).eq("company_id", selectedCompanyId).eq("status", "active"),
       ]);
 
       return {
@@ -94,6 +102,10 @@ export default function EmployeeRelationsDashboardPage() {
         pendingGrievances: grievancesRes.count || 0,
         recognitionsThisMonth: recognitionsRes.count || 0,
         activeUnions: unionsRes.count || 0,
+        activeDisciplinary: disciplinaryRes.count || 0,
+        pendingExits: exitsRes.count || 0,
+        activeSurveys: surveysRes.count || 0,
+        wellnessPrograms: wellnessRes.count || 0,
       };
     },
     enabled: !!selectedCompanyId,
@@ -123,29 +135,37 @@ export default function EmployeeRelationsDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "Cases & Disciplinary",
-      items: filterByAccess([allModules.cases, allModules.disciplinary, allModules.grievances]),
+      titleKey: "Case & Dispute Resolution",
+      items: filterByAccess([allModules.cases, allModules.grievances, allModules.disciplinary]),
     },
     {
-      titleKey: "Recognition & Engagement",
+      titleKey: "Employee Engagement",
       items: filterByAccess([allModules.recognition, allModules.surveys, allModules.wellness]),
     },
     {
-      titleKey: "Exit & Legal",
-      items: filterByAccess([allModules.exitInterviews, allModules.unions, allModules.courtJudgements]),
+      titleKey: "Union & Labor Relations",
+      items: filterByAccess([allModules.unions, allModules.courtJudgements]),
     },
     {
-      titleKey: "Analytics",
+      titleKey: "Workforce Transitions",
+      items: filterByAccess([allModules.exitInterviews]),
+    },
+    {
+      titleKey: "Insights & Reporting",
       items: filterByAccess([allModules.analytics]),
     },
   ];
 
-  const currentStats: Stats = stats || { openCases: 0, pendingGrievances: 0, recognitionsThisMonth: 0, activeUnions: 0 };
+  const currentStats: Stats = stats || { openCases: 0, pendingGrievances: 0, recognitionsThisMonth: 0, activeUnions: 0, activeDisciplinary: 0, pendingExits: 0, activeSurveys: 0, wellnessPrograms: 0 };
 
   const statCards = [
     { label: t("employeeRelationsModule.stats.openCases"), value: currentStats.openCases, icon: AlertTriangle, color: "bg-warning/10 text-warning" },
     { label: t("employeeRelationsModule.stats.pendingGrievances"), value: currentStats.pendingGrievances, icon: FileText, color: "bg-orange-500/10 text-orange-500" },
+    { label: t("employeeRelationsModule.stats.activeDisciplinary", "Active Disciplinary"), value: currentStats.activeDisciplinary, icon: Scale, color: "bg-destructive/10 text-destructive" },
     { label: t("employeeRelationsModule.stats.recognitionsThisMonth"), value: currentStats.recognitionsThisMonth, icon: Award, color: "bg-amber-500/10 text-amber-500" },
+    { label: t("employeeRelationsModule.stats.activeSurveys", "Active Surveys"), value: currentStats.activeSurveys, icon: MessageSquare, color: "bg-info/10 text-info" },
+    { label: t("employeeRelationsModule.stats.wellnessPrograms", "Wellness Programs"), value: currentStats.wellnessPrograms, icon: Activity, color: "bg-success/10 text-success" },
+    { label: t("employeeRelationsModule.stats.pendingExits", "Pending Exits"), value: currentStats.pendingExits, icon: DoorOpen, color: "bg-cyan-500/10 text-cyan-500" },
     { label: t("employeeRelationsModule.stats.activeUnions"), value: currentStats.activeUnions, icon: Users, color: "bg-primary/10 text-primary" },
   ];
 
@@ -205,7 +225,7 @@ export default function EmployeeRelationsDashboardPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - 2 rows of 4 */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 animate-slide-up">
           {statCards.map((stat, index) => {
             const Icon = stat.icon;

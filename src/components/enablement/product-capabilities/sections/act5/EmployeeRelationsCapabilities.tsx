@@ -1,7 +1,7 @@
 import { 
   Scale, FileText, Users, AlertCircle, Handshake, LogOut, 
   Award, ClipboardList, Heart, Gavel, ClipboardCheck, ShieldCheck,
-  HeartHandshake, BarChart3
+  HeartHandshake, BarChart3, MessageSquare, Brain, UserCheck, Briefcase
 } from "lucide-react";
 import { ModuleCapabilityCard } from "../../components/ModuleCapabilityCard";
 import { CapabilityCategory, CapabilityItem } from "../../components/CapabilityCategory";
@@ -32,7 +32,7 @@ export const EmployeeRelationsCapabilities = () => {
       tagline="Fair, consistent, and compliant employee management"
       overview="Manage the full spectrum of employee relations from grievances to disciplinary actions. From recognition programs to wellness initiatives, from exit insights to union relations—every case is documented, every decision is defensible, and every pattern is visible. AI detects emerging issues before they escalate."
       accentColor="bg-red-500/10 text-red-600"
-      badge="95+ Capabilities"
+      badge="130+ Capabilities"
       id="employee-relations"
     >
       <div className="space-y-6">
@@ -78,6 +78,7 @@ export const EmployeeRelationsCapabilities = () => {
             <CapabilityItem>Employee acknowledgment capture</CapabilityItem>
             <CapabilityItem>Expiry and purge scheduling</CapabilityItem>
             <CapabilityItem>Disciplinary history tracking</CapabilityItem>
+            <CapabilityItem>Compliance document generation</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Recognition Programs" icon={Award}>
@@ -92,15 +93,16 @@ export const EmployeeRelationsCapabilities = () => {
             <CapabilityItem>Values-aligned recognition</CapabilityItem>
           </CapabilityCategory>
 
-          <CapabilityCategory title="Employee Surveys" icon={ClipboardList}>
-            <CapabilityItem>Survey template creation</CapabilityItem>
-            <CapabilityItem>Engagement survey deployment</CapabilityItem>
-            <CapabilityItem>Pulse survey scheduling</CapabilityItem>
+          <CapabilityCategory title="Pulse Surveys & Sentiment Analysis" icon={MessageSquare}>
+            <CapabilityItem>Survey template creation and deployment</CapabilityItem>
+            <CapabilityItem>Pulse survey scheduling (recurring/one-time)</CapabilityItem>
             <CapabilityItem>Anonymous response collection</CapabilityItem>
-            <CapabilityItem>Response analytics and trending</CapabilityItem>
-            <CapabilityItem>Action planning from results</CapabilityItem>
-            <CapabilityItem>Survey completion tracking</CapabilityItem>
-            <CapabilityItem>Benchmarking capabilities</CapabilityItem>
+            <CapabilityItem>Real-time sentiment dashboard</CapabilityItem>
+            <CapabilityItem>Employee Net Promoter Score (eNPS) analytics</CapabilityItem>
+            <CapabilityItem>Manager coaching nudges from survey data</CapabilityItem>
+            <CapabilityItem>Response rate tracking and reminders</CapabilityItem>
+            <CapabilityItem>Trend analysis and benchmarking</CapabilityItem>
+            <CapabilityItem>Action planning from survey results</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Wellness Programs" icon={Heart}>
@@ -125,6 +127,18 @@ export const EmployeeRelationsCapabilities = () => {
             <CapabilityItem>Meeting and negotiation scheduling</CapabilityItem>
           </CapabilityCategory>
 
+          <CapabilityCategory title="CBA Intelligence" icon={Brain}>
+            <CapabilityItem>AI-powered CBA document import wizard</CapabilityItem>
+            <CapabilityItem>Automated article and clause extraction</CapabilityItem>
+            <CapabilityItem>Rule and time-rule detection</CapabilityItem>
+            <CapabilityItem>Unsupported rule flagging and review</CapabilityItem>
+            <CapabilityItem>CBA violation tracking and alerts</CapabilityItem>
+            <CapabilityItem>Negotiation round management</CapabilityItem>
+            <CapabilityItem>Proposal and counter-proposal tracking</CapabilityItem>
+            <CapabilityItem>Amendment and extension workflows</CapabilityItem>
+            <CapabilityItem>CBA compliance scoring</CapabilityItem>
+          </CapabilityCategory>
+
           <CapabilityCategory title="Industrial Relations" icon={Handshake}>
             <CapabilityItem>Labor dispute tracking</CapabilityItem>
             <CapabilityItem>Agreement version control</CapabilityItem>
@@ -143,18 +157,35 @@ export const EmployeeRelationsCapabilities = () => {
             <CapabilityItem>Cost tracking</CapabilityItem>
             <CapabilityItem>Settlement management</CapabilityItem>
             <CapabilityItem>Compliance implications tracking</CapabilityItem>
+            <CapabilityItem>Keyword search and precedent matching</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Exit Management" icon={LogOut}>
             <CapabilityItem>Resignation processing workflows</CapabilityItem>
             <CapabilityItem>Exit interview scheduling and forms</CapabilityItem>
-            <CapabilityItem>Clearance checklist management</CapabilityItem>
+            <CapabilityItem>Multi-dimension satisfaction scoring (6 areas)</CapabilityItem>
             <CapabilityItem>Final settlement tracking</CapabilityItem>
             <CapabilityItem>Knowledge transfer documentation</CapabilityItem>
             <CapabilityItem>Exit survey analysis</CapabilityItem>
             <CapabilityItem>Departure reason trending</CapabilityItem>
-            <CapabilityItem>Alumni network management</CapabilityItem>
             <CapabilityItem>Rehire eligibility tracking</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Employee Self-Service (ESS)" icon={UserCheck}>
+            <CapabilityItem>View personal cases and track status</CapabilityItem>
+            <CapabilityItem>Submit workplace concerns (with confidential option)</CapabilityItem>
+            <CapabilityItem>View recognition received</CapabilityItem>
+            <CapabilityItem>Respond to active pulse surveys</CapabilityItem>
+            <CapabilityItem>Browse and enroll in wellness programs</CapabilityItem>
+            <CapabilityItem>Summary KPI cards (cases, recognition, surveys, wellness)</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Manager Self-Service (MSS)" icon={Briefcase}>
+            <CapabilityItem>View team cases and case status</CapabilityItem>
+            <CapabilityItem>Give recognition to direct reports</CapabilityItem>
+            <CapabilityItem>Team recognition history</CapabilityItem>
+            <CapabilityItem>Team case summary KPIs</CapabilityItem>
+            <CapabilityItem>Cross-module drill-down to employee profiles</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Offboarding Workflows" icon={ClipboardCheck}>
@@ -192,16 +223,20 @@ export const EmployeeRelationsCapabilities = () => {
             <CapabilityItem>Recognition distribution</CapabilityItem>
             <CapabilityItem>Engagement score tracking</CapabilityItem>
             <CapabilityItem>AI-powered risk identification</CapabilityItem>
+            <CapabilityItem>Dashboard with 8 real-time KPI cards</CapabilityItem>
           </CapabilityCategory>
         </div>
 
         <AIFeatureHighlight>
           <AICapability type="predictive">Case outcome probability scoring</AICapability>
           <AICapability type="prescriptive">Escalation recommendations based on case type</AICapability>
-          <AICapability type="automated">Sentiment analysis in exit interview feedback</AICapability>
+          <AICapability type="automated">Sentiment analysis in exit interview and survey feedback</AICapability>
           <AICapability type="predictive">Pattern detection in grievances by manager/department</AICapability>
           <AICapability type="prescriptive">Retention risk correlation from ER data</AICapability>
           <AICapability type="automated">Suggested resolutions based on similar cases</AICapability>
+          <AICapability type="automated">AI-powered CBA document extraction and rule parsing</AICapability>
+          <AICapability type="prescriptive">Manager coaching nudges from pulse survey trends</AICapability>
+          <AICapability type="predictive">eNPS trend forecasting and engagement risk alerts</AICapability>
         </AIFeatureHighlight>
 
         <RegionalBadge regions={["Caribbean", "Africa"]}>
@@ -210,11 +245,13 @@ export const EmployeeRelationsCapabilities = () => {
 
         <ModuleIntegrations
           integrations={[
-            { module: "Workforce", description: "Employee and manager data" },
+            { module: "Workforce", description: "Employee profile drill-down from all ER pages" },
             { module: "Payroll", description: "Final settlement calculations" },
             { module: "Company Property", description: "Asset return tracking" },
             { module: "Health & Safety", description: "Workers' comp coordination" },
             { module: "Performance", description: "Disciplinary context" },
+            { module: "ESS Portal", description: "Employee case submission and survey response" },
+            { module: "MSS Portal", description: "Team case oversight and recognition" },
           ]}
         />
       </div>

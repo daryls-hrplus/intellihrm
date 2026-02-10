@@ -14,10 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Plus, Scale, FileText, Search, Loader2, ClipboardList, MoreVertical } from 'lucide-react';
+import { Plus, Scale, FileText, Search, Loader2, ClipboardList, MoreVertical, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 import { ComplianceDocumentGenerator } from '@/components/compliance/ComplianceDocumentGenerator';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 
 interface ERGrievancesTabProps {
   companyId: string;
@@ -31,6 +32,7 @@ const GRIEVANCE_STATUSES = ['filed', 'under_review', 'in_progress', 'escalated',
 export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProcedureDialogOpen, setIsProcedureDialogOpen] = useState(false);
@@ -550,7 +552,22 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
                     {filteredGrievances.map((grievance: any) => (
                       <TableRow key={grievance.id}>
                         <TableCell className="font-mono text-sm">{grievance.grievance_number}</TableCell>
-                        <TableCell>{grievance.profiles?.full_name}</TableCell>
+                        <TableCell>
+                          <button
+                            className="text-primary hover:underline cursor-pointer"
+                            onClick={() => grievance.employee_id && navigateToRecord({
+                              route: `/workforce/employees/${grievance.employee_id}`,
+                              title: grievance.profiles?.full_name || 'Employee',
+                              subtitle: "Employee",
+                              moduleCode: "workforce",
+                              contextType: "employee",
+                              contextId: grievance.employee_id,
+                              icon: User,
+                            })}
+                          >
+                            {grievance.profiles?.full_name}
+                          </button>
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {grievance.title}

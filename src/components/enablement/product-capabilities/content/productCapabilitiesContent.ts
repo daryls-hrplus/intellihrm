@@ -122,7 +122,7 @@ export const MODULES_REGISTRY: Record<string, ModuleDefinition> = {
   
   // Act 5
   health_safety: { key: "health_safety", name: "Health & Safety", icon: Heart, capabilities: 135, act: "act5" },
-  employee_relations: { key: "employee_relations", name: "Employee Relations", icon: Scale, capabilities: 95, act: "act5" },
+  employee_relations: { key: "employee_relations", name: "Employee Relations", icon: Scale, capabilities: 130, act: "act5" },
   company_property: { key: "company_property", name: "Company Property", icon: Package, capabilities: 65, act: "act5" },
   
   // Epilogue
@@ -265,7 +265,7 @@ export const ACTS: ActDefinition[] = [
     capabilities: 280,
     modules: [
       { name: "Health & Safety", count: 120, icon: Heart },
-      { name: "Employee Relations", count: 95, icon: Scale },
+      { name: "Employee Relations", count: 130, icon: Scale },
       { name: "Company Property", count: 65, icon: Package },
     ],
     keyOutcomes: [

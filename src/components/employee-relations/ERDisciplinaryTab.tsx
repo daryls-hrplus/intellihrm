@@ -10,11 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Loader2, Scale, CheckCircle, FileText, MoreVertical } from 'lucide-react';
+import { Plus, Search, Loader2, Scale, CheckCircle, FileText, MoreVertical, User } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 import { ComplianceDocumentGenerator } from '@/components/compliance/ComplianceDocumentGenerator';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 
 const ACTION_TYPES = ['verbal_warning', 'written_warning', 'final_warning', 'suspension', 'demotion', 'termination'];
 const SEVERITIES = ['minor', 'moderate', 'major', 'severe'];
@@ -26,6 +27,7 @@ interface ERDisciplinaryTabProps {
 export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { disciplinaryActions, loadingDisciplinary, createDisciplinaryAction, updateDisciplinaryAction } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -262,7 +264,20 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
                 <TableRow key={action.id}>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{action.employee?.full_name}</p>
+                      <button
+                        className="font-medium text-primary hover:underline cursor-pointer"
+                        onClick={() => action.employee_id && navigateToRecord({
+                          route: `/workforce/employees/${action.employee_id}`,
+                          title: action.employee?.full_name || 'Employee',
+                          subtitle: "Employee",
+                          moduleCode: "workforce",
+                          contextType: "employee",
+                          contextId: action.employee_id,
+                          icon: User,
+                        })}
+                      >
+                        {action.employee?.full_name}
+                      </button>
                       <p className="text-xs text-muted-foreground">{action.employee?.email}</p>
                     </div>
                   </TableCell>

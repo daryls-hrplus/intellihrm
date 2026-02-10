@@ -174,7 +174,7 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
     level: 1,
     children: [
       { id: "health-safety", title: "Health & Safety (120+)", level: 2 },
-      { id: "employee-relations", title: "Employee Relations (95+)", level: 2 },
+      { id: "employee-relations", title: "Employee Relations (130+)", level: 2 },
       { id: "company-property", title: "Company Property (65+)", level: 2 },
     ],
   },
