@@ -14,7 +14,7 @@ export function MSSCapabilities() {
       tagline="Equip managers with real-time team insights"
       overview="Unified manager portal providing team oversight, unified approvals, performance management, and workforce action capabilities—with AI that surfaces risks before they become crises."
       accentColor="bg-emerald-500/10 text-emerald-500"
-      badge="90+ Capabilities"
+      badge="100+ Capabilities"
     >
       <div className="space-y-6">
         {/* Value Story Header */}
@@ -79,6 +79,8 @@ export function MSSCapabilities() {
             <CapabilityItem>Offboarding coordination and exit interviews</CapabilityItem>
             <CapabilityItem>Acting assignment management</CapabilityItem>
             <CapabilityItem>Job requisition creation and approval</CapabilityItem>
+            <CapabilityItem>Team payroll consolidation with variance analysis and cost trends</CapabilityItem>
+            <CapabilityItem>Team reminders and to-do management for pending actions</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Team Time & Attendance" icon={Clock}>
@@ -119,6 +121,8 @@ export function MSSCapabilities() {
             <CapabilityItem>9-Box review and calibration input</CapabilityItem>
             <CapabilityItem>High-potential identification and tracking</CapabilityItem>
             <CapabilityItem>Career path guidance for direct reports</CapabilityItem>
+            <CapabilityItem>Succession readiness assessment for direct reports</CapabilityItem>
+            <CapabilityItem>Talent pool nomination with justification and criteria</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Recognition & Engagement" icon={Award}>
@@ -140,6 +144,8 @@ export function MSSCapabilities() {
             <CapabilityItem>Cost center analytics and budget tracking</CapabilityItem>
             <CapabilityItem>Headcount trend visualization</CapabilityItem>
             <CapabilityItem>Performance distribution analysis</CapabilityItem>
+            <CapabilityItem>Compa-ratio monitoring across team members</CapabilityItem>
+            <CapabilityItem>Pay equity analysis with gap identification and recommendations</CapabilityItem>
           </CapabilityCategory>
         </div>
 

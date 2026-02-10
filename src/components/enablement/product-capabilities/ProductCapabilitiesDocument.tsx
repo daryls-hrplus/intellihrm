@@ -165,7 +165,7 @@ export function ProductCapabilitiesDocument() {
           "99.9% time accuracy with geofencing",
           "Zero compliance violations on leave",
         ]}
-        modules={["Employee Self-Service", "Manager Self-Service", "Time & Attendance", "Leave Management"]}
+        modules={["Employee Self-Service (90+)", "Manager Self-Service (100+)", "Time & Attendance (135+)", "Leave Management (95+)"]}
       />
 
       <section id="ess" className="scroll-mt-20">

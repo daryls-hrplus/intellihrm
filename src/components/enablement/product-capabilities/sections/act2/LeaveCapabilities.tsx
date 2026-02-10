@@ -15,7 +15,7 @@ export function LeaveCapabilities() {
       tagline="Flexible leave policies for every scenario"
       overview="Comprehensive leave administration with configurable types, accrual rules, self-service requests, compliance tracking, and liability forecasting—handling every leave scenario across multiple countries."
       accentColor="bg-emerald-500/10 text-emerald-500"
-      badge="80+ Capabilities"
+      badge="95+ Capabilities"
     >
       <div className="space-y-6">
         {/* Value Story Header */}
@@ -58,6 +58,7 @@ export function LeaveCapabilities() {
             <CapabilityItem>Accrual log and history tracking</CapabilityItem>
             <CapabilityItem>Balance recalculation tools</CapabilityItem>
             <CapabilityItem>Tenure-based bonus entitlements</CapabilityItem>
+            <CapabilityItem>Pro-rata calculation methods with company-level configuration</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Rollover & Expiry" icon={AlertTriangle}>
@@ -89,6 +90,7 @@ export function LeaveCapabilities() {
             <CapabilityItem>Year-end processing automation</CapabilityItem>
             <CapabilityItem>Balance audit trail</CapabilityItem>
             <CapabilityItem>Leave liability calculations</CapabilityItem>
+            <CapabilityItem>Bulk balance recalculation with audit logging</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Leave Encashment" icon={DollarSign}>
@@ -130,6 +132,8 @@ export function LeaveCapabilities() {
             <CapabilityItem>Peak period restrictions</CapabilityItem>
             <CapabilityItem>Department-level blackouts</CapabilityItem>
             <CapabilityItem>Exception approval workflows</CapabilityItem>
+            <CapabilityItem>Conflict rule engine with department limits and role restrictions</CapabilityItem>
+            <CapabilityItem>Concurrent leave caps with configurable thresholds</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Public Holidays" icon={Globe}>
@@ -140,6 +144,20 @@ export function LeaveCapabilities() {
             <CapabilityItem>Holiday pay rules integration</CapabilityItem>
             <CapabilityItem>Floating holiday management</CapabilityItem>
             <CapabilityItem>Company-specific holidays</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Leave Year & Period Management" icon={Clock}>
+            <CapabilityItem>Leave year definitions with fiscal and calendar alignment</CapabilityItem>
+            <CapabilityItem>Period locking and finalization controls</CapabilityItem>
+            <CapabilityItem>Year-end processing automation with rollover execution</CapabilityItem>
+            <CapabilityItem>Multi-year balance tracking and history</CapabilityItem>
+            <CapabilityItem>Leave period transition rules and validation</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Compensatory Time" icon={DollarSign}>
+            <CapabilityItem>Compensatory time policy configuration linked to overtime</CapabilityItem>
+            <CapabilityItem>Comp time balance management and usage tracking</CapabilityItem>
+            <CapabilityItem>Comp time earning rules with approval workflows</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Compliance & Liability" icon={FileText}>

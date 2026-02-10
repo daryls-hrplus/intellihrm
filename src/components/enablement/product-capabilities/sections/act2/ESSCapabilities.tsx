@@ -1,4 +1,4 @@
-import { User, Inbox, FileText, Clock, Target, CreditCard, Award, Bell, Briefcase } from "lucide-react";
+import { User, Inbox, FileText, Clock, Target, CreditCard, Award, Bell, Briefcase, RefreshCw, Layers } from "lucide-react";
 import { ModuleCapabilityCard } from "../../components/ModuleCapabilityCard";
 import { CapabilityCategory, CapabilityItem } from "../../components/CapabilityCategory";
 import { AIFeatureHighlight, AICapability } from "../../components/AIFeatureHighlight";
@@ -14,7 +14,7 @@ export function ESSCapabilities() {
       tagline="Empower employees with 24/7 HR access"
       overview="Comprehensive self-service portal enabling employees to manage their personal information, time, pay, and career development independently—reducing HR burden while increasing employee satisfaction."
       accentColor="bg-emerald-500/10 text-emerald-500"
-      badge="75+ Capabilities"
+      badge="90+ Capabilities"
     >
       <div className="space-y-6">
         {/* Value Story Header */}
@@ -55,6 +55,9 @@ export function ESSCapabilities() {
             <CapabilityItem>Government ID viewing (TRN, NIS, NHT, SSN, BIR)</CapabilityItem>
             <CapabilityItem>Address change with effective dating</CapabilityItem>
             <CapabilityItem>Professional certifications and qualifications</CapabilityItem>
+            <CapabilityItem>Immigration and work permit document management</CapabilityItem>
+            <CapabilityItem>Medical information profile with conditions and emergency data</CapabilityItem>
+            <CapabilityItem>Personal interests for culture and team-building alignment</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Time & Leave" icon={Clock}>
@@ -119,6 +122,23 @@ export function ESSCapabilities() {
             <CapabilityItem>Reminders and to-do lists</CapabilityItem>
             <CapabilityItem>Milestone celebrations (birthday, anniversary)</CapabilityItem>
             <CapabilityItem>Team directory and org chart navigation</CapabilityItem>
+            <CapabilityItem>Personal work calendar with leave, meetings, and milestones</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Lifecycle & Requests" icon={RefreshCw}>
+            <CapabilityItem>My Transactions dashboard with module-based categorization and filtering</CapabilityItem>
+            <CapabilityItem>Change request submission, tracking, and status monitoring</CapabilityItem>
+            <CapabilityItem>Onboarding task checklist with progress tracking</CapabilityItem>
+            <CapabilityItem>Offboarding task coordination and exit workflow</CapabilityItem>
+            <CapabilityItem>Request status tracking with document upload support</CapabilityItem>
+            <CapabilityItem>Historical request archive with search and filtering</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Cross-Module Self-Service" icon={Layers}>
+            <CapabilityItem>HSE incident reporting and safety training compliance tracking</CapabilityItem>
+            <CapabilityItem>Employee relations grievance submission and case tracking</CapabilityItem>
+            <CapabilityItem>Company property viewing, return coordination, and asset history</CapabilityItem>
+            <CapabilityItem>Professional info management (credentials, agreements, compliance, languages)</CapabilityItem>
           </CapabilityCategory>
         </div>
 

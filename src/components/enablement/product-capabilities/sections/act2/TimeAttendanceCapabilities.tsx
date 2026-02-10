@@ -15,7 +15,7 @@ export function TimeAttendanceCapabilities() {
       tagline="Accurate time tracking with intelligent compliance"
       overview="Comprehensive time management with multiple clock methods, geofencing validation, shift scheduling, overtime control, and seamless payroll integration—with AI-powered anomaly detection and compliance automation."
       accentColor="bg-emerald-500/10 text-emerald-500"
-      badge="120+ Capabilities"
+      badge="135+ Capabilities"
     >
       <div className="space-y-6">
         {/* Value Story Header */}
@@ -68,6 +68,12 @@ export function TimeAttendanceCapabilities() {
             <CapabilityItem>Schedule conflict detection</CapabilityItem>
             <CapabilityItem>Shift differentials by time/day configuration</CapabilityItem>
             <CapabilityItem>Shift rounding rules configuration</CapabilityItem>
+            <CapabilityItem>Reusable shift pattern templates with assignment</CapabilityItem>
+            <CapabilityItem>Visual shift calendar with drag-and-drop assignment</CapabilityItem>
+            <CapabilityItem>Employee-to-shift assignment management</CapabilityItem>
+            <CapabilityItem>Complex rotation pattern configuration</CapabilityItem>
+            <CapabilityItem>Shift-specific payment rule configuration (percentage, flat, multiplier)</CapabilityItem>
+            <CapabilityItem>Shift-level punch rounding rule overrides</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Overtime Control" icon={AlertTriangle}>
@@ -141,6 +147,14 @@ export function TimeAttendanceCapabilities() {
             <CapabilityItem>Coverage snapshot tracking</CapabilityItem>
             <CapabilityItem>Cost projection by schedule</CapabilityItem>
             <CapabilityItem>Schedule optimization suggestions</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Advanced Scheduling" icon={Calendar}>
+            <CapabilityItem>AI-powered schedule generation with demand forecasting</CapabilityItem>
+            <CapabilityItem>Multi-location schedule coordination and resource sharing</CapabilityItem>
+            <CapabilityItem>Fatigue management with risk scoring and rest period enforcement</CapabilityItem>
+            <CapabilityItem>Shift bidding with employee preference and seniority rules</CapabilityItem>
+            <CapabilityItem>Coverage gap detection with fill recommendations</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Project Time Tracking" icon={Briefcase}>
