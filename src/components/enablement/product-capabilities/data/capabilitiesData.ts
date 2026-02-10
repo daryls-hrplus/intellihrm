@@ -68,7 +68,7 @@ export const EXECUTIVE_SUMMARY = {
   promise: "Intelli HRM is the first enterprise-grade HRMS purpose-built for the Caribbean, Africa, and Latin America. Native regional compliance, AI-powered intelligence in every module, and seamless cross-module orchestration—delivering the sophistication of Workday with the regional depth your business demands.",
   stats: [
     { value: "25", label: "Core Modules" },
-    { value: "1,710+", label: "Capabilities" },
+    { value: "1,760+", label: "Capabilities" },
     { value: "20+", label: "Countries" },
     { value: "100%", label: "AI-Enhanced" },
   ],
@@ -474,7 +474,7 @@ export const CAPABILITIES_DATA: ActData[] = [
         title: "Recruitment",
         tagline: "Find, attract, and hire the best talent faster",
         overview: "Complete Applicant Tracking System with AI-powered sourcing, structured assessments, interview coordination, offer management, and seamless onboarding integration. Your end-to-end talent acquisition command center.",
-        badge: "85+ Capabilities",
+        badge: "110+ Capabilities",
         challenge: "Every open position costs $500 per day unfilled. Manual resume screening misses qualified candidates, interview chaos frustrates hiring managers, and disjointed communication damages your employer brand. Without a unified system, great talent slips through the cracks while competitors move faster.",
         promise: "Intelli HRM Recruitment is your complete talent acquisition command center. From requisition to offer acceptance, AI-powered sourcing, structured interviews, and seamless candidate experiences ensure you hire the best talent 50% faster—while maintaining full compliance and eliminating bias.",
         keyOutcomes: [
@@ -511,7 +511,11 @@ export const CAPABILITIES_DATA: ActData[] = [
               "Custom application forms by job type",
               "Job board API integrations (Indeed, LinkedIn, etc.)",
               "AI-powered job description optimization",
-              "Social media amplification and sharing"
+              "Social media amplification and sharing",
+              "Source effectiveness tracking with cost-per-hire by channel",
+              "Job board integration configuration with API key management",
+              "Automated job posting syndication with status tracking",
+              "Source ROI analytics with conversion funnel by channel"
             ]
           },
           {
@@ -530,12 +534,47 @@ export const CAPABILITIES_DATA: ActData[] = [
             title: "Selection & Assessment",
             context: "Structured selection reduces bias and improves hire quality. Consistent evaluation criteria lead to better decisions.",
             items: [
-              "Configurable scorecards by role",
-              "Interview scheduling with calendar sync",
-              "Panel review workflows",
-              "Assessment integrations",
-              "Offer comparison tools",
-              "Background check tracking"
+              "Configurable scorecards by role with weighted criteria",
+              "Interview scheduling with calendar sync and availability management",
+              "Interview panel creation with member assignment and expertise tagging",
+              "Panel scheduling coordination with interviewer workload balancing",
+              "Assessment template creation with configurable question types",
+              "Candidate assessment assignment and tracking",
+              "Assessment scoring with rubric-based evaluation",
+              "Assessment results analytics and comparison",
+              "Background check tracking and status management"
+            ]
+          },
+          {
+            title: "Offer Management",
+            context: "The offer stage is where great candidates are won or lost. Streamlined offer workflows with competitive benchmarking close top talent faster.",
+            items: [
+              "Offer creation with salary, benefits, and terms configuration",
+              "Multi-level offer approval workflows with budget validation",
+              "Offer letter generation with customizable templates",
+              "Offer tracking with acceptance, rejection, and counter workflows",
+              "Compensation benchmarking integration for offer validation",
+              "Offer comparison tools with market data overlay"
+            ]
+          },
+          {
+            title: "Referral & Employee Advocacy",
+            context: "Employee referrals are the highest-quality, lowest-cost source of hire. A structured referral program turns your workforce into talent scouts.",
+            items: [
+              "Employee referral program management with reward tracking",
+              "Referral submission portal with candidate linking",
+              "Referral bonus tracking and payout automation",
+              "Referral source analytics and ROI measurement"
+            ]
+          },
+          {
+            title: "Recruitment Communication",
+            context: "Candidate experience is your employer brand. Consistent, timely communication keeps top talent engaged throughout the hiring process.",
+            items: [
+              "Email template management with variable placeholders",
+              "Stage-based automated candidate communication",
+              "Branded email templates for employer experience",
+              "Communication history and audit trail per candidate"
             ]
           }
         ],
@@ -681,7 +720,7 @@ export const CAPABILITIES_DATA: ActData[] = [
               "Termination workflow with approval routing",
               "Retirement processing with benefit transitions",
               "Last working day calculations per policy",
-              "Exit type-specific task templates",
+              "Exit type-specific task templates with configurable tasks by departure type and department",
               "Rehire eligibility determination"
             ]
           },
@@ -749,7 +788,7 @@ export const CAPABILITIES_DATA: ActData[] = [
         title: "Workforce Management",
         tagline: "The complete employee record, from hire to retire",
         overview: "Comprehensive employee master data, organization structure, position management, job architecture, headcount planning, and workforce analytics. The single source of truth for your entire organization with 16+ configurable data tabs per employee.",
-        badge: "150+ Capabilities",
+        badge: "195+ Capabilities",
         challenge: "Employee data scattered across spreadsheets, siloed org charts that are always outdated, and manual position tracking create a governance nightmare. Without a single source of truth, strategic workforce decisions are based on gut feel, compliance risks multiply, and HR spends hours chasing data instead of driving strategy.",
         promise: "Intelli HRM Workforce Management is your organization's living blueprint. Every employee, every position, every reporting relationship—unified in one intelligent system that automatically maintains accuracy, surfaces insights, and enables data-driven workforce planning across countries and entities.",
         keyOutcomes: [
@@ -774,7 +813,10 @@ export const CAPABILITIES_DATA: ActData[] = [
               "Document attachments with expiry tracking",
               "Employment history and transaction log",
               "Government ID management (TRN, NIS, NHT, SSN, etc.)",
-              "Dependent and emergency contact management"
+              "Dependent and emergency contact management",
+              "Academic qualification tracking with institution and date management",
+              "Professional certification management with expiry alerts and verification workflows",
+              "Responsibility catalog with categorization, ownership, and position mapping"
             ]
           },
           {
@@ -786,7 +828,11 @@ export const CAPABILITIES_DATA: ActData[] = [
               "Department and division hierarchies",
               "Cost center management",
               "Location and site configuration",
-              "Reporting relationship management"
+              "Reporting relationship management",
+              "Division management with hierarchical parent-child relationships and department linking",
+              "Org changes reporting with historical comparison and scheduled reports",
+              "Org structure configuration with hierarchy rule management",
+              "Date-effective organizational restructuring with impact analysis"
             ]
           },
           {
@@ -798,19 +844,71 @@ export const CAPABILITIES_DATA: ActData[] = [
               "Vacancy tracking and reporting",
               "Competency and skill requirements",
               "Headcount planning and requests",
-              "Position history and incumbents"
+              "Position history and incumbents",
+              "Position control dashboard with fill rate analytics",
+              "Vacancy tracking with aging metrics and recruitment linkage",
+              "Budget vs. actual headcount comparison by department",
+              "Vacancy-to-requisition conversion workflow"
             ]
           },
           {
             title: "Lifecycle & Transactions",
             context: "Every employee lifecycle event—from promotion to termination—must be tracked and auditable.",
             items: [
+              "Module-based transaction categorization (Entry, Movement, Exit, Compensation, Status)",
+              "Transaction dashboard with KPI summary (Pending, Draft, Completed counts)",
+              "Visual transaction status timeline (Draft → Pending → Approved → Completed)",
               "Promotions and transfers with approval workflows",
+              "Contract extensions and conversions",
+              "Secondment and acting appointment management",
+              "Salary and rate change workflows with impact analysis",
+              "Probation confirmation and extension processing",
               "Terminations with exit workflows",
               "Rehire processing",
               "Mass update capabilities",
-              "Onboarding checklists and tasks",
-              "Offboarding and clearance"
+              "Card and table view modes with persistent preferences"
+            ]
+          },
+          {
+            title: "Employee Assignments",
+            context: "Modern workforces require employees to hold multiple concurrent roles. Multi-assignment management tracks every engagement accurately.",
+            items: [
+              "Multi-assignment management with concurrent position support",
+              "Acting and secondment assignment tracking with date ranges",
+              "Primary vs. secondary assignment designation",
+              "Assignment history and timeline visualization"
+            ]
+          },
+          {
+            title: "Corporate Governance",
+            context: "Board and management team governance ensures organizational oversight, compliance, and strategic alignment at the highest levels.",
+            items: [
+              "Board of directors management with member profiles and term tracking",
+              "Management team composition and reporting structure",
+              "Board meeting scheduling and attendance tracking",
+              "Governance compliance reporting and oversight"
+            ]
+          },
+          {
+            title: "Capability Framework",
+            context: "A structured capability framework connects skills, competencies, and values to positions—enabling talent architecture, succession planning, and development alignment.",
+            items: [
+              "Skills registry with proficiency levels and behavioral indicators",
+              "Competency framework management with job linkage",
+              "Organizational values definition with recognition alignment",
+              "Capability audit filters for governance gap identification (missing indicators, unlinked skills)",
+              "Capability-to-position mapping for talent architecture"
+            ]
+          },
+          {
+            title: "Headcount Planning & Forecasting",
+            context: "Strategic headcount decisions require data, not guesswork. AI-powered forecasting and structured request workflows align hiring to business needs.",
+            items: [
+              "Headcount request workflows with approval routing",
+              "Headcount analytics dashboard with trend visualization",
+              "AI-powered headcount forecasting with scenario modeling",
+              "Monte Carlo simulation for workforce demand projections",
+              "Shareable forecast scenarios with stakeholder collaboration"
             ]
           }
         ],
