@@ -126,7 +126,7 @@ export function ProductCapabilitiesDocument() {
           "98%+ asset recovery on departures",
           "Complete visibility into workforce structure",
         ]}
-        modules={["Recruitment (75+)", "Onboarding (55+)", "Offboarding (55+)", "Workforce Management (60+)"]}
+        modules={["Recruitment (110+)", "Onboarding (55+)", "Offboarding (55+)", "Workforce Management (195+)"]}
       />
 
       <section id="recruitment" className="scroll-mt-20">
