@@ -135,13 +135,13 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
   },
   {
     id: "act2",
-    title: "Act 2: Enable & Engage (180+)",
+    title: "Act 2: Enable & Engage (420+)",
     level: 1,
     children: [
-      { id: "ess", title: "Employee Self-Service (45+)", level: 2 },
-      { id: "mss", title: "Manager Self-Service (50+)", level: 2 },
-      { id: "time-attendance", title: "Time & Attendance (45+)", level: 2 },
-      { id: "leave", title: "Leave Management (40+)", level: 2 },
+      { id: "ess", title: "Employee Self-Service (90+)", level: 2 },
+      { id: "mss", title: "Manager Self-Service (100+)", level: 2 },
+      { id: "time-attendance", title: "Time & Attendance (135+)", level: 2 },
+      { id: "leave", title: "Leave Management (95+)", level: 2 },
     ],
   },
   {
