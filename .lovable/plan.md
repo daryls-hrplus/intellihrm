@@ -1,232 +1,155 @@
 
-# Plan: Convert Administrator Manuals to Streamed Content
 
-## Problem Summary
+# Product Capabilities Document -- Gap Analysis: Admin & Security + HR Hub
 
-The build process exhausts memory (OOM at ~3GB) because Rollup must analyze 600+ deeply nested manual components at build time, even though they're lazy-loaded. The L&D Manual alone has 100+ sub-components across 10 chapters.
+## Summary
 
-## Solution: Content Streaming Architecture
-
-Move manual content from React components to **runtime-loaded markdown** stored in the database or as static files. The build no longer needs to process this content—it's fetched at runtime.
+After comparing the actual implemented pages in `/src/pages/admin/` and `/src/pages/hr-hub/` against the current Product Capabilities document (`capabilitiesData.ts`), I identified **15 functional areas** that exist in the codebase but are either missing entirely or insufficiently covered in the document.
 
 ---
 
-## Architecture Overview
+## Module 1: Admin & Security -- Gaps Found
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                     CURRENT ARCHITECTURE                        │
-├─────────────────────────────────────────────────────────────────┤
-│  Build Time                                                     │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │ Vite/Rollup transforms ALL 600+ manual components        │   │
-│  │ even though they're lazy-loaded (analyzes full graph)    │   │
-│  └──────────────────────────────────────────────────────────┘   │
-│                          ↓ OOM at 3GB                           │
-└─────────────────────────────────────────────────────────────────┘
+The current document covers 8 categories with ~75 capabilities. The following implemented features are **not documented or under-documented**:
 
-┌─────────────────────────────────────────────────────────────────┐
-│                     NEW ARCHITECTURE                            │
-├─────────────────────────────────────────────────────────────────┤
-│  Build Time                      Runtime                        │
-│  ┌─────────────────────┐         ┌─────────────────────────┐   │
-│  │ Thin viewer shell   │         │ Fetch markdown content  │   │
-│  │ (~5 components)     │────────>│ from database/CDN       │   │
-│  └─────────────────────┘         └─────────────────────────┘   │
-│          ↓                                ↓                     │
-│     Builds in <1GB                 Renders via react-markdown   │
-└─────────────────────────────────────────────────────────────────┘
-```
+### Gap 1: ESS Administration Hub (MISSING)
+**Page:** `ESSAdministrationPage.tsx`
+A dedicated administration console with three tabs:
+- **Module Enablement** -- toggle ESS modules on/off per company
+- **Approval Policies** -- configure approval modes (auto-approve, HR review, full workflow) per request type
+- **Field Permissions** -- control which fields employees can view/edit in self-service
 
----
+This is a significant governance feature (referenced in memory as "access-control-and-ess-administration-standard") that has no dedicated mention in the capabilities doc. The existing "Approval Workflows" category touches on approvals generically but doesn't address ESS-specific configuration.
 
-## Implementation Steps
+**Recommendation:** Add new category "Employee Self-Service Administration" under Admin & Security, or add items to existing "Role-Based Access Control" / "Data Access" categories.
 
-### Phase 1: Database Schema for Manual Content
+### Gap 2: Company Relationships (MISSING)
+**Page:** `CompanyRelationshipsPage.tsx`
+Cross-company reporting relationships for corporate groups, joint ventures, and managed services. This is distinct from the existing "Organizational Scope Controls" which only mentions company-level access restrictions.
 
-Create a `manual_content` table to store markdown content:
+**Recommendation:** Add to "Organizational Scope Controls" category: "Cross-company reporting relationships for corporate groups, joint ventures, and managed services"
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | uuid | Primary key |
-| `manual_id` | text | e.g., "learning-development" |
-| `section_id` | text | e.g., "sec-4-1" |
-| `chapter_id` | text | e.g., "chapter-4" |
-| `title` | text | Section title |
-| `content_markdown` | text | Full markdown content |
-| `read_time_minutes` | integer | Estimated read time |
-| `target_roles` | jsonb | Array of applicable personas |
-| `order_index` | integer | Display order |
-| `updated_at` | timestamptz | Last update |
+### Gap 3: Company Tags (MISSING)
+**Page:** `CompanyTagsPage.tsx`
+Tagging system for companies. The doc mentions "company tag-based access controls" but doesn't describe the tag management itself.
 
-### Phase 2: Content Migration Edge Function
+**Recommendation:** Add to "Organizational Scope Controls": "Company tag management with creation, assignment, and access-control integration"
 
-Create an edge function to convert existing React component content to markdown:
+### Gap 4: Currency Management (MISSING)
+**Page:** `CurrencyManagementPage.tsx` (676 lines)
+Full currency management with exchange rates, base currency configuration, and multi-currency support. This is foundational platform configuration not captured anywhere.
 
-1. Extract text content from each manual section
-2. Convert JSX structures to markdown equivalents
-3. Store in `manual_content` table
-4. Preserve section IDs for navigation continuity
+**Recommendation:** Add new items to "Organizational Scope Controls" or create a new "Platform Configuration" category covering currency management, exchange rate maintenance, and group base currency settings.
 
-### Phase 3: Universal Manual Viewer Component
+### Gap 5: Territories Management (MISSING)
+**Page:** `TerritoriesPage.tsx` (490 lines)
+Geographic territory definitions with hierarchy and assignment. Not mentioned in the document.
 
-Replace all 11 individual manual pages with a single `UniversalManualViewer`:
+**Recommendation:** Add to "Organizational Scope Controls": "Territory management with geographic hierarchy, region definitions, and territory-based access scoping"
 
-```text
-src/components/enablement/manuals/
-├── UniversalManualViewer.tsx    # Main viewer (fetches content at runtime)
-├── ManualSectionRenderer.tsx    # Renders markdown via react-markdown
-├── ManualTableOfContents.tsx    # TOC sidebar (already exists pattern)
-└── ManualSearch.tsx             # Search within loaded content
-```
+### Gap 6: Custom Fields Configuration (MISSING)
+**Page:** `AdminCustomFieldsPage.tsx`
+Admin-configurable custom fields per module. The Workforce module mentions "unlimited custom fields" for employees, but the Admin & Security module doesn't document the custom field engine itself.
 
-Key features:
-- Fetches section list on mount (lightweight metadata query)
-- Streams individual section content on-demand
-- Uses `react-markdown` (already installed) for rendering
-- Preserves existing navigation, progress tracking, and print features
+**Recommendation:** Add to a new "Platform Configuration" category: "Custom field engine with field type configuration, module assignment, validation rules, and display ordering"
 
-### Phase 4: Route Simplification
+### Gap 7: Branding & Color Scheme (MISSING)
+**Page:** `AdminColorSchemePage.tsx`
+Brand wizard, color presets, and advanced color customization. Zero mention in the document.
 
-Before (11 separate page imports):
-```typescript
-const LearningDevelopmentManualPage = lazy(() => import("..."));
-const SuccessionManualPage = lazy(() => import("..."));
-// ... 9 more
-```
+**Recommendation:** Add to "Platform Configuration": "Brand customization with color scheme wizard, preset themes, and advanced CSS variable controls"
 
-After (1 universal viewer):
-```typescript
-const ManualViewerPage = lazy(() => import("@/pages/enablement/ManualViewerPage"));
+### Gap 8: Translation Management (MISSING)
+**Page:** `TranslationsPage.tsx` (1,031 lines)
+Full translation management with AI-assisted translation generation, import/export, and multi-language support. The doc mentions "Multi-language" in cross-cutting concerns but doesn't describe the actual management interface.
 
-// Route: /enablement/manuals/:manualId
-```
+**Recommendation:** Add to "Platform Configuration": "Translation management console with AI-assisted generation, bulk import/export, language-specific overrides, and coverage analytics"
 
-### Phase 5: Content Seeding
+### Gap 9: Data Management (MISSING)
+**Page:** `DataManagementPage.tsx` (643 lines)
+Data population and purge tools for demo/test environments. This is an implementation/admin tooling feature.
 
-Options for initial content population:
-1. **Automated extraction**: Parse existing TSX files server-side to extract content
-2. **Manual migration**: Export each section's content to markdown files, then bulk import
-3. **Hybrid**: Keep current components temporarily, run extraction in background
+**Recommendation:** Add to "Platform Configuration": "Data management tools with sample data population, selective data purge by module, and environment reset capabilities"
+
+### Gap 10: Client Provisioning & Registry (MISSING)
+**Pages:** `ClientRegistryPage.tsx`, `ClientProvisioningPage.tsx`, `ClientDetailPage.tsx`, `ProspectJourneyPage.tsx`, `DemoManagementPage.tsx`, `SubscriptionManagementPage.tsx`
+Complete SaaS client lifecycle management. This is a platform-level capability for multi-tenant deployments.
+
+**Recommendation:** Add a new category "Multi-Tenant & Client Management" with items covering client registry, provisioning workflows, demo environment management, prospect journey tracking, and subscription management.
 
 ---
 
-## Technical Details
+## Module 2: HR Hub -- Gaps Found
 
-### Markdown Rendering
+The current document covers 8 categories with ~70 capabilities. The following are missing:
 
-Use the already-installed `react-markdown` package with:
-- Custom components for callouts (Info, Warning, Tip)
-- Code syntax highlighting
-- Table support
-- Anchor links for cross-references
+### Gap 11: Company Intranet (MISSING)
+**Page:** `IntranetAdminPage.tsx` (928 lines)
+Full intranet system with announcements, banners, content management, and company-scoped publishing. This is a substantial feature with no mention in the document.
 
-### Caching Strategy
+**Recommendation:** Add new category "Company Intranet" with items: content management, announcement publishing, banner management, company-scoped visibility, and pinning/scheduling.
 
-- **Section metadata**: Cache for 5 minutes (lightweight, frequently accessed)
-- **Section content**: Cache for 1 hour (larger, less frequently changing)
-- **Invalidation**: On publish from Release Command Center
+### Gap 12: Directory Privacy Configuration (MISSING)
+**Page:** `DirectoryPrivacyConfigPage.tsx` (470 lines)
+Granular privacy controls for the employee directory -- which fields are visible, to whom, per field type (phone, email, etc.).
 
-### Search Implementation
+**Recommendation:** Add to "Communication & Support" or "Daily Operations": "Employee directory privacy configuration with field-level visibility controls per data type (phone, email, department, hire date)"
 
-- Query `manual_content` with full-text search
-- Highlight matching terms in results
-- Jump to specific sections
+### Gap 13: Reference Data Catalog (MISSING)
+**Page:** `ReferenceDataCatalogPage.tsx`
+A browsable catalog of all reference/lookup data in the system.
 
----
+**Recommendation:** Add to "Organization & Configuration": "Reference data catalog with browsable system-wide lookup data, usage tracking, and data lineage"
 
-## Impact Assessment
+### Gap 14: Recognition Analytics (UNDER-DOCUMENTED)
+**Page:** `RecognitionAnalyticsPage.tsx`
+The doc mentions "Recognition analytics with program effectiveness, leaderboards, and values alignment" as one line item, but the actual implementation is a full analytics dashboard. Consider expanding.
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Build memory | ~3.5GB (OOM) | ~1GB |
-| Manual components in bundle | 600+ | ~10 |
-| Content update process | Code change + deploy | Database update |
-| Build time | ~45s (when it works) | ~15s |
+**Recommendation:** Minor -- current coverage is adequate as a line item.
 
----
+### Gap 15: Company Values Management (MISSING)
+**Page:** `CompanyValuesPage.tsx`
+Define and manage organizational values that feed into recognition programs and performance management. Not documented.
 
-## Migration Progress
-
-| Phase | Scope | Status |
-|-------|-------|--------|
-| **Phase 1** | Database schema + viewer shell | ✅ Complete |
-| **Phase 2** | L&D Manual migration (largest) | ✅ Complete |
-| **Phase 3** | Remaining 10 manuals (admin-security, appraisals, benefits, career-development, compensation, feedback-360, goals, hr-hub, succession, time-attendance, workforce) | ✅ Complete |
-| **Phase 4** | Remove old component files | ✅ Complete |
-
-### Completed Work - All 11 Manuals Migrated ✅
-
-1. ✅ Created `manual_content` table with full-text search
-2. ✅ Built `UniversalManualViewer` component (thin shell, ~100 lines)
-3. ✅ Built `ManualSectionRenderer` (markdown to React via react-markdown)
-4. ✅ Built `ManualTableOfContents` (sidebar navigation)
-5. ✅ Created `useManualContent` hook (data fetching with caching)
-6. ✅ Added `/enablement/manual/:manualId` dynamic route
-7. ✅ Deployed `migrate-manual-content` edge function
-8. ✅ Migrated Learning Development Manual (13 sections)
-9. ✅ Migrated 10 remaining manuals in alphabetical order
-10. ✅ Updated all 11 legacy routes to redirect to streaming viewer
-11. ✅ Removed all legacy manual component imports from routes
-
-### Phase 4 Cleanup Complete ✅
-
-1. ✅ Deleted 11 legacy manual page files from src/pages/enablement/
-2. ✅ Deleted 8 legacy manual component folders from src/components/enablement/
-3. ✅ Removed lazy imports from src/routes/lazyPages.ts
-4. ✅ Fixed useContentCurrencyValidation.ts references
-5. ✅ Deleted 10 large manual type files from src/types/ (~10,000+ lines total):
-   - adminManual.ts, adminSecurityManual.ts, benefitsManual.ts
-   - careerDevelopmentManual.ts, feedback360Manual.ts, hrHubManual.ts
-   - learningDevelopmentManual.ts, successionManual.ts
-   - timeAttendanceManual.ts, workforceManual.ts
-6. ✅ Deleted unused ImportStaticManualDialog.tsx
-7. ✅ Deleted unused appraisalsManualDocx.ts utility
-
-### Expected Build Improvement
-
-With the removal of:
-- 11 page components (each importing 50-100 nested components)
-- 8 component directories (600+ total components)
-- 10 large type files (~10,000+ lines of data structures)
-- 2 unused utility/dialog files
-
-The module count should drop significantly, reducing build memory from ~3.5GB to ~1GB.
+**Recommendation:** Add to HR Hub "Organization & Configuration" or Admin "Organizational Scope Controls": "Company values management with definitions, icons, alignment to recognition programs, and performance frameworks"
 
 ---
 
-## Rollback Plan
+## Proposed Changes to `capabilitiesData.ts`
 
-Keep existing component files in a `legacy-manuals/` folder during migration. If issues arise, routes can be switched back to the component-based pages.
+### For Admin & Security module:
+1. **Add new category: "Platform Configuration"** with ~8 items covering:
+   - Custom field engine
+   - Brand/color scheme customization
+   - Translation management with AI generation
+   - Currency management with exchange rates
+   - Territory management
+   - Data management tools
+2. **Add new category: "ESS Administration"** with ~4 items covering module enablement, approval policies, field permissions, and setup wizard
+3. **Add new category: "Multi-Tenant & Client Management"** with ~5 items covering client registry, provisioning, demo management, prospect tracking, subscriptions
+4. **Expand "Organizational Scope Controls"** with 2-3 items for company relationships, tag management
+
+### For HR Hub module:
+1. **Add new category: "Company Intranet"** with ~5 items covering content management, announcements, banners, company-scoped publishing
+2. **Expand "Organization & Configuration"** with items for reference data catalog, company values management
+3. **Expand "Daily Operations"** with directory privacy configuration
+
+### Badge Updates:
+- Admin & Security: Update from "75+ Capabilities" to "95+ Capabilities"
+- HR Hub: Update from "70+ Capabilities" to "85+ Capabilities"
+- Executive Summary stats: Update total from "1,675+" to "1,710+" (approximate)
 
 ---
 
-## Alternative: Static JSON Bundles
+## Technical Implementation
 
-If database storage is undesirable, content can be stored as static JSON files in `public/manuals/`:
+All changes are confined to a single file:
+- `src/components/enablement/product-capabilities/data/capabilitiesData.ts`
 
-```text
-public/manuals/
-├── learning-development/
-│   ├── index.json          # TOC and metadata
-│   ├── chapter-1.json      # Chapter content
-│   ├── chapter-2.json
-│   └── ...
-└── succession/
-    └── ...
-```
+Each gap translates to either:
+- New `CapabilityCategoryData` entries added to the `categories` array of the relevant module
+- New items added to existing category `items` arrays
+- Updated badge strings
 
-This removes content from the Vite module graph while keeping it version-controlled.
+No structural or schema changes needed. The existing PDF export, table of contents, and web rendering will automatically pick up the new content.
 
----
-
-## Approval Required
-
-This plan requires:
-1. Creating new database table (`manual_content`)
-2. Creating content migration edge function
-3. Building the `UniversalManualViewer` component
-4. Migrating content from 11 manuals
-5. Removing 600+ component files after verification
-
-Shall I proceed with implementation?
