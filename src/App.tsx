@@ -84,7 +84,7 @@ const App = () => (
                 {PropertyRoutes()}
                 {PayrollRoutes()}
                 {HrHubRoutes()}
-                {EnablementAppRoutes()}
+                {(import.meta.env.DEV || import.meta.env.VITE_INCLUDE_ENABLEMENT === "true") && EnablementAppRoutes()}
                 {MiscProtectedRoutes()}
               </Route>
 
