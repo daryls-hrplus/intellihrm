@@ -204,7 +204,7 @@ export function ProductCapabilitiesDocument() {
           "Complete benefits lifecycle from enrollment to claims",
           "Real-time GL integration and cost allocation",
         ]}
-        modules={["Payroll", "Compensation", "Benefits Administration"]}
+        modules={["Payroll (150+)", "Compensation (100+)", "Benefits (95+)"]}
       />
 
       <section id="payroll" className="scroll-mt-20">
