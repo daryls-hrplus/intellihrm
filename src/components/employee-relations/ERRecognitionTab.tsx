@@ -9,10 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Search, Loader2, Award, Star, Trophy } from 'lucide-react';
+import { Plus, Search, Loader2, Award, Star, Trophy, User } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
+import { useWorkspaceNavigation } from '@/hooks/useWorkspaceNavigation';
 
 const RECOGNITION_TYPES = ['award', 'appreciation', 'milestone', 'peer_recognition', 'spot_bonus'];
 const CATEGORIES = ['performance', 'innovation', 'teamwork', 'customer_service', 'safety', 'leadership', 'other'];
@@ -24,6 +25,7 @@ interface ERRecognitionTabProps {
 export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { navigateToRecord } = useWorkspaceNavigation();
   const { recognitions, loadingRecognition, createRecognition } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -242,7 +244,20 @@ export function ERRecognitionTab({ companyId }: ERRecognitionTabProps) {
                   </div>
                   <h4 className="font-semibold mb-1">{recognition.title}</h4>
                   <div className="mb-2">
-                    <p className="text-sm font-medium">{recognition.employee?.full_name}</p>
+                    <button
+                      className="text-sm font-medium text-primary hover:underline cursor-pointer"
+                      onClick={() => recognition.employee_id && navigateToRecord({
+                        route: `/workforce/employees/${recognition.employee_id}`,
+                        title: recognition.employee?.full_name || 'Employee',
+                        subtitle: "Employee",
+                        moduleCode: "workforce",
+                        contextType: "employee",
+                        contextId: recognition.employee_id,
+                        icon: User,
+                      })}
+                    >
+                      {recognition.employee?.full_name}
+                    </button>
                     <p className="text-xs text-muted-foreground">{recognition.employee?.email}</p>
                   </div>
                   {recognition.description && (
