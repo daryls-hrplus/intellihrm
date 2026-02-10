@@ -196,7 +196,7 @@ export interface HSEInspection {
   inspector?: { full_name: string };
 }
 
-export function useHSE(companyId?: string) {
+export function useHSE(companyId?: string, directReportIds?: string[]) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -506,21 +506,19 @@ export function useHSE(companyId?: string) {
   });
 
   // ===== ESS: Near-Miss Reports =====
-  const useMyNearMisses = () => {
-    return useQuery({
-      queryKey: ["hse-my-near-misses", user?.id],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("hse_near_misses")
-          .select("*")
-          .eq("reported_by", user!.id)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: !!user,
-    });
-  };
+  const { data: myNearMisses = [], isLoading: myNearMissesLoading } = useQuery({
+    queryKey: ["hse-my-near-misses", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hse_near_misses")
+        .select("*")
+        .eq("reported_by", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
   const createNearMiss = useMutation({
     mutationFn: async (nearMissData: Record<string, unknown>) => {
@@ -541,21 +539,19 @@ export function useHSE(companyId?: string) {
   });
 
   // ===== ESS: Safety Observations =====
-  const useMyObservations = () => {
-    return useQuery({
-      queryKey: ["hse-my-observations", user?.id],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("hse_safety_observations")
-          .select("*")
-          .eq("observer_id", user!.id)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: !!user,
-    });
-  };
+  const { data: myObservations = [], isLoading: myObservationsLoading } = useQuery({
+    queryKey: ["hse-my-observations", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hse_safety_observations")
+        .select("*")
+        .eq("observer_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
   const createObservation = useMutation({
     mutationFn: async (obsData: Record<string, unknown>) => {
@@ -576,37 +572,33 @@ export function useHSE(companyId?: string) {
   });
 
   // ===== ESS: My PPE Issuances =====
-  const useMyPPE = () => {
-    return useQuery({
-      queryKey: ["hse-my-ppe", user?.id],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("hse_ppe_issuances")
-          .select("*, ppe_type:ppe_type_id(name, category)")
-          .eq("employee_id", user!.id)
-          .order("issued_date", { ascending: false });
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: !!user,
-    });
-  };
+  const { data: myPPE = [], isLoading: myPPELoading } = useQuery({
+    queryKey: ["hse-my-ppe", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hse_ppe_issuances")
+        .select("*, ppe_type:ppe_type_id(name, category)")
+        .eq("employee_id", user!.id)
+        .order("issued_date", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
   // ===== ESS: Policy Acknowledgments =====
-  const useMyAcknowledgments = () => {
-    return useQuery({
-      queryKey: ["hse-my-acknowledgments", user?.id],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("hse_policy_acknowledgments")
-          .select("*")
-          .eq("employee_id", user!.id);
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: !!user,
-    });
-  };
+  const { data: myAcknowledgments = [], isLoading: myAcknowledgmentsLoading } = useQuery({
+    queryKey: ["hse-my-acknowledgments", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hse_policy_acknowledgments")
+        .select("*")
+        .eq("employee_id", user!.id);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
   const acknowledgePolicy = useMutation({
     mutationFn: async (policyId: string) => {
@@ -630,21 +622,19 @@ export function useHSE(companyId?: string) {
   });
 
   // ===== ESS: Ergonomic Requests =====
-  const useMyErgonomicRequests = () => {
-    return useQuery({
-      queryKey: ["hse-my-ergonomic", user?.id],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("hse_ergonomic_assessments")
-          .select("*")
-          .eq("employee_id", user!.id)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: !!user,
-    });
-  };
+  const { data: myErgonomicRequests = [], isLoading: myErgonomicLoading } = useQuery({
+    queryKey: ["hse-my-ergonomic", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hse_ergonomic_assessments")
+        .select("*")
+        .eq("employee_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
 
   const createErgonomicRequest = useMutation({
     mutationFn: async (reqData: Record<string, unknown>) => {
@@ -664,76 +654,71 @@ export function useHSE(companyId?: string) {
   });
 
   // ===== MSS: Team Near-Misses =====
-  const useTeamNearMisses = (directReportIds: string[]) => {
-    return useQuery({
-      queryKey: ["hse-team-near-misses", directReportIds],
-      queryFn: async () => {
-        if (!directReportIds.length) return [];
-        const { data, error } = await supabase
-          .from("hse_near_misses")
-          .select("*")
-          .in("reported_by", directReportIds)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: directReportIds.length > 0,
-    });
-  };
+  const safeDirectReportIds = directReportIds || [];
+  const hasDirectReports = safeDirectReportIds.length > 0;
+
+  const { data: teamNearMisses = [], isLoading: teamNearMissesLoading } = useQuery({
+    queryKey: ["hse-team-near-misses", safeDirectReportIds],
+    queryFn: async () => {
+      if (!safeDirectReportIds.length) return [];
+      const { data, error } = await supabase
+        .from("hse_near_misses")
+        .select("*")
+        .in("reported_by", safeDirectReportIds)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: hasDirectReports,
+  });
 
   // ===== MSS: Team Safety Observations =====
-  const useTeamObservations = (directReportIds: string[]) => {
-    return useQuery({
-      queryKey: ["hse-team-observations", directReportIds],
-      queryFn: async () => {
-        if (!directReportIds.length) return [];
-        const { data, error } = await supabase
-          .from("hse_safety_observations")
-          .select("*")
-          .in("observer_id", directReportIds)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: directReportIds.length > 0,
-    });
-  };
+  const { data: teamObservations = [], isLoading: teamObservationsLoading } = useQuery({
+    queryKey: ["hse-team-observations", safeDirectReportIds],
+    queryFn: async () => {
+      if (!safeDirectReportIds.length) return [];
+      const { data, error } = await supabase
+        .from("hse_safety_observations")
+        .select("*")
+        .in("observer_id", safeDirectReportIds)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: hasDirectReports,
+  });
 
   // ===== MSS: Team PPE Issuances =====
-  const useTeamPPE = (directReportIds: string[]) => {
-    return useQuery({
-      queryKey: ["hse-team-ppe", directReportIds],
-      queryFn: async () => {
-        if (!directReportIds.length) return [];
-        const { data, error } = await supabase
-          .from("hse_ppe_issuances")
-          .select("*, ppe_type:ppe_type_id(name, category), employee:employee_id(full_name)")
-          .in("employee_id", directReportIds)
-          .order("issued_date", { ascending: false });
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: directReportIds.length > 0,
-    });
-  };
+  const { data: teamPPE = [], isLoading: teamPPELoading } = useQuery({
+    queryKey: ["hse-team-ppe", safeDirectReportIds],
+    queryFn: async () => {
+      if (!safeDirectReportIds.length) return [];
+      const { data, error } = await supabase
+        .from("hse_ppe_issuances")
+        .select("*, ppe_type:ppe_type_id(name, category), employee:employee_id(full_name)")
+        .in("employee_id", safeDirectReportIds)
+        .order("issued_date", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: hasDirectReports,
+  });
 
   // ===== MSS: Team Work Permits =====
-  const useTeamWorkPermits = (directReportIds: string[]) => {
-    return useQuery({
-      queryKey: ["hse-team-work-permits", directReportIds],
-      queryFn: async () => {
-        if (!directReportIds.length) return [];
-        const { data, error } = await supabase
-          .from("hse_work_permits")
-          .select("*")
-          .or(`requested_by.in.(${directReportIds.join(",")}),approved_by.eq.${user?.id}`)
-          .order("created_at", { ascending: false });
-        if (error) throw error;
-        return data || [];
-      },
-      enabled: directReportIds.length > 0,
-    });
-  };
+  const { data: teamWorkPermits = [], isLoading: teamWorkPermitsLoading } = useQuery({
+    queryKey: ["hse-team-work-permits", safeDirectReportIds],
+    queryFn: async () => {
+      if (!safeDirectReportIds.length) return [];
+      const { data, error } = await supabase
+        .from("hse_work_permits")
+        .select("*")
+        .or(`requested_by.in.(${safeDirectReportIds.join(",")}),approved_by.eq.${user?.id}`)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: hasDirectReports,
+  });
 
   return {
     incidents,
@@ -760,19 +745,28 @@ export function useHSE(companyId?: string) {
     inspections,
     inspectionsLoading,
     // ESS
-    useMyNearMisses,
+    myNearMisses,
+    myNearMissesLoading,
     createNearMiss,
-    useMyObservations,
+    myObservations,
+    myObservationsLoading,
     createObservation,
-    useMyPPE,
-    useMyAcknowledgments,
+    myPPE,
+    myPPELoading,
+    myAcknowledgments,
+    myAcknowledgmentsLoading,
     acknowledgePolicy,
-    useMyErgonomicRequests,
+    myErgonomicRequests,
+    myErgonomicLoading,
     createErgonomicRequest,
     // MSS
-    useTeamNearMisses,
-    useTeamObservations,
-    useTeamPPE,
-    useTeamWorkPermits,
+    teamNearMisses,
+    teamNearMissesLoading,
+    teamObservations,
+    teamObservationsLoading,
+    teamPPE,
+    teamPPELoading,
+    teamWorkPermits,
+    teamWorkPermitsLoading,
   };
 }
