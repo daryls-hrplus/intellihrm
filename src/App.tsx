@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useState, useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,9 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { TranslationsProvider } from "@/components/TranslationsProvider";
 import { ThemeProvider } from "next-themes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { EnablementAccessGuard } from "@/components/auth/EnablementAccessGuard";
 import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
-import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 
 // Initialize i18n
 import "@/i18n";
@@ -34,7 +32,6 @@ import { EmployeeRelationsRoutes } from "@/routes/groups/employeeRelationsRoutes
 import { PropertyRoutes } from "@/routes/groups/propertyRoutes";
 import { PayrollRoutes } from "@/routes/groups/payrollRoutes";
 import { HrHubRoutes } from "@/routes/groups/hrHubRoutes";
-import { EnablementAppRoutes } from "@/routes/groups/enablementAppRoutes";
 import { MiscProtectedRoutes } from "@/routes/groups/miscProtectedRoutes";
 
 // Core pages (synchronous for fast initial load)
@@ -45,58 +42,79 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 const queryClient = new QueryClient();
 
-// Note: Suspense boundaries are centralized in src/routes/LazyPage.tsx
+/**
+ * Dynamically loads enablement routes in dev mode only.
+ * In production builds, this import is never followed,
+ * keeping the entire enablement module tree out of the bundle.
+ */
+function useEnablementRoutes(): ReactNode {
+  const [routes, setRoutes] = useState<ReactNode>(null);
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <TranslationsProvider>
-            <AuthProvider>
-            <Routes>
-              {/* Root route - Login page */}
-              <Route path="/" element={<AuthPage />} />
+  useEffect(() => {
+    if (import.meta.env.DEV || import.meta.env.VITE_INCLUDE_ENABLEMENT === "true") {
+      import("@/routes/groups/enablementAppRoutes").then(({ EnablementAppRoutes }) => {
+        setRoutes(EnablementAppRoutes());
+      });
+    }
+  }, []);
 
-              {PublicRoutes()}
+  return routes;
+}
 
-              {/* Protected Routes with Layout */}
-              <Route element={<ProtectedLayout />}>
-                {/* Main Dashboard */}
-                <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+const App = () => {
+  const enablementRoutes = useEnablementRoutes();
 
-                {EssRoutes()}
-                {MssRoutes()}
-                {AdminRoutes()}
-                {WorkforceRoutes()}
-                {TimeAttendanceRoutes()}
-                {PerformanceRoutes()}
-                {LeaveRoutes()}
-                {CompensationRoutes()}
-                {BenefitsRoutes()}
-                {TrainingRoutes()}
-                {SuccessionRoutes()}
-                {RecruitmentRoutes()}
-                {HseRoutes()}
-                {EmployeeRelationsRoutes()}
-                {PropertyRoutes()}
-                {PayrollRoutes()}
-                {HrHubRoutes()}
-                {(import.meta.env.DEV || import.meta.env.VITE_INCLUDE_ENABLEMENT === "true") && EnablementAppRoutes()}
-                {MiscProtectedRoutes()}
-              </Route>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <TranslationsProvider>
+              <AuthProvider>
+              <Routes>
+                {/* Root route - Login page */}
+                <Route path="/" element={<AuthPage />} />
 
-              {/* Catch-all */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            </AuthProvider>
-          </TranslationsProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+                {PublicRoutes()}
+
+                {/* Protected Routes with Layout */}
+                <Route element={<ProtectedLayout />}>
+                  {/* Main Dashboard */}
+                  <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+
+                  {EssRoutes()}
+                  {MssRoutes()}
+                  {AdminRoutes()}
+                  {WorkforceRoutes()}
+                  {TimeAttendanceRoutes()}
+                  {PerformanceRoutes()}
+                  {LeaveRoutes()}
+                  {CompensationRoutes()}
+                  {BenefitsRoutes()}
+                  {TrainingRoutes()}
+                  {SuccessionRoutes()}
+                  {RecruitmentRoutes()}
+                  {HseRoutes()}
+                  {EmployeeRelationsRoutes()}
+                  {PropertyRoutes()}
+                  {PayrollRoutes()}
+                  {HrHubRoutes()}
+                  {enablementRoutes}
+                  {MiscProtectedRoutes()}
+                </Route>
+
+                {/* Catch-all */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              </AuthProvider>
+            </TranslationsProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
