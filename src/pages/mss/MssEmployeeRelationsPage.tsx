@@ -14,12 +14,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Heart, 
-  Plus, 
   Award,
   Users,
   AlertTriangle,
   Loader2,
-  Star
+  Star,
+  Scale,
+  DoorOpen,
+  BarChart3
 } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
@@ -48,9 +50,15 @@ export default function MssEmployeeRelationsPage() {
 
   const { 
     cases,
-    recognitions, 
+    recognitions,
+    disciplinaryActions,
+    exitInterviews,
+    surveys,
     loadingCases,
     loadingRecognition,
+    loadingDisciplinary,
+    loadingExitInterviews,
+    loadingSurveys,
     createRecognition,
   } = useEmployeeRelations(company?.id);
 
@@ -81,6 +89,9 @@ export default function MssEmployeeRelationsPage() {
   // Filter to team data
   const teamCases = cases.filter(c => directReportIds.includes(c.employee_id));
   const teamRecognitions = recognitions.filter(r => directReportIds.includes(r.employee_id));
+  const teamDisciplinary = disciplinaryActions.filter(d => directReportIds.includes(d.employee_id));
+  const teamExitInterviews = exitInterviews.filter(e => directReportIds.includes(e.employee_id));
+  const activeSurveys = surveys.filter(s => s.status === 'active' || s.status === 'completed');
 
   const handleRecognitionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,13 +127,13 @@ export default function MssEmployeeRelationsPage() {
     switch (status) {
       case 'open': return 'bg-warning/10 text-warning border-warning/20';
       case 'in_progress': return 'bg-info/10 text-info border-info/20';
-      case 'resolved': return 'bg-success/10 text-success border-success/20';
+      case 'resolved': case 'completed': return 'bg-success/10 text-success border-success/20';
       case 'closed': return 'bg-muted text-muted-foreground';
       default: return '';
     }
   };
 
-  const isLoading = loadingCases || loadingRecognition;
+  const isLoading = loadingCases || loadingRecognition || loadingDisciplinary || loadingExitInterviews || loadingSurveys;
 
   if (isLoading) {
     return (
@@ -197,9 +208,9 @@ export default function MssEmployeeRelationsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {RECOGNITION_TYPES.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        {RECOGNITION_TYPES.map((rt) => (
+                          <SelectItem key={rt} value={rt}>
+                            {rt.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -268,7 +279,7 @@ export default function MssEmployeeRelationsPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-5">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -308,10 +319,36 @@ export default function MssEmployeeRelationsPage() {
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full bg-destructive/10">
+                  <Scale className="h-6 w-6 text-destructive" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Team Disciplinary</p>
+                  <p className="text-2xl font-bold">{teamDisciplinary.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full bg-info/10">
+                  <DoorOpen className="h-6 w-6 text-info" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Pending Exits</p>
+                  <p className="text-2xl font-bold">{teamExitInterviews.filter(e => e.status !== 'completed').length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs defaultValue="recognition" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="recognition" className="gap-2">
               <Award className="h-4 w-4" />
               {t('mss.teamRelations.teamRecognition')} ({teamRecognitions.length})
@@ -320,8 +357,21 @@ export default function MssEmployeeRelationsPage() {
               <AlertTriangle className="h-4 w-4" />
               {t('mss.teamRelations.teamCases')} ({teamCases.length})
             </TabsTrigger>
+            <TabsTrigger value="disciplinary" className="gap-2">
+              <Scale className="h-4 w-4" />
+              Team Disciplinary ({teamDisciplinary.length})
+            </TabsTrigger>
+            <TabsTrigger value="exits" className="gap-2">
+              <DoorOpen className="h-4 w-4" />
+              Team Exits ({teamExitInterviews.length})
+            </TabsTrigger>
+            <TabsTrigger value="sentiment" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Team Sentiment
+            </TabsTrigger>
           </TabsList>
 
+          {/* ==================== RECOGNITION TAB ==================== */}
           <TabsContent value="recognition">
             <Card>
               <CardHeader>
@@ -365,6 +415,7 @@ export default function MssEmployeeRelationsPage() {
             </Card>
           </TabsContent>
 
+          {/* ==================== CASES TAB ==================== */}
           <TabsContent value="cases">
             <Card>
               <CardHeader>
@@ -409,6 +460,212 @@ export default function MssEmployeeRelationsPage() {
                     </TableBody>
                   </Table>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ==================== TEAM DISCIPLINARY TAB (NEW) ==================== */}
+          <TabsContent value="disciplinary">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Disciplinary Actions</CardTitle>
+                <CardDescription>Disciplinary actions for your direct reports</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {teamDisciplinary.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Scale className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No disciplinary actions for your team</p>
+                    <p className="text-sm">All team members have a clean record</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Action Type</TableHead>
+                        <TableHead>Severity</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Issued Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Acknowledged</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {teamDisciplinary.map((action) => (
+                        <TableRow key={action.id}>
+                          <TableCell className="font-medium">{action.employee?.full_name}</TableCell>
+                          <TableCell className="capitalize">{action.action_type.replace(/_/g, ' ')}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={
+                              action.severity === 'critical' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                              action.severity === 'high' ? 'bg-warning/10 text-warning border-warning/20' :
+                              action.severity === 'medium' ? 'bg-info/10 text-info border-info/20' :
+                              'bg-muted text-muted-foreground'
+                            }>
+                              {action.severity}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate">{action.reason}</TableCell>
+                          <TableCell className="text-muted-foreground">{formatDateForDisplay(action.issued_date, 'PP')}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={getStatusColor(action.status)}>
+                              {action.status.replace(/_/g, ' ')}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={action.acknowledged_by_employee ? 'bg-success/10 text-success border-success/20' : 'bg-warning/10 text-warning border-warning/20'}>
+                              {action.acknowledged_by_employee ? 'Yes' : 'Pending'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ==================== TEAM EXITS TAB (NEW) ==================== */}
+          <TabsContent value="exits">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Exit Interviews</CardTitle>
+                <CardDescription>Exit interviews for departing team members</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {teamExitInterviews.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <DoorOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No exit interviews for your team</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {teamExitInterviews.map((interview) => (
+                      <Card key={interview.id} className="border-border">
+                        <CardContent className="pt-6 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold">{interview.employee?.full_name}</h4>
+                            <Badge variant="outline" className={getStatusColor(interview.status)}>
+                              {interview.status.replace(/_/g, ' ')}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <p className="text-muted-foreground">Interview Date</p>
+                              <p className="font-medium">{formatDateForDisplay(interview.interview_date, 'PP')}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Interviewer</p>
+                              <p className="font-medium">{interview.interviewer?.full_name || 'TBD'}</p>
+                            </div>
+                            {interview.departure_reason && (
+                              <div>
+                                <p className="text-muted-foreground">Departure Reason</p>
+                                <p className="font-medium capitalize">{interview.departure_reason.replace(/_/g, ' ')}</p>
+                              </div>
+                            )}
+                            {interview.last_working_date && (
+                              <div>
+                                <p className="text-muted-foreground">Last Working Date</p>
+                                <p className="font-medium">{formatDateForDisplay(interview.last_working_date, 'PP')}</p>
+                              </div>
+                            )}
+                          </div>
+                          {interview.overall_satisfaction != null && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-1">Satisfaction</p>
+                              <div className="flex items-center gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`h-4 w-4 ${
+                                      star <= (interview.overall_satisfaction || 0)
+                                        ? 'text-amber-500 fill-amber-500'
+                                        : 'text-muted-foreground/30'
+                                    }`}
+                                  />
+                                ))}
+                                <span className="ml-1 text-sm">{interview.overall_satisfaction}/5</span>
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ==================== TEAM SENTIMENT TAB (NEW) ==================== */}
+          <TabsContent value="sentiment">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Sentiment Overview</CardTitle>
+                <CardDescription>Survey participation and wellness engagement for your team</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Survey Participation */}
+                  <Card className="border-border">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Recent Surveys</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {activeSurveys.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-6">No surveys available</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {activeSurveys.slice(0, 5).map((survey) => (
+                            <div key={survey.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                              <div>
+                                <p className="text-sm font-medium">{survey.title}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{survey.survey_type.replace(/_/g, ' ')}</p>
+                              </div>
+                              <Badge variant="outline" className={getStatusColor(survey.status)}>
+                                {survey.status}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Team Health Summary */}
+                  <Card className="border-border">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Team Health Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Team Size</span>
+                          <span className="font-semibold">{directReports.length}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Open Cases</span>
+                          <span className="font-semibold">{teamCases.filter(c => c.status === 'open').length}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Active Disciplinary</span>
+                          <span className="font-semibold">{teamDisciplinary.filter(d => d.status === 'active' || d.status === 'open').length}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Pending Exits</span>
+                          <span className="font-semibold">{teamExitInterviews.filter(e => e.status !== 'completed').length}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Recognition Given</span>
+                          <span className="font-semibold">{teamRecognitions.length}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
