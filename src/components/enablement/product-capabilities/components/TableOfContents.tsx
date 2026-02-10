@@ -146,12 +146,12 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
   },
   {
     id: "act3",
-    title: "Act 3: Pay & Reward (150+)",
+    title: "Act 3: Pay & Reward (345+)",
     level: 1,
     children: [
-      { id: "payroll", title: "Payroll (60+)", level: 2 },
-      { id: "compensation", title: "Compensation (50+)", level: 2 },
-      { id: "benefits", title: "Benefits (40+)", level: 2 },
+      { id: "payroll", title: "Payroll (150+)", level: 2 },
+      { id: "compensation", title: "Compensation (100+)", level: 2 },
+      { id: "benefits", title: "Benefits (95+)", level: 2 },
     ],
   },
   {

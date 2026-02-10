@@ -151,6 +151,7 @@ export function CompensationCapabilities() {
             <CapabilityItem>Cost component configuration</CapabilityItem>
             <CapabilityItem>Vacancy cost projections</CapabilityItem>
             <CapabilityItem>Headcount vs. budget analysis</CapabilityItem>
+            <CapabilityItem>FTE reconciliation with headcount analysis and variance reporting</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Compensation Analytics" icon={PieChart}>
@@ -160,6 +161,7 @@ export function CompensationCapabilities() {
             <CapabilityItem>Budget vs. actual reporting</CapabilityItem>
             <CapabilityItem>AI-powered insights</CapabilityItem>
             <CapabilityItem>Predictive cost modeling</CapabilityItem>
+            <CapabilityItem>Minimum wage rule configuration with jurisdiction-specific thresholds</CapabilityItem>
           </CapabilityCategory>
         </div>
 

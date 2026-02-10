@@ -81,6 +81,7 @@ export function BenefitsCapabilities() {
             <CapabilityItem>Evidence of insurability tracking</CapabilityItem>
             <CapabilityItem>Eligibility audit trails</CapabilityItem>
             <CapabilityItem>Age and service requirements</CapabilityItem>
+            <CapabilityItem>Benefit cost calculator for employee decision support</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Enrollment Management" icon={Users}>
@@ -91,6 +92,8 @@ export function BenefitsCapabilities() {
             <CapabilityItem>Benefit election tracking</CapabilityItem>
             <CapabilityItem>Enrollment status monitoring</CapabilityItem>
             <CapabilityItem>Batch enrollment processing</CapabilityItem>
+            <CapabilityItem>Side-by-side plan comparison tool with cost modeling</CapabilityItem>
+            <CapabilityItem>Open enrollment progress tracker with completion analytics</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Life Event Processing" icon={Calendar}>
@@ -146,6 +149,7 @@ export function BenefitsCapabilities() {
             <CapabilityItem>Employee cost modeling</CapabilityItem>
             <CapabilityItem>Plan cost comparison</CapabilityItem>
             <CapabilityItem>Budget vs. actual tracking</CapabilityItem>
+            <CapabilityItem>Waiting period status monitoring with auto-enrollment triggers</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Compliance & Reporting" icon={Shield}>

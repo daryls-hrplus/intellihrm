@@ -12,7 +12,9 @@ import {
   FileCheck, 
   RotateCcw, 
   Clock, 
-  BarChart3 
+  BarChart3,
+  Calendar,
+  Database
 } from "lucide-react";
 import { ModuleCapabilityCard } from "../../components/ModuleCapabilityCard";
 import { CapabilityCategory, CapabilityItem } from "../../components/CapabilityCategory";
@@ -86,6 +88,7 @@ export function PayrollCapabilities() {
             <CapabilityItem>Benefit deduction integration</CapabilityItem>
             <CapabilityItem>Employee regular deductions</CapabilityItem>
             <CapabilityItem>Period-specific deductions</CapabilityItem>
+            <CapabilityItem>Expense claim reimbursement through payroll</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Statutory Compliance" icon={Shield}>
@@ -98,6 +101,16 @@ export function PayrollCapabilities() {
             <CapabilityItem>Tax allowance tracking</CapabilityItem>
             <CapabilityItem>Tax form generation (W-2, P60, IR56)</CapabilityItem>
             <CapabilityItem>Minimum wage compliance checking</CapabilityItem>
+            <CapabilityItem>Statutory pay element-to-pay-code mapping configuration</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Pay Period & Group Configuration" icon={Calendar}>
+            <CapabilityItem>Pay group creation with employee assignment and scheduling rules</CapabilityItem>
+            <CapabilityItem>Pay period definition with frequency options (weekly, bi-weekly, semi-monthly, monthly)</CapabilityItem>
+            <CapabilityItem>Semi-monthly payroll rules with split-period calculations</CapabilityItem>
+            <CapabilityItem>Public holiday calendar management with payroll impact rules</CapabilityItem>
+            <CapabilityItem>Country-specific payroll year setup with fiscal period alignment</CapabilityItem>
+            <CapabilityItem>Payment rule engine with conditional logic and priority ordering</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Salary Advances" icon={Wallet}>
@@ -181,6 +194,16 @@ export function PayrollCapabilities() {
             <CapabilityItem>Shift payment rules</CapabilityItem>
             <CapabilityItem>Sync log and reconciliation</CapabilityItem>
             <CapabilityItem>Exception handling workflows</CapabilityItem>
+            <CapabilityItem>Leave balance buyout and cash-out processing</CapabilityItem>
+            <CapabilityItem>Leave-to-payroll payment configuration rules</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Implementation & Data Management" icon={Database}>
+            <CapabilityItem>Historical payroll data import with validation and reconciliation</CapabilityItem>
+            <CapabilityItem>Opening balance setup for mid-year implementations</CapabilityItem>
+            <CapabilityItem>Payroll archive settings with retention policies and purge scheduling</CapabilityItem>
+            <CapabilityItem>Country-specific payroll documentation and compliance reference hub</CapabilityItem>
+            <CapabilityItem>Pay period payroll entry management with bulk upload support</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Payroll Analytics & Reporting" icon={BarChart3}>
