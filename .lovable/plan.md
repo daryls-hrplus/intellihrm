@@ -1,44 +1,91 @@
 
 
-# Fix: Update TOC and Document to Reflect New Capability Counts
+# Update WorkforceCapabilities.tsx to Close Remaining Gaps
 
 ## Problem
 
-The capability data in `capabilitiesData.ts` was updated with new categories and items, but two other files have **hardcoded capability counts** that were not updated to match:
+The `WorkforceCapabilities.tsx` component renders hardcoded `<CapabilityCategory>` blocks -- it does **not** read from `capabilitiesData.ts`. While the data file was updated with new categories, the actual rendered document still shows the old 10 categories. Three entirely new categories are missing, and several existing ones need expanded items.
 
-1. **`TableOfContents.tsx`** — The sidebar TOC shows old counts (e.g., "Recruitment (75+)", "Workforce Management (60+)")
-2. **`ProductCapabilitiesDocument.tsx`** — The Act divider summaries show old counts in the `modules` prop
+## Root Cause
 
-## Changes Required
+Each section component (e.g., `WorkforceCapabilities.tsx`, `RecruitmentCapabilities.tsx`) maintains its own hardcoded capability items. The `capabilitiesData.ts` file serves as a reference/registry but is not consumed by the section components for rendering.
 
-### File 1: `src/components/enablement/product-capabilities/components/TableOfContents.tsx`
+Recruitment, Onboarding, and Offboarding components were already up to date. Only **Workforce Management** has gaps.
 
-Update the `PRODUCT_CAPABILITIES_TOC` array with corrected counts:
+## Changes (Single File)
 
-| Entry | Old | New |
-|-------|-----|-----|
-| Admin & Security | 80+ | 95+ |
-| HR Hub | 70+ | 85+ |
-| Prologue total | (implicit) | Update if shown |
-| Recruitment | 75+ | 110+ |
-| Workforce Management | 60+ | 195+ |
-| Act 1 total | 245+ | 415+ |
+**File:** `src/components/enablement/product-capabilities/sections/act1/WorkforceCapabilities.tsx`
 
-Lines affected: 121-134
+### 1. Add new category: "Corporate Governance" (4 items)
+Insert after the existing "Compliance & Documentation" category (around line 240):
 
-### File 2: `src/components/enablement/product-capabilities/ProductCapabilitiesDocument.tsx`
+- Board of directors management with member profiles and term tracking
+- Management team composition and reporting structure
+- Board meeting scheduling and attendance tracking
+- Governance compliance reporting and oversight
 
-Update the `modules` array on the Act 1 divider (line 129):
+Requires importing `Landmark` icon from lucide-react.
 
-Old: `["Recruitment (75+)", "Onboarding (55+)", "Offboarding (55+)", "Workforce Management (60+)"]`
-New: `["Recruitment (110+)", "Onboarding (55+)", "Offboarding (55+)", "Workforce Management (195+)"]`
+### 2. Add new category: "Capability Framework" (5 items)
+Insert after Corporate Governance:
 
-Also check the Prologue divider (line 97) -- currently shows no counts, so likely fine.
+- Skills registry with proficiency levels and behavioral indicators
+- Competency framework management with job linkage
+- Organizational values definition with recognition alignment
+- Capability audit filters for governance gap identification
+- Capability-to-position mapping for talent architecture
 
-### No Other Files Needed
+Requires importing `Puzzle` or `Boxes` icon from lucide-react.
 
-The `capabilitiesData.ts` file itself was already updated in the previous edit. The section components render dynamically from that data. Only these two hardcoded references need syncing.
+### 3. Add new category: "Employee Assignments" (4 items)
+Insert after Capability Framework:
 
-## Note on Build OOM
+- Multi-assignment management with concurrent position support
+- Acting and secondment assignment tracking with date ranges
+- Primary vs. secondary assignment designation
+- Assignment history and timeline visualization
 
-The OOM error is a pre-existing infrastructure issue (9,697 modules exceeding the 3GB heap limit) unrelated to these content changes. These edits will not increase module count.
+Requires importing `UserCog` icon (already imported).
+
+### 4. Expand "Organization Structure" category (line 144-156)
+Add items for divisions, org changes, and config:
+
+- Division management with hierarchical parent-child relationships
+- Org changes reporting with historical comparison
+- Org structure configuration with hierarchy rule management
+
+### 5. Expand "Employee Master Data" category (line 116-128)
+Add items for qualifications and responsibilities:
+
+- Responsibility catalog with categorization and ownership
+- Academic qualification tracking with institution and date management
+- Professional certification management with expiry alerts
+
+### 6. Expand "Position Management" category (line 158-170)
+Add items for position control and vacancies:
+
+- Position control dashboard with fill rate analytics
+- Vacancy-to-requisition conversion workflow with recruitment linkage
+
+### 7. Expand "Lifecycle Transactions" category (line 186-198)
+Add items for transaction dashboard and expanded types:
+
+- Transaction dashboard with module-based categorization (Entry, Movement, Exit, Compensation, Status)
+- Contract extensions and conversions
+- Probation confirmation and extension processing
+
+### 8. Update module badge
+Update the `badge` prop on the `ModuleCapabilityCard` (line 30 area) from whatever the current value is to `"195+ Capabilities"`.
+
+## What Does Not Change
+
+- `capabilitiesData.ts` -- already updated
+- `TableOfContents.tsx` -- already updated
+- `ProductCapabilitiesDocument.tsx` -- already updated
+- `RecruitmentCapabilities.tsx` -- already has all needed categories
+- `OffboardingCapabilities.tsx` -- already has all needed categories
+- `OnboardingCapabilities.tsx` -- no gaps identified
+
+## Note on Build Error
+
+The OOM error (heap out of memory during build) is a pre-existing infrastructure issue caused by the project's 9,697 modules exceeding the 3GB heap limit. It is unrelated to these content changes.
