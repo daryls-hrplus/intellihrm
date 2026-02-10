@@ -121,7 +121,7 @@ export const MODULES_REGISTRY: Record<string, ModuleDefinition> = {
   succession: { key: "succession", name: "Succession Planning", icon: TrendingUp, capabilities: 95, act: "act4" },
   
   // Act 5
-  health_safety: { key: "health_safety", name: "Health & Safety", icon: Heart, capabilities: 120, act: "act5" },
+  health_safety: { key: "health_safety", name: "Health & Safety", icon: Heart, capabilities: 135, act: "act5" },
   employee_relations: { key: "employee_relations", name: "Employee Relations", icon: Scale, capabilities: 95, act: "act5" },
   company_property: { key: "company_property", name: "Company Property", icon: Package, capabilities: 65, act: "act5" },
   
