@@ -12,21 +12,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
   Heart, 
-  Plus, 
   Award,
   MessageSquare,
   Activity,
   AlertTriangle,
   Loader2,
-  Star
+  Star,
+  Scale,
+  DoorOpen,
+  CheckCircle2
 } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Json } from '@/integrations/supabase/types';
 import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
 const CASE_TYPES = ['grievance', 'complaint', 'harassment', 'discrimination', 'workplace_safety', 'other'];
@@ -36,9 +36,6 @@ export default function MyEmployeeRelationsPage() {
   const { t } = useTranslation();
   const { user, company } = useAuth();
   const [isGrievanceDialogOpen, setIsGrievanceDialogOpen] = useState(false);
-  const [isSurveyDialogOpen, setIsSurveyDialogOpen] = useState(false);
-  const [selectedSurvey, setSelectedSurvey] = useState<any>(null);
-  const [surveyResponses, setSurveyResponses] = useState<Record<string, any>>({});
 
   const [grievanceForm, setGrievanceForm] = useState({
     title: '',
@@ -50,14 +47,19 @@ export default function MyEmployeeRelationsPage() {
 
   const { 
     cases,
-    recognitions, 
+    recognitions,
+    disciplinaryActions,
+    exitInterviews,
     surveys,
     wellnessPrograms,
     loadingCases,
     loadingRecognition,
+    loadingDisciplinary,
+    loadingExitInterviews,
     loadingSurveys,
     loadingWellness,
     createCase,
+    acknowledgeDisciplinary,
   } = useEmployeeRelations(company?.id);
 
   const breadcrumbItems = [
@@ -68,6 +70,8 @@ export default function MyEmployeeRelationsPage() {
   // Filter to current user's data
   const myCases = cases.filter(c => c.employee_id === user?.id || c.reported_by === user?.id);
   const myRecognitions = recognitions.filter(r => r.employee_id === user?.id);
+  const myDisciplinary = disciplinaryActions.filter(d => d.employee_id === user?.id);
+  const myExitInterviews = exitInterviews.filter(e => e.employee_id === user?.id);
   const activeSurveys = surveys.filter(s => s.status === 'active');
   const activeWellnessPrograms = wellnessPrograms.filter(w => w.status === 'active');
 
@@ -109,7 +113,7 @@ export default function MyEmployeeRelationsPage() {
     }
   };
 
-  const isLoading = loadingCases || loadingRecognition || loadingSurveys || loadingWellness;
+  const isLoading = loadingCases || loadingRecognition || loadingDisciplinary || loadingExitInterviews || loadingSurveys || loadingWellness;
 
   if (isLoading) {
     return (
@@ -166,9 +170,9 @@ export default function MyEmployeeRelationsPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {CASE_TYPES.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        {CASE_TYPES.map((ct) => (
+                          <SelectItem key={ct} value={ct}>
+                            {ct.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -228,7 +232,7 @@ export default function MyEmployeeRelationsPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -249,8 +253,21 @@ export default function MyEmployeeRelationsPage() {
                   <Award className="h-6 w-6 text-success" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Recognition Received</p>
+                  <p className="text-sm text-muted-foreground">Recognition</p>
                   <p className="text-2xl font-bold">{myRecognitions.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full bg-destructive/10">
+                  <Scale className="h-6 w-6 text-destructive" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Disciplinary</p>
+                  <p className="text-2xl font-bold">{myDisciplinary.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -275,7 +292,7 @@ export default function MyEmployeeRelationsPage() {
                   <Activity className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Wellness Programs</p>
+                  <p className="text-sm text-muted-foreground">Wellness</p>
                   <p className="text-2xl font-bold">{activeWellnessPrograms.length}</p>
                 </div>
               </div>
@@ -284,7 +301,7 @@ export default function MyEmployeeRelationsPage() {
         </div>
 
         <Tabs defaultValue="recognition" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="recognition" className="gap-2">
               <Award className="h-4 w-4" />
               My Recognition ({myRecognitions.length})
@@ -292,6 +309,10 @@ export default function MyEmployeeRelationsPage() {
             <TabsTrigger value="cases" className="gap-2">
               <AlertTriangle className="h-4 w-4" />
               My Cases ({myCases.length})
+            </TabsTrigger>
+            <TabsTrigger value="disciplinary" className="gap-2">
+              <Scale className="h-4 w-4" />
+              My Disciplinary ({myDisciplinary.length})
             </TabsTrigger>
             <TabsTrigger value="surveys" className="gap-2">
               <MessageSquare className="h-4 w-4" />
@@ -301,8 +322,13 @@ export default function MyEmployeeRelationsPage() {
               <Activity className="h-4 w-4" />
               Wellness ({activeWellnessPrograms.length})
             </TabsTrigger>
+            <TabsTrigger value="exit-interview" className="gap-2">
+              <DoorOpen className="h-4 w-4" />
+              Exit Interview ({myExitInterviews.length})
+            </TabsTrigger>
           </TabsList>
 
+          {/* ==================== RECOGNITION TAB ==================== */}
           <TabsContent value="recognition">
             <Card>
               <CardHeader>
@@ -351,6 +377,7 @@ export default function MyEmployeeRelationsPage() {
             </Card>
           </TabsContent>
 
+          {/* ==================== CASES TAB ==================== */}
           <TabsContent value="cases">
             <Card>
               <CardHeader>
@@ -398,6 +425,90 @@ export default function MyEmployeeRelationsPage() {
             </Card>
           </TabsContent>
 
+          {/* ==================== DISCIPLINARY TAB (NEW) ==================== */}
+          <TabsContent value="disciplinary">
+            <Card>
+              <CardHeader>
+                <CardTitle>My Disciplinary History</CardTitle>
+                <CardDescription>View and acknowledge disciplinary actions on your record</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {myDisciplinary.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Scale className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No disciplinary actions on record</p>
+                    <p className="text-sm">You have a clean record</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Action Type</TableHead>
+                        <TableHead>Severity</TableHead>
+                        <TableHead>Reason</TableHead>
+                        <TableHead>Issued Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Acknowledged</TableHead>
+                        <TableHead></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {myDisciplinary.map((action) => (
+                        <TableRow key={action.id}>
+                          <TableCell className="capitalize font-medium">{action.action_type.replace(/_/g, ' ')}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={
+                              action.severity === 'critical' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                              action.severity === 'high' ? 'bg-warning/10 text-warning border-warning/20' :
+                              action.severity === 'medium' ? 'bg-info/10 text-info border-info/20' :
+                              'bg-muted text-muted-foreground'
+                            }>
+                              {action.severity}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate">{action.reason}</TableCell>
+                          <TableCell className="text-muted-foreground">{formatDateForDisplay(action.issued_date, 'PP')}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={getStatusColor(action.status)}>
+                              {action.status.replace(/_/g, ' ')}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {action.acknowledged_by_employee ? (
+                              <div className="flex items-center gap-1 text-success">
+                                <CheckCircle2 className="h-4 w-4" />
+                                <span className="text-xs">{action.acknowledged_at ? formatDateForDisplay(action.acknowledged_at, 'PP') : 'Yes'}</span>
+                              </div>
+                            ) : (
+                              <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">Pending</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {!action.acknowledged_by_employee && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => acknowledgeDisciplinary.mutate(action.id)}
+                                disabled={acknowledgeDisciplinary.isPending}
+                              >
+                                {acknowledgeDisciplinary.isPending ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  'Acknowledge'
+                                )}
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ==================== SURVEYS TAB ==================== */}
           <TabsContent value="surveys">
             <Card>
               <CardHeader>
@@ -435,6 +546,7 @@ export default function MyEmployeeRelationsPage() {
             </Card>
           </TabsContent>
 
+          {/* ==================== WELLNESS TAB ==================== */}
           <TabsContent value="wellness">
             <Card>
               <CardHeader>
@@ -464,6 +576,80 @@ export default function MyEmployeeRelationsPage() {
                             </span>
                             <Button size="sm" variant="outline">Enroll</Button>
                           </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ==================== EXIT INTERVIEW TAB (NEW) ==================== */}
+          <TabsContent value="exit-interview">
+            <Card>
+              <CardHeader>
+                <CardTitle>My Exit Interview</CardTitle>
+                <CardDescription>View your scheduled or completed exit interview details</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {myExitInterviews.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <DoorOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No exit interview scheduled</p>
+                    <p className="text-sm">This section will be populated if an exit interview is arranged</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {myExitInterviews.map((interview) => (
+                      <Card key={interview.id} className="border-border">
+                        <CardContent className="pt-6 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold">Exit Interview</h4>
+                            <Badge variant="outline" className={getStatusColor(interview.status)}>
+                              {interview.status.replace(/_/g, ' ')}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <p className="text-muted-foreground">Interview Date</p>
+                              <p className="font-medium">{formatDateForDisplay(interview.interview_date, 'PPP')}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Interviewer</p>
+                              <p className="font-medium">{interview.interviewer?.full_name || 'TBD'}</p>
+                            </div>
+                            {interview.last_working_date && (
+                              <div>
+                                <p className="text-muted-foreground">Last Working Date</p>
+                                <p className="font-medium">{formatDateForDisplay(interview.last_working_date, 'PPP')}</p>
+                              </div>
+                            )}
+                            {interview.departure_reason && (
+                              <div>
+                                <p className="text-muted-foreground">Departure Reason</p>
+                                <p className="font-medium capitalize">{interview.departure_reason.replace(/_/g, ' ')}</p>
+                              </div>
+                            )}
+                          </div>
+                          {interview.overall_satisfaction != null && (
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-1">Overall Satisfaction</p>
+                              <div className="flex items-center gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`h-5 w-5 ${
+                                      star <= (interview.overall_satisfaction || 0)
+                                        ? 'text-amber-500 fill-amber-500'
+                                        : 'text-muted-foreground/30'
+                                    }`}
+                                  />
+                                ))}
+                                <span className="ml-2 text-sm font-medium">{interview.overall_satisfaction}/5</span>
+                              </div>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     ))}

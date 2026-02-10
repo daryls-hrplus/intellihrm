@@ -450,6 +450,25 @@ export const useEmployeeRelations = (companyId?: string) => {
     onError: () => toast.error("Failed to update survey"),
   });
 
+  // Acknowledge Disciplinary Action (ESS)
+  const acknowledgeDisciplinary = useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from("er_disciplinary_actions")
+        .update({ acknowledged_by_employee: true, acknowledged_at: new Date().toISOString() })
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["er-disciplinary"] });
+      toast.success("Disciplinary action acknowledged");
+    },
+    onError: () => toast.error("Failed to acknowledge disciplinary action"),
+  });
+
   // Create Wellness Program
   const createWellnessProgram = useMutation({
     mutationFn: async (program: { company_id: string; name: string; description?: string; program_type: string; start_date: string; end_date?: string | null; max_participants?: number | null; budget?: number | null; coordinator_id?: string }) => {
@@ -509,6 +528,7 @@ export const useEmployeeRelations = (companyId?: string) => {
     updateExitInterview,
     createSurvey,
     updateSurvey,
+    acknowledgeDisciplinary,
     createWellnessProgram,
     updateWellnessProgram,
   };
