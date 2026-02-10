@@ -46,8 +46,12 @@ export default defineConfig(({ mode, command }) => ({
             return "vendor-misc";
           }
 
-          // Split app into 3 chunks to balance graph complexity vs chunk size
+          // Split app into granular chunks to stay within memory limits
+          if (id.includes("/src/pages/enablement/")) return "app-pages-enablement";
+          if (id.includes("/src/pages/mss/")) return "app-pages-mss";
+          if (id.includes("/src/pages/ess/")) return "app-pages-ess";
           if (id.includes("/src/pages/")) return "app-pages";
+          if (id.includes("/src/components/enablement/")) return "app-components-enablement";
           if (id.includes("/src/components/")) return "app-components";
           if (id.includes("/src/")) return "app-core";
         },
