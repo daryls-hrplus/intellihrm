@@ -72,7 +72,7 @@ const MODULES = {
   succession: { name: "Succession Planning", icon: TrendingUp, capabilities: 50, act: "act4" },
   
   // Act 5
-  health_safety: { name: "Health & Safety", icon: AlertTriangle, capabilities: 120, act: "act5" },
+  health_safety: { name: "Health & Safety", icon: AlertTriangle, capabilities: 135, act: "act5" },
   employee_relations: { name: "Employee Relations", icon: Scale, capabilities: 95, act: "act5" },
   company_property: { name: "Company Property", icon: Package, capabilities: 65, act: "act5" },
   

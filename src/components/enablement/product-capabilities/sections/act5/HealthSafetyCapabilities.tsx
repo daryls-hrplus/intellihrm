@@ -32,7 +32,7 @@ export const HealthSafetyCapabilities = () => {
       tagline="Proactive safety management with compliance built-in"
       overview="Comprehensive occupational health and safety management from incident reporting to wellness programs. From chemical management to LOTO procedures, from behavioral observations to OSHA reporting—every safety touchpoint is captured, analyzed, and acted upon. AI predicts risks before they become incidents."
       accentColor="bg-red-500/10 text-red-600"
-      badge="120+ Capabilities"
+      badge="135+ Capabilities"
       id="health-safety"
     >
       <div className="space-y-6">
@@ -200,6 +200,26 @@ export const HealthSafetyCapabilities = () => {
             <CapabilityItem>AI-powered risk prediction</CapabilityItem>
             <CapabilityItem>Benchmarking and comparisons</CapabilityItem>
           </CapabilityCategory>
+
+          <CapabilityCategory title="Employee Self-Service (ESS)" icon={Users}>
+            <CapabilityItem>Personal incident history and tracking</CapabilityItem>
+            <CapabilityItem>Near-miss reporting with anonymous option</CapabilityItem>
+            <CapabilityItem>Safety observation submission (positive/negative)</CapabilityItem>
+            <CapabilityItem>Issued PPE visibility and return tracking</CapabilityItem>
+            <CapabilityItem>Safety policy acknowledgment workflow</CapabilityItem>
+            <CapabilityItem>Ergonomic assessment requests</CapabilityItem>
+            <CapabilityItem>Personal safety training and certification view</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Manager Self-Service (MSS)" icon={ClipboardCheck}>
+            <CapabilityItem>Team incident and near-miss consolidated view</CapabilityItem>
+            <CapabilityItem>Team safety observation monitoring</CapabilityItem>
+            <CapabilityItem>Team PPE compliance and overdue tracking</CapabilityItem>
+            <CapabilityItem>Inspection assignment and permit approvals</CapabilityItem>
+            <CapabilityItem>Team risk overview with corrective action due dates</CapabilityItem>
+            <CapabilityItem>Training compliance dashboard per direct report</CapabilityItem>
+            <CapabilityItem>Near-miss, PPE overdue, and permit KPI cards</CapabilityItem>
+          </CapabilityCategory>
         </div>
 
         <AIFeatureHighlight>
@@ -217,11 +237,13 @@ export const HealthSafetyCapabilities = () => {
 
         <ModuleIntegrations
           integrations={[
-            { module: "Workforce", description: "Employee job and location data" },
+            { module: "Workforce", description: "Employee profiles with cross-module drill-down navigation" },
             { module: "Time & Attendance", description: "Work hours for exposure tracking" },
-            { module: "Learning", description: "Safety training compliance" },
-            { module: "Employee Relations", description: "Workers' comp case coordination" },
+            { module: "Learning (LMS)", description: "Safety training compliance with direct LMS course links" },
+            { module: "Employee Relations", description: "Workers' comp case coordination with incident linking" },
             { module: "Company Property", description: "Equipment safety requirements" },
+            { module: "ESS Portal", description: "Employee incident, near-miss, observation, PPE, and ergonomic self-service" },
+            { module: "MSS Portal", description: "Manager team safety dashboard with KPIs and approvals" },
           ]}
         />
       </div>
