@@ -27,7 +27,7 @@ export const LearningCapabilities = () => {
       tagline="Transform training from cost center to competitive advantage"
       overview="A complete LMS with SCORM/xAPI support, AI-powered personalization, gamification, and competency-aligned learning paths. From compliance training to leadership development, from content authoring to certification tracking—every learning moment is captured, measured, and connected to business outcomes."
       accentColor="bg-violet-500/10 text-violet-600"
-      badge="130+ Capabilities"
+      badge="140+ Capabilities"
       id="learning"
     >
       <div className="space-y-6">
@@ -65,6 +65,7 @@ export const LearningCapabilities = () => {
             <CapabilityItem>Topic-based content organization</CapabilityItem>
             <CapabilityItem>Content reuse and linking across courses</CapabilityItem>
             <CapabilityItem>AI-assisted content generation and enhancement</CapabilityItem>
+            <CapabilityItem>Interactive training module builder with branching scenarios</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Module & Lesson Structure" icon={Settings}>
@@ -141,6 +142,7 @@ export const LearningCapabilities = () => {
             <CapabilityItem>Calendar integration and session scheduling</CapabilityItem>
             <CapabilityItem>Session capacity and venue management</CapabilityItem>
             <CapabilityItem>Virtual classroom integration (Zoom, Teams)</CapabilityItem>
+            <CapabilityItem>Live session management with virtual classroom scheduling</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Training Needs & Skills" icon={Brain}>
@@ -150,6 +152,7 @@ export const LearningCapabilities = () => {
             <CapabilityItem>Remediation tracking and follow-up</CapabilityItem>
             <CapabilityItem>Competency-to-course linking</CapabilityItem>
             <CapabilityItem>Development recommendations from performance data</CapabilityItem>
+            <CapabilityItem>Competency gap analysis dashboard with training recommendations</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Evaluations & Effectiveness" icon={ClipboardCheck}>
@@ -159,6 +162,14 @@ export const LearningCapabilities = () => {
             <CapabilityItem>Behavior change tracking post-training</CapabilityItem>
             <CapabilityItem>Results and ROI calculation tools</CapabilityItem>
             <CapabilityItem>Training effectiveness scoring and trending</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory title="Vendor & External Training" icon={Users}>
+            <CapabilityItem>Vendor registration and contract management</CapabilityItem>
+            <CapabilityItem>Vendor performance tracking and ratings</CapabilityItem>
+            <CapabilityItem>External training record management</CapabilityItem>
+            <CapabilityItem>Vendor cost tracking and budget alignment</CapabilityItem>
+            <CapabilityItem>Preferred vendor catalog with qualification tracking</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Learning Analytics" icon={BarChart3}>

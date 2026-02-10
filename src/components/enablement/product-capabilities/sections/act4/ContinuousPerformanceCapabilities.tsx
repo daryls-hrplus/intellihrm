@@ -27,7 +27,7 @@ export const ContinuousPerformanceCapabilities = () => {
       tagline="Capture every performance signal in real-time"
       overview="Recognition flows instantly. Feedback is immediate. Pulse surveys track engagement. Performance indices provide always-on visibility. AI detects risks before they become terminations—and celebrates wins as they happen."
       accentColor="bg-emerald-500/10 text-emerald-600"
-      badge="55+ Capabilities"
+      badge="60+ Capabilities"
       id="continuous-performance"
     >
       <div className="space-y-6">
@@ -127,6 +127,8 @@ export const ContinuousPerformanceCapabilities = () => {
             <CapabilityItem>Predictive performance modeling</CapabilityItem>
             <CapabilityItem>Check-in completion analytics</CapabilityItem>
             <CapabilityItem>IDP and PIP outcome tracking</CapabilityItem>
+            <CapabilityItem>Unified talent dashboard with cross-module performance, succession, and development insights</CapabilityItem>
+            <CapabilityItem>Performance Intelligence Hub with AI-powered workforce modeling and predictive analytics</CapabilityItem>
           </CapabilityCategory>
         </div>
 

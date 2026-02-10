@@ -29,6 +29,7 @@ export { GoalsCapabilities } from "./act4/GoalsCapabilities";
 export { AppraisalsCapabilities } from "./act4/AppraisalsCapabilities";
 export { Feedback360Capabilities } from "./act4/Feedback360Capabilities";
 export { ContinuousPerformanceCapabilities } from "./act4/ContinuousPerformanceCapabilities";
+export { CareerDevelopmentCapabilities } from "./act4/CareerDevelopmentCapabilities";
 export { SuccessionCapabilities } from "./act4/SuccessionCapabilities";
 
 // Act 5
