@@ -68,7 +68,7 @@ export const EXECUTIVE_SUMMARY = {
   promise: "Intelli HRM is the first enterprise-grade HRMS purpose-built for the Caribbean, Africa, and Latin America. Native regional compliance, AI-powered intelligence in every module, and seamless cross-module orchestration—delivering the sophistication of Workday with the regional depth your business demands.",
   stats: [
     { value: "25", label: "Core Modules" },
-    { value: "1,675+", label: "Capabilities" },
+    { value: "1,710+", label: "Capabilities" },
     { value: "20+", label: "Countries" },
     { value: "100%", label: "AI-Enhanced" },
   ],
@@ -112,7 +112,7 @@ export const CAPABILITIES_DATA: ActData[] = [
         title: "Admin & Security",
         tagline: "Enterprise-grade security that scales with you",
         overview: "Foundation for all platform operations with comprehensive user lifecycle management, multi-factor authentication, granular role-based access control, PII protection, organizational scoping, approval workflows, and full audit capabilities with AI-powered security monitoring.",
-        badge: "75+ Capabilities",
+        badge: "95+ Capabilities",
         challenge: "Without robust, unified security controls, organizations face fragmented access management, compliance gaps, data breaches, and audit failures. Manual permission management across multiple systems creates security blind spots and consumes valuable HR and IT resources.",
         promise: "Intelli HRM delivers an enterprise-grade security foundation that centralizes authentication, authorization, and audit across all HR operations. From day one, you get the same security architecture trusted by global enterprises—configured for your regional compliance needs.",
         keyOutcomes: [
@@ -188,7 +188,10 @@ export const CAPABILITIES_DATA: ActData[] = [
               "Pay group and company tag-based access controls",
               "Position type exclusions for sensitive role categories",
               "Hierarchical reporting line visibility controls",
-              "Cross-entity permission management for shared services"
+              "Cross-entity permission management for shared services",
+              "Cross-company reporting relationships for corporate groups, joint ventures, and managed services",
+              "Company tag management with creation, assignment, and access-control integration",
+              "Territory management with geographic hierarchy, region definitions, and territory-based access scoping"
             ]
           },
           {
@@ -228,6 +231,38 @@ export const CAPABILITIES_DATA: ActData[] = [
               "AI guardrails configuration with budget limit enforcement",
               "Model registry with approved/prohibited use case management"
             ]
+          },
+          {
+            title: "Employee Self-Service Administration",
+            context: "ESS governance ensures employees can update their own data safely—without creating compliance risks or data quality issues.",
+            items: [
+              "ESS module enablement with per-company toggle controls for self-service features",
+              "Approval policy configuration with modes per request type (auto-approve, HR review, full workflow)",
+              "Field-level permission management controlling which fields employees can view or edit in self-service",
+              "ESS setup wizard for guided initial configuration of self-service policies and permissions"
+            ]
+          },
+          {
+            title: "Platform Configuration",
+            context: "Enterprise platforms require deep configurability. These tools let administrators tailor every aspect without code changes.",
+            items: [
+              "Custom field engine with field type configuration, module assignment, validation rules, and display ordering",
+              "Brand customization with color scheme wizard, preset themes, and advanced CSS variable controls",
+              "Translation management console with AI-assisted generation, bulk import/export, language-specific overrides, and coverage analytics",
+              "Currency management with exchange rates, base currency configuration, and multi-currency support across entities",
+              "Data management tools with sample data population, selective data purge by module, and environment reset capabilities"
+            ]
+          },
+          {
+            title: "Multi-Tenant & Client Management",
+            context: "SaaS deployments require robust client lifecycle management—from prospect to production—with full isolation and governance.",
+            items: [
+              "Client registry with organization profiles, contact management, and status tracking across the client lifecycle",
+              "Client provisioning workflows with automated environment setup, configuration templates, and readiness validation",
+              "Demo environment management with sandbox creation, data seeding, and time-limited access controls",
+              "Prospect journey tracking with stage-based pipeline management, conversion analytics, and engagement scoring",
+              "Subscription management with plan configuration, billing integration, usage tracking, and renewal workflows"
+            ]
           }
         ],
         aiCapabilities: [
@@ -259,7 +294,7 @@ export const CAPABILITIES_DATA: ActData[] = [
         title: "HR Hub",
         tagline: "The central command center for all HR operations",
         overview: "Unified hub for daily operations, documents, policies, communications, compliance tracking, workflow configuration, and cross-module integration. The single source of truth for HR operations with AI-powered insights and automation.",
-        badge: "70+ Capabilities",
+        badge: "85+ Capabilities",
         challenge: "HR teams juggle dozens of disconnected tools—ticketing systems, document repositories, policy libraries, compliance trackers—wasting hours on context-switching and manual coordination. Employees can't find answers, managers lack visibility, and compliance deadlines slip through the cracks.",
         promise: "HR Hub is your single command center for all HR operations. Every document, every policy, every ticket, every compliance deadline—unified in one intelligent workspace with AI that anticipates needs and automates routine work.",
         keyOutcomes: [
@@ -284,7 +319,8 @@ export const CAPABILITIES_DATA: ActData[] = [
               "HR Task Management with priorities, due dates, assignees, recurring schedules, comments, and completion tracking",
               "HR Calendar with event types (meetings, deadlines, training, holidays), company-specific views, and color-coded scheduling",
               "Milestones Dashboard tracking birthdays, work anniversaries, and probation endings with celebration automation",
-              "Configurable approval modes per change type (auto-approve, HR review, full workflow) with risk-based routing"
+              "Configurable approval modes per change type (auto-approve, HR review, full workflow) with risk-based routing",
+              "Employee directory privacy configuration with field-level visibility controls per data type (phone, email, department, hire date)"
             ]
           },
           {
@@ -356,7 +392,9 @@ export const CAPABILITIES_DATA: ActData[] = [
               "Data Import Wizard with AI validation, dependency checking, and error correction suggestions",
               "Import templates for company structure, positions, employees, and new hires",
               "Import history with full audit trail and status tracking",
-              "Org structure visualization with drill-down capabilities"
+              "Org structure visualization with drill-down capabilities",
+              "Reference data catalog with browsable system-wide lookup data, usage tracking, and data lineage",
+              "Company values management with definitions, icons, alignment to recognition programs, and performance frameworks"
             ]
           },
           {
@@ -379,6 +417,17 @@ export const CAPABILITIES_DATA: ActData[] = [
               "Pending approvals queue with bulk approve/reject capabilities for integration actions",
               "Failed integration retry with automatic and manual retry options",
               "By-module analytics showing success rates, activity volumes, and processing times"
+            ]
+          },
+          {
+            title: "Company Intranet",
+            context: "A centralized intranet bridges the communication gap between leadership and employees—keeping everyone aligned and informed.",
+            items: [
+              "Content management system with rich text editing, media embedding, and category-based organization",
+              "Announcement publishing with targeting by company, department, location, or employee group",
+              "Banner management with scheduling, priority ordering, and call-to-action configuration",
+              "Company-scoped content visibility with multi-entity publishing controls",
+              "Content pinning and scheduling with automated publish/unpublish and expiry management"
             ]
           }
         ],
