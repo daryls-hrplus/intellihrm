@@ -1,151 +1,185 @@
 
 
-# Update Act 3 Capabilities: Payroll, Compensation, Benefits
+# Update Act 4 Capabilities: Learning, Goals, Appraisals, 360 Feedback, Continuous Performance, Succession + New Career Development Module
 
-## Root Cause
+## Root Cause (Same as Acts 2 & 3)
 
-Same issue as Act 2: the Table of Contents counts were never updated when the capability components were expanded. Additionally, 15+ Payroll pages and a few Compensation/Benefits pages have no representation in the hardcoded component content.
-
-## Gap Analysis
-
-### Payroll (Badge: 150+, TOC: 60+ -- severely outdated)
-
-**Missing pages not covered in document:**
-
-| Page | What's Missing |
-|------|---------------|
-| LeaveBalanceBuyoutPage | Leave balance buyout/cash-out processing |
-| LeavePaymentConfigPage | Leave-to-payroll payment configuration |
-| PayrollExpenseClaimsPage | Expense claim payroll integration |
-| HistoricalPayrollImportPage | Historical payroll data migration |
-| OpeningBalancesPage | Opening balance setup for new implementations |
-| PayrollArchiveSettingsPage | Archive retention and purge configuration |
-| PayrollCountryDocumentationPage | Country-specific payroll documentation hub |
-| SemiMonthlyPayrollRulesPage | Semi-monthly pay period rule configuration |
-| StatutoryPayElementMappingsPage | Statutory element-to-pay-code mappings |
-| PayPeriodPayrollEntriesPage | Period-specific payroll entry management |
-| PayrollHolidaysPage | Public holiday calendar for payroll calculations |
-| PayGroupsPage | Pay group configuration and assignment |
-| PayPeriodsPage | Pay period definition and scheduling |
-| CountryPayrollYearSetupPage | Country-specific payroll year configuration |
-| PaymentRulesConfigPage | Payment rule engine configuration |
-
-**Recommendation:** Add 2 new categories ("Pay Period & Group Configuration" ~6 items, "Implementation & Data Management" ~5 items) and expand existing categories with 4-5 items. No badge change needed (150+ already accurate).
-
-### Compensation (Badge: 100+, TOC: 50+ -- severely outdated)
-
-**Minor gaps:**
-
-| Page | What's Missing |
-|------|---------------|
-| CompensationFTEReconciliationPage | FTE reconciliation with headcount analysis |
-| MinimumWageConfigPage | Minimum wage rule configuration (separate from monitoring) |
-
-**Recommendation:** Add 1 item to "Position Budgeting" for FTE reconciliation and 1 item to "Compensation Analytics" for minimum wage configuration. No badge change needed.
-
-### Benefits (Badge: 95+, TOC: 40+ -- severely outdated)
-
-**Minor gaps -- pages exist but specific features not called out:**
-
-| Page | What's Missing |
-|------|---------------|
-| PlanComparisonPage | Side-by-side plan comparison tool |
-| BenefitCalculatorPage | Employee benefit cost calculator |
-| OpenEnrollmentTrackerPage | Enrollment progress tracking dashboard |
-| WaitingPeriodTrackingPage | Waiting period status monitoring |
-
-**Recommendation:** Add 2 items to "Enrollment Management" (plan comparison tool, enrollment tracker) and 2 items to "Eligibility & Rules" (benefit calculator, waiting period tracking). No badge change needed.
+The Table of Contents counts were never synchronized with the component badges. Additionally, Career Development features are embedded inside the Succession component but the user wants them separated into a standalone module (following the Workday "Career Hub" model already established in the codebase).
 
 ---
 
-## Changes Required
+## Gap Analysis
 
-### File 1: `PayrollCapabilities.tsx`
+### Learning & LMS (Badge: 130+, TOC: 130+ -- correct)
 
-#### 1. Add new category: "Pay Period & Group Configuration" (~6 items)
-Insert after "Earnings Configuration" block:
-- Pay group creation with employee assignment and scheduling rules
-- Pay period definition with frequency options (weekly, bi-weekly, semi-monthly, monthly)
-- Semi-monthly payroll rules with split-period calculations
-- Public holiday calendar management with payroll impact rules
-- Country-specific payroll year setup with fiscal period alignment
-- Payment rule engine with conditional logic and priority ordering
+**Missing from document:**
 
-Icon: `Calendar` (needs import)
+| Page | What's Missing |
+|------|---------------|
+| VendorManagementPage.tsx (336 lines) | Training vendor management, contracts, and performance tracking |
+| InteractiveTrainingPage.tsx (335 lines) | Interactive training player with program enrollment and progress |
+| CompetencyGapAnalysisPage.tsx | Competency gap analysis dashboard linked to training |
+| LiveSessionsPage.tsx | Live session scheduling and management |
+| CourseCompetenciesPage.tsx | Course-to-competency mapping administration |
 
-#### 2. Add new category: "Implementation & Data Management" (~5 items)
-Insert after "Year-End Processing" block:
-- Historical payroll data import with validation and reconciliation
-- Opening balance setup for mid-year implementations
-- Payroll archive settings with retention policies and purge scheduling
-- Country-specific payroll documentation and compliance reference hub
-- Pay period payroll entry management with bulk upload support
+**Recommendation:** Add new category "Vendor & External Training" (~5 items) for vendor management. Add items to existing categories for interactive training, live sessions, and competency mapping. Update badge to **140+ Capabilities**.
 
-Icon: `Database` (needs import)
+---
 
-#### 3. Expand "Statutory Compliance"
-Add:
-- Statutory pay element-to-pay-code mapping configuration
+### Goals Management (Badge: 45+, TOC: 45+ -- correct)
 
-#### 4. Expand "Time & Attendance Integration"
-Add:
-- Leave balance buyout and cash-out processing
-- Leave-to-payroll payment configuration rules
+No significant gaps found. The component is comprehensive with 7 categories covering frameworks, creation, alignment, progress, quality, dependencies, and analytics.
 
-#### 5. Expand "Deductions & Garnishments" or add to relevant category
-Add:
-- Expense claim reimbursement through payroll
+**No changes needed.**
 
-### File 2: `CompensationCapabilities.tsx`
+---
 
-#### 1. Expand "Position Budgeting & Planning"
-Add:
-- FTE reconciliation with headcount analysis and variance reporting
+### Performance Appraisals (Badge: 50+, TOC: 50+ -- correct)
 
-#### 2. Expand "Compensation Analytics"
-Add:
-- Minimum wage rule configuration with jurisdiction-specific thresholds
+**Missing from document:**
 
-### File 3: `BenefitsCapabilities.tsx`
+| Feature | What's Missing |
+|---------|---------------|
+| Dispute Workflow | File Dispute with 6 categories (Rating, Comments, Goals, Competencies, Evidence, Process), employee submission, manager rebuttal, HR resolution queue (Uphold/Modify/Overturn) |
+| Appraisal Form Preview | Full form preview before submission |
+| Performance Intelligence Hub | Unified analytics hub with AI predictions, trend analysis, and workforce insights |
 
-#### 1. Expand "Enrollment Management"
-Add:
-- Side-by-side plan comparison tool with cost modeling
-- Open enrollment progress tracker with completion analytics
+**Recommendation:** Add new category "Dispute & Grievance Resolution" (~5 items). Add form preview to "Review Execution". Update badge to **60+ Capabilities**.
 
-#### 2. Expand "Eligibility & Rules"
-Add:
-- Benefit cost calculator for employee decision support
+---
 
-#### 3. Expand "Cost Analysis & Projections"
-Add:
-- Waiting period status monitoring with auto-enrollment triggers
+### 360 Feedback (Badge: 35+, TOC: 35+ -- correct)
 
-### File 4: `TableOfContents.tsx`
+No significant gaps. The component is comprehensive with 7 categories. Blind spot visualization, sentiment analysis, and development actions are all covered.
 
-Update Act 3 counts to match component badges:
-- Payroll: "60+" to "150+"
-- Compensation: "50+" to "100+"
-- Benefits: "40+" to "95+"
-- Act 3 total: "150+" to "345+"
+**No changes needed.**
 
-### File 5: `ProductCapabilitiesDocument.tsx`
+---
 
-Update Act 3 divider `modules` prop:
-```
-["Payroll (150+)", "Compensation (100+)", "Benefits (95+)"]
-```
+### Continuous Performance (Badge: 55+, TOC: 55+ -- correct)
+
+**Missing from document:**
+
+| Feature | What's Missing |
+|---------|---------------|
+| Talent Unified Dashboard | Cross-module talent overview combining performance, succession, and development data (570-line page) |
+| Performance Intelligence Hub | AI-powered analytics hub with operations analytics, AI insights, and predictive modeling (414-line page) |
+
+**Recommendation:** Add items to "Performance Analytics" for unified talent dashboard and intelligence hub. Update badge to **60+ Capabilities**.
+
+---
+
+### Succession Planning (Currently Badge: 95+)
+
+Career Development features (Career Paths, Career Development, Mentorship) currently live inside this component. These need to be **extracted** into a standalone module.
+
+**After extraction:** Remove "Career Paths", "Career Development", and "Mentorship Programs" categories from SuccessionCapabilities. This reduces the component from 14 categories to 11. Update badge to **75+ Capabilities**.
+
+---
+
+### NEW: Career Development (Standalone Module)
+
+Extract from Succession and expand based on actual codebase pages:
+
+| Source | Content |
+|--------|---------|
+| SuccessionCapabilities "Career Paths" | Career path configuration, step definitions, skill mapping, milestones |
+| SuccessionCapabilities "Career Development" | Career conversations, development themes, goal alignment, skill gap remediation |
+| SuccessionCapabilities "Mentorship Programs" | Mentor-mentee pairing, AI matching, session tracking, effectiveness metrics |
+| CareerDevelopmentPage.tsx | IDP management, development activity tracking |
+| MyCareerPathsPage.tsx | ESS career path viewing and progress |
+| MyCareerPlanPage.tsx | Personal career plan with succession readiness |
+| MyDevelopmentThemesPage.tsx | AI development themes from 360 feedback |
+| TrainingCareerPathsPage.tsx | Admin career path configuration via L&D |
+| TrainingMentorshipPage.tsx | Mentorship administration via L&D |
+
+**Recommendation:** Create new `CareerDevelopmentCapabilities.tsx` with ~45 capabilities across 5 categories: Career Paths, Individual Development Plans, Mentorship Programs, Development Themes & AI, Career Analytics.
+
+---
+
+## Changes Required (8 files)
+
+### File 1: NEW `CareerDevelopmentCapabilities.tsx`
+
+Create new component at `src/components/enablement/product-capabilities/sections/act4/CareerDevelopmentCapabilities.tsx`
+
+**5 categories:**
+1. **Career Paths & Progression** (~7 items): Path configuration, step definitions, skill requirements, milestone tracking, lateral moves, career aspirations, ladder templates
+2. **Individual Development Plans** (~7 items): IDP creation, development goal setting, activity tracking, feedback linkage, progress monitoring, manager collaboration, learning course linkage
+3. **Mentorship Programs** (~7 items): Program configuration, mentor-mentee pairing, AI-assisted matching, session scheduling, goal-based mentoring, effectiveness metrics, mentor pool management
+4. **Development Themes & AI** (~5 items): AI development theme generation from 360 feedback, career conversation tracking, skill gap remediation planning, development resource matching, progress milestone tracking
+5. **Career Analytics** (~5 items): Career progression tracking, path completion rates, mentorship program effectiveness, development investment ROI, career mobility patterns
+
+Badge: **"45+ Capabilities"**
+Icon: `TrendingUp` or `Route`
+ID: `career-development`
+
+### File 2: `LearningCapabilities.tsx`
+
+- Update badge: "130+" to "140+"
+- Add new category: **"Vendor & External Training"** (~5 items): Vendor registration and contract management, vendor performance tracking and ratings, external training record management, vendor cost tracking and budget alignment, preferred vendor catalog
+- Expand "Training Administration": add live session management with virtual classroom integration
+- Expand "Training Needs & Skills": add competency gap analysis dashboard
+- Expand "Content Authoring": add interactive training module builder with branching scenarios
+
+### File 3: `AppraisalsCapabilities.tsx`
+
+- Update badge: "50+" to "60+"
+- Add new category: **"Dispute & Grievance Resolution"** (~6 items): Employee dispute filing with 6 dispute categories, dispute submission with evidence and justification, manager rebuttal and response workflow, HR dispute queue with resolution options (Uphold/Modify/Overturn), dispute audit trail and outcome documentation, escalation paths for unresolved disputes
+- Expand "Review Execution": add full form preview before submission
+- Expand "Appraisal Analytics": add Performance Intelligence Hub with AI predictions
+
+### File 4: `ContinuousPerformanceCapabilities.tsx`
+
+- Update badge: "55+" to "60+"
+- Expand "Performance Analytics": add unified talent dashboard with cross-module insights, add Performance Intelligence Hub with AI-powered workforce modeling
+
+### File 5: `SuccessionCapabilities.tsx`
+
+- Update badge: "95+" to "75+"
+- **Remove** 3 categories: "Career Paths", "Career Development", "Mentorship Programs" (moved to Career Development module)
+- Update integrations list to add cross-reference to Career Development module
+
+### File 6: `sections/index.ts`
+
+- Add export: `export { CareerDevelopmentCapabilities } from "./act4/CareerDevelopmentCapabilities";`
+
+### File 7: `ProductCapabilitiesDocument.tsx`
+
+- Import `CareerDevelopmentCapabilities`
+- Add new section between Continuous Performance and Succession:
+  ```
+  <section id="career-development" className="scroll-mt-20">
+    <CareerDevelopmentCapabilities />
+  </section>
+  ```
+- Update Act 4 divider `modules` prop:
+  ```
+  ["Learning & LMS (140+)", "Goals (45+)", "Appraisals (60+)", "360 Feedback (35+)", "Continuous Performance (60+)", "Career Development (45+)", "Succession (75+)"]
+  ```
+- This gives Act 4 total: 140+45+60+35+60+45+75 = **460+**
+
+### File 8: `TableOfContents.tsx`
+
+- Update Act 4 title: "Act 4: Develop & Grow (460+)"
+- Update children counts:
+  - Learning & LMS: "130+" to "140+"
+  - Appraisals: "50+" to "60+"
+  - Continuous Performance: "55+" to "60+"
+  - Succession: "95+" to "75+"
+- Add new child: `{ id: "career-development", title: "Career Development (45+)", level: 2 }` (between Continuous Performance and Succession)
 
 ---
 
 ## What Does Not Change
 
-- `capabilitiesData.ts` -- not the rendering source for these sections
-- Component badges -- already accurate (150+, 100+, 95+)
-- Value stories, personas, AI highlights, integrations -- already comprehensive
+- `GoalsCapabilities.tsx` -- no gaps found
+- `Feedback360Capabilities.tsx` -- no gaps found
+- `capabilitiesData.ts` -- not the rendering source
 
 ## Technical Notes
 
-- Two new icon imports needed in PayrollCapabilities: `Calendar` (already in lucide-react), `Database`
-- All changes are text-only content additions
+- One new file created (CareerDevelopmentCapabilities.tsx)
+- Icons needed in new file: `Route`, `Target`, `Heart`, `Brain`, `BarChart3` (all from lucide-react)
 - The OOM build error is pre-existing and unrelated to these changes
+
