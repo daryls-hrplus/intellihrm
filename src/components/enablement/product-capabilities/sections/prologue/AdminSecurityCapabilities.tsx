@@ -18,7 +18,7 @@ export function AdminSecurityCapabilities() {
       tagline="Enterprise-grade security that scales with you"
       overview="Foundation for all platform operations with comprehensive user lifecycle management, multi-factor authentication, granular role-based access control, PII protection, organizational scoping, approval workflows, and full audit capabilities with AI-powered security monitoring."
       accentColor="bg-red-500/10 text-red-500"
-      badge="75+ Capabilities"
+      badge="95+ Capabilities"
     >
       <div className="space-y-6">
         {/* Challenge & Promise */}
@@ -164,6 +164,8 @@ export function AdminSecurityCapabilities() {
             <CapabilityItem>Position type exclusions for sensitive role categories</CapabilityItem>
             <CapabilityItem>Hierarchical reporting line visibility controls</CapabilityItem>
             <CapabilityItem>Cross-entity permission management for shared services</CapabilityItem>
+            <CapabilityItem>Cross-company reporting relationships for corporate groups, joint ventures, and managed services</CapabilityItem>
+            <CapabilityItem>Company tag management with creation, assignment, and access-control integration</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory 
@@ -178,6 +180,44 @@ export function AdminSecurityCapabilities() {
             <CapabilityItem>Digital signature integration for critical approvals</CapabilityItem>
             <CapabilityItem>Substitute approver configuration with delegation audit trails</CapabilityItem>
             <CapabilityItem>Workflow analytics with bottleneck detection and optimization recommendations</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory 
+            title="ESS Administration" 
+            icon={UserCog}
+            context="Self-service configuration must balance employee empowerment with governance controls across every entity."
+          >
+            <CapabilityItem>ESS module enablement with per-company on/off toggles for self-service features</CapabilityItem>
+            <CapabilityItem>ESS approval policy configuration with auto-approve, HR review, and full workflow modes</CapabilityItem>
+            <CapabilityItem>ESS field-level permissions controlling employee view/edit access per data domain</CapabilityItem>
+            <CapabilityItem>ESS setup wizard with guided configuration and validation checks</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory 
+            title="Platform Configuration" 
+            icon={Settings}
+            context="A configurable platform eliminates custom development—every setting adapts to your organization without code."
+          >
+            <CapabilityItem>Custom field engine with field type configuration, module assignment, validation rules, and display ordering</CapabilityItem>
+            <CapabilityItem>Brand customization with color scheme wizard, preset themes, and advanced CSS variable controls</CapabilityItem>
+            <CapabilityItem>Translation management console with AI-assisted generation, bulk import/export, and coverage analytics</CapabilityItem>
+            <CapabilityItem>Currency management with exchange rates, base currency configuration, and multi-currency support</CapabilityItem>
+            <CapabilityItem>Territory management with geographic hierarchy, region definitions, and territory-based scoping</CapabilityItem>
+            <CapabilityItem>Data management tools with sample data population, selective purge by module, and environment reset</CapabilityItem>
+            <CapabilityItem>System-wide notification preferences and delivery channel configuration</CapabilityItem>
+            <CapabilityItem>Platform health monitoring with usage analytics and capacity metrics</CapabilityItem>
+          </CapabilityCategory>
+
+          <CapabilityCategory 
+            title="Multi-Tenant & Client Management" 
+            icon={Briefcase}
+            context="SaaS platforms need client lifecycle management that scales from first demo to enterprise deployment."
+          >
+            <CapabilityItem>Client registry with organization profiles, contact management, and status tracking</CapabilityItem>
+            <CapabilityItem>Client provisioning workflows with environment setup and configuration templates</CapabilityItem>
+            <CapabilityItem>Demo environment management with data seeding and automated teardown</CapabilityItem>
+            <CapabilityItem>Prospect journey tracking with pipeline stages and conversion analytics</CapabilityItem>
+            <CapabilityItem>Subscription management with plan tiers, billing cycles, and usage metering</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory 
