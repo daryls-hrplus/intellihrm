@@ -80,6 +80,7 @@ export function ESSCapabilities() {
             <CapabilityItem>Currency preference configuration</CapabilityItem>
             <CapabilityItem>Salary advance requests with approval workflow</CapabilityItem>
             <CapabilityItem>Pay structure and grade visibility</CapabilityItem>
+            <CapabilityItem>Equity grants viewing with vesting schedules and current valuations</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Benefits & Claims" icon={Briefcase}>
@@ -101,6 +102,8 @@ export function ESSCapabilities() {
             <CapabilityItem>Career path visualization</CapabilityItem>
             <CapabilityItem>Mentorship program participation</CapabilityItem>
             <CapabilityItem>Evidence portfolio for competency tracking</CapabilityItem>
+            <CapabilityItem>Career plan with succession readiness status and next-role mapping</CapabilityItem>
+            <CapabilityItem>Qualification submission with approval workflow and document upload</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Performance & Feedback" icon={Award}>
@@ -111,6 +114,8 @@ export function ESSCapabilities() {
             <CapabilityItem>Recognition received and given tracking</CapabilityItem>
             <CapabilityItem>Competency self-assessment tools</CapabilityItem>
             <CapabilityItem>Performance trend visualization</CapabilityItem>
+            <CapabilityItem>Performance targets tracking with progress indicators and milestones</CapabilityItem>
+            <CapabilityItem>AI-generated development themes from 360-degree feedback synthesis</CapabilityItem>
           </CapabilityCategory>
 
           <CapabilityCategory title="Communications & Documents" icon={Bell}>
