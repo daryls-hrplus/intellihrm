@@ -250,7 +250,7 @@ const MODULE_DEPENDENCIES: ModuleDependency[] = [
   // Act 4
   {
     moduleId: "learning",
-    moduleName: "Learning & LMS",
+    moduleName: "Learning & Development",
     act: "act4",
     prerequisites: ["workforce"],
     enables: ["succession", "goals"],

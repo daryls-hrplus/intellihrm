@@ -64,7 +64,7 @@ const MODULES = {
   benefits: { name: "Benefits", icon: Heart, capabilities: 60, act: "act3" },
   
   // Act 4
-  learning: { name: "Learning & LMS", icon: GraduationCap, capabilities: 130, act: "act4" },
+  learning: { name: "Learning & Development", icon: GraduationCap, capabilities: 130, act: "act4" },
   goals: { name: "Goals & OKRs", icon: Target, capabilities: 45, act: "act4" },
   appraisals: { name: "Appraisals", icon: Award, capabilities: 50, act: "act4" },
   feedback_360: { name: "360 Feedback", icon: MessageSquare, capabilities: 35, act: "act4" },

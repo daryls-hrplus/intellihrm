@@ -143,7 +143,7 @@ const ACTS: ActSummary[] = [
     borderColor: "border-purple-500/30",
     capabilities: 410,
     modules: [
-      { name: "Learning & LMS", count: 130, icon: GraduationCap },
+      { name: "Learning & Development", count: 130, icon: GraduationCap },
       { name: "Goals", count: 45, icon: Target },
       { name: "Appraisals", count: 50, icon: BarChart3 },
       { name: "360 Feedback", count: 35, icon: MessageSquare },
